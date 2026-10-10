@@ -276,6 +276,10 @@ button:focus-visible {
   width: auto;
   max-width: 50%;
 }
+.lang-select {
+  width: auto;
+  flex: none;
+}
 .alert {
   flex: none;
   padding: 0.5rem 0.9rem;

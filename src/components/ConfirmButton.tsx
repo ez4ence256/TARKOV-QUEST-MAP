@@ -1,6 +1,7 @@
 // Bouton à confirmation en deux temps (pas de boîte de dialogue du navigateur) :
 // un premier clic affiche la question, un second confirme.
 import { useState, type ReactNode } from "react";
+import { tr } from "../lib/i18n";
 
 interface Props {
   label: ReactNode;
@@ -33,7 +34,7 @@ export function ConfirmButton({ label, question, confirmLabel, onConfirm, classN
         {confirmLabel}
       </button>
       <button className="btn btn-small" onClick={() => setAsking(false)}>
-        Annuler
+        {tr("Annuler", "Cancel")}
       </button>
     </span>
   );

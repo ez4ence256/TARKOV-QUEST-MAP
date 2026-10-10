@@ -6,6 +6,7 @@ import L from "leaflet";
 import { useMap } from "react-leaflet";
 import type { MapCalibration, MapLayer, RawBounds } from "./calibration";
 import { toLatLngBounds } from "./crs";
+import { tr } from "../lib/i18n";
 
 const svgCache = new Map<string, Promise<string>>();
 function fetchSvg(url: string) {
@@ -142,7 +143,7 @@ export function BaseLayer({
         onStatus("svg");
       })
       .catch((error) => {
-        console.warn("Fond de carte indisponible", error);
+        console.warn(tr("Fond de carte indisponible", "Base map unavailable"), error);
         if (!cancelled) {
           setFailed(true);
           onStatus("grid");
@@ -165,7 +166,7 @@ export function BaseLayer({
         .then((text) => {
           if (!cancelled) overlay = svgOverlay(text, level.svgLayer, calibration, LEVEL_PANE).addTo(map);
         })
-        .catch((error) => console.warn("Étage indisponible", error));
+        .catch((error) => console.warn(tr("Étage indisponible", "Floor unavailable"), error));
     } else if (level.tilePath) {
       overlay = tileLayer(level.tilePath, calibration, LEVEL_PANE).addTo(map);
     }

@@ -27,6 +27,7 @@ import { Icon } from "./Icon";
 import { ConfirmButton } from "./ConfirmButton";
 import { WikiBlocks } from "./WikiBlocks";
 import { QUEST_SECTIONS, type QuestSectionId } from "../lib/questSections";
+import { getLang, tr } from "../lib/i18n";
 
 interface Props {
   tasks: Task[];
@@ -89,7 +90,7 @@ function Warnings({ items }: { items: string[] }) {
   if (items.length === 0) return null;
   return (
     <div className="warn-box" role="note">
-      <strong>Les sources ne sont pas d'accord :</strong>
+      <strong>{tr("Les sources ne sont pas d'accord :", "The sources disagree:")}</strong>
       <ul>
         {items.map((w) => (
           <li key={w}>{w}</li>
@@ -132,17 +133,18 @@ function QuestLinks({
   );
 }
 
-const PACK_GROUPS: { kinds: PackItem["kind"][]; title: string }[] = [
-  { kinds: ["key"], title: "Clés" },
-  { kinds: ["handover", "find", "sell"], title: "Objets à trouver ou à rendre" },
-  { kinds: ["questItem"], title: "Objets de quête à trouver en raid" },
-  { kinds: ["place", "marker"], title: "À placer ou à marquer" },
+// title : [français, anglais], résolu au rendu (la langue peut changer)
+const PACK_GROUPS: { kinds: PackItem["kind"][]; title: [string, string] }[] = [
+  { kinds: ["key"], title: ["Clés", "Keys"] },
+  { kinds: ["handover", "find", "sell"], title: ["Objets à trouver ou à rendre", "Items to find or hand over"] },
+  { kinds: ["questItem"], title: ["Objets de quête à trouver en raid", "Quest items to find in raid"] },
+  { kinds: ["place", "marker"], title: ["À placer ou à marquer", "To place or mark"] },
 ];
 
 const firLabel = (fir: boolean | null | undefined) =>
-  fir === true ? "Find in raid" : fir === false ? "Pas Find in raid" : null;
+  fir === true ? "Find in raid" : fir === false ? tr("Pas Find in raid", "Not Found in raid") : null;
 
-const fmt = (n: number) => n.toLocaleString("fr-FR");
+const fmt = (n: number) => n.toLocaleString(getLang() === "en" ? "en-US" : "fr-FR");
 
 export function QuestTab(p: Props) {
   const tasksById = useMemo(() => new Map(p.tasks.map((t) => [t.id, t])), [p.tasks]);
@@ -158,7 +160,7 @@ export function QuestTab(p: Props) {
   if (!task) {
     return (
       <div className="tab-body empty">
-        <p>Sélectionnez une quête, ou ouvrez-la depuis un point de la carte (bouton 📜 Quête).</p>
+        <p>{tr("Sélectionnez une quête, ou ouvrez-la depuis un point de la carte (bouton 📜 Quête).", "Select a quest, or open it from a map point (📜 Quest button).")}</p>
       </div>
     );
   }
@@ -173,9 +175,9 @@ export function QuestTab(p: Props) {
   const rewards = task.details?.rewards ?? null;
   const showTarkovRewards = rewards !== null && (rewardDiffs.length > 0 || !wiki || wiki.rewards.length === 0);
   const pvp = isPvpZone(task) && wiki !== null;
-  const itemName = (id: string) => p.itemNames[id] ?? `objet inconnu (${id})`;
+  const itemName = (id: string) => p.itemNames[id] ?? tr(`objet inconnu (${id})`, `unknown item (${id})`);
   const statusText = (l: QuestLink & { status?: string[] }) =>
-    l.status?.length ? ` (${l.status.map((s) => STATUS_LABELS[s] ?? s).join(" ou ")})` : "";
+    l.status?.length ? ` (${l.status.map((s) => STATUS_LABELS[s] ?? s).join(tr(" ou ", " or "))})` : "";
   // quêtes de tarkov.dev : nom de l'app (français) ; celles du wiki gardent leur nom anglais
   const appName = (l: QuestLink) => (l.taskId ? tasksById.get(l.taskId)?.name : undefined) ?? l.name;
   const traderReqs = task.details?.traderRequirements ?? [];
@@ -197,7 +199,7 @@ export function QuestTab(p: Props) {
   /** Mention de la source, en tête des sections où le texte du wiki est mis en avant. */
   const wikiSource = wiki && (
     <div className="wiki-source small">
-      Texte du wiki, en anglais :{" "}
+      {tr("Texte du wiki, en anglais :", "Wiki text, in English:")}{" "}
       <a href={wiki.pageUrl} target="_blank" rel="noreferrer">
         {wiki.pageTitle}
       </a>
@@ -219,7 +221,7 @@ export function QuestTab(p: Props) {
         {wiki && wiki.relatedItems.length > 0 && (
           <div className="wiki-highlight">
             {wikiSource}
-            <div className="wiki-heading wiki-heading-4">Tableau « Related Quest Items »</div>
+            <div className="wiki-heading wiki-heading-4">{tr("Tableau « Related Quest Items »", "\"Related Quest Items\" table")}</div>
             <ul className="plain-list pack-list">
               {wiki.relatedItems.map((r, k) => (
                 <li key={k}>
@@ -235,19 +237,19 @@ export function QuestTab(p: Props) {
         )}
         {pack.length > 0 && (
           <>
-            <div className="muted small">Pour toute la quête, d'après tarkov.dev (à reprendre après une mort) :</div>
+            <div className="muted small">{tr("Pour toute la quête, d'après tarkov.dev (à reprendre après une mort) :", "For the whole quest, per tarkov.dev (to pick up again after a death):")}</div>
             {PACK_GROUPS.map((g) => {
               const items = pack.filter((i) => g.kinds.includes(i.kind));
               if (items.length === 0) return null;
               return (
-                <div key={g.title}>
-                  <div className="wiki-heading wiki-heading-4">{g.title}</div>
+                <div key={g.title[0]}>
+                  <div className="wiki-heading wiki-heading-4">{tr(...g.title)}</div>
                   <ul className="plain-list pack-list">
                     {items.map((i, k) => (
                       <li key={k}>
                         {!i.countInLabel && i.count && i.count > 1 ? `${i.count} × ` : ""}
                         {i.label}
-                        {i.kind === "sell" && " (à vendre)"}
+                        {i.kind === "sell" && tr(" (à vendre)", " (to sell)")}
                         {firLabel(i.foundInRaid) && <span className={`fir-tag ${i.foundInRaid ? "is-fir" : ""}`}>{firLabel(i.foundInRaid)}</span>}
                         {i.detail && <span className="muted small"> · {i.detail}</span>}
                       </li>
@@ -271,15 +273,15 @@ export function QuestTab(p: Props) {
         )}
         {(failConditions.length > 0 || task.details?.restartable) && (
           <>
-            <div className="wiki-heading wiki-heading-3">Selon tarkov.dev</div>
+            <div className="wiki-heading wiki-heading-3">{tr("Selon tarkov.dev", "According to tarkov.dev")}</div>
             <ul className="plain-list">
               {failConditions.map((f, i) => (
                 <li key={i}>{failConditionText(f, tasksById)}</li>
               ))}
               {task.details && failConditions.length > 0 && (
-                <li>Refaisable après un échec : {task.details.restartable ? "oui" : "non"}</li>
+                <li>{tr("Refaisable après un échec : ", "Can be redone after failing: ")}{task.details.restartable ? tr("oui", "yes") : tr("non", "no")}</li>
               )}
-              {task.details?.restartable && failConditions.length === 0 && <li>Refaisable après un échec : oui</li>}
+              {task.details?.restartable && failConditions.length === 0 && <li>{tr("Refaisable après un échec : oui", "Can be redone after failing: yes")}</li>}
             </ul>
           </>
         )}
@@ -292,12 +294,12 @@ export function QuestTab(p: Props) {
         <Warnings items={rewardDiffs} />
         {showTarkovRewards && rewards && (
           <>
-            <div className="wiki-heading wiki-heading-3">Selon tarkov.dev</div>
+            <div className="wiki-heading wiki-heading-3">{tr("Selon tarkov.dev", "According to tarkov.dev")}</div>
             <ul className="plain-list">
               {rewards.experience > 0 && <li>+{fmt(rewards.experience)} EXP</li>}
               {rewards.standing.map((s, i) => (
                 <li key={`s${i}`}>
-                  Réputation {traderName(s.traderId)} {s.value > 0 ? "+" : ""}
+                  {tr("Réputation", "Reputation")} {traderName(s.traderId)} {s.value > 0 ? "+" : ""}
                   {s.value}
                 </li>
               ))}
@@ -308,12 +310,12 @@ export function QuestTab(p: Props) {
               ))}
               {rewards.offerUnlocks.map((u, i) => (
                 <li key={`o${i}`}>
-                  Débloque l'achat de {itemName(u.itemId)} chez {traderName(u.traderId)} (niveau {u.level})
+                  {tr(`Débloque l'achat de ${itemName(u.itemId)} chez ${traderName(u.traderId)} (niveau ${u.level})`, `Unlocks purchase of ${itemName(u.itemId)} at ${traderName(u.traderId)} (level ${u.level})`)}
                 </li>
               ))}
               {rewards.skills.map((s, i) => (
                 <li key={`k${i}`}>
-                  Compétence « {s.skill} » : niveau {s.level}
+                  {tr(`Compétence « ${s.skill} » : niveau ${s.level}`, `Skill "${s.skill}": level ${s.level}`)}
                 </li>
               ))}
             </ul>
@@ -325,41 +327,41 @@ export function QuestTab(p: Props) {
     prereq: hasPrereq ? (
       <>
         <Warnings items={prereq.warnings} />
-        <div className="wiki-heading wiki-heading-3">Selon tarkov.dev</div>
+        <div className="wiki-heading wiki-heading-3">{tr("Selon tarkov.dev", "According to tarkov.dev")}</div>
         <ul className="plain-list">
-          {task.minPlayerLevel ? <li>Niveau {task.minPlayerLevel}</li> : null}
+          {task.minPlayerLevel ? <li>{tr("Niveau", "Level")} {task.minPlayerLevel}</li> : null}
           {traderReqs.map((r, i) => (
             <li key={i}>
-              {traderName(r.traderId)} : {r.type === "level" ? "niveau de fidélité" : "réputation"} {r.compare} {r.value}
+              {traderName(r.traderId)}{tr(" : ", ": ")}{r.type === "level" ? tr("niveau de fidélité", "loyalty level") : tr("réputation", "reputation")} {r.compare} {r.value}
             </li>
           ))}
-          {prereq.tarkovTasks.length === 0 && <li>Aucune quête préalable</li>}
+          {prereq.tarkovTasks.length === 0 && <li>{tr("Aucune quête préalable", "No prerequisite quest")}</li>}
         </ul>
         {prereq.tarkovTasks.length > 0 && (
           <>
-            <div className="muted small">Quêtes préalables :</div>
+            <div className="muted small">{tr("Quêtes préalables :", "Prerequisite quests:")}</div>
             <QuestLinks links={prereq.tarkovTasks} onOpen={p.onTaskChange} suffix={statusText} displayName={appName} />
           </>
         )}
         {wiki && (
           <>
-            <div className="wiki-heading wiki-heading-3">Selon le wiki (en anglais)</div>
+            <div className="wiki-heading wiki-heading-3">{tr("Selon le wiki (en anglais)", "According to the wiki (in English)")}</div>
             {wiki.loyaltyLevel !== null && <div className="small">LL requirement : {wiki.loyaltyLevel}</div>}
             {wiki.requirements.length > 0 && <WikiBlocks blocks={wiki.requirements} />}
             {prereq.wikiTasks.length > 0 && (
               <>
-                <div className="muted small">Quêtes précédentes (previous) :</div>
+                <div className="muted small">{tr("Quêtes précédentes (previous) :", "Previous quests:")}</div>
                 <QuestLinks links={prereq.wikiTasks} onOpen={p.onTaskChange} />
               </>
             )}
             {wiki.requirements.length === 0 && prereq.wikiTasks.length === 0 && wiki.loyaltyLevel === null && (
-              <div className="muted small">Le wiki ne donne pas de prérequis.</div>
+              <div className="muted small">{tr("Le wiki ne donne pas de prérequis.", "The wiki gives no prerequisites.")}</div>
             )}
           </>
         )}
         {(prereq.tarkovNext.length > 0 || prereq.wikiNext.length > 0) && (
           <>
-            <div className="wiki-heading wiki-heading-3">Quêtes suivantes</div>
+            <div className="wiki-heading wiki-heading-3">{tr("Quêtes suivantes", "Next quests")}</div>
             {prereq.tarkovNext.length > 0 && (
               <QuestLinks links={prereq.tarkovNext} onOpen={p.onTaskChange} suffix={() => " (tarkov.dev)"} displayName={appName} />
             )}
@@ -376,22 +378,22 @@ export function QuestTab(p: Props) {
         {wiki?.briefing && <blockquote className="wiki-quote">{wiki.briefing}</blockquote>}
         <ul className="plain-list">
           <li>
-            Marchand : {traderName(task.traderId)}
+            {tr("Marchand", "Trader")}{tr(" : ", ": ")}{traderName(task.traderId)}
             {wiki?.givenBy && wiki.givenBy.toLowerCase() !== p.traders.find((t) => t.id === task.traderId)?.normalizedName
-              ? ` (wiki : ${wiki.givenBy})`
+              ? ` (wiki${tr(" : ", ": ")}${wiki.givenBy})`
               : ""}
           </li>
-          {wiki?.location && <li>Lieu (wiki) : {wiki.location}</li>}
-          {task.minPlayerLevel ? <li>Niveau requis : {task.minPlayerLevel}</li> : null}
+          {wiki?.location && <li>{tr("Lieu (wiki) : ", "Location (wiki): ")}{wiki.location}</li>}
+          {task.minPlayerLevel ? <li>{tr("Niveau requis : ", "Required level: ")}{task.minPlayerLevel}</li> : null}
           <li>
-            Kappa : {task.kappaRequired ? "requise" : "non requise"} (tarkov.dev)
-            {wiki && wiki.kappa !== null ? ` · ${wiki.kappa ? "requise" : "non requise"} (wiki)` : ""}
+            Kappa{tr(" : ", ": ")}{task.kappaRequired ? tr("requise", "required") : tr("non requise", "not required")} (tarkov.dev)
+            {wiki && wiki.kappa !== null ? ` · ${wiki.kappa ? tr("requise", "required") : tr("non requise", "not required")} (wiki)` : ""}
           </li>
-          {task.details?.lightkeeperRequired && <li>Requise pour Lightkeeper (tarkov.dev)</li>}
+          {task.details?.lightkeeperRequired && <li>{tr("Requise pour Lightkeeper (tarkov.dev)", "Required for Lightkeeper (tarkov.dev)")}</li>}
         </ul>
         {wiki?.failureDialogue && (
           <>
-            <div className="wiki-heading wiki-heading-3">Réplique en cas d'échec</div>
+            <div className="wiki-heading wiki-heading-3">{tr("Réplique en cas d'échec", "Failure dialogue")}</div>
             <blockquote className="wiki-quote">{wiki.failureDialogue}</blockquote>
           </>
         )}
@@ -401,9 +403,9 @@ export function QuestTab(p: Props) {
 
   return (
     <div className="tab-body quest-tab">
-      <div className="subhead">Quête sélectionnée</div>
+      <div className="subhead">{tr("Quête sélectionnée", "Selected quest")}</div>
       {optionIds.length > 1 && (
-        <select className="input" value={task.id} onChange={(e) => p.onTaskChange(e.target.value)} aria-label="Quête affichée">
+        <select className="input" value={task.id} onChange={(e) => p.onTaskChange(e.target.value)} aria-label={tr("Quête affichée", "Displayed quest")}>
           {optionIds.map((id) => (
             <option key={id} value={id}>
               {tasksById.get(id)!.name}
@@ -414,13 +416,18 @@ export function QuestTab(p: Props) {
 
       {pvp && (
         <div className="pvp-banner" role="note">
-          Cette quête PVP ZONE n'a pas de page propre sur le wiki : le texte affiché est celui de la quête normale «{" "}
-          {wiki!.pageTitle} » et peut différer (objectifs, récompenses).
+          {tr(
+            `Cette quête PVP ZONE n'a pas de page propre sur le wiki : le texte affiché est celui de la quête normale « ${wiki!.pageTitle} » et peut différer (objectifs, récompenses).`,
+            `This PVP ZONE quest has no page of its own on the wiki: the text shown is from the regular quest "${wiki!.pageTitle}" and may differ (objectives, rewards).`,
+          )}
         </div>
       )}
       {wiki?.historical && (
         <div className="warn-box" role="note">
-          Page historique : d'après le wiki, cette quête n'est plus dans le jeu (catégorie « Historical content »).
+          {tr(
+            "Page historique : d'après le wiki, cette quête n'est plus dans le jeu (catégorie « Historical content »).",
+            "Historical page: according to the wiki, this quest is no longer in the game (category \"Historical content\").",
+          )}
         </div>
       )}
 
@@ -428,19 +435,19 @@ export function QuestTab(p: Props) {
         <h2 className="quest-tab-title">{task.name}</h2>
         <span
           className={`progress-badge ${progress.done === progress.total && progress.total > 0 ? "is-complete" : ""}`}
-          title="Objectifs faits / objectifs obligatoires"
+          title={tr("Objectifs faits / objectifs obligatoires", "Objectives done / required objectives")}
         >
           {progress.done}/{progress.total}
         </span>
       </div>
       <div className="muted small">
         {traderName(task.traderId)}
-        {task.minPlayerLevel ? ` · niveau ${task.minPlayerLevel}` : ""}
+        {task.minPlayerLevel ? tr(` · niveau ${task.minPlayerLevel}`, ` · level ${task.minPlayerLevel}`) : ""}
         {task.kappaRequired ? " · Kappa" : ""}
-        {task.nameEn !== task.name ? ` · EN : ${task.nameEn}` : ""}
+        {task.nameEn !== task.name ? ` · EN${tr(" : ", ": ")}${task.nameEn}` : ""}
       </div>
 
-      <div className="subhead">Objectifs à cocher (tarkov.dev)</div>
+      <div className="subhead">{tr("Objectifs à cocher (tarkov.dev)", "Objectives to check off (tarkov.dev)")}</div>
       <ul className="objectives">
         {task.objectives.map((o) => {
           const isDone = Boolean(p.done[o.id]);
@@ -453,7 +460,7 @@ export function QuestTab(p: Props) {
                   type="checkbox"
                   checked={isDone}
                   onChange={(e) => p.onSetDone(o.id, e.target.checked)}
-                  aria-label={isDone ? "Marquer comme non fait" : "Marquer comme fait"}
+                  aria-label={isDone ? tr("Marquer comme non fait", "Mark as not done") : tr("Marquer comme fait", "Mark as done")}
                 />
               </label>
               <div className="objective-body">
@@ -461,22 +468,22 @@ export function QuestTab(p: Props) {
                   <span className="objective-icon" title={ICON_LABELS[cat]}>
                     <Icon id={cat} size={14} />
                   </span>
-                  {o.description || <em className="muted">(sans description)</em>}
-                  {o.optional && <span className="tag">optionnel</span>}
+                  {o.description || <em className="muted">{tr("(sans description)", "(no description)")}</em>}
+                  {o.optional && <span className="tag">{tr("optionnel", "optional")}</span>}
                 </div>
-                {spawns > 1 && <div className="objective-note">{spawns} emplacements possibles sur la carte</div>}
+                {spawns > 1 && <div className="objective-note">{tr(`${spawns} emplacements possibles sur la carte`, `${spawns} possible locations on the map`)}</div>}
               </div>
             </li>
           );
         })}
       </ul>
-      <p className="muted small">Décocher un objectif fait réapparaître ses points sur la carte.</p>
+      <p className="muted small">{tr("Décocher un objectif fait réapparaître ses points sur la carte.", "Unchecking an objective makes its points reappear on the map.")}</p>
       <div className="btn-row">
         {checked > 0 && (
           <ConfirmButton
-            label="Réinitialiser cette quête"
-            question={`Décocher ${checked} objectif${checked > 1 ? "s" : ""} ?`}
-            confirmLabel="Oui"
+            label={tr("Réinitialiser cette quête", "Reset this quest")}
+            question={tr(`Décocher ${checked} objectif${checked > 1 ? "s" : ""} ?`, `Uncheck ${checked} objective${checked > 1 ? "s" : ""}?`)}
+            confirmLabel={tr("Oui", "Yes")}
             onConfirm={() => p.onReset(task)}
           />
         )}
@@ -488,18 +495,21 @@ export function QuestTab(p: Props) {
       </div>
 
       <div className="wiki-status small">
-        {wikiState.status === "loading" && <span className="muted">Chargement du wiki…</span>}
+        {wikiState.status === "loading" && <span className="muted">{tr("Chargement du wiki…", "Loading the wiki…")}</span>}
         {wikiState.status === "error" && (
           <span className="error">
-            Le wiki ne répond pas ({wikiState.error}). Les informations ci-dessous viennent seulement de tarkov.dev.
+            {tr(
+              `Le wiki ne répond pas (${wikiState.error}). Les informations ci-dessous viennent seulement de tarkov.dev.`,
+              `The wiki is not responding (${wikiState.error}). The information below comes only from tarkov.dev.`,
+            )}
           </span>
         )}
         {wikiState.status === "ready" && !wiki && (
-          <span className="muted">Pas de page de quête sur le wiki : seules les données tarkov.dev sont affichées.</span>
+          <span className="muted">{tr("Pas de page de quête sur le wiki : seules les données tarkov.dev sont affichées.", "No quest page on the wiki: only tarkov.dev data is shown.")}</span>
         )}
         {wiki && (
           <span className="muted">
-            Texte du wiki, en anglais :{" "}
+            {tr("Texte du wiki, en anglais :", "Wiki text, in English:")}{" "}
             <a href={wiki.pageUrl} target="_blank" rel="noreferrer">
               {wiki.pageTitle}
             </a>{" "}
@@ -511,7 +521,7 @@ export function QuestTab(p: Props) {
       {QUEST_SECTIONS.map((s) => {
         const content = sections[s.id];
         if (!content) return null; // section sans données : masquée
-        const title = s.id === "prereq" && prereq.warnings.length > 0 ? `${s.title} ⚠ désaccord` : s.title;
+        const title = s.id === "prereq" && prereq.warnings.length > 0 ? `${s.title} ⚠ ${tr("désaccord", "mismatch")}` : s.title;
         return (
           <Section key={`${task.id}:${s.id}`} title={title} open={s.open}>
             {content}

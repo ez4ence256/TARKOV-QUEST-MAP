@@ -3,6 +3,7 @@ import { useRef, useState, type ReactNode } from "react";
 import { GAME_MODES, type GameMode, type TarkovData } from "../types";
 import { ICON_LABELS, type IconId } from "../lib/objectiveTypes";
 import { readImportFile, type AppState } from "../state/store";
+import { getLang, tr } from "../lib/i18n";
 import { Icon } from "./Icon";
 
 interface Props {
@@ -29,11 +30,11 @@ export function SettingsTab(p: Props) {
     if (!file) return;
     try {
       const state = await readImportFile(file);
-      if (!window.confirm("Remplacer toute votre progression actuelle par celle du fichier ?")) return;
+      if (!window.confirm(tr("Remplacer toute votre progression actuelle par celle du fichier ?", "Replace all your current progress with the file's content?"))) return;
       p.onImport(state);
-      setMessage("Sauvegarde importée.");
+      setMessage(tr("Sauvegarde importée.", "Backup imported."));
     } catch (error) {
-      setMessage(`Import impossible : ${(error as Error).message}`);
+      setMessage(tr(`Import impossible : ${(error as Error).message}`, `Import failed: ${(error as Error).message}`));
     } finally {
       if (fileRef.current) fileRef.current.value = "";
     }
@@ -42,37 +43,37 @@ export function SettingsTab(p: Props) {
   return (
     <div className="tab-body settings">
       <section>
-        <div className="subhead">Mode de jeu</div>
+        <div className="subhead">{tr("Mode de jeu", "Game mode")}</div>
         <div className="row-between">
           <span>{GAME_MODES.find((m) => m.id === p.gameMode)?.label}</span>
           <button className="btn btn-small" onClick={p.onChangeMode}>
-            Changer
+            {tr("Changer", "Change")}
           </button>
         </div>
-        <p className="muted small">Chaque mode a sa propre progression, ses notes et ses points.</p>
+        <p className="muted small">{tr("Chaque mode a sa propre progression, ses notes et ses points.", "Each mode has its own progress, notes and points.")}</p>
       </section>
 
       <section>
-        <div className="subhead">Données tarkov.dev</div>
+        <div className="subhead">{tr("Données tarkov.dev", "tarkov.dev data")}</div>
         {p.data && (
           <p className="small">
-            {p.data.tasks.length} quêtes · {p.data.maps.length} maps
+            {p.data.tasks.length} {tr("quêtes", "quests")} · {p.data.maps.length} maps
             <br />
-            Mises à jour le {new Date(p.data.fetchedAt).toLocaleString("fr-FR")}
+            {tr("Mises à jour le", "Updated")} {new Date(p.data.fetchedAt).toLocaleString(getLang() === "en" ? "en-US" : "fr-FR")}
             <br />
             <span className="muted">{p.dataSource}</span>
           </p>
         )}
         <button className="btn btn-small" onClick={p.onRefresh}>
-          Recharger depuis l'API
+          {tr("Recharger depuis l'API", "Reload from the API")}
         </button>
       </section>
 
       <section>
-        <div className="subhead">Affichage</div>
+        <div className="subhead">{tr("Affichage", "Display")}</div>
         <label className="check">
           <input type="checkbox" checked={p.showDone} onChange={(e) => p.onShowDone(e.target.checked)} />
-          Afficher les objectifs faits (grisés) sur la carte
+          {tr("Afficher les objectifs faits (grisés) sur la carte", "Show completed objectives (greyed out) on the map")}
         </label>
         <ul className="legend">
           {LEGEND.map((id) => (
@@ -84,17 +85,19 @@ export function SettingsTab(p: Props) {
       </section>
 
       <section>
-        <div className="subhead">Sauvegarde</div>
+        <div className="subhead">{tr("Sauvegarde", "Backup")}</div>
         <p className="muted small">
-          Tout est enregistré automatiquement dans ce navigateur. Exportez un fichier pour garder une copie ou
-          changer d'appareil.
+          {tr(
+            "Tout est enregistré automatiquement dans ce navigateur. Exportez un fichier pour garder une copie ou changer d'appareil.",
+            "Everything is saved automatically in this browser. Export a file to keep a copy or switch devices.",
+          )}
         </p>
         <div className="btn-row">
           <button className="btn btn-small" onClick={p.onExport}>
-            Exporter (JSON)
+            {tr("Exporter (JSON)", "Export (JSON)")}
           </button>
           <button className="btn btn-small" onClick={() => fileRef.current?.click()}>
-            Importer…
+            {tr("Importer…", "Import…")}
           </button>
           <input
             ref={fileRef}
@@ -110,14 +113,17 @@ export function SettingsTab(p: Props) {
       {p.resetSection}
 
       <section>
-        <div className="subhead">Crédits</div>
+        <div className="subhead">{tr("Crédits", "Credits")}</div>
         <p className="muted small">
-          Données : <a href="https://tarkov.dev" target="_blank" rel="noreferrer">tarkov.dev</a>. Cartes :{" "}
+          {tr("Données", "Data")}: <a href="https://tarkov.dev" target="_blank" rel="noreferrer">tarkov.dev</a>. {tr("Cartes", "Maps")}:{" "}
           <a href="https://github.com/the-hideout/tarkov-dev-svg-maps" target="_blank" rel="noreferrer">
             tarkov-dev-svg-maps
           </a>{" "}
-          (CC BY-NC-SA 4.0). Escape from Tarkov est une marque de Battlestate Games ; ce projet n'y est pas
-          affilié.
+          (CC BY-NC-SA 4.0).{" "}
+          {tr(
+            "Escape from Tarkov est une marque de Battlestate Games ; ce projet n'y est pas affilié.",
+            "Escape from Tarkov is a trademark of Battlestate Games; this project is not affiliated with it.",
+          )}
         </p>
       </section>
     </div>

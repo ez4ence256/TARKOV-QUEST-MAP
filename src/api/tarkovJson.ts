@@ -22,6 +22,7 @@ import type {
   Trader,
 } from "../types";
 import { factionsOf, isCoopName, mergeExits } from "../lib/exits";
+import { tr } from "../lib/i18n";
 
 export const API_BASE = "https://json.tarkov.dev/";
 const FALLBACK_LANG = "en";
@@ -303,7 +304,7 @@ export async function fetchTarkovData(
     }))
     .filter((tr) => tr.id);
 
-  if (tasks.length === 0) throw new Error("L'API n'a renvoyé aucune quête.");
+  if (tasks.length === 0) throw new Error(tr("L'API n'a renvoyé aucune quête.", "The API returned no quests."));
 
   const itemNames = await readItemNames(gameMode, lang, tasks, tasksRes, signal);
 

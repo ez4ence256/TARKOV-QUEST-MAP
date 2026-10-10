@@ -6,6 +6,7 @@
 // version en ligne, pour suivre automatiquement les nouvelles maps.
 
 import bundledMaps from "../data/tarkov-dev-maps.json";
+import { tr } from "../lib/i18n";
 
 export const CALIBRATION_URL =
   "https://raw.githubusercontent.com/the-hideout/tarkov-dev/main/src/data/maps.json";
@@ -183,7 +184,7 @@ export async function loadCalibration(): Promise<CalibrationTable> {
     }
     return { ...BUNDLED_CALIBRATION, ...table };
   } catch (error) {
-    console.warn("Calibrage en ligne indisponible, copie embarquée utilisée", error);
+    console.warn(tr("Calibrage en ligne indisponible, copie embarquée utilisée", "Online calibration unavailable, using bundled copy"), error);
     return BUNDLED_CALIBRATION;
   }
 }

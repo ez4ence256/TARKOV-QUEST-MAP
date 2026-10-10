@@ -1,12 +1,32 @@
 // Écran d'accueil : choix du mode de jeu à chaque ouverture de l'app.
 import { GAME_MODES, type GameMode } from "../types";
+import { tr, type Lang } from "../lib/i18n";
 
-export function ModePicker({ last, onPick }: { last: GameMode | null; onPick: (m: GameMode) => void }) {
+export function ModePicker({
+  last,
+  onPick,
+  lang,
+  onLang,
+}: {
+  last: GameMode | null;
+  onPick: (m: GameMode) => void;
+  lang: Lang;
+  onLang: (l: Lang) => void;
+}) {
   return (
     <div className="mode-picker">
       <div className="mode-card">
+        <select
+          className="input lang-select"
+          value={lang}
+          onChange={(e) => onLang(e.target.value === "en" ? "en" : "fr")}
+          aria-label={tr("Langue", "Language")}
+        >
+          <option value="fr">FR</option>
+          <option value="en">EN</option>
+        </select>
         <h1>Tarkov Quest Planner</h1>
-        <p className="muted">Choisissez votre mode de jeu</p>
+        <p className="muted">{tr("Choisissez votre mode de jeu", "Choose your game mode")}</p>
         <div className="mode-options">
           {GAME_MODES.map((m) => (
             <button
@@ -17,7 +37,7 @@ export function ModePicker({ last, onPick }: { last: GameMode | null; onPick: (m
             >
               <span className="mode-label">{m.label}</span>
               <span className="muted small">{m.hint}</span>
-              {m.id === last && <span className="tag">dernier utilisé</span>}
+              {m.id === last && <span className="tag">{tr("dernier utilisé", "last used")}</span>}
             </button>
           ))}
         </div>

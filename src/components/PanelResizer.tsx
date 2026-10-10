@@ -2,6 +2,7 @@
 // téléphone par le CSS). Glisser pour régler la largeur ; flèches gauche/droite au
 // clavier ; double-clic pour revenir à la largeur par défaut. La largeur est enregistrée.
 import { useRef } from "react";
+import { tr } from "../lib/i18n";
 import { PANEL_DEFAULT, PANEL_MAX, PANEL_MIN, clampPanelWidth, savePanelWidth } from "../lib/panelWidth";
 
 interface Props {
@@ -25,12 +26,12 @@ export function PanelResizer({ width, onChange }: Props) {
       className="panel-resizer"
       role="separator"
       aria-orientation="vertical"
-      aria-label="Largeur du panneau"
+      aria-label={tr("Largeur du panneau", "Panel width")}
       aria-valuemin={PANEL_MIN}
       aria-valuemax={PANEL_MAX}
       aria-valuenow={width}
       tabIndex={0}
-      title="Glisser pour régler la largeur du panneau (double-clic : largeur par défaut)"
+      title={tr("Glisser pour régler la largeur du panneau (double-clic : largeur par défaut)", "Drag to resize the panel (double-click: default width)")}
       onPointerDown={(e) => {
         e.currentTarget.setPointerCapture(e.pointerId);
         drag.current = { startX: e.clientX, startWidth: width, last: width };

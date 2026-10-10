@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Task } from "../types";
 import { orphanDoneCount, taskProgress, tasksWithProgress } from "../lib/points";
+import { tr } from "../lib/i18n";
 import { ConfirmButton } from "./ConfirmButton";
 
 interface Props {
@@ -23,14 +24,16 @@ export function ResetProgressSection({ tasks, done, modeLabel, onResetTask, onRe
 
   return (
     <section>
-      <div className="subhead">Réinitialiser la progression ({modeLabel})</div>
+      <div className="subhead">{tr(`Réinitialiser la progression (${modeLabel})`, `Reset progress (${modeLabel})`)}</div>
       <p className="muted small">
-        Remet les objectifs à « pas fait » : leurs points réapparaissent sur la carte. Vos notes et vos points
-        personnels sont conservés. Les autres modes de jeu ne sont pas touchés.
+        {tr(
+          "Remet les objectifs à « pas fait » : leurs points réapparaissent sur la carte. Vos notes et vos points personnels sont conservés. Les autres modes de jeu ne sont pas touchés.",
+          "Sets objectives back to \"not done\": their points reappear on the map. Your notes and custom points are kept. Other game modes are not affected.",
+        )}
       </p>
 
       {total === 0 ? (
-        <p className="muted small">Aucun objectif coché dans ce mode.</p>
+        <p className="muted small">{tr("Aucun objectif coché dans ce mode.", "No checked objective in this mode.")}</p>
       ) : (
         <>
           <ul className="reset-list">
@@ -44,9 +47,9 @@ export function ResetProgressSection({ tasks, done, modeLabel, onResetTask, onRe
                     <span className="muted small"> · {p.done}/{p.total}</span>
                   </span>
                   <ConfirmButton
-                    label="Réinitialiser"
-                    question={`Décocher ${checked} objectif${checked > 1 ? "s" : ""} ?`}
-                    confirmLabel="Oui"
+                    label={tr("Réinitialiser", "Reset")}
+                    question={tr(`Décocher ${checked} objectif${checked > 1 ? "s" : ""} ?`, `Uncheck ${checked} objective${checked > 1 ? "s" : ""}?`)}
+                    confirmLabel={tr("Oui", "Yes")}
                     onConfirm={() => onResetTask(task)}
                   />
                 </li>
@@ -55,29 +58,34 @@ export function ResetProgressSection({ tasks, done, modeLabel, onResetTask, onRe
           </ul>
           {orphans > 0 && (
             <p className="muted small">
-              + {orphans} objectif{orphans > 1 ? "s" : ""} coché{orphans > 1 ? "s" : ""} de quêtes absentes des
-              données actuelles (compris dans « Tout réinitialiser »).
+              {tr(
+                `+ ${orphans} objectif${orphans > 1 ? "s" : ""} coché${orphans > 1 ? "s" : ""} de quêtes absentes des données actuelles (compris dans « Tout réinitialiser »).`,
+                `+ ${orphans} checked objective${orphans > 1 ? "s" : ""} from quests missing in the current data (included in "Reset all").`,
+              )}
             </p>
           )}
 
           {!confirmAll ? (
             <button className="btn btn-small btn-danger-outline" onClick={() => setConfirmAll(true)}>
-              Tout réinitialiser ({modeLabel})
+              {tr(`Tout réinitialiser (${modeLabel})`, `Reset all (${modeLabel})`)}
             </button>
           ) : (
-            <div className="danger-box" role="alertdialog" aria-label="Confirmer la réinitialisation complète">
+            <div className="danger-box" role="alertdialog" aria-label={tr("Confirmer la réinitialisation complète", "Confirm full reset")}>
               <p>
                 <strong>
-                  Décocher les {total} objectifs faits en {modeLabel} ?
+                  {tr(`Décocher les ${total} objectifs faits en ${modeLabel} ?`, `Uncheck the ${total} completed objectives in ${modeLabel}?`)}
                 </strong>{" "}
-                Cette action ne peut pas être annulée.
+                {tr("Cette action ne peut pas être annulée.", "This action cannot be undone.")}
               </p>
               <p className="small">
-                Conseil : faites d'abord une sauvegarde avec l'export JSON. Vous pourrez la réimporter si besoin.
+                {tr(
+                  "Conseil : faites d'abord une sauvegarde avec l'export JSON. Vous pourrez la réimporter si besoin.",
+                  "Tip: make a backup with the JSON export first. You can re-import it if needed.",
+                )}
               </p>
               <div className="btn-row">
                 <button className="btn btn-small" onClick={onExport}>
-                  Exporter d'abord (JSON)
+                  {tr("Exporter d'abord (JSON)", "Export first (JSON)")}
                 </button>
                 <button
                   className="btn btn-small btn-danger"
@@ -86,10 +94,10 @@ export function ResetProgressSection({ tasks, done, modeLabel, onResetTask, onRe
                     setConfirmAll(false);
                   }}
                 >
-                  Oui, tout réinitialiser
+                  {tr("Oui, tout réinitialiser", "Yes, reset all")}
                 </button>
                 <button className="btn btn-small" onClick={() => setConfirmAll(false)}>
-                  Annuler
+                  {tr("Annuler", "Cancel")}
                 </button>
               </div>
             </div>

@@ -4,6 +4,7 @@
 
 import type { GameMap, Task, Trader } from "../types";
 import type { WikiPage } from "../api/wiki";
+import { getLang, tr } from "./i18n";
 import {
   cleanInline,
   findSection,
@@ -156,24 +157,24 @@ export function comparePrerequisites(task: Task, wiki: WikiQuest | null, ctx: Qu
     const wikiSet = new Set(wikiNames.map(norm));
     const tarkovSet = new Set(tarkovTasks.map((t) => norm(t.name)));
     for (const t of tarkovTasks) {
-      if (!wikiSet.has(norm(t.name))) warnings.push(`tarkov.dev demande la quête « ${t.name} », que le wiki ne mentionne pas.`);
+      if (!wikiSet.has(norm(t.name))) warnings.push(tr(`tarkov.dev demande la quête « ${t.name} », que le wiki ne mentionne pas.`, `tarkov.dev requires the quest "${t.name}", which the wiki does not mention.`));
     }
     for (const name of wikiNames) {
-      if (!tarkovSet.has(norm(name))) warnings.push(`Le wiki indique la quête « ${name} », absente des prérequis de tarkov.dev.`);
+      if (!tarkovSet.has(norm(name))) warnings.push(tr(`Le wiki indique la quête « ${name} », absente des prérequis de tarkov.dev.`, `The wiki lists the quest "${name}", which is missing from the tarkov.dev prerequisites.`));
     }
     const level = task.minPlayerLevel || null;
     if (wiki.requiredLevel && level && wiki.requiredLevel !== level) {
-      warnings.push(`Niveau requis : ${level} selon tarkov.dev, ${wiki.requiredLevel} selon le wiki.`);
+      warnings.push(tr(`Niveau requis : ${level} selon tarkov.dev, ${wiki.requiredLevel} selon le wiki.`, `Required level: ${level} per tarkov.dev, ${wiki.requiredLevel} per the wiki.`));
     }
     const loyalty = task.details?.traderRequirements.find((r) => r.traderId === task.traderId && r.type === "level")?.value ?? null;
     if (wiki.loyaltyLevel && wiki.loyaltyLevel > 1 && wiki.loyaltyLevel !== loyalty) {
       warnings.push(
-        `Niveau de fidélité du marchand : ${loyalty ? `LL${loyalty}` : "non indiqué"} selon tarkov.dev, LL${wiki.loyaltyLevel} selon le wiki.`,
+        tr(`Niveau de fidélité du marchand : ${loyalty ? `LL${loyalty}` : "non indiqué"} selon tarkov.dev, LL${wiki.loyaltyLevel} selon le wiki.`, `Trader loyalty level: ${loyalty ? `LL${loyalty}` : "not specified"} per tarkov.dev, LL${wiki.loyaltyLevel} per the wiki.`),
       );
     }
     if (wiki.kappa !== null && wiki.kappa !== task.kappaRequired) {
       warnings.push(
-        `Kappa : ${task.kappaRequired ? "requise" : "non requise"} selon tarkov.dev, ${wiki.kappa ? "requise" : "non requise"} selon le wiki.`,
+        tr(`Kappa : ${task.kappaRequired ? "requise" : "non requise"} selon tarkov.dev, ${wiki.kappa ? "requise" : "non requise"} selon le wiki.`, `Kappa: ${task.kappaRequired ? "required" : "not required"} per tarkov.dev, ${wiki.kappa ? "required" : "not required"} per the wiki.`),
       );
     }
   }
@@ -200,7 +201,7 @@ const MAX_LISTED_CHOICES = 3;
 
 /** Liste de ce qu'il faut avoir pour toute la quête, d'après tarkov.dev. */
 export function packingList(task: Task, itemNames: Record<string, string>, maps: GameMap[]): PackItem[] {
-  const name = (id: string) => itemNames[id] ?? `objet inconnu (${id})`;
+  const name = (id: string) => itemNames[id] ?? tr(`objet inconnu (${id})`, `unknown item (${id})`);
   const mapName = (id: string) => maps.find((m) => m.id === id)?.name ?? "";
   const items: PackItem[] = [];
   const seen = new Set<string>();
@@ -210,22 +211,22 @@ export function packingList(task: Task, itemNames: Record<string, string>, maps:
     items.push(item);
   };
   const choices = (ids: string[], count: number | null) => {
-    if (ids.length <= MAX_LISTED_CHOICES) return { label: ids.map(name).join(" ou ") };
+    if (ids.length <= MAX_LISTED_CHOICES) return { label: ids.map(name).join(tr(" ou ", " or ")) };
     const n = count ?? 1;
     return {
-      label: `${n} objet${n > 1 ? "s" : ""} au choix parmi ${ids.length}`,
-      detail: `ex. ${ids.slice(0, MAX_LISTED_CHOICES).map(name).join(", ")}…`,
+      label: tr(`${n} objet${n > 1 ? "s" : ""} au choix parmi ${ids.length}`, `${n} item${n > 1 ? "s" : ""} of your choice among ${ids.length}`),
+      detail: tr("ex. ", "e.g. ") + `${ids.slice(0, MAX_LISTED_CHOICES).map(name).join(", ")}…`,
       countInLabel: true as const,
     };
   };
 
   // clés (par map, puis par objectif), une seule fois chacune
   for (const k of task.details?.neededKeys ?? []) {
-    add(`key:${[...k.keyIds].sort().join("|")}`, { kind: "key", label: k.keyIds.map(name).join(" ou "), count: 1, detail: mapName(k.mapId) || undefined });
+    add(`key:${[...k.keyIds].sort().join("|")}`, { kind: "key", label: k.keyIds.map(name).join(tr(" ou ", " or ")), count: 1, detail: mapName(k.mapId) || undefined });
   }
   for (const o of task.objectives) {
     for (const group of o.requiredKeyIds ?? []) {
-      add(`key:${[...group].sort().join("|")}`, { kind: "key", label: group.map(name).join(" ou "), count: 1 });
+      add(`key:${[...group].sort().join("|")}`, { kind: "key", label: group.map(name).join(tr(" ou ", " or ")), count: 1 });
     }
   }
 
@@ -270,20 +271,20 @@ export function compareRewards(task: Task, wiki: WikiQuest | null, traders: Trad
   const rewards = task.details?.rewards;
   if (!rewards || !wiki || wiki.rewards.length === 0) return [];
   const diffs: string[] = [];
-  const fmt = (n: number) => n.toLocaleString("fr-FR");
+  const fmt = (n: number) => n.toLocaleString(getLang() === "en" ? "en-US" : "fr-FR");
   const w = wiki.rewardNumbers;
   if (w.experience !== null && w.experience !== rewards.experience) {
-    diffs.push(`Expérience : ${fmt(rewards.experience)} selon tarkov.dev, ${fmt(w.experience)} selon le wiki.`);
+    diffs.push(tr(`Expérience : ${fmt(rewards.experience)} selon tarkov.dev, ${fmt(w.experience)} selon le wiki.`, `Experience: ${fmt(rewards.experience)} per tarkov.dev, ${fmt(w.experience)} per the wiki.`));
   }
   for (const [currency, amount] of Object.entries(w.money) as ["Roubles" | "Dollars" | "Euros", number][]) {
     const td = rewards.items.find((i) => i.itemId === CURRENCY_IDS[currency])?.count ?? 0;
-    if (td !== amount) diffs.push(`${currency} : ${fmt(td)} selon tarkov.dev, ${fmt(amount)} selon le wiki.`);
+    if (td !== amount) diffs.push(tr(`${currency} : ${fmt(td)} selon tarkov.dev, ${fmt(amount)} selon le wiki.`, `${currency}: ${fmt(td)} per tarkov.dev, ${fmt(amount)} per the wiki.`));
   }
   for (const [traderName, value] of Object.entries(w.reputation)) {
     const trader = traders.find((t) => t.normalizedName.toLowerCase() === traderName.toLowerCase());
     if (!trader) continue;
     const td = rewards.standing.find((s) => s.traderId === trader.id)?.value ?? 0;
-    if (Math.abs(td - value) > 1e-6) diffs.push(`Réputation ${trader.name} : ${td} selon tarkov.dev, ${value} selon le wiki.`);
+    if (Math.abs(td - value) > 1e-6) diffs.push(tr(`Réputation ${trader.name} : ${td} selon tarkov.dev, ${value} selon le wiki.`, `Reputation ${trader.name}: ${td} per tarkov.dev, ${value} per the wiki.`));
   }
   return diffs;
 }
@@ -295,11 +296,15 @@ export function failConditionText(
 ): string {
   if (f.description) return f.description;
   if (f.type === "taskStatus" && f.taskId) {
-    const other = tasksById.get(f.taskId)?.name ?? "une autre quête";
-    const status = (f.status ?? []).map((s) => STATUS_LABELS[s] ?? s).join(" ou ");
-    return `Échoue si la quête « ${other} » est ${status || "dans un autre état"}.`;
+    const other = tasksById.get(f.taskId)?.name ?? tr("une autre quête", "another quest");
+    const status = (f.status ?? []).map((s) => STATUS_LABELS[s] ?? s).join(tr(" ou ", " or "));
+    return tr(`Échoue si la quête « ${other} » est ${status || "dans un autre état"}.`, `Fails if the quest "${other}" is ${status || "in another state"}.`);
   }
-  return `Condition d'échec (type « ${f.type} »).`;
+  return tr(`Condition d'échec (type « ${f.type} »).`, `Fail condition (type "${f.type}").`);
 }
 
-export const STATUS_LABELS: Record<string, string> = { complete: "terminée", active: "acceptée", failed: "échouée" };
+export const STATUS_LABELS: Record<string, string> = {
+  get complete() { return tr("terminée", "completed"); },
+  get active() { return tr("acceptée", "started"); },
+  get failed() { return tr("échouée", "failed"); },
+};

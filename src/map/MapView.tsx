@@ -21,6 +21,7 @@ import {
 } from "./levels";
 import { CUSTOM_POINT_COLOR, categoryOf } from "../lib/objectiveTypes";
 import { CustomPopup, ObjectivePopup } from "../components/PointPopups";
+import { tr, getLang } from "../lib/i18n";
 
 const SHOW_EXITS_KEY = "tqp:showExits";
 
@@ -261,7 +262,7 @@ function MapViewInner(props: MapViewProps) {
               key={pt.key}
               point={pt}
               color={color}
-              title={`${task.name} — ${objective.description}${pt.spawn ? ` (emplacement possible ${pt.spawn.index}/${pt.spawn.count})` : ""}`}
+              title={`${task.name} — ${objective.description}${pt.spawn ? ` (${tr("emplacement possible", "possible location")} ${pt.spawn.index}/${pt.spawn.count})` : ""}`}
               icon={markerIcon(categoryOf(objective.type), color, {
                 faded: done,
                 offLevel,
@@ -303,7 +304,7 @@ function MapViewInner(props: MapViewProps) {
             position={gameToLatLng(cp)}
             icon={markerIcon(cp.icon, CUSTOM_POINT_COLOR, { custom: true })}
             draggable
-            title={cp.label || "Point perso"}
+            title={cp.label || tr("Point perso", "Custom point")}
             eventHandlers={{
               dragend: (e) =>
                 dispatch({ type: "updateCustom", id: cp.id, patch: latLngToGame((e.target as L.Marker).getLatLng()) }),
@@ -325,14 +326,14 @@ function MapViewInner(props: MapViewProps) {
           className={`map-toggle exits-toggle ${showExits ? "is-on" : ""}`}
           aria-pressed={showExits}
           onClick={toggleExits}
-          title={showExits ? "Masquer les sorties et transits" : "Afficher les sorties et transits"}
+          title={showExits ? tr("Masquer les sorties et transits", "Hide exits and transits") : tr("Afficher les sorties et transits", "Show exits and transits")}
         >
-          <span className="exit-swatch" aria-hidden="true" /> Sorties
+          <span className="exit-swatch" aria-hidden="true" /> {tr("Sorties", "Exits")}
         </button>
       )}
       {pickerLevels.length > 1 && (
-        <div className="level-picker" role="radiogroup" aria-label="Étage affiché">
-          <div className="level-picker-title">Étage</div>
+        <div className="level-picker" role="radiogroup" aria-label={tr("Étage affiché", "Displayed floor")}>
+          <div className="level-picker-title">{tr("Étage", "Floor")}</div>
           {pickerLevels.map((l) => (
             <button
               key={l ?? "main"}
@@ -351,7 +352,7 @@ function MapViewInner(props: MapViewProps) {
         // version compacte pour téléphone (affichée par le CSS)
         <select
           className="input level-select"
-          aria-label="Étage affiché"
+          aria-label={tr("Étage affiché", "Displayed floor")}
           value={level ?? ""}
           onChange={(e) => setLevel(e.target.value === "" ? null : Number(e.target.value))}
         >
@@ -366,15 +367,15 @@ function MapViewInner(props: MapViewProps) {
       {props.placing && (
         <div className="map-banner">
           {props.placing.kind === "manual"
-            ? `Cliquez sur la carte pour placer : ${props.placing.label}`
-            : "Cliquez sur la carte pour ajouter votre point"}
+            ? tr(`Cliquez sur la carte pour placer : ${props.placing.label}`, `Click on the map to place: ${props.placing.label}`)
+            : tr("Cliquez sur la carte pour ajouter votre point", "Click on the map to add your point")}
         </div>
       )}
       {baseStatus === "grid" && (
         <div className="map-notice">
           {calibration
-            ? "Pas de fond de carte pour cette map : grille affichée, positions calibrées."
-            : "Map non calibrée : positions brutes du jeu, sans fond de carte."}
+            ? tr("Pas de fond de carte pour cette map : grille affichée, positions calibrées.", "No base map for this map: grid shown, positions calibrated.")
+            : tr("Map non calibrée : positions brutes du jeu, sans fond de carte.", "Map not calibrated: raw in-game positions, no base map.")}
         </div>
       )}
       <div className="map-coords" aria-live="off">
@@ -384,12 +385,12 @@ function MapViewInner(props: MapViewProps) {
   );
 }
 
-const formatHeight = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 1 });
+const formatHeight = (n: number) => n.toLocaleString(getLang() === "en" ? "en-US" : "fr-FR", { maximumFractionDigits: 1 });
 /** Tranche de hauteur lisible ; maps.json note les bornes ouvertes ±1000 ou ±10000. */
 function formatExtent([low, high]: [number, number]) {
-  if (high >= 1000) return `au-dessus de ${formatHeight(low)} m`;
-  if (low <= -1000) return `sous ${formatHeight(high)} m`;
-  return `de ${formatHeight(low)} à ${formatHeight(high)} m`;
+  if (high >= 1000) return tr(`au-dessus de ${formatHeight(low)} m`, `above ${formatHeight(low)} m`);
+  if (low <= -1000) return tr(`sous ${formatHeight(high)} m`, `below ${formatHeight(high)} m`);
+  return tr(`de ${formatHeight(low)} à ${formatHeight(high)} m`, `from ${formatHeight(low)} to ${formatHeight(high)} m`);
 }
 
 /** Infobulle d'un point d'étage supérieur : nom de l'étage, hauteur du point et de l'étage. */
@@ -401,15 +402,15 @@ function UpperLevelTooltip({ point, calibration, level }: {
   const extent = extentOf(point, calibration.layers[level]);
   const height =
     point.bottom !== undefined && point.top !== undefined
-      ? `zone de ${formatHeight(point.bottom)} à ${formatHeight(point.top)} m`
+      ? tr(`zone de ${formatHeight(point.bottom)} à ${formatHeight(point.top)} m`, `zone from ${formatHeight(point.bottom)} to ${formatHeight(point.top)} m`)
       : point.y !== undefined
         ? `${formatHeight(point.y)} m`
         : null;
   return (
     <>
       <strong>{levelName(calibration, level)}</strong>
-      {height && <div>Hauteur du point : {height}</div>}
-      {extent && <div className="muted">Étage : {formatExtent(extent)}</div>}
+      {height && <div>{tr("Hauteur du point : ", "Point height: ")}{height}</div>}
+      {extent && <div className="muted">{tr("Étage : ", "Floor: ")}{formatExtent(extent)}</div>}
     </>
   );
 }

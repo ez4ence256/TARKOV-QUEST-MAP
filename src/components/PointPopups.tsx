@@ -4,6 +4,7 @@ import type { Objective, Task } from "../types";
 import type { CustomPoint } from "../state/store";
 import { CUSTOM_ICONS, ICON_LABELS, categoryOf } from "../lib/objectiveTypes";
 import { Icon } from "./Icon";
+import { tr } from "../lib/i18n";
 
 interface ObjectivePopupProps {
   task: Task;
@@ -37,57 +38,57 @@ export function ObjectivePopup(p: ObjectivePopupProps) {
       </div>
       <div className="popup-type">
         <Icon id={category} /> {ICON_LABELS[category]}
-        {p.objective.optional && <span className="tag">optionnel</span>}
-        {p.manual && <span className="tag">placé à la main</span>}
+        {p.objective.optional && <span className="tag">{tr("optionnel", "optional")}</span>}
+        {p.manual && <span className="tag">{tr("placé à la main", "placed by hand")}</span>}
       </div>
       <p className="popup-desc">{p.objective.description}</p>
       {p.spawn && (
         <div className="popup-spawn">
-          Emplacement possible <strong>{p.spawn.index}</strong> sur {p.spawn.count}
+          {tr("Emplacement possible", "Possible location")} <strong>{p.spawn.index}</strong> {tr("sur", "of")} {p.spawn.count}
         </div>
       )}
       {p.levelLabel && (
         <div className="popup-level">
-          Étage : <strong>{p.levelLabel}</strong>
+          {tr("Étage : ", "Floor: ")}<strong>{p.levelLabel}</strong>
           {p.onShowLevel && (
             <button className="btn btn-ghost btn-small" onClick={p.onShowLevel}>
-              Afficher cet étage
+              {tr("Afficher cet étage", "Show this floor")}
             </button>
           )}
         </div>
       )}
       <label className="field">
-        <span>Mes notes</span>
+        <span>{tr("Mes notes", "My notes")}</span>
         <textarea
           rows={3}
           value={p.note}
-          placeholder="Ex. : clé nécessaire, passer par l'arrière…"
+          placeholder={tr("Ex. : clé nécessaire, passer par l'arrière…", "E.g. key needed, go around the back…")}
           onChange={(e) => p.onNote(e.target.value)}
         />
       </label>
       <div className="popup-actions">
         {p.done ? (
           <button className="btn" onClick={() => p.onDone(false)}>
-            ↩ Annuler « Fait »
+            {tr("↩ Annuler « Fait »", "↩ Undo “Done”")}
           </button>
         ) : (
           <button className="btn btn-primary" onClick={() => p.onDone(true)}>
-            ✓ Fait
+            {tr("✓ Fait", "✓ Done")}
           </button>
         )}
         {p.onQuest && (
           <button className="btn btn-ghost" onClick={p.onQuest}>
-            📜 Quête
+            {tr("📜 Quête", "📜 Quest")}
           </button>
         )}
         {p.onPhotos && (
           <button className="btn btn-ghost" onClick={p.onPhotos}>
-            📷 Photos
+            {tr("📷 Photos", "📷 Photos")}
           </button>
         )}
         {p.manual && p.onRemoveManual && (
           <button className="btn btn-ghost" onClick={p.onRemoveManual}>
-            Retirer le point
+            {tr("Retirer le point", "Remove point")}
           </button>
         )}
       </div>
@@ -107,15 +108,15 @@ export function CustomPopup({ point, onChange, onRemove }: CustomPopupProps) {
   return (
     <div className="popup">
       <label className="field">
-        <span>Nom du point</span>
+        <span>{tr("Nom du point", "Point name")}</span>
         <input
           value={point.label}
-          placeholder="Point perso"
+          placeholder={tr("Point perso", "Custom point")}
           onChange={(e) => onChange({ label: e.target.value })}
         />
       </label>
       <div className="field">
-        <span>Icône</span>
+        <span>{tr("Icône", "Icon")}</span>
         <div className="icon-grid">
           {CUSTOM_ICONS.map((id) => (
             <button
@@ -131,26 +132,26 @@ export function CustomPopup({ point, onChange, onRemove }: CustomPopupProps) {
         </div>
       </div>
       <label className="field">
-        <span>Note</span>
+        <span>{tr("Note", "Note")}</span>
         <textarea rows={3} value={point.note} onChange={(e) => onChange({ note: e.target.value })} />
       </label>
       <div className="popup-actions">
         {confirm ? (
           <>
             <button className="btn btn-danger" onClick={onRemove}>
-              Confirmer la suppression
+              {tr("Confirmer la suppression", "Confirm deletion")}
             </button>
             <button className="btn btn-ghost" onClick={() => setConfirm(false)}>
-              Non
+              {tr("Non", "No")}
             </button>
           </>
         ) : (
           <button className="btn btn-ghost" onClick={() => setConfirm(true)}>
-            Supprimer
+            {tr("Supprimer", "Delete")}
           </button>
         )}
       </div>
-      <div className="popup-foot">Astuce : faites glisser le point pour le déplacer.</div>
+      <div className="popup-foot">{tr("Astuce : faites glisser le point pour le déplacer.", "Tip: drag the point to move it.")}</div>
     </div>
   );
 }

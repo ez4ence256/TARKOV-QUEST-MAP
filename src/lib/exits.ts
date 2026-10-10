@@ -2,6 +2,7 @@
 // libellés. Fonctions pures, testées dans exits.test.ts.
 
 import type { MapExit } from "../types";
+import { tr } from "./i18n";
 
 /** L'API n'a pas de champ « coop » : seul le nom anglais l'indique (« (Co-op) » ou « (Co-Op) »). */
 export const isCoopName = (nameEn: string) => /\(\s*co-?op\s*\)/i.test(nameEn);
@@ -43,14 +44,21 @@ export function mergeExits(exits: MapExit[]): MapExit[] {
 }
 
 export function factionLabel(factions: MapExit["factions"]): string {
-  if (factions.length === 2) return "PMC et Scav";
+  if (factions.length === 2) return tr("PMC et Scav", "PMC and Scav");
   if (factions[0] === "pmc") return "PMC";
   if (factions[0] === "scav") return "Scav";
-  return "non précisée par les données";
+  return tr("non précisée par les données", "not specified by the data");
 }
 
+// getters : la langue est lue à chaque accès, pas à l'import
 export const EXIT_KIND_LABELS: Record<MapExit["kind"], string> = {
-  extract: "Sortie",
-  coop: "Sortie coop (PMC + Scav ensemble)",
-  transit: "Transit",
+  get extract() {
+    return tr("Sortie", "Exit");
+  },
+  get coop() {
+    return tr("Sortie coop (PMC + Scav ensemble)", "Co-op exit (PMC + Scav together)");
+  },
+  get transit() {
+    return tr("Transit", "Transit");
+  },
 };

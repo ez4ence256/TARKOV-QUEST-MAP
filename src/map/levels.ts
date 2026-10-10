@@ -16,6 +16,7 @@
 
 import type { MapCalibration, MapLayer } from "./calibration";
 import { isInBounds } from "./crs";
+import { tr } from "../lib/i18n";
 
 /** Hauteur d'un point : y, ou haut/bas de la zone quand l'API les donne. */
 export interface PointHeight {
@@ -122,20 +123,22 @@ export function levelBadge(calibration: MapCalibration, level: number): string {
   return name.match(/\d+/)?.[0] ?? "↑";
 }
 
-const LEVEL_NAMES: Record<string, string> = {
-  "2nd Floor": "2e étage",
-  "3rd Floor": "3e étage",
-  "4th Floor": "4e étage",
-  "5th Floor": "5e étage",
-  Underground: "Sous-sol",
-  Garage: "Garage",
-  Tunnels: "Tunnels",
-  Technical: "Niveau technique",
-  "Second Level": "2e niveau",
+// [français, anglais] : résolu à l'appel (pas à l'import) pour suivre la langue choisie
+const LEVEL_NAMES: Record<string, [string, string]> = {
+  "2nd Floor": ["2e étage", "2nd floor"],
+  "3rd Floor": ["3e étage", "3rd floor"],
+  "4th Floor": ["4e étage", "4th floor"],
+  "5th Floor": ["5e étage", "5th floor"],
+  Underground: ["Sous-sol", "Basement"],
+  Garage: ["Garage", "Garage"],
+  Tunnels: ["Tunnels", "Tunnels"],
+  Technical: ["Niveau technique", "Technical level"],
+  "Second Level": ["2e niveau", "2nd level"],
 };
 
 export function levelName(calibration: MapCalibration | undefined, level: Level): string {
-  if (level === null || !calibration) return calibration?.mainLevelName ?? "Niveau principal";
+  if (level === null || !calibration) return calibration?.mainLevelName ?? tr("Niveau principal", "Main level");
   const name = calibration.layers[level]?.name ?? "";
-  return LEVEL_NAMES[name] ?? name;
+  const names = LEVEL_NAMES[name];
+  return names ? tr(names[0], names[1]) : name;
 }

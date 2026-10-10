@@ -11,6 +11,8 @@
 //    légendes ne donnent pas de coordonnées, une photo est rattachée à la quête.
 // Licences : texte CC BY-NC-SA ; images sans licence indiquée (voir CREDITS.md).
 
+import { tr } from "../lib/i18n";
+
 export const WIKI_HOST = "escapefromtarkov.fandom.com";
 const WIKI_API = `https://${WIKI_HOST}/api.php`;
 const CACHE_PREFIX = "tqp:wiki:v2:";
@@ -106,10 +108,10 @@ function wikiRequest(params: Record<string, string>): Promise<Record<string, unk
     if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
     lastRequestAt = Date.now();
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`wiki : HTTP ${res.status}`);
+    if (!res.ok) throw new Error(`wiki: HTTP ${res.status}`);
     const json = (await res.json()) as Record<string, unknown>;
     const error = json.error as { code?: string; info?: string } | undefined;
-    if (error) throw Object.assign(new Error(`wiki : ${error.info ?? "erreur"}`), { code: error.code });
+    if (error) throw Object.assign(new Error(`wiki: ${error.info ?? tr("erreur", "error")}`), { code: error.code });
     return json;
   });
   queue = run.catch(() => undefined);
@@ -192,7 +194,7 @@ const inFlight = new Map<string, Promise<WikiPage>>();
 /** Page wiki d'une quête (une requête parse, cache 7 jours, partagée entre les onglets). */
 export function loadWikiPage(wikiLink: string): Promise<WikiPage> {
   const title = wikiTitleFromLink(wikiLink);
-  if (!title) return Promise.reject(new Error("Lien wiki non reconnu"));
+  if (!title) return Promise.reject(new Error(tr("Lien wiki non reconnu", "Unrecognized wiki link")));
   const cached = readCache<WikiPage>(`page:${title}`);
   if (cached) return Promise.resolve(cached);
   let pending = inFlight.get(title);
@@ -231,7 +233,7 @@ async function fetchWikiPage(title: string): Promise<WikiPage> {
  */
 export function loadQuestPhotos(wikiLink: string): Promise<WikiGallery> {
   const title = wikiTitleFromLink(wikiLink);
-  if (!title) return Promise.reject(new Error("Lien wiki non reconnu"));
+  if (!title) return Promise.reject(new Error(tr("Lien wiki non reconnu", "Unrecognized wiki link")));
   const cached = readCache<WikiGallery>(`photos:${title}`);
   if (cached) return Promise.resolve(cached);
   // une demande déjà en cours (autre onglet, double rendu) est réutilisée

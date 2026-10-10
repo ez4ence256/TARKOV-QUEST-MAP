@@ -3,6 +3,7 @@ import type { GameMap, Objective, Task, Trader } from "../types";
 import type { Action, ModeState } from "../state/store";
 import { ICON_LABELS, QUEST_COLORS, categoryOf } from "../lib/objectiveTypes";
 import { hasApiPosition, manualPointKey, objectiveMapCounts, objectivePointKey, taskProgress } from "../lib/points";
+import { tr } from "../lib/i18n";
 import { Icon } from "./Icon";
 
 /** Objectifs d'objets à trouver ou remettre : on signale quand l'API n'en donne aucun emplacement. */
@@ -28,15 +29,15 @@ interface Props {
 export function SelectedQuests(props: Props) {
   const { mode, dispatch } = props;
   const tasksById = new Map(props.tasks.map((t) => [t.id, t]));
-  const mapName = (id: string) => props.maps.find((m) => m.id === id)?.name ?? "Map inconnue";
+  const mapName = (id: string) => props.maps.find((m) => m.id === id)?.name ?? tr("Map inconnue", "Unknown map");
   const traderName = (id: string) => props.traders.find((t) => t.id === id)?.name ?? "";
 
   if (mode.selected.length === 0) {
     return (
       <div className="tab-body empty">
-        <p>Aucune quête sélectionnée.</p>
+        <p>{tr("Aucune quête sélectionnée.", "No quest selected.")}</p>
         <button className="btn btn-primary" onClick={props.onBrowse}>
-          Choisir des quêtes
+          {tr("Choisir des quêtes", "Choose quests")}
         </button>
       </div>
     );
@@ -45,9 +46,9 @@ export function SelectedQuests(props: Props) {
   return (
     <div className="tab-body">
       <div className="selection-head">
-        <span className="muted small">{mode.selected.length} quête(s) sur la carte</span>
+        <span className="muted small">{tr(`${mode.selected.length} quête(s) sur la carte`, `${mode.selected.length} quest(s) on the map`)}</span>
         <button className="btn btn-ghost btn-small" onClick={() => dispatch({ type: "clearSelection" })}>
-          Tout désélectionner
+          {tr("Tout désélectionner", "Deselect all")}
         </button>
       </div>
 
@@ -58,8 +59,8 @@ export function SelectedQuests(props: Props) {
           return (
             <section key={taskId} className="task-card">
               <div className="task-head">
-                <span className="muted">Quête introuvable dans les données actuelles.</span>
-                <button className="icon-btn" onClick={() => dispatch({ type: "toggleTask", taskId })} aria-label="Retirer">
+                <span className="muted">{tr("Quête introuvable dans les données actuelles.", "Quest not found in the current data.")}</span>
+                <button className="icon-btn" onClick={() => dispatch({ type: "toggleTask", taskId })} aria-label={tr("Retirer", "Remove")}>
                   ×
                 </button>
               </div>
@@ -86,7 +87,7 @@ export function SelectedQuests(props: Props) {
                   type="checkbox"
                   checked={done}
                   onChange={(e) => dispatch({ type: "setDone", objectiveId: o.id, done: e.target.checked })}
-                  aria-label={done ? "Marquer comme non fait" : "Marquer comme fait"}
+                  aria-label={done ? tr("Marquer comme non fait", "Mark as not done") : tr("Marquer comme fait", "Mark as done")}
                 />
               </label>
               <div className="objective-body">
@@ -94,11 +95,11 @@ export function SelectedQuests(props: Props) {
                   <span className="objective-icon" style={{ color: qColor }} title={ICON_LABELS[cat]}>
                     <Icon id={cat} size={14} />
                   </span>
-                  {o.description || <em className="muted">(sans description)</em>}
-                  {o.optional && <span className="tag">optionnel</span>}
+                  {o.description || <em className="muted">{tr("(sans description)", "(no description)")}</em>}
+                  {o.optional && <span className="tag">{tr("optionnel", "optional")}</span>}
                 </div>
                 {!hasApiPosition(o) && LOOT_TYPES.has(o.type) && (
-                  <div className="objective-note">L'API ne donne pas d'emplacement pour cet objet.</div>
+                  <div className="objective-note">{tr("L'API ne donne pas d'emplacement pour cet objet.", "The API gives no location for this item.")}</div>
                 )}
                 <div className="objective-links">
                   {[...counts.entries()].map(([mapId, n]) => (
@@ -112,7 +113,9 @@ export function SelectedQuests(props: Props) {
                       }
                     >
                       {mapName(mapId)} · {n}{" "}
-                      {isSpawnList ? `emplacement${n > 1 ? "s" : ""} possible${n > 1 ? "s" : ""}` : `point${n > 1 ? "s" : ""}`}
+                      {isSpawnList
+                        ? tr(`emplacement${n > 1 ? "s" : ""} possible${n > 1 ? "s" : ""}`, `possible location${n > 1 ? "s" : ""}`)
+                        : `point${n > 1 ? "s" : ""}`}
                     </button>
                   ))}
                   {!hasApiPosition(o) &&
@@ -122,18 +125,18 @@ export function SelectedQuests(props: Props) {
                           📍 {mapName(manual.mapId)}
                         </button>
                         <button className="chip" onClick={() => props.onStartPlacing(o)}>
-                          Déplacer
+                          {tr("Déplacer", "Move")}
                         </button>
                         <button
                           className="chip chip-danger"
                           onClick={() => dispatch({ type: "setManual", objectiveId: o.id, position: null })}
                         >
-                          Retirer
+                          {tr("Retirer", "Remove")}
                         </button>
                       </>
                     ) : (
                       <button className="chip chip-accent" onClick={() => props.onStartPlacing(o)}>
-                        📍 Placer sur la carte
+                        📍 {tr("Placer sur la carte", "Place on the map")}
                       </button>
                     ))}
                 </div>
@@ -153,13 +156,13 @@ export function SelectedQuests(props: Props) {
                   {task.mapId ? ` · ${mapName(task.mapId)}` : ""}
                   {" · "}
                   <button className="link" onClick={() => props.onQuest(task.id)}>
-                    📜 quête
+                    📜 {tr("quête", "quest")}
                   </button>
                   {task.wikiLink && (
                     <>
                       {" · "}
                       <button className="link" onClick={() => props.onPhotos(task.id)}>
-                        photos
+                        {tr("photos", "photos")}
                       </button>
                       {" · "}
                       <a href={task.wikiLink} target="_blank" rel="noreferrer">
@@ -171,15 +174,15 @@ export function SelectedQuests(props: Props) {
               </div>
               <span
                 className={`progress-badge ${progress.done === progress.total && progress.total > 0 ? "is-complete" : ""}`}
-                title="Objectifs faits / objectifs obligatoires"
+                title={tr("Objectifs faits / objectifs obligatoires", "Objectives done / required objectives")}
               >
                 {progress.done}/{progress.total}
               </span>
               <button
                 className="icon-btn"
                 onClick={() => dispatch({ type: "toggleTask", taskId })}
-                aria-label={`Retirer ${task.name}`}
-                title="Retirer de la carte"
+                aria-label={tr(`Retirer ${task.name}`, `Remove ${task.name}`)}
+                title={tr("Retirer de la carte", "Remove from the map")}
               >
                 ×
               </button>
@@ -192,7 +195,7 @@ export function SelectedQuests(props: Props) {
 
             {unpositioned.length > 0 && (
               <>
-                <div className="subhead">Objectifs sans position ({unpositioned.length})</div>
+                <div className="subhead">{tr(`Objectifs sans position (${unpositioned.length})`, `Objectives without position (${unpositioned.length})`)}</div>
                 <ul className="objectives">{unpositioned.map(renderObjective)}</ul>
               </>
             )}

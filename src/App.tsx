@@ -19,10 +19,8 @@ import { QuestTab } from "./components/QuestTab";
 import { CaptureTab } from "./components/CaptureTab";
 import { dominantMap } from "./lib/ocrMatch";
 import { PanelResizer } from "./components/PanelResizer";
+import { getLang, setLang as applyLang, tr, type Lang } from "./lib/i18n";
 import { clampPanelWidth, readPanelWidth } from "./lib/panelWidth";
-
-/** Langue des noms de quêtes : français, l'anglais sert de secours (géré par l'API). */
-const LANG = "fr";
 
 type Tab = "selection" | "quests" | "capture" | "quest" | "photos" | "custom" | "settings";
 
@@ -31,14 +29,14 @@ type Tab = "selection" | "quests" | "capture" | "quest" | "photos" | "custom" | 
  * pour tenir sur deux lignes sans couper de mot) ; `full` : nom complet (lecteur d'écran,
  * infobulle) ; `logo` : seul affiché sur téléphone.
  */
-const TABS: { id: Tab; label: string; full?: string; logo: string }[] = [
-  { id: "selection", label: "Sélection", logo: "📌" },
-  { id: "quests", label: "Quêtes", full: "Toutes les quêtes", logo: "📋" },
-  { id: "capture", label: "Capture", full: "Importer une capture", logo: "📥" },
-  { id: "quest", label: "Fiche quête", full: "Quête sélectionnée", logo: "📜" },
-  { id: "photos", label: "Photos", logo: "📷" },
-  { id: "custom", label: "Mes points", logo: "📍" },
-  { id: "settings", label: "Réglages", logo: "⚙️" },
+const TABS: { id: Tab; label: [string, string]; full?: [string, string]; logo: string }[] = [
+  { id: "selection", label: ["Sélection", "Selection"], logo: "📌" },
+  { id: "quests", label: ["Quêtes", "Quests"], full: ["Toutes les quêtes", "All quests"], logo: "📋" },
+  { id: "capture", label: ["Capture", "Capture"], full: ["Importer une capture", "Import a screenshot"], logo: "📥" },
+  { id: "quest", label: ["Fiche quête", "Quest page"], full: ["Quête sélectionnée", "Selected quest"], logo: "📜" },
+  { id: "photos", label: ["Photos", "Photos"], logo: "📷" },
+  { id: "custom", label: ["Mes points", "My points"], logo: "📍" },
+  { id: "settings", label: ["Réglages", "Settings"], logo: "⚙️" },
 ];
 type LoadState =
   | { status: "loading"; data: TarkovData | null }
@@ -56,6 +54,12 @@ export default function App() {
   const gameMode = state.gameMode;
   const [load, setLoad] = useState<LoadState>({ status: "loading", data: null });
   const [reloadToken, setReloadToken] = useState(0);
+  const [lang, setLang] = useState<Lang>(getLang);
+  // i18n d'abord, pour que le rendu suivant lise déjà la nouvelle langue
+  const changeLang = (next: Lang) => {
+    applyLang(next);
+    setLang(next);
+  };
   const [calibration, setCalibration] = useState(BUNDLED_CALIBRATION);
   const [tab, setTab] = useState<Tab>("quests");
   /** Quête affichée dans l'onglet Photos. */
@@ -85,13 +89,13 @@ export default function App() {
     lastReload.current = reloadToken;
     const controller = new AbortController();
     setLoad((prev) => ({ status: "loading", data: prev.data?.gameMode === gameMode ? prev.data : null }));
-    loadTarkovData(gameMode, LANG, { force, signal: controller.signal })
+    loadTarkovData(gameMode, lang, { force, signal: controller.signal })
       .then((res) => setLoad({ status: "ready", ...res }))
       .catch((error: Error) => {
         if (error.name !== "AbortError") setLoad({ status: "error", data: null, error: error.message });
       });
     return () => controller.abort();
-  }, [gameMode, reloadToken]);
+  }, [gameMode, reloadToken, lang]);
 
   const data = load.data;
   const tasks = useMemo(() => data?.tasks ?? [], [data]);
@@ -216,17 +220,25 @@ export default function App() {
   }, [placing]);
 
   if (!gameMode) {
-    return <ModePicker last={getLastMode()} onPick={(m) => dispatch({ type: "setGameMode", mode: m })} />;
+    return <ModePicker
+        last={getLastMode()}
+        onPick={(m) => dispatch({ type: "setGameMode", mode: m })}
+        lang={lang}
+        onLang={changeLang}
+      />;
   }
 
   const modeLabel = GAME_MODES.find((m) => m.id === gameMode)?.label;
   const sourceLabel =
     load.status === "ready"
       ? load.source === "network"
-        ? "Téléchargées à l'instant."
+        ? tr("Téléchargées à l'instant.", "Just downloaded.")
         : load.source === "cache"
-          ? "Depuis le cache local (rafraîchi toutes les 6 h)."
-          : `API injoignable, dernière version en cache utilisée (${load.error}).`
+          ? tr("Depuis le cache local (rafraîchi toutes les 6 h).", "From the local cache (refreshed every 6 h).")
+          : tr(
+              `API injoignable, dernière version en cache utilisée (${load.error}).`,
+              `API unreachable, using the last cached version (${load.error}).`,
+            )
       : "";
 
   return (
@@ -238,7 +250,7 @@ export default function App() {
           aria-expanded={panelOpen}
           aria-controls="side-panel"
         >
-          {panelOpen ? "◀ Masquer" : "☰ Quêtes"}
+          {panelOpen ? tr("◀ Masquer", "◀ Hide") : tr("☰ Quêtes", "☰ Quests")}
         </button>
         <div className="brand">
           Quest Planner <span className="mode-badge">{modeLabel}</span>
@@ -247,7 +259,7 @@ export default function App() {
           className="input map-select"
           value={currentMap?.id ?? ""}
           onChange={(e) => showMap(e.target.value)}
-          aria-label="Map affichée"
+          aria-label={tr("Map affichée", "Displayed map")}
           disabled={maps.length === 0}
         >
           {maps.map((m) => (
@@ -257,21 +269,37 @@ export default function App() {
             </option>
           ))}
         </select>
+        <select
+          className="input lang-select"
+          value={lang}
+          onChange={(e) => changeLang(e.target.value === "en" ? "en" : "fr")}
+          aria-label={tr("Langue", "Language")}
+          title={tr("Langue de l'interface et des noms de quêtes, maps et objets", "Language of the interface and of quest, map and item names")}
+        >
+          <option value="fr">FR</option>
+          <option value="en">EN</option>
+        </select>
       </header>
 
       {load.status === "ready" && load.source === "stale" && (
         <div className="alert">
-          L'API tarkov.dev ne répond pas : affichage de la dernière version en cache.{" "}
+          {tr(
+            "L'API tarkov.dev ne répond pas : affichage de la dernière version en cache.",
+            "The tarkov.dev API is not responding: showing the last cached version.",
+          )}{" "}
           <button className="link" onClick={() => setReloadToken((n) => n + 1)}>
-            Réessayer
+            {tr("Réessayer", "Retry")}
           </button>
         </div>
       )}
 
-      <div className="layout">
+      {/* key : recrée tout l'arbre (popups Leaflet comprises) dans la nouvelle langue */}
+      <div className="layout" key={lang}>
         <aside id="side-panel" className={`panel ${panelOpen ? "is-open" : ""}`}>
           <nav className="tabs" role="tablist">
-            {TABS.map(({ id, label, full, logo }) => {
+            {TABS.map(({ id, label: labelPair, full: fullPair, logo }) => {
+              const label = tr(...labelPair);
+              const full = fullPair && tr(...fullPair);
               const count = id === "selection" && mode.selected.length > 0 ? mode.selected.length : null;
               const name = `${full ?? label}${count ? ` (${count})` : ""}`;
               return (
@@ -295,12 +323,15 @@ export default function App() {
             })}
           </nav>
 
-          {load.status === "loading" && !data && <div className="tab-body notice muted">Chargement des quêtes…</div>}
+          {load.status === "loading" && !data && <div className="tab-body notice muted">{tr("Chargement des quêtes…", "Loading quests…")}</div>}
           {load.status === "error" && (
             <div className="tab-body notice">
-              <p className="error">Impossible de charger les données de tarkov.dev : {load.error}</p>
+              <p className="error">
+                {tr("Impossible de charger les données de tarkov.dev : ", "Unable to load tarkov.dev data: ")}
+                {load.error}
+              </p>
               <button className="btn" onClick={() => setReloadToken((n) => n + 1)}>
-                Réessayer
+                {tr("Réessayer", "Retry")}
               </button>
             </div>
           )}
@@ -327,7 +358,7 @@ export default function App() {
               onShowMap={showMap}
               onFocus={focusPoint}
               onStartPlacing={(o) =>
-                startPlacing({ kind: "manual", objectiveId: o.id, label: o.description || "objectif" })
+                startPlacing({ kind: "manual", objectiveId: o.id, label: o.description || tr("objectif", "objective") })
               }
               onBrowse={() => setTab("quests")}
               onPhotos={showPhotos}
@@ -357,12 +388,23 @@ export default function App() {
                 dispatch({ type: "selectTasks", taskIds, replace });
                 const added = taskIds.map((id) => tasksById.get(id)).filter((t): t is Task => Boolean(t));
                 const mapId = dominantMap(added);
-                const n = `${added.length} quête${added.length > 1 ? "s" : ""} ${replace ? "sélectionnée" : "ajoutée"}${added.length > 1 ? "s" : ""}.`;
+                const k = added.length;
+                const n = tr(
+                  `${k} quête${k > 1 ? "s" : ""} ${replace ? "sélectionnée" : "ajoutée"}${k > 1 ? "s" : ""}.`,
+                  `${k} quest${k > 1 ? "s" : ""} ${replace ? "selected" : "added"}.`,
+                );
                 if (mapId && maps.some((m) => m.id === mapId)) {
                   dispatch({ type: "setMap", mapId });
-                  return `${n} Map affichée : ${maps.find((m) => m.id === mapId)!.name} (la plupart de leurs points s'y trouvent).`;
+                  const name = maps.find((m) => m.id === mapId)!.name;
+                  return tr(
+                    `${n} Map affichée : ${name} (la plupart de leurs points s'y trouvent).`,
+                    `${n} Displayed map: ${name} (most of their points are there).`,
+                  );
                 }
-                return `${n} Leurs points sont répartis sur plusieurs maps (ou absents) : la map affichée n'a pas changé.`;
+                return tr(
+                  `${n} Leurs points sont répartis sur plusieurs maps (ou absents) : la map affichée n'a pas changé.`,
+                  `${n} Their points are spread over several maps (or missing): the displayed map did not change.`,
+                );
               }}
             />
           )}
@@ -433,11 +475,11 @@ export default function App() {
               onQuest={showQuest}
             />
           ) : (
-            <div className="map-empty muted">{load.status === "loading" ? "Chargement…" : "Aucune map."}</div>
+            <div className="map-empty muted">{load.status === "loading" ? tr("Chargement…", "Loading…") : tr("Aucune map.", "No map.")}</div>
           )}
           {placing && (
             <button className="btn cancel-placing" onClick={() => setPlacing(null)}>
-              Annuler le placement
+              {tr("Annuler le placement", "Cancel placement")}
             </button>
           )}
         </main>

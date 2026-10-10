@@ -5,6 +5,7 @@ import type { GameMap, Task, Trader } from "../types";
 import type { ModeState } from "../state/store";
 import { QUEST_COLORS } from "../lib/objectiveTypes";
 import { taskProgress } from "../lib/points";
+import { getLang, tr } from "../lib/i18n";
 import { filterQuests, pinSelected, type QuestResult } from "../lib/questFilter";
 
 interface Props {
@@ -31,7 +32,7 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onCl
   // Marchands réellement présents dans les quêtes, triés par nom
   const traderOptions = useMemo(() => {
     const ids = new Set(tasks.map((t) => t.traderId));
-    return traders.filter((t) => ids.has(t.id)).sort((a, b) => a.name.localeCompare(b.name));
+    return traders.filter((t) => ids.has(t.id)).sort((a, b) => a.name.localeCompare(b.name, getLang()));
   }, [tasks, traders]);
 
   // Recherche sur le nom affiché ET le nom anglais ; meilleurs résultats en premier.
@@ -54,7 +55,7 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onCl
           className={`quest-row ${isSelected ? "is-selected" : ""}`}
           onClick={() => onToggle(t.id)}
           aria-pressed={isSelected}
-          title={isSelected ? "Cliquer pour désélectionner" : "Cliquer pour sélectionner"}
+          title={isSelected ? tr("Cliquer pour désélectionner", "Click to deselect") : tr("Cliquer pour sélectionner", "Click to select")}
           style={isSelected ? { ["--q" as string]: QUEST_COLORS[color] } : undefined}
         >
           <span className="quest-check" aria-hidden="true">
@@ -65,7 +66,7 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onCl
             {viaEnglish && <span className="quest-alt">EN : {t.nameEn}</span>}
             <span className="quest-meta">
               {tradersById.get(t.traderId)?.name ?? "?"}
-              {t.minPlayerLevel ? ` · niv. ${t.minPlayerLevel}` : ""}
+              {t.minPlayerLevel ? ` · ${tr("niv.", "lvl")} ${t.minPlayerLevel}` : ""}
               {t.kappaRequired ? " · Kappa" : ""}
             </span>
           </span>
@@ -79,8 +80,8 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onCl
           <button
             className="quest-photos"
             onClick={() => onPhotos(t.id)}
-            title="Photos des emplacements (wiki)"
-            aria-label={`Photos des emplacements de ${t.name}`}
+            title={tr("Photos des emplacements (wiki)", "Location photos (wiki)")}
+            aria-label={tr(`Photos des emplacements de ${t.name}`, `Location photos for ${t.name}`)}
           >
             📷
           </button>
@@ -95,22 +96,22 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onCl
         <input
           type="search"
           className="input"
-          placeholder="Rechercher une quête…"
+          placeholder={tr("Rechercher une quête…", "Search quests…")}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          aria-label="Rechercher une quête"
+          aria-label={tr("Rechercher une quête", "Search quests")}
         />
         <div className="filter-row">
-          <select className="input" value={trader} onChange={(e) => setTrader(e.target.value)} aria-label="Filtrer par marchand">
-            <option value="">Tous les marchands</option>
+          <select className="input" value={trader} onChange={(e) => setTrader(e.target.value)} aria-label={tr("Filtrer par marchand", "Filter by trader")}>
+            <option value="">{tr("Tous les marchands", "All traders")}</option>
             {traderOptions.map((t) => (
               <option key={t.id} value={t.id}>
                 {t.name}
               </option>
             ))}
           </select>
-          <select className="input" value={mapFilter} onChange={(e) => setMapFilter(e.target.value)} aria-label="Filtrer par map">
-            <option value="">Toutes les maps</option>
+          <select className="input" value={mapFilter} onChange={(e) => setMapFilter(e.target.value)} aria-label={tr("Filtrer par map", "Filter by map")}>
+            <option value="">{tr("Toutes les maps", "All maps")}</option>
             {maps.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.name}
@@ -120,32 +121,37 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onCl
         </div>
         <label className="check">
           <input type="checkbox" checked={hideCompleted} onChange={(e) => setHideCompleted(e.target.checked)} />
-          Masquer les quêtes terminées
+          {tr("Masquer les quêtes terminées", "Hide completed quests")}
         </label>
         <div className="muted small">
-          {filtered.length} quête{filtered.length > 1 ? "s" : ""} sur {tasks.length}
+          {tr(
+            `${filtered.length} quête${filtered.length > 1 ? "s" : ""} sur ${tasks.length}`,
+            `${filtered.length} of ${tasks.length} quest${tasks.length > 1 ? "s" : ""}`,
+          )}
         </div>
       </div>
 
       {mode.selected.length > 0 && (
-        <section className="pinned" aria-label="Quêtes sélectionnées">
+        <section className="pinned" aria-label={tr("Quêtes sélectionnées", "Selected quests")}>
           <div className="pinned-head">
-            <span className="subhead">Quêtes sélectionnées ({pinned.length})</span>
+            <span className="subhead">{tr(`Quêtes sélectionnées (${pinned.length})`, `Selected quests (${pinned.length})`)}</span>
             <button className="btn btn-small" onClick={onClearSelection}>
-              Tout désélectionner
+              {tr("Tout désélectionner", "Deselect all")}
             </button>
           </div>
           {hiddenSelected > 0 && (
             <p className="muted small">
-              {hiddenSelected} autre{hiddenSelected > 1 ? "s" : ""} quête{hiddenSelected > 1 ? "s" : ""} sélectionnée
-              {hiddenSelected > 1 ? "s" : ""}, masquée{hiddenSelected > 1 ? "s" : ""} par la recherche ou les filtres.
+              {tr(
+                `${hiddenSelected} autre${hiddenSelected > 1 ? "s" : ""} quête${hiddenSelected > 1 ? "s" : ""} sélectionnée${hiddenSelected > 1 ? "s" : ""}, masquée${hiddenSelected > 1 ? "s" : ""} par la recherche ou les filtres.`,
+                `${hiddenSelected} other selected quest${hiddenSelected > 1 ? "s" : ""} hidden by the search or filters.`,
+              )}
             </p>
           )}
           <ul className="quest-list">{pinned.map(renderRow)}</ul>
         </section>
       )}
 
-      {mode.selected.length > 0 && others.length > 0 && <div className="subhead">Autres quêtes ({others.length})</div>}
+      {mode.selected.length > 0 && others.length > 0 && <div className="subhead">{tr(`Autres quêtes (${others.length})`, `Other quests (${others.length})`)}</div>}
       <ul className="quest-list">{others.map(renderRow)}</ul>
     </div>
   );

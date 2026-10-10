@@ -10,6 +10,7 @@ import { gameToLatLng } from "./crs";
 import { displayLevelOf, levelBadge, levelName, upperLevelOf, type Level } from "./levels";
 import { exitIcon } from "./exitIcons";
 import { EXIT_KIND_LABELS, factionLabel } from "../lib/exits";
+import { tr } from "../lib/i18n";
 
 /** Zoom (au-dessus du zoom d'ouverture, qui montre toute la carte) à partir duquel les noms s'affichent. */
 const LABEL_ZOOM_MARGIN = 0.5;
@@ -41,9 +42,9 @@ function ExitInfo({ exit, maps, floor }: { exit: MapExit; maps: GameMap[]; floor
     <div className="exit-info">
       <strong>{exit.name}</strong>
       <div>{EXIT_KIND_LABELS[exit.kind]}</div>
-      {exit.kind !== "transit" && <div>Faction : {factionLabel(exit.factions)}</div>}
-      {destination && <div>Vers : {destination}</div>}
-      {floor && <div>Étage : {floor}</div>}
+      {exit.kind !== "transit" && <div>{tr("Faction : ", "Faction: ")}{factionLabel(exit.factions)}</div>}
+      {destination && <div>{tr("Vers : ", "To: ")}{destination}</div>}
+      {floor && <div>{tr("Étage : ", "Floor: ")}{floor}</div>}
     </div>
   );
 }

@@ -2,6 +2,8 @@
 // Valeurs de "type" relevées dans tarkov-api (resolvers/taskResolver.mjs) et
 // tarkov-data-manager (jobs/update-quests.mjs).
 
+import { tr } from "./i18n";
+
 export type IconId =
   | "mark"
   | "visit"
@@ -31,19 +33,30 @@ export const OBJECTIVE_CATEGORY: Record<string, IconId> = {
 
 export const categoryOf = (type: string): IconId => OBJECTIVE_CATEGORY[type] ?? "other";
 
-export const ICON_LABELS: Record<IconId, string> = {
-  mark: "Marquer",
-  visit: "Visiter",
-  search: "Fouiller / chercher",
-  item: "Trouver un objet",
-  plant: "Placer un objet",
-  other: "Autre",
-  star: "Favori",
-  danger: "Danger",
-  key: "Clé / porte",
-  loot: "Loot",
-  extract: "Extraction",
+// [français, anglais] ; ICON_LABELS lit la langue à chaque accès (pas à l'import)
+const ICON_TEXTS: Record<IconId, [string, string]> = {
+  mark: ["Marquer", "Mark"],
+  visit: ["Visiter", "Visit"],
+  search: ["Fouiller / chercher", "Search / find"],
+  item: ["Trouver un objet", "Find an item"],
+  plant: ["Placer un objet", "Plant an item"],
+  other: ["Autre", "Other"],
+  star: ["Favori", "Favorite"],
+  danger: ["Danger", "Danger"],
+  key: ["Clé / porte", "Key / door"],
+  loot: ["Loot", "Loot"],
+  extract: ["Extraction", "Extraction"],
 };
+
+export const ICON_LABELS = Object.defineProperties(
+  {} as Record<IconId, string>,
+  Object.fromEntries(
+    (Object.keys(ICON_TEXTS) as IconId[]).map((id) => [
+      id,
+      { enumerable: true, get: () => tr(...ICON_TEXTS[id]) },
+    ]),
+  ),
+);
 
 /** Icônes proposées pour les points personnels. */
 export const CUSTOM_ICONS: IconId[] = [

@@ -1,12 +1,34 @@
 // Types partagés de l'application.
+import { tr } from "./lib/i18n";
 
 /** Modes de jeu proposés par l'API JSON de tarkov.dev (json.tarkov.dev/endpoints). */
 export type GameMode = "regular" | "pve" | "pvp-season";
 
+// getters : la langue est lue à l'affichage, pas à l'import
 export const GAME_MODES: { id: GameMode; label: string; hint: string }[] = [
-  { id: "regular", label: "PvP", hint: "Mode classique en ligne" },
-  { id: "pve", label: "PvE", hint: "Mode coopératif contre l'IA" },
-  { id: "pvp-season", label: "PvP Saison", hint: "Saison PvP (progression séparée)" },
+  {
+    id: "regular",
+    label: "PvP",
+    get hint() {
+      return tr("Mode classique en ligne", "Classic online mode");
+    },
+  },
+  {
+    id: "pve",
+    label: "PvE",
+    get hint() {
+      return tr("Mode coopératif contre l'IA", "Co-op mode against AI");
+    },
+  },
+  {
+    id: "pvp-season",
+    get label() {
+      return tr("PvP Saison", "PvP Season");
+    },
+    get hint() {
+      return tr("Saison PvP (progression séparée)", "PvP season (separate progression)");
+    },
+  },
 ];
 
 /** Position dans les coordonnées du jeu (Unity : y = hauteur). */

@@ -1,11 +1,12 @@
 // Affiche des blocs de texte du wiki (voir lib/wikiText.ts) avec des éléments React :
 // tout est du texte échappé, aucun HTML du wiki n'est inséré dans la page.
 import type { WikiBlock } from "../lib/wikiText";
+import { tr } from "../lib/i18n";
 
 /** Ligne de tableau -> "En-tête : valeur · …" (cellules vides, comme l'icône, ignorées). */
 function rowText(headers: string[], row: string[]) {
   return row
-    .map((cell, i) => (cell ? (headers[i] ? `${headers[i]} : ${cell}` : cell) : ""))
+    .map((cell, i) => (cell ? (headers[i] ? `${headers[i]}${tr(" : ", ": ")}${cell}` : cell) : ""))
     .filter(Boolean)
     .join(" · ");
 }

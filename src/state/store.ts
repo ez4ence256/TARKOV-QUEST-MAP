@@ -4,6 +4,7 @@
 
 import { useEffect, useReducer } from "react";
 import type { GameMode } from "../types";
+import { tr } from "../lib/i18n";
 import { QUEST_COLORS, type IconId } from "../lib/objectiveTypes";
 
 export const STATE_KEY = "tqp:state:v1";
@@ -262,7 +263,7 @@ export function exportState(state: AppState) {
 export async function readImportFile(file: File): Promise<AppState> {
   const json = JSON.parse(await file.text());
   if (!json || typeof json !== "object" || !("modes" in json)) {
-    throw new Error("Ce fichier n'est pas une sauvegarde du planificateur.");
+    throw new Error(tr("Ce fichier n'est pas une sauvegarde du planificateur.", "This file is not a planner backup."));
   }
   return sanitizeState(json);
 }

@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Task } from "../types";
 import { matchOcrLines, type OcrMatch, type OcrMatchResult } from "../lib/ocrMatch";
 import type { OcrProgress } from "../lib/ocr";
+import { tr } from "../lib/i18n";
 
 interface Props {
   /** Quêtes du mode actuel (seules candidates). */
@@ -22,14 +23,14 @@ type State =
   | { step: "review"; result: OcrMatchResult }
   | { step: "error"; message: string };
 
-/** Étapes de Tesseract.js, en français. */
-const STATUS_LABELS: Record<string, string> = {
-  "loading tesseract core": "Chargement du moteur de lecture…",
-  "initializing tesseract": "Démarrage du moteur…",
-  "loading language traineddata": "Données de langue (téléchargées la première fois)…",
-  "loading language traineddata (from cache)": "Données de langue (cache)…",
-  "initializing api": "Démarrage du moteur…",
-  "recognizing text": "Lecture du texte…",
+/** Étapes de Tesseract.js : [français, anglais], résolu au rendu (la langue peut changer). */
+const STATUS_LABELS: Record<string, [string, string]> = {
+  "loading tesseract core": ["Chargement du moteur de lecture…", "Loading the reading engine…"],
+  "initializing tesseract": ["Démarrage du moteur…", "Starting the engine…"],
+  "loading language traineddata": ["Données de langue (téléchargées la première fois)…", "Language data (downloaded the first time)…"],
+  "loading language traineddata (from cache)": ["Données de langue (cache)…", "Language data (cache)…"],
+  "initializing api": ["Démarrage du moteur…", "Starting the engine…"],
+  "recognizing text": ["Lecture du texte…", "Reading the text…"],
 };
 
 export function CaptureTab({ tasks, pasted, onApply }: Props) {
@@ -61,7 +62,10 @@ export function CaptureTab({ tasks, pasted, onApply }: Props) {
     } catch (error) {
       setState({
         step: "error",
-        message: `Lecture impossible : ${(error as Error).message}. La première utilisation demande une connexion (données de langue).`,
+        message: tr(
+          `Lecture impossible : ${(error as Error).message}. La première utilisation demande une connexion (données de langue).`,
+          `Could not read the image: ${(error as Error).message}. The first use needs a connection (language data).`,
+        ),
       });
     }
   };
@@ -95,7 +99,8 @@ export function CaptureTab({ tasks, pasted, onApply }: Props) {
             <span className="capture-name">{task.name}</span>
             {task.nameEn !== task.name && <span className="muted small"> · {task.nameEn}</span>}
             <span className="muted small capture-read">
-              {uncertain ? "Lu par l'OCR : " : "Lu : "}« {m.text} »{uncertain ? ` · ressemblance ${Math.round(m.score * 100)} %` : ""}
+              {uncertain ? tr("Lu par l'OCR : ", "Read by OCR: ") : tr("Lu : ", "Read: ")}{tr(`« ${m.text} »`, `"${m.text}"`)}
+              {uncertain ? tr(` · ressemblance ${Math.round(m.score * 100)} %`, ` · similarity ${Math.round(m.score * 100)}%`) : ""}
             </span>
           </span>
         </label>
@@ -120,14 +125,16 @@ export function CaptureTab({ tasks, pasted, onApply }: Props) {
         if (file) void handleImage(file);
       }}
     >
-      <div className="subhead">Importer des quêtes depuis une capture</div>
+      <div className="subhead">{tr("Importer des quêtes depuis une capture", "Import quests from a screenshot")}</div>
       <p className="small">
-        Faites une capture du menu <strong>Personnage &gt; Tâches</strong> du jeu (filtré par map si vous voulez), puis{" "}
-        <kbd>Ctrl</kbd>+<kbd>V</kbd> n'importe où dans l'app (sauf dans un champ de texte), ou :
+        {tr("Faites une capture du menu ", "Take a screenshot of the in-game ")}
+        <strong>{tr("Personnage > Tâches", "Character > Tasks")}</strong>
+        {tr(" du jeu (filtré par map si vous voulez), puis", " menu (filtered by map if you like), then")}{" "}
+        <kbd>Ctrl</kbd>+<kbd>V</kbd>{tr(" n'importe où dans l'app (sauf dans un champ de texte), ou :", " anywhere in the app (except in a text field), or:")}
       </p>
       <div className="btn-row">
         <button className="btn btn-primary btn-small" onClick={() => fileRef.current?.click()}>
-          Choisir une image
+          {tr("Choisir une image", "Choose an image")}
         </button>
         <input
           ref={fileRef}
@@ -140,18 +147,20 @@ export function CaptureTab({ tasks, pasted, onApply }: Props) {
             e.target.value = "";
           }}
         />
-        <span className="muted small">ou glissez-déposez l'image ici.</span>
+        <span className="muted small">{tr("ou glissez-déposez l'image ici.", "or drag and drop the image here.")}</span>
       </div>
       <p className="muted small">
-        La lecture se fait dans votre navigateur : l'image n'est envoyée nulle part. La première fois, environ 4 Mo de
-        données de langue (français + anglais) sont téléchargés, puis gardés en cache.
+        {tr(
+          "La lecture se fait dans votre navigateur : l'image n'est envoyée nulle part. La première fois, environ 4 Mo de données de langue (français + anglais) sont téléchargés, puis gardés en cache.",
+          "Reading happens in your browser: the image is not sent anywhere. The first time, about 4 MB of language data (French + English) is downloaded, then cached.",
+        )}
       </p>
 
-      {preview && <img className="capture-preview" src={preview} alt="Capture importée" />}
+      {preview && <img className="capture-preview" src={preview} alt={tr("Capture importée", "Imported screenshot")} />}
 
       {state.step === "reading" && (
         <div className="capture-progress" role="status">
-          <div>{STATUS_LABELS[progress?.status ?? ""] ?? "Préparation…"}</div>
+          <div>{tr(...(STATUS_LABELS[progress?.status ?? ""] ?? ["Préparation…", "Preparing…"]))}</div>
           <progress max={1} value={progress?.progress ?? 0} />
         </div>
       )}
@@ -161,26 +170,28 @@ export function CaptureTab({ tasks, pasted, onApply }: Props) {
         <>
           {state.result.recognized.length === 0 && state.result.uncertain.length === 0 ? (
             <p className="warn-box">
-              Aucune quête reconnue sur cette capture. Essayez une capture plus nette du menu Personnage &gt; Tâches,
-              recadrée sur la liste des quêtes, et vérifiez que le bon mode de jeu est choisi.
+              {tr(
+                "Aucune quête reconnue sur cette capture. Essayez une capture plus nette du menu Personnage > Tâches, recadrée sur la liste des quêtes, et vérifiez que le bon mode de jeu est choisi.",
+                "No quest recognized in this screenshot. Try a sharper screenshot of the Character > Tasks menu, cropped to the quest list, and check that the right game mode is selected.",
+              )}
             </p>
           ) : (
             <>
               {state.result.recognized.length > 0 && (
                 <section>
-                  <div className="subhead">Reconnues ({state.result.recognized.length})</div>
+                  <div className="subhead">{tr(`Reconnues (${state.result.recognized.length})`, `Recognized (${state.result.recognized.length})`)}</div>
                   <ul className="capture-list">{state.result.recognized.map((m) => row(m, false))}</ul>
                 </section>
               )}
               {state.result.uncertain.length > 0 && (
                 <section>
-                  <div className="subhead">Incertaines ({state.result.uncertain.length}) : à vérifier</div>
+                  <div className="subhead">{tr(`Incertaines (${state.result.uncertain.length}) : à vérifier`, `Uncertain (${state.result.uncertain.length}): to check`)}</div>
                   <ul className="capture-list">{state.result.uncertain.map((m) => row(m, true))}</ul>
                 </section>
               )}
               <label className="check">
                 <input type="checkbox" checked={replace} onChange={(e) => setReplace(e.target.checked)} />
-                Remplacer ma sélection actuelle
+                {tr("Remplacer ma sélection actuelle", "Replace my current selection")}
               </label>
               <div className="btn-row">
                 <button
@@ -191,14 +202,14 @@ export function CaptureTab({ tasks, pasted, onApply }: Props) {
                     setState({ step: "idle" });
                   }}
                 >
-                  Ajouter à la sélection ({checked.size})
+                  {tr(`Ajouter à la sélection (${checked.size})`, `Add to selection (${checked.size})`)}
                 </button>
               </div>
             </>
           )}
           {state.result.unmatched.length > 0 && (
             <details className="capture-unmatched">
-              <summary>Lignes non reconnues ({state.result.unmatched.length})</summary>
+              <summary>{tr(`Lignes non reconnues (${state.result.unmatched.length})`, `Unrecognized lines (${state.result.unmatched.length})`)}</summary>
               <ul className="plain-list small">
                 {state.result.unmatched.map((l, i) => (
                   <li key={i}>{l}</li>
