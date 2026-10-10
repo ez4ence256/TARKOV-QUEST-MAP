@@ -47,18 +47,26 @@ async function fetchTranslations(path: string, lang: string, signal?: AbortSigna
   }
 }
 
-/** Charge un endpoint et renvoie ses données + une fonction de traduction. */
+/**
+ * Charge un endpoint et renvoie ses données + deux fonctions de traduction :
+ * t (langue demandée, repli anglais) et tEn (anglais seul, pour la recherche bilingue).
+ */
 async function fetchEndpoint(path: string, lang: string, signal?: AbortSignal) {
   const [main, primary, fallback] = await Promise.all([
     fetchJson(path, signal),
     fetchTranslations(path, lang, signal),
     lang === FALLBACK_LANG ? Promise.resolve({}) : fetchTranslations(path, FALLBACK_LANG, signal),
   ]);
+  const english = (lang === FALLBACK_LANG ? primary : fallback) as Translations;
   const t = (key: unknown): string => {
     if (typeof key !== "string") return "";
-    return primary[key] ?? (fallback as Translations)[key] ?? key;
+    return primary[key] ?? english[key] ?? key;
   };
-  return { data: (main.data ?? {}) as Dict, t };
+  const tEn = (key: unknown): string => {
+    if (typeof key !== "string") return "";
+    return english[key] ?? key;
+  };
+  return { data: (main.data ?? {}) as Dict, t, tEn };
 }
 
 // --- Lecture prudente des champs (le format n'est pas garanti par un schéma) ---
@@ -110,7 +118,7 @@ function readLocations(obj: Dict): ApiLocation[] {
   return out;
 }
 
-function readTask(raw: Dict, t: (k: unknown) => string): Task | null {
+function readTask(raw: Dict, t: (k: unknown) => string, tEn: (k: unknown) => string): Task | null {
   const id = asString(raw.id);
   if (!id) return null;
   const objectives: Objective[] = values(raw.objectives)
@@ -125,6 +133,7 @@ function readTask(raw: Dict, t: (k: unknown) => string): Task | null {
   return {
     id,
     name: t(raw.name) || id,
+    nameEn: tEn(raw.name) || id,
     normalizedName: asString(raw.normalizedName) ?? id,
     traderId: asString(raw.trader) ?? asString(asDict(raw.trader).id) ?? "",
     mapId: asString(raw.map) ?? asString(asDict(raw.map).id),
@@ -152,7 +161,7 @@ export async function fetchTarkovData(
   ]);
 
   const tasks = values(tasksRes.data.tasks)
-    .map((raw) => readTask(raw, tasksRes.t))
+    .map((raw) => readTask(raw, tasksRes.t, tasksRes.tEn))
     .filter((task): task is Task => task !== null)
     .sort((a, b) => a.name.localeCompare(b.name, lang));
 

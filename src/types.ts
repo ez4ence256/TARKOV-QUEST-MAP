@@ -42,6 +42,8 @@ export interface Objective {
 export interface Task {
   id: string;
   name: string;
+  /** Nom anglais (sert à la recherche bilingue ; identique à name quand la langue est l'anglais). */
+  nameEn: string;
   normalizedName: string;
   traderId: string;
   /** Map principale de la quête, si l'API en indique une. */

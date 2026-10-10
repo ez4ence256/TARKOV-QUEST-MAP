@@ -372,6 +372,13 @@ button:focus-visible {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* nom anglais, affiché quand c'est lui qui correspond à la recherche */
+.quest-alt {
+  font-size: 0.8em;
+  color: var(--accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .quest-meta {
   font-size: 0.8em;
   color: var(--muted);

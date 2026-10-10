@@ -35,7 +35,7 @@ Le dossier `dist/` est un site statique. Vous pouvez le déposer tel quel sur n'
 ## Fonctionnalités
 
 - **Mode de jeu** demandé à chaque ouverture : PvP, PvE ou PvP Saison. Chaque mode a sa propre progression.
-- **Liste de toutes les quêtes**, avec une recherche par nom (insensible aux accents) et des filtres par marchand et par map.
+- **Liste de toutes les quêtes**, avec des filtres par marchand et par map, et une **recherche bilingue** : le nom français ou anglais trouve la quête (« Appâtage » ou « Chumming »). La recherche ignore la casse, les accents et la ponctuation, et tolère les petites fautes (1 faute à partir de 5 lettres, 2 à partir de 9). Les correspondances exactes passent en premier. Quand c'est le nom anglais qui correspond, il est rappelé sous le nom français.
 - **Sélecteur de map** : toutes les maps fournies par l'API. Le nombre de points restants est indiqué entre parenthèses.
 - **Plusieurs quêtes à la fois** sur la même carte, une couleur par quête.
 - **Icônes selon le type d'objectif** (champ `type` de l'API) :
@@ -74,7 +74,8 @@ Elles viennent de l'**API JSON publique de tarkov.dev** (`https://json.tarkov.de
 - Les données sont téléchargées au premier lancement, puis gardées en **cache local pendant 6 heures**. Les nouvelles quêtes apparaissent donc toutes seules, sans toucher au code.
 - Le bouton **Recharger depuis l'API** (dans « Réglages ») force une mise à jour.
 - Si l'API ne répond pas, l'app utilise la dernière version en cache et affiche un avertissement.
-- Les noms sont en **français**. Quand une traduction manque, l'anglais est utilisé à la place.
+- Les noms sont en **français**. Quand une traduction manque, l'anglais est utilisé à la place. Les noms anglais sont gardés aussi (fichiers `tasks_en`, déjà téléchargés pour ce repli) : ils servent à la recherche.
+- En octobre 2026, aucun nom de quête ne manque en français, mais **137 noms « français » sont identiques à l'anglais** dans les données de tarkov.dev (« Aid Stations », « Grenadier », quêtes « [PVP ZONE] »…). L'app ne traduit rien elle-même.
 
 Positions utilisées pour placer les points (rien n'est inventé) :
 

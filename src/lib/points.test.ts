@@ -6,6 +6,7 @@ import { buildObjectivePoints, manualPointKey, taskProgress } from "./points";
 const task: Task = {
   id: "t",
   name: "T",
+  nameEn: "T",
   normalizedName: "t",
   traderId: "p",
   mapId: "m1",

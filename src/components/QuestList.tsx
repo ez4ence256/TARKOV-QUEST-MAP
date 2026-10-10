@@ -3,7 +3,8 @@ import { useMemo, useState } from "react";
 import type { GameMap, Task, Trader } from "../types";
 import type { ModeState } from "../state/store";
 import { QUEST_COLORS } from "../lib/objectiveTypes";
-import { normalizeSearch, taskMapIds, taskProgress } from "../lib/points";
+import { taskMapIds, taskProgress } from "../lib/points";
+import { questScore } from "../lib/search";
 
 interface Props {
   tasks: Task[];
@@ -29,18 +30,23 @@ export function QuestList({ tasks, traders, maps, mode, onToggle }: Props) {
     return traders.filter((t) => ids.has(t.id)).sort((a, b) => a.name.localeCompare(b.name));
   }, [tasks, traders]);
 
+  // Recherche sur le nom affiché ET le nom anglais ; meilleurs résultats en premier.
   const filtered = useMemo(() => {
-    const q = normalizeSearch(query.trim());
-    return tasks.filter((t) => {
-      if (trader && t.traderId !== trader) return false;
-      if (mapFilter && !mapIdsByTask.get(t.id)?.has(mapFilter)) return false;
-      if (q && !normalizeSearch(t.name).includes(q)) return false;
+    const q = query.trim();
+    const results: { task: Task; score: number; viaEnglish: boolean }[] = [];
+    for (const t of tasks) {
+      if (trader && t.traderId !== trader) continue;
+      if (mapFilter && !mapIdsByTask.get(t.id)?.has(mapFilter)) continue;
       if (hideCompleted) {
         const p = taskProgress(t, mode.done);
-        if (p.total > 0 && p.done === p.total) return false;
+        if (p.total > 0 && p.done === p.total) continue;
       }
-      return true;
-    });
+      const match = q ? questScore(q, t) : { score: 1, viaEnglish: false };
+      if (match.score > 0) results.push({ task: t, ...match });
+    }
+    // tri stable : à score égal, l'ordre alphabétique est conservé
+    if (q) results.sort((a, b) => b.score - a.score);
+    return results;
   }, [tasks, query, trader, mapFilter, hideCompleted, mapIdsByTask, mode.done]);
 
   return (
@@ -82,7 +88,7 @@ export function QuestList({ tasks, traders, maps, mode, onToggle }: Props) {
       </div>
 
       <ul className="quest-list">
-        {filtered.map((t) => {
+        {filtered.map(({ task: t, viaEnglish }) => {
           const color = selected.get(t.id);
           const isSelected = color !== undefined;
           const p = taskProgress(t, mode.done);
@@ -99,6 +105,7 @@ export function QuestList({ tasks, traders, maps, mode, onToggle }: Props) {
                 </span>
                 <span className="quest-main">
                   <span className="quest-name">{t.name}</span>
+                  {viaEnglish && <span className="quest-alt">EN : {t.nameEn}</span>}
                   <span className="quest-meta">
                     {tradersById.get(t.traderId)?.name ?? "?"}
                     {t.minPlayerLevel ? ` · niv. ${t.minPlayerLevel}` : ""}

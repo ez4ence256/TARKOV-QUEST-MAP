@@ -58,7 +58,7 @@ const responses: Record<string, unknown> = {
     translations: ["$.data.tasks.*.name"],
   },
   "regular/tasks_fr": { data: { "t1 name": "Quête un", "o1 desc": "Marquer" } },
-  "regular/tasks_en": { data: { "o2 desc": "Find it" } },
+  "regular/tasks_en": { data: { "t1 name": "Quest one", "o2 desc": "Find it" } },
   "regular/maps": { data: { maps: { m1: { id: "m1", name: "m1 name", normalizedName: "customs" } } } },
   "regular/maps_fr": { data: { "m1 name": "Douanes" } },
   "regular/maps_en": { data: {} },
@@ -91,6 +91,7 @@ describe("fetchTarkovData", () => {
 
     const task = data.tasks[0];
     expect(task.name).toBe("Quête un");
+    expect(task.nameEn).toBe("Quest one"); // gardé pour la recherche bilingue
     expect(task.traderId).toBe("tr1");
     expect(task.mapId).toBe("m1");
     expect(task.kappaRequired).toBe(true);
