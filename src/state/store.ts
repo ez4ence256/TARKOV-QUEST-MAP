@@ -106,7 +106,11 @@ export type Action =
   | { type: "updateCustom"; id: string; patch: Partial<Omit<CustomPoint, "id">> }
   | { type: "removeCustom"; id: string }
   | { type: "setShowDone"; value: boolean }
-  | { type: "import"; state: AppState };
+  | { type: "import"; state: AppState }
+  /** Remet à "pas fait" les objectifs donnés (une quête), dans le mode courant seulement. */
+  | { type: "resetProgress"; objectiveIds: string[] }
+  /** Remet à "pas fait" tous les objectifs du mode courant (notes et points perso gardés). */
+  | { type: "resetAllProgress" };
 
 /** Applique une modification au ModeState du mode courant. */
 function updateMode(state: AppState, fn: (m: ModeState) => ModeState): AppState {
@@ -115,7 +119,11 @@ function updateMode(state: AppState, fn: (m: ModeState) => ModeState): AppState 
   return { ...state, modes: { ...state.modes, [state.gameMode]: fn(current) } };
 }
 
-function reducer(state: AppState, action: Action): AppState {
+/**
+ * Réducteur de l'état. Les réinitialisations ne touchent qu'à `done` du mode courant :
+ * notes, positions placées à la main, points perso et autres modes sont conservés.
+ */
+export function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case "setGameMode":
       return { ...state, gameMode: action.mode };
@@ -171,6 +179,14 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, showDone: action.value };
     case "import":
       return { ...action.state, gameMode: state.gameMode };
+    case "resetProgress":
+      return updateMode(state, (m) => {
+        const done = { ...m.done };
+        for (const id of action.objectiveIds) delete done[id];
+        return { ...m, done };
+      });
+    case "resetAllProgress":
+      return updateMode(state, (m) => ({ ...m, done: {} }));
   }
 }
 

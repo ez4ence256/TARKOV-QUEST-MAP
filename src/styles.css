@@ -85,6 +85,50 @@ button {
   border-color: var(--danger);
   color: #1a0b0a;
 }
+.btn-danger-outline {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: transparent;
+}
+/* confirmation en deux temps (ConfirmButton) */
+.confirm {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.confirm-question {
+  font-size: 0.85em;
+}
+.danger-box {
+  margin-top: 0.5rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  background: rgba(229, 103, 95, 0.08);
+}
+.danger-box p {
+  margin: 0 0 0.5rem;
+}
+.reset-list {
+  list-style: none;
+  margin: 0 0 0.6rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.reset-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.reset-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 .btn-small {
   padding: 0.3em 0.7em;
   font-size: 0.88em;

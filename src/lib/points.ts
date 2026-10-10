@@ -88,6 +88,17 @@ export function taskProgress(task: Task, done: Record<string, number>) {
   return { done: list.filter((o) => done[o.id]).length, total: list.length };
 }
 
+/** Quêtes ayant au moins un objectif coché (optionnels compris), dans l'ordre de `tasks`. */
+export function tasksWithProgress(tasks: Task[], done: Record<string, number>): Task[] {
+  return tasks.filter((t) => t.objectives.some((o) => done[o.id]));
+}
+
+/** Objectifs cochés qui n'appartiennent à aucune quête connue (quête retirée de l'API…). */
+export function orphanDoneCount(tasks: Task[], done: Record<string, number>): number {
+  const known = new Set(tasks.flatMap((t) => t.objectives.map((o) => o.id)));
+  return Object.keys(done).filter((id) => !known.has(id)).length;
+}
+
 /** Recherche insensible à la casse et aux accents. */
 export const normalizeSearch = (s: string) =>
   s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();

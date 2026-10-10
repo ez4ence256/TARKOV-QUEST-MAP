@@ -14,6 +14,7 @@ import { SelectedQuests } from "./components/SelectedQuests";
 import { CustomPointsTab } from "./components/CustomPointsTab";
 import { SettingsTab } from "./components/SettingsTab";
 import { PhotosTab } from "./components/PhotosTab";
+import { ResetProgressSection } from "./components/ResetProgressSection";
 
 /** Langue des noms de quêtes : français, l'anglais sert de secours (géré par l'API). */
 const LANG = "fr";
@@ -304,6 +305,18 @@ export default function App() {
               onRefresh={() => setReloadToken((n) => n + 1)}
               onExport={() => exportState(state)}
               onImport={(imported) => dispatch({ type: "import", state: imported })}
+              resetSection={
+                <ResetProgressSection
+                  tasks={tasks}
+                  done={mode.done}
+                  modeLabel={modeLabel ?? ""}
+                  onResetTask={(task) =>
+                    dispatch({ type: "resetProgress", objectiveIds: task.objectives.map((o) => o.id) })
+                  }
+                  onResetAll={() => dispatch({ type: "resetAllProgress" })}
+                  onExport={() => exportState(state)}
+                />
+              }
             />
           )}
         </aside>

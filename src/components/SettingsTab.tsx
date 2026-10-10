@@ -1,5 +1,5 @@
 // Onglet "Réglages" : mode de jeu, données, affichage, sauvegarde.
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { GAME_MODES, type GameMode, type TarkovData } from "../types";
 import { ICON_LABELS, type IconId } from "../lib/objectiveTypes";
 import { readImportFile, type AppState } from "../state/store";
@@ -15,6 +15,8 @@ interface Props {
   onRefresh: () => void;
   onExport: () => void;
   onImport: (state: AppState) => void;
+  /** Section « Réinitialiser la progression » (voir ResetProgressSection). */
+  resetSection: ReactNode;
 }
 
 const LEGEND: IconId[] = ["mark", "visit", "search", "item", "plant", "other"];
@@ -104,6 +106,8 @@ export function SettingsTab(p: Props) {
         </div>
         {message && <p className="small">{message}</p>}
       </section>
+
+      {p.resetSection}
 
       <section>
         <div className="subhead">Crédits</div>
