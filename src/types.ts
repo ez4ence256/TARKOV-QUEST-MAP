@@ -97,10 +97,31 @@ export interface Task {
   details?: TaskDetails;
 }
 
+/**
+ * Sortie d'une map : extraction normale, coop (repérée par « (Co-op) » dans le nom anglais,
+ * l'API n'ayant pas de champ dédié) ou transit vers une autre map.
+ */
+export interface MapExit {
+  id: string;
+  kind: "extract" | "coop" | "transit";
+  /** Nom dans la langue de l'app (repli anglais). */
+  name: string;
+  nameEn: string;
+  /** Factions qui peuvent l'utiliser ; vide si l'API ne le précise pas. */
+  factions: ("pmc" | "scav")[];
+  position: GamePosition;
+  top?: number;
+  bottom?: number;
+  /** Transit : map de destination. */
+  destinationMapId?: string;
+}
+
 export interface GameMap {
   id: string;
   name: string;
   normalizedName: string;
+  /** Sorties et transits (absent dans les anciennes données en cache). */
+  exits?: MapExit[];
 }
 
 export interface Trader {

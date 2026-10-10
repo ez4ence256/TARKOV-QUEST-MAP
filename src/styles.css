@@ -887,6 +887,124 @@ body.is-resizing {
   left: 0.75rem;
   max-width: calc(100% - 1.5rem);
 }
+/* Sorties : rectangle vertical, bonhomme blanc ; vert = sortie, orange = transit et coop */
+.exit-marker {
+  background: none;
+  border: 0;
+  overflow: visible;
+}
+.exit-pin {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  color: #fff;
+}
+.exit-extract {
+  background: #2f9e44;
+}
+.exit-transit,
+.exit-coop {
+  background: #e8590c;
+}
+.exit-persons {
+  display: flex;
+  gap: 1px;
+}
+.exit-persons svg {
+  width: 10px;
+  height: 17px;
+  fill: #fff;
+}
+.exit-coop .exit-persons svg {
+  width: 9px;
+  height: 15px;
+}
+.exit-coop-text {
+  font: 700 8px/1 system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+.exit-badge {
+  position: absolute;
+  top: -7px;
+  right: -9px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid #fff;
+  font: 700 9px/13px system-ui, sans-serif;
+  text-align: center;
+}
+.exit-label {
+  position: absolute;
+  left: calc(100% + 4px);
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  font: 600 11px/1.2 system-ui, sans-serif;
+  color: #fff;
+  text-shadow: 0 0 3px #000, 0 0 3px #000, 0 1px 2px #000;
+  pointer-events: none;
+}
+.exit-labels-hidden .exit-label {
+  display: none;
+}
+.exit-pin.is-off-level,
+.exit-label.is-off-level {
+  opacity: 0.3;
+}
+.exit-tooltip,
+.exit-info {
+  font-size: 0.85em;
+  line-height: 1.4;
+}
+.exit-tooltip {
+  background: rgba(15, 18, 21, 0.95);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+.exit-info strong {
+  color: var(--accent-2);
+}
+/* bouton « Sorties » sous le zoom */
+.map-toggle {
+  position: absolute;
+  z-index: 500;
+  top: 84px;
+  left: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(15, 18, 21, 0.9);
+  color: var(--muted);
+  font-size: 0.85em;
+  cursor: pointer;
+}
+.map-toggle.is-on {
+  color: var(--text);
+  border-color: #2f9e44;
+}
+.exit-swatch {
+  width: 8px;
+  height: 13px;
+  border-radius: 2px;
+  background: #2f9e44;
+}
+.map-toggle:not(.is-on) .exit-swatch {
+  background: var(--muted);
+}
+
 /* Étages */
 .level-picker {
   position: absolute;

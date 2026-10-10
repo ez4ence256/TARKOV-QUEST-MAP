@@ -88,9 +88,32 @@ const responses: Record<string, unknown> = {
   // noms d'objets : seuls ceux cités par les quêtes sont gardés
   "regular/items_fr": { data: { "key1 Name": "Clé 306", "med1 Name": "Salewa", "rub Name": "Roubles", "autre Name": "Inutile" } },
   "regular/tasks_en": { data: { "t1 name": "Quest one", "o2 desc": "Find it" } },
-  "regular/maps": { data: { maps: { m1: { id: "m1", name: "m1 name", normalizedName: "customs" } } } },
-  "regular/maps_fr": { data: { "m1 name": "Douanes" } },
-  "regular/maps_en": { data: {} },
+  // sorties réelles de Douanes (positions de l'API), réduites aux champs utiles
+  "regular/maps": {
+    data: {
+      maps: {
+        m1: {
+          id: "m1",
+          name: "m1 name",
+          normalizedName: "customs",
+          extracts: [
+            { id: "e1", name: "Crossroads", faction: "pmc", position: { x: -336.33, y: 2.19, z: -86.39 }, top: 5.06, bottom: -0.68 },
+            { id: "e2", name: "Crossroads", faction: "scav", position: { x: -336.18, y: 2.19, z: -86.27 }, top: 5.06, bottom: -0.68 },
+            { id: "e3", name: "Boiler", faction: "shared", position: { x: 106.97, y: -4.71, z: -43.62 }, top: -3.36, bottom: -6.06 },
+            { id: "e4", name: "NightGate", position: { x: 1, y: 0, z: 1 } },
+            { id: "e5", name: "NoPos", faction: "pmc" },
+          ],
+          transits: [{ id: "12", description: "FAC_TRANSIT", map: "m2", position: { x: 20.94, y: -0.33, z: 139.61 }, top: 1.82, bottom: -2.48 }],
+        },
+      },
+    },
+  },
+  "regular/maps_fr": {
+    data: { "m1 name": "Douanes", Crossroads: "Carrefour", Boiler: "Sous-sol de la chaufferie (Co-Op)", FAC_TRANSIT: "Transit vers le littoral" },
+  },
+  "regular/maps_en": {
+    data: { Boiler: "Boiler Room Basement (Co-op)", FAC_TRANSIT: "Transit to Shoreline", NightGate: "Gate 3" },
+  },
   "regular/traders": { data: { tr1: { id: "tr1", name: "tr1 name", normalizedName: "prapor" } } },
   // pas de traduction FR pour les marchands : repli anglais
   "regular/traders_en": { data: { "tr1 name": "Prapor" } },
@@ -115,7 +138,45 @@ describe("fetchTarkovData", () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     const data = await fetchTarkovData("regular", "fr");
 
-    expect(data.maps).toEqual([{ id: "m1", name: "Douanes", normalizedName: "customs" }]);
+    const [customs] = data.maps;
+    expect(customs).toMatchObject({ id: "m1", name: "Douanes", normalizedName: "customs" });
+    expect(customs.exits).toEqual([
+      // doublon PMC + Scav au même endroit : une seule sortie
+      {
+        id: "e1",
+        kind: "extract",
+        name: "Carrefour",
+        nameEn: "Crossroads",
+        factions: ["pmc", "scav"],
+        position: { x: -336.33, y: 2.19, z: -86.39 },
+        top: 5.06,
+        bottom: -0.68,
+      },
+      // coop : repérée par le nom anglais ; faction « shared » = PMC et Scav
+      {
+        id: "e3",
+        kind: "coop",
+        name: "Sous-sol de la chaufferie (Co-Op)",
+        nameEn: "Boiler Room Basement (Co-op)",
+        factions: ["pmc", "scav"],
+        position: { x: 106.97, y: -4.71, z: -43.62 },
+        top: -3.36,
+        bottom: -6.06,
+      },
+      // faction absente : non précisée (nom FR absent : repli anglais)
+      { id: "e4", kind: "extract", name: "Gate 3", nameEn: "Gate 3", factions: [], position: { x: 1, y: 0, z: 1 } },
+      {
+        id: "transit:12",
+        kind: "transit",
+        name: "Transit vers le littoral",
+        nameEn: "Transit to Shoreline",
+        factions: [],
+        position: { x: 20.94, y: -0.33, z: 139.61 },
+        top: 1.82,
+        bottom: -2.48,
+        destinationMapId: "m2",
+      },
+    ]);
     expect(data.traders[0].name).toBe("Prapor");
 
     const task = data.tasks[0];

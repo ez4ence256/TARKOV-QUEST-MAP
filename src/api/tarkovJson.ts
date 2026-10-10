@@ -13,6 +13,7 @@ import type {
   GameMap,
   GameMode,
   GamePosition,
+  MapExit,
   Objective,
   TarkovData,
   Task,
@@ -20,6 +21,7 @@ import type {
   TaskRewards,
   Trader,
 } from "../types";
+import { factionsOf, isCoopName, mergeExits } from "../lib/exits";
 
 export const API_BASE = "https://json.tarkov.dev/";
 const FALLBACK_LANG = "en";
@@ -196,6 +198,42 @@ function readDetails(raw: Dict, t: (k: unknown) => string): TaskDetails {
   };
 }
 
+/** Sorties (extracts) et transits d'une map, doublons PMC/Scav fusionnés. */
+function readExits(raw: Dict, t: (k: unknown) => string, tEn: (k: unknown) => string): MapExit[] {
+  const exits: MapExit[] = [];
+  const heights = (e: Dict) =>
+    typeof e.top === "number" && typeof e.bottom === "number" ? { top: e.top, bottom: e.bottom } : {};
+  for (const e of values(raw.extracts)) {
+    const position = asPosition(e.position);
+    if (!position) continue;
+    const nameEn = tEn(e.name);
+    exits.push({
+      id: asString(e.id) ?? `${nameEn}@${position.x},${position.z}`,
+      kind: isCoopName(nameEn) ? "coop" : "extract",
+      name: t(e.name),
+      nameEn,
+      factions: factionsOf(asString(e.faction)),
+      position,
+      ...heights(e),
+    });
+  }
+  for (const tr of values(raw.transits)) {
+    const position = asPosition(tr.position);
+    if (!position) continue;
+    exits.push({
+      id: `transit:${asString(tr.id) ?? `${position.x},${position.z}`}`,
+      kind: "transit",
+      name: t(tr.description),
+      nameEn: tEn(tr.description),
+      factions: [],
+      position,
+      ...heights(tr),
+      ...(asString(tr.map) ? { destinationMapId: asString(tr.map)! } : {}),
+    });
+  }
+  return mergeExits(exits);
+}
+
 function readTask(raw: Dict, t: (k: unknown) => string, tEn: (k: unknown) => string): Task | null {
   const id = asString(raw.id);
   if (!id) return null;
@@ -250,6 +288,7 @@ export async function fetchTarkovData(
       id: asString(m.id) ?? "",
       name: mapsRes.t(m.name),
       normalizedName: asString(m.normalizedName) ?? "",
+      exits: readExits(m, mapsRes.t, mapsRes.tEn),
     }))
     .filter((m) => m.id)
     .sort((a, b) => a.name.localeCompare(b.name, lang));

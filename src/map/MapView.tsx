@@ -8,6 +8,7 @@ import type { MapCalibration, RawBounds } from "./calibration";
 import { gameToLatLng, getCRS, latLngToGame, toLatLngBounds } from "./crs";
 import { markerIcon } from "./icons";
 import { BaseLayer, type BaseStatus } from "./BaseLayer";
+import { ExitsLayer } from "./ExitsLayer";
 import {
   displayLevelOf,
   extentOf,
@@ -21,10 +22,14 @@ import {
 import { CUSTOM_POINT_COLOR, categoryOf } from "../lib/objectiveTypes";
 import { CustomPopup, ObjectivePopup } from "../components/PointPopups";
 
+const SHOW_EXITS_KEY = "tqp:showExits";
+
 export type Placing = { kind: "manual"; objectiveId: string; label: string } | { kind: "custom" } | null;
 
 interface MapViewProps {
   map: GameMap;
+  /** Toutes les maps (noms des destinations de transit). */
+  maps: GameMap[];
   calibration?: MapCalibration;
   points: MapPoint[];
   customPoints: CustomPoint[];
@@ -151,6 +156,24 @@ function MapViewInner(props: MapViewProps) {
   const [cursor, setCursor] = useState<{ x: number; z: number } | null>(null);
   const [baseStatus, setBaseStatus] = useState<BaseStatus>("loading");
   const [level, setLevel] = useState<Level>(null);
+  // sorties affichées par défaut ; le choix est retenu dans le navigateur
+  const [showExits, setShowExits] = useState(() => {
+    try {
+      return localStorage.getItem(SHOW_EXITS_KEY) !== "0";
+    } catch {
+      return true;
+    }
+  });
+  const toggleExits = () =>
+    setShowExits((v) => {
+      try {
+        localStorage.setItem(SHOW_EXITS_KEY, v ? "0" : "1");
+      } catch {
+        /* préférence non retenue */
+      }
+      return !v;
+    });
+  const exits = props.map.exits ?? [];
   const layers = calibration?.layers ?? [];
   // niveaux du sélecteur : principal + souterrains (les étages supérieurs sont sur la carte de base)
   const pickerLevels = useMemo(() => selectableLevels(calibration), [calibration]);
@@ -208,6 +231,9 @@ function MapViewInner(props: MapViewProps) {
       >
         <FitBounds bounds={bounds} />
         <InvalidateOnResize />
+        {showExits && exits.length > 0 && (
+          <ExitsLayer exits={exits} maps={props.maps} calibration={calibration} level={level} />
+        )}
         <AttributionPrefix />
         <BaseLayer
           calibration={calibration}
@@ -294,6 +320,16 @@ function MapViewInner(props: MapViewProps) {
         ))}
       </MapContainer>
 
+      {exits.length > 0 && (
+        <button
+          className={`map-toggle exits-toggle ${showExits ? "is-on" : ""}`}
+          aria-pressed={showExits}
+          onClick={toggleExits}
+          title={showExits ? "Masquer les sorties et transits" : "Afficher les sorties et transits"}
+        >
+          <span className="exit-swatch" aria-hidden="true" /> Sorties
+        </button>
+      )}
       {pickerLevels.length > 1 && (
         <div className="level-picker" role="radiogroup" aria-label="Étage affiché">
           <div className="level-picker-title">Étage</div>

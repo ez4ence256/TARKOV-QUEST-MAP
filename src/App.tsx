@@ -375,6 +375,7 @@ export default function App() {
               // une carte = un système de coordonnées : on recrée Leaflet à chaque changement
               key={`${currentMap.id}|${calibration[currentMap.normalizedName]?.key ?? "none"}`}
               map={currentMap}
+              maps={maps}
               calibration={calibration[currentMap.normalizedName]}
               points={points}
               customPoints={customPoints}
