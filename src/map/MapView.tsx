@@ -37,6 +37,8 @@ interface MapViewProps {
   onPlace: (pos: { x: number; z: number }) => void;
   /** Ouvre l'onglet Photos sur une quête. */
   onPhotos: (taskId: string) => void;
+  /** Ouvre l'onglet Quête sur une quête. */
+  onQuest: (taskId: string) => void;
   /** Point à centrer / ouvrir (ex. clic dans le panneau) ; n change à chaque demande. */
   focus: { key: string; n: number } | null;
 }
@@ -245,6 +247,7 @@ function MapViewInner(props: MapViewProps) {
                 manual={manual}
                 spawn={pt.spawn}
                 onPhotos={task.wikiLink ? () => props.onPhotos(task.id) : undefined}
+                onQuest={() => props.onQuest(task.id)}
                 levelLabel={layers.length > 0 && !manual ? levelName(calibration, pointLevel) : undefined}
                 onShowLevel={offLevel ? () => setLevel(shownOn) : undefined}
                 onNote={(note) => dispatch({ type: "setNote", key: pt.key, note })}

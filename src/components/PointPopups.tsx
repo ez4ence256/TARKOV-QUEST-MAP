@@ -17,6 +17,8 @@ interface ObjectivePopupProps {
   spawn?: { index: number; count: number };
   /** Ouvre la galerie de photos du wiki pour cette quête. */
   onPhotos?: () => void;
+  /** Ouvre l'onglet Quête (tous les objectifs, à cocher). */
+  onQuest?: () => void;
   /** Étage du point, sur les maps qui en ont. */
   levelLabel?: string;
   /** Présent quand le point est sur un autre étage que celui affiché. */
@@ -71,6 +73,11 @@ export function ObjectivePopup(p: ObjectivePopupProps) {
         ) : (
           <button className="btn btn-primary" onClick={() => p.onDone(true)}>
             ✓ Fait
+          </button>
+        )}
+        {p.onQuest && (
+          <button className="btn btn-ghost" onClick={p.onQuest}>
+            📜 Quête
           </button>
         )}
         {p.onPhotos && (

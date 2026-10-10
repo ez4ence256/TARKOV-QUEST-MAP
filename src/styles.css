@@ -318,6 +318,30 @@ button:focus-visible {
   font-size: 0.9em;
   white-space: nowrap;
 }
+.tab-logo {
+  margin-right: 0.25em;
+}
+/* téléphone : les onglets à logo (Quête, Photos) n'affichent que le logo */
+@media (max-width: 480px) {
+  .tab-text {
+    display: none;
+  }
+  .tab-logo {
+    margin-right: 0;
+  }
+}
+/* titre de l'onglet Quête */
+.quest-tab-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.quest-tab-title {
+  margin: 0;
+  font-size: 1.1em;
+}
 .tab.is-active {
   color: var(--text);
   border-bottom-color: var(--accent);

@@ -21,6 +21,8 @@ interface Props {
   onBrowse: () => void;
   /** Ouvre l'onglet Photos sur une quête. */
   onPhotos: (taskId: string) => void;
+  /** Ouvre l'onglet Quête sur une quête (même quand tous ses points sont faits). */
+  onQuest: (taskId: string) => void;
 }
 
 export function SelectedQuests(props: Props) {
@@ -149,6 +151,10 @@ export function SelectedQuests(props: Props) {
                 <div className="muted small">
                   {traderName(task.traderId)}
                   {task.mapId ? ` · ${mapName(task.mapId)}` : ""}
+                  {" · "}
+                  <button className="link" onClick={() => props.onQuest(task.id)}>
+                    📜 quête
+                  </button>
                   {task.wikiLink && (
                     <>
                       {" · "}

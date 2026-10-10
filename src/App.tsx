@@ -15,11 +15,12 @@ import { CustomPointsTab } from "./components/CustomPointsTab";
 import { SettingsTab } from "./components/SettingsTab";
 import { PhotosTab } from "./components/PhotosTab";
 import { ResetProgressSection } from "./components/ResetProgressSection";
+import { QuestTab } from "./components/QuestTab";
 
 /** Langue des noms de quêtes : français, l'anglais sert de secours (géré par l'API). */
 const LANG = "fr";
 
-type Tab = "selection" | "quests" | "photos" | "custom" | "settings";
+type Tab = "selection" | "quests" | "quest" | "photos" | "custom" | "settings";
 type LoadState =
   | { status: "loading"; data: TarkovData | null }
   | { status: "ready"; data: TarkovData; source: "cache" | "network" | "stale"; error?: string }
@@ -39,7 +40,7 @@ export default function App() {
   const [calibration, setCalibration] = useState(BUNDLED_CALIBRATION);
   const [tab, setTab] = useState<Tab>("quests");
   /** Quête affichée dans l'onglet Photos. */
-  const [photoTaskId, setPhotoTaskId] = useState<string | null>(null);
+  const [tabTaskId, setTabTaskId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(() => !isMobile());
   const [placing, setPlacing] = useState<Placing>(null);
   const [focus, setFocus] = useState<{ key: string; n: number } | null>(null);
@@ -113,12 +114,14 @@ export default function App() {
     [mode.customPoints, currentMap],
   );
 
-  // ouvre l'onglet Photos sur une quête (bouton 📷 de la liste, du panneau ou d'une popup)
-  const showPhotos = useCallback((taskId: string) => {
-    setPhotoTaskId(taskId);
-    setTab("photos");
+  // ouvre l'onglet Quête ou Photos sur une quête (boutons de la liste, du panneau ou d'une popup)
+  const showTaskTab = useCallback((taskId: string, which: "quest" | "photos") => {
+    setTabTaskId(taskId);
+    setTab(which);
     setPanelOpen(true);
   }, []);
+  const showPhotos = useCallback((taskId: string) => showTaskTab(taskId, "photos"), [showTaskTab]);
+  const showQuest = useCallback((taskId: string) => showTaskTab(taskId, "quest"), [showTaskTab]);
 
   const showMap = (mapId: string) => {
     dispatch({ type: "setMap", mapId });
@@ -223,19 +226,28 @@ export default function App() {
               [
                 ["selection", `Sélection${mode.selected.length ? ` (${mode.selected.length})` : ""}`],
                 ["quests", "Quêtes"],
-                ["photos", "Photos"],
+                ["quest", "Quête", "📜"],
+                ["photos", "Photos", "📷"],
                 ["custom", "Mes points"],
                 ["settings", "Réglages"],
-              ] as [Tab, string][]
-            ).map(([id, label]) => (
+              ] as [Tab, string, string?][]
+            ).map(([id, label, logo]) => (
               <button
                 key={id}
                 role="tab"
                 aria-selected={tab === id}
+                aria-label={label}
+                title={label}
                 className={`tab ${tab === id ? "is-active" : ""}`}
                 onClick={() => setTab(id)}
               >
-                {label}
+                {logo && (
+                  <span className="tab-logo" aria-hidden="true">
+                    {logo}
+                  </span>
+                )}
+                {/* sur téléphone, les onglets à logo n'affichent que le logo (voir styles.css) */}
+                <span className={logo ? "tab-text" : undefined}>{label}</span>
               </button>
             ))}
           </nav>
@@ -275,14 +287,28 @@ export default function App() {
               }
               onBrowse={() => setTab("quests")}
               onPhotos={showPhotos}
+              onQuest={showQuest}
+            />
+          )}
+          {data && tab === "quest" && (
+            <QuestTab
+              tasks={tasks}
+              traders={data.traders}
+              selectedIds={mode.selected.map((s) => s.taskId)}
+              taskId={tabTaskId}
+              onTaskChange={setTabTaskId}
+              done={mode.done}
+              onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })}
+              onReset={(task) => dispatch({ type: "resetProgress", objectiveIds: task.objectives.map((o) => o.id) })}
+              onPhotos={showPhotos}
             />
           )}
           {data && tab === "photos" && (
             <PhotosTab
               tasks={tasks}
               selectedIds={mode.selected.map((s) => s.taskId)}
-              taskId={photoTaskId}
-              onTaskChange={setPhotoTaskId}
+              taskId={tabTaskId}
+              onTaskChange={setTabTaskId}
             />
           )}
           {data && tab === "custom" && (
@@ -339,6 +365,7 @@ export default function App() {
               onPlace={onPlace}
               focus={focus}
               onPhotos={showPhotos}
+              onQuest={showQuest}
             />
           ) : (
             <div className="map-empty muted">{load.status === "loading" ? "Chargement…" : "Aucune map."}</div>
