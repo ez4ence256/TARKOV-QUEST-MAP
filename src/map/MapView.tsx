@@ -1,14 +1,23 @@
 // Carte Leaflet (CRS.Simple calibré) avec les points des quêtes et les points perso.
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
-import { MapContainer, Marker, Polygon, Popup, useMap, useMapEvents } from "react-leaflet";
+import { MapContainer, Marker, Polygon, Popup, Tooltip, useMap, useMapEvents } from "react-leaflet";
 import type { GameMap, MapPoint, Objective, Task } from "../types";
 import type { Action, CustomPoint, ModeState } from "../state/store";
 import type { MapCalibration, RawBounds } from "./calibration";
 import { gameToLatLng, getCRS, latLngToGame, toLatLngBounds } from "./crs";
 import { markerIcon } from "./icons";
 import { BaseLayer, type BaseStatus } from "./BaseLayer";
-import { isOnLevel, levelName, levelOf, type Level } from "./levels";
+import {
+  displayLevelOf,
+  extentOf,
+  levelBadge,
+  levelName,
+  levelOf,
+  selectableLevels,
+  upperLevelOf,
+  type Level,
+} from "./levels";
 import { CUSTOM_POINT_COLOR, categoryOf } from "../lib/objectiveTypes";
 import { CustomPopup, ObjectivePopup } from "../components/PointPopups";
 
@@ -128,6 +137,8 @@ function MapViewInner(props: MapViewProps) {
   const [baseStatus, setBaseStatus] = useState<BaseStatus>("loading");
   const [level, setLevel] = useState<Level>(null);
   const layers = calibration?.layers ?? [];
+  // niveaux du sélecteur : principal + souterrains (les étages supérieurs sont sur la carte de base)
+  const pickerLevels = useMemo(() => selectableLevels(calibration), [calibration]);
   const markers = useMemo(() => ({ current: new Map<string, L.Marker>() }), []);
 
   const crs = useMemo(() => getCRS(calibration), [calibration]);
@@ -142,7 +153,7 @@ function MapViewInner(props: MapViewProps) {
   const maxZoom = calibration ? calibration.maxZoom + 1 : 6;
   const onStatus = useCallback((s: BaseStatus) => setBaseStatus(s), []);
   const showLevelOf = useCallback(
-    (p: { x: number; z: number }) => setLevel(levelOf(p, calibration)),
+    (p: { x: number; z: number }) => setLevel(displayLevelOf(p, calibration)),
     [calibration],
   );
   // nombre de points restants par niveau, pour le sélecteur
@@ -150,7 +161,7 @@ function MapViewInner(props: MapViewProps) {
     const counts = new Map<Level, number>();
     for (const pt of points) {
       if (mode.done[pt.objectiveId ?? ""]) continue;
-      const l = levelOf(pt, calibration);
+      const l = displayLevelOf(pt, calibration);
       counts.set(l, (counts.get(l) ?? 0) + 1);
     }
     return counts;
@@ -200,15 +211,22 @@ function MapViewInner(props: MapViewProps) {
           const done = Boolean(mode.done[objective.id]);
           const manual = pt.kind === "manual";
           const pointLevel = levelOf(pt, calibration);
-          const offLevel = !isOnLevel(pt, calibration, level);
+          const shownOn = displayLevelOf(pt, calibration);
+          const offLevel = shownOn !== level;
+          const upper = upperLevelOf(pt, calibration);
           return (
             <MarkerWithOutline
               key={pt.key}
               point={pt}
               color={color}
               title={`${task.name} — ${objective.description}`}
-              icon={markerIcon(categoryOf(objective.type), color, { faded: done, offLevel })}
+              icon={markerIcon(categoryOf(objective.type), color, {
+                faded: done,
+                offLevel,
+                badge: upper !== null && calibration ? levelBadge(calibration, upper) : undefined,
+              })}
               offLevel={offLevel}
+              tooltip={upper !== null && calibration ? <UpperLevelTooltip point={pt} calibration={calibration} level={upper} /> : null}
               register={registerMarker(pt.key)}
               draggable={manual}
               onDragEnd={(p) =>
@@ -224,7 +242,7 @@ function MapViewInner(props: MapViewProps) {
                 done={done}
                 manual={manual}
                 levelLabel={layers.length > 0 && !manual ? levelName(calibration, pointLevel) : undefined}
-                onShowLevel={offLevel ? () => setLevel(pointLevel) : undefined}
+                onShowLevel={offLevel ? () => setLevel(shownOn) : undefined}
                 onNote={(note) => dispatch({ type: "setNote", key: pt.key, note })}
                 onDone={(value) => dispatch({ type: "setDone", objectiveId: objective.id, done: value })}
                 onRemoveManual={() => dispatch({ type: "setManual", objectiveId: objective.id, position: null })}
@@ -257,10 +275,10 @@ function MapViewInner(props: MapViewProps) {
         ))}
       </MapContainer>
 
-      {layers.length > 0 && (
+      {pickerLevels.length > 1 && (
         <div className="level-picker" role="radiogroup" aria-label="Étage affiché">
           <div className="level-picker-title">Étage</div>
-          {[null, ...layers.map((_, i) => i)].map((l) => (
+          {pickerLevels.map((l) => (
             <button
               key={l ?? "main"}
               role="radio"
@@ -274,7 +292,7 @@ function MapViewInner(props: MapViewProps) {
           ))}
         </div>
       )}
-      {layers.length > 0 && (
+      {pickerLevels.length > 1 && (
         // version compacte pour téléphone (affichée par le CSS)
         <select
           className="input level-select"
@@ -282,7 +300,7 @@ function MapViewInner(props: MapViewProps) {
           value={level ?? ""}
           onChange={(e) => setLevel(e.target.value === "" ? null : Number(e.target.value))}
         >
-          {[null, ...layers.map((_, i) => i)].map((l) => (
+          {pickerLevels.map((l) => (
             <option key={l ?? "main"} value={l ?? ""}>
               {levelName(calibration, l)}
               {levelCounts.get(l) ? ` (${levelCounts.get(l)})` : ""}
@@ -311,6 +329,36 @@ function MapViewInner(props: MapViewProps) {
   );
 }
 
+const formatHeight = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 1 });
+/** Tranche de hauteur lisible ; maps.json note les bornes ouvertes ±1000 ou ±10000. */
+function formatExtent([low, high]: [number, number]) {
+  if (high >= 1000) return `au-dessus de ${formatHeight(low)} m`;
+  if (low <= -1000) return `sous ${formatHeight(high)} m`;
+  return `de ${formatHeight(low)} à ${formatHeight(high)} m`;
+}
+
+/** Infobulle d'un point d'étage supérieur : nom de l'étage, hauteur du point et de l'étage. */
+function UpperLevelTooltip({ point, calibration, level }: {
+  point: MapPoint;
+  calibration: MapCalibration;
+  level: number;
+}) {
+  const extent = extentOf(point, calibration.layers[level]);
+  const height =
+    point.bottom !== undefined && point.top !== undefined
+      ? `zone de ${formatHeight(point.bottom)} à ${formatHeight(point.top)} m`
+      : point.y !== undefined
+        ? `${formatHeight(point.y)} m`
+        : null;
+  return (
+    <>
+      <strong>{levelName(calibration, level)}</strong>
+      {height && <div>Hauteur du point : {height}</div>}
+      {extent && <div className="muted">Étage : {formatExtent(extent)}</div>}
+    </>
+  );
+}
+
 /** Marqueur d'objectif + contour de zone (si l'API en fournit un). */
 function MarkerWithOutline(props: {
   point: MapPoint;
@@ -320,6 +368,8 @@ function MarkerWithOutline(props: {
   register: (m: L.Marker | null) => void;
   draggable: boolean;
   offLevel: boolean;
+  /** Infobulle au survol (étage des points des étages supérieurs). */
+  tooltip: React.ReactNode;
   onDragEnd: (p: { x: number; z: number }) => void;
   children: React.ReactNode;
 }) {
@@ -352,6 +402,11 @@ function MarkerWithOutline(props: {
             : undefined
         }
       >
+        {props.tooltip && (
+          <Tooltip direction="top" offset={[0, -14]} className="level-tooltip">
+            {props.tooltip}
+          </Tooltip>
+        )}
         <Popup minWidth={240} maxWidth={320}>
           {props.children}
         </Popup>

@@ -664,6 +664,37 @@ button:focus-visible {
 .leaflet-pane.is-dimmed {
   opacity: 0.35;
 }
+/* numéro d'étage sur l'icône des points des étages supérieurs */
+.tqp-pin-badge {
+  position: absolute;
+  top: -7px;
+  right: -8px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--pin);
+  color: var(--text);
+  font: 700 10px/14px system-ui, sans-serif;
+  text-align: center;
+}
+.level-tooltip {
+  background: rgba(15, 18, 21, 0.95);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 0.85em;
+  line-height: 1.4;
+}
+.level-tooltip strong {
+  color: var(--accent-2);
+}
+.level-tooltip .muted {
+  color: var(--muted);
+}
+.level-tooltip::before {
+  border-top-color: var(--line);
+}
 .tqp-pin.is-off-level {
   opacity: 0.3;
 }
@@ -705,6 +736,7 @@ button:focus-visible {
   border: 0;
 }
 .tqp-pin {
+  position: relative;
   width: 30px;
   height: 30px;
   border-radius: 50%;

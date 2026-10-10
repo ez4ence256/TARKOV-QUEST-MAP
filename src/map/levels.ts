@@ -4,6 +4,15 @@
 // (src/pages/map/index.jsx) : chaque étage a des "extents", c.-à-d. des
 // tranches de hauteur (y du jeu), éventuellement limitées à certaines zones
 // de la carte (bâtiments). Un point hors de l'étage affiché est grisé, pas caché.
+//
+// Étages "supérieurs" et "souterrains" :
+//  - souterrain : une tranche sans limite basse (-1000 / -10000 dans maps.json),
+//    ou toutes les tranches sous le bas du niveau principal ;
+//  - supérieur : tous les autres. Leurs points s'affichent directement sur la
+//    carte de base (avec le numéro d'étage) ; seuls les souterrains se choisissent
+//    dans le sélecteur.
+// Exception : Icebreaker (un bateau, où "souterrain" n'a pas de sens) garde tous
+// ses ponts dans le sélecteur.
 
 import type { MapCalibration, MapLayer } from "./calibration";
 import { isInBounds } from "./crs";
@@ -51,11 +60,66 @@ export function isOnLevel(p: PointHeight, calibration: MapCalibration | undefine
   return Boolean(pointIsOnLayer(p, mainLayer(calibration)));
 }
 
+/** Maps dont tous les étages restent dans le sélecteur (clé de maps.json). */
+const SELECTOR_ONLY_MAPS = new Set(["icebreaker"]);
+/** Limite basse "ouverte" utilisée par maps.json (-1000 ou -10000). */
+const OPEN_BOTTOM = -1000;
+/** Tolérance sur les hauteurs (Icebreaker : 18,93 contre 18,92). */
+const EPSILON = 0.05;
+
+/** L'étage est-il sous le niveau principal ? */
+export function isUnderground(calibration: MapCalibration, layer: MapLayer): boolean {
+  if (layer.extents.some((e) => e.height[0] <= OPEN_BOTTOM)) return true;
+  const mainBottom = calibration.heightRange?.[0];
+  if (mainBottom === undefined || mainBottom <= OPEN_BOTTOM) return false;
+  return layer.extents.every((e) => e.height[1] <= mainBottom + EPSILON);
+}
+
+/** L'étage se choisit-il dans le sélecteur ? (sinon ses points sont sur la carte de base) */
+export function isSelectable(calibration: MapCalibration, index: number): boolean {
+  const layer = calibration.layers[index];
+  if (!layer) return false;
+  return SELECTOR_ONLY_MAPS.has(calibration.key) || isUnderground(calibration, layer);
+}
+
+/** Niveaux proposés dans le sélecteur : principal + étages sélectionnables. */
+export function selectableLevels(calibration: MapCalibration | undefined): Level[] {
+  if (!calibration) return [null];
+  return [null, ...calibration.layers.map((_, i) => i).filter((i) => isSelectable(calibration, i))];
+}
+
 /** Niveau "naturel" d'un point : le premier où il apparaît, principal en priorité. */
 export function levelOf(p: PointHeight, calibration: MapCalibration | undefined): Level {
   if (!calibration || isOnLevel(p, calibration, null)) return null;
   const i = calibration.layers.findIndex((_, idx) => isOnLevel(p, calibration, idx));
   return i === -1 ? null : i;
+}
+
+/** Niveau du sélecteur où le point s'affiche : les étages supérieurs comptent comme le principal. */
+export function displayLevelOf(p: PointHeight, calibration: MapCalibration | undefined): Level {
+  const level = levelOf(p, calibration);
+  return level !== null && calibration && isSelectable(calibration, level) ? level : null;
+}
+
+/** Étage supérieur d'un point affiché sur la carte de base, sinon null. */
+export function upperLevelOf(p: PointHeight, calibration: MapCalibration | undefined): number | null {
+  const level = levelOf(p, calibration);
+  return level !== null && calibration && !isSelectable(calibration, level) ? level : null;
+}
+
+/** Tranche de hauteur de l'étage qui contient le point (pour l'afficher). */
+export function extentOf(p: PointHeight, layer: MapLayer): [number, number] | null {
+  for (const extent of layer.extents) {
+    if (pointIsOnLayer(p, { extents: [extent] })) return extent.height;
+  }
+  return null;
+}
+
+/** Numéro court d'un étage pour l'icône ("2", "3"…), ou "↑" si le nom n'en contient pas. */
+export function levelBadge(calibration: MapCalibration, level: number): string {
+  const name = calibration.layers[level]?.name ?? "";
+  if (/^second\b/i.test(name)) return "2";
+  return name.match(/\d+/)?.[0] ?? "↑";
 }
 
 const LEVEL_NAMES: Record<string, string> = {

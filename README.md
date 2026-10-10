@@ -53,7 +53,12 @@ Le dossier `dist/` est un site statique. Vous pouvez le déposer tel quel sur n'
 - **« Fait »** retire le point de la carte et coche l'objectif dans le panneau, qui affiche la progression (ex. 2/4, sans compter les objectifs optionnels). Pour annuler, décochez l'objectif dans le panneau. Vous pouvez aussi activer « Afficher les objectifs faits » dans les réglages.
 - **Objectifs sans position** : si l'API ne donne pas de position, l'objectif est listé à part dans le panneau de la quête. Le bouton **Placer sur la carte** permet de le positionner à la main. Le point peut ensuite être déplacé par glisser-déposer.
 - **Points personnels** (onglet « Mes points ») : nom, icône, note, déplaçables.
-- **Étages** : sur les maps qui en ont (Douanes, Littoral, Usine, Labs, Icebreaker…), un sélecteur en haut à droite de la carte affiche l'étage voulu par-dessus le niveau principal, qui est alors atténué. Chaque étage indique combien de points il contient. Les points des autres étages restent visibles mais grisés, et leur popup donne leur étage avec un bouton **Afficher cet étage**. Cliquer sur un objectif dans le panneau affiche automatiquement le bon étage.
+- **Étages** :
+  - **Étages supérieurs** (2e, 3e étage…) : leurs points sont affichés directement sur la carte de base. L'icône porte le numéro de l'étage, et le survol affiche une infobulle avec le nom de l'étage, la hauteur du point et la tranche de hauteur de l'étage. Sur téléphone, un appui ouvre la popup, qui indique aussi l'étage.
+  - **Étages souterrains** (sous-sols, tunnels, bunkers, niveau technique de Labs…) : un sélecteur en haut à droite de la carte (liste déroulante sur téléphone) les affiche par-dessus le niveau principal, qui est alors atténué. Chaque niveau indique combien de points il contient. Les points des autres niveaux restent visibles mais grisés, avec un bouton **Afficher cet étage** dans leur popup.
+  - **Règle** : un étage est souterrain si une de ses tranches de hauteur n'a pas de limite basse dans `maps.json`, ou si toutes ses tranches sont sous le bas du niveau principal. Tous les autres sont supérieurs.
+  - **Exception : Icebreaker** (un bateau) garde tous ses ponts dans le sélecteur.
+  - Cliquer sur un objectif dans le panneau affiche automatiquement le bon niveau.
 - **Coordonnées du jeu** affichées sous le curseur (en bas à gauche), pratique pour vérifier le calibrage.
 - **Sauvegarde automatique** dans le navigateur : quêtes sélectionnées, progression, notes et points. Le bouton **Exporter / Importer (JSON)** dans « Réglages » permet de faire une copie ou de changer d'appareil.
 - **Interface sombre**, utilisable sur téléphone : le panneau des quêtes se replie au-dessus de la carte.
