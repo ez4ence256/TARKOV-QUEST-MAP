@@ -564,6 +564,24 @@ body.is-resizing {
   flex-direction: column;
   gap: 2px;
 }
+/* quêtes sélectionnées épinglées en tête de la liste */
+.pinned {
+  margin-bottom: 0.6rem;
+  padding: 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+}
+.pinned-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0 0.15rem 0.3rem;
+}
+.pinned-head .subhead {
+  margin: 0;
+}
 /* ligne de quête + bouton photos à droite */
 .quest-item {
   display: flex;

@@ -1,10 +1,11 @@
 // Onglet "Quêtes" : liste complète avec recherche et filtres (marchand, map).
+// Les quêtes sélectionnées qui passent les filtres sont épinglées en tête.
 import { useMemo, useState } from "react";
 import type { GameMap, Task, Trader } from "../types";
 import type { ModeState } from "../state/store";
 import { QUEST_COLORS } from "../lib/objectiveTypes";
-import { taskMapIds, taskProgress } from "../lib/points";
-import { questScore } from "../lib/search";
+import { taskProgress } from "../lib/points";
+import { filterQuests, pinSelected, type QuestResult } from "../lib/questFilter";
 
 interface Props {
   tasks: Task[];
@@ -14,16 +15,17 @@ interface Props {
   onToggle: (taskId: string) => void;
   /** Ouvre l'onglet Photos sur une quête. */
   onPhotos: (taskId: string) => void;
+  /** Vide la sélection (progression, notes et points perso gardés). */
+  onClearSelection: () => void;
 }
 
-export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos }: Props) {
+export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onClearSelection }: Props) {
   const [query, setQuery] = useState("");
   const [trader, setTrader] = useState("");
   const [mapFilter, setMapFilter] = useState("");
   const [hideCompleted, setHideCompleted] = useState(false);
 
   const tradersById = useMemo(() => new Map(traders.map((t) => [t.id, t])), [traders]);
-  const mapIdsByTask = useMemo(() => new Map(tasks.map((t) => [t.id, taskMapIds(t)])), [tasks]);
   const selected = useMemo(() => new Map(mode.selected.map((s) => [s.taskId, s.color])), [mode.selected]);
 
   // Marchands réellement présents dans les quêtes, triés par nom
@@ -33,23 +35,59 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos }: Pr
   }, [tasks, traders]);
 
   // Recherche sur le nom affiché ET le nom anglais ; meilleurs résultats en premier.
-  const filtered = useMemo(() => {
-    const q = query.trim();
-    const results: { task: Task; score: number; viaEnglish: boolean }[] = [];
-    for (const t of tasks) {
-      if (trader && t.traderId !== trader) continue;
-      if (mapFilter && !mapIdsByTask.get(t.id)?.has(mapFilter)) continue;
-      if (hideCompleted) {
-        const p = taskProgress(t, mode.done);
-        if (p.total > 0 && p.done === p.total) continue;
-      }
-      const match = q ? questScore(q, t) : { score: 1, viaEnglish: false };
-      if (match.score > 0) results.push({ task: t, ...match });
-    }
-    // tri stable : à score égal, l'ordre alphabétique est conservé
-    if (q) results.sort((a, b) => b.score - a.score);
-    return results;
-  }, [tasks, query, trader, mapFilter, hideCompleted, mapIdsByTask, mode.done]);
+  const filtered = useMemo(
+    () => filterQuests(tasks, { query, traderId: trader, mapId: mapFilter, hideCompleted }, mode.done),
+    [tasks, query, trader, mapFilter, hideCompleted, mode.done],
+  );
+  const { pinned, others, hiddenSelected } = useMemo(
+    () => pinSelected(filtered, mode.selected.map((s) => s.taskId)),
+    [filtered, mode.selected],
+  );
+
+  const renderRow = ({ task: t, viaEnglish }: QuestResult) => {
+    const color = selected.get(t.id);
+    const isSelected = color !== undefined;
+    const p = taskProgress(t, mode.done);
+    return (
+      <li key={t.id} className="quest-item">
+        <button
+          className={`quest-row ${isSelected ? "is-selected" : ""}`}
+          onClick={() => onToggle(t.id)}
+          aria-pressed={isSelected}
+          title={isSelected ? "Cliquer pour désélectionner" : "Cliquer pour sélectionner"}
+          style={isSelected ? { ["--q" as string]: QUEST_COLORS[color] } : undefined}
+        >
+          <span className="quest-check" aria-hidden="true">
+            {isSelected ? "✓" : ""}
+          </span>
+          <span className="quest-main">
+            <span className="quest-name">{t.name}</span>
+            {viaEnglish && <span className="quest-alt">EN : {t.nameEn}</span>}
+            <span className="quest-meta">
+              {tradersById.get(t.traderId)?.name ?? "?"}
+              {t.minPlayerLevel ? ` · niv. ${t.minPlayerLevel}` : ""}
+              {t.kappaRequired ? " · Kappa" : ""}
+            </span>
+          </span>
+          {p.done > 0 && (
+            <span className="quest-progress">
+              {p.done}/{p.total}
+            </span>
+          )}
+        </button>
+        {t.wikiLink && (
+          <button
+            className="quest-photos"
+            onClick={() => onPhotos(t.id)}
+            title="Photos des emplacements (wiki)"
+            aria-label={`Photos des emplacements de ${t.name}`}
+          >
+            📷
+          </button>
+        )}
+      </li>
+    );
+  };
 
   return (
     <div className="tab-body">
@@ -89,51 +127,26 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos }: Pr
         </div>
       </div>
 
-      <ul className="quest-list">
-        {filtered.map(({ task: t, viaEnglish }) => {
-          const color = selected.get(t.id);
-          const isSelected = color !== undefined;
-          const p = taskProgress(t, mode.done);
-          return (
-            <li key={t.id} className="quest-item">
-              <button
-                className={`quest-row ${isSelected ? "is-selected" : ""}`}
-                onClick={() => onToggle(t.id)}
-                aria-pressed={isSelected}
-                style={isSelected ? { ["--q" as string]: QUEST_COLORS[color] } : undefined}
-              >
-                <span className="quest-check" aria-hidden="true">
-                  {isSelected ? "✓" : ""}
-                </span>
-                <span className="quest-main">
-                  <span className="quest-name">{t.name}</span>
-                  {viaEnglish && <span className="quest-alt">EN : {t.nameEn}</span>}
-                  <span className="quest-meta">
-                    {tradersById.get(t.traderId)?.name ?? "?"}
-                    {t.minPlayerLevel ? ` · niv. ${t.minPlayerLevel}` : ""}
-                    {t.kappaRequired ? " · Kappa" : ""}
-                  </span>
-                </span>
-                {p.done > 0 && (
-                  <span className="quest-progress">
-                    {p.done}/{p.total}
-                  </span>
-                )}
-              </button>
-              {t.wikiLink && (
-                <button
-                  className="quest-photos"
-                  onClick={() => onPhotos(t.id)}
-                  title="Photos des emplacements (wiki)"
-                  aria-label={`Photos des emplacements de ${t.name}`}
-                >
-                  📷
-                </button>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+      {mode.selected.length > 0 && (
+        <section className="pinned" aria-label="Quêtes sélectionnées">
+          <div className="pinned-head">
+            <span className="subhead">Quêtes sélectionnées ({pinned.length})</span>
+            <button className="btn btn-small" onClick={onClearSelection}>
+              Tout désélectionner
+            </button>
+          </div>
+          {hiddenSelected > 0 && (
+            <p className="muted small">
+              {hiddenSelected} autre{hiddenSelected > 1 ? "s" : ""} quête{hiddenSelected > 1 ? "s" : ""} sélectionnée
+              {hiddenSelected > 1 ? "s" : ""}, masquée{hiddenSelected > 1 ? "s" : ""} par la recherche ou les filtres.
+            </p>
+          )}
+          <ul className="quest-list">{pinned.map(renderRow)}</ul>
+        </section>
+      )}
+
+      {mode.selected.length > 0 && others.length > 0 && <div className="subhead">Autres quêtes ({others.length})</div>}
+      <ul className="quest-list">{others.map(renderRow)}</ul>
     </div>
   );
 }

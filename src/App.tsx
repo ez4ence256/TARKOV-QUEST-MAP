@@ -288,6 +288,7 @@ export default function App() {
               mode={mode}
               onToggle={(taskId) => dispatch({ type: "toggleTask", taskId })}
               onPhotos={showPhotos}
+              onClearSelection={() => dispatch({ type: "clearSelection" })}
             />
           )}
           {data && tab === "selection" && (

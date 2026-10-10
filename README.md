@@ -36,6 +36,7 @@ Le dossier `dist/` est un site statique. Vous pouvez le déposer tel quel sur n'
 
 - **Mode de jeu** demandé à chaque ouverture : PvP, PvE ou PvP Saison. Chaque mode a sa propre progression.
 - **Liste de toutes les quêtes**, avec des filtres par marchand et par map, et une **recherche bilingue** : le nom français ou anglais trouve la quête (« Appâtage » ou « Chumming »). La recherche ignore la casse, les accents et la ponctuation, et tolère les petites fautes (1 faute à partir de 5 lettres, 2 à partir de 9). Les correspondances exactes passent en premier. Quand c'est le nom anglais qui correspond, il est rappelé sous le nom français.
+- **Quêtes sélectionnées épinglées** en tête de cette liste, dans une zone « Quêtes sélectionnées (n) », puis les autres quêtes. La recherche et les filtres s'appliquent aussi à la zone épinglée, qui indique combien de quêtes sélectionnées sont masquées. Le bouton **« Tout désélectionner »** vide la sélection sans toucher à la progression, aux notes ni aux points perso. Un clic sur une quête la sélectionne ou la désélectionne.
 - **Sélecteur de map** : toutes les maps fournies par l'API. Le nombre de points restants est indiqué entre parenthèses.
 - **Plusieurs quêtes à la fois** sur la même carte, une couleur par quête.
 - **Icônes selon le type d'objectif** (champ `type` de l'API) :
