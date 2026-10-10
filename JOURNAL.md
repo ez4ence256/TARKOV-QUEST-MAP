@@ -15,13 +15,13 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 | Compilation | OK (`npm run build`). Avertissement Vite : le fichier principal fait 516 Ko (> 500 Ko). L'OCR est dans des fichiers séparés, chargés à la demande. |
 | Vérifié dans le navigateur | Panneau à 400 / 440 / 520 / 540 / 560 / 720 px, fenêtre de 1024 px et zoom simulé à 125 %, téléphone · sélection épinglée avec filtre et recherche, « Tout désélectionner » · ordre des sections sur Signal - Partie 3 · sorties sur Douanes (niveau principal + sous-sol) et Labs (principal + niveau technique) · import d'une **image de synthèse** (Ctrl+V, vérification, ajout, map choisie) |
 | **Pas vérifié** | **Import avec les captures de l'utilisateur** : elles ne sont pas arrivées en session 5 (ni l'image de référence 3D). |
-| **Pas encore poussé** | Voir « Push » ci-dessous. Pour compter les commits locaux : `git rev-list --count origin/claude/tarkov-quest-planner-axir48..HEAD` (18 juste après le commit de ce journal ; GitHub n'a que `ecbe77a`). |
+| **Poussé sur GitHub** | Oui, en fin de session 5 (voir « Push »). Pour vérifier qu'il ne reste rien à pousser : `git rev-list --count origin/claude/tarkov-quest-planner-axir48..HEAD` (doit donner 0). |
 | **En attente de validation** | Étude 3D (tâche 6, rapport ci-dessous) ; liste finale des libellés d'onglets (proposition) |
 
 ### Push
 - Sessions 2 à 4 : jamais poussé (identifiants GitHub absents de la session de Claude).
-- Session 5 : une tentative à la toute fin, résultat noté juste en dessous.
-- **Résultat de la tentative de la session 5 : (voir le commit suivant de ce journal, ou le message final de la session)**
+- Session 5 : **une tentative à la toute fin, réussie** : `git push origin claude/tarkov-quest-planner-axir48` a envoyé `ecbe77a..63a8ed7` (18 commits). Après `git fetch`, local et origin sont identiques (0 en avance, 0 en retard). Les identifiants GitHub sont donc maintenant disponibles dans la session (gestionnaire d'identifiants Windows ou GitHub Desktop) ; aucune configuration Git n'a été modifiée.
+- Ce commit de journal a été poussé ensuite par un second push.
 
 ### Commits depuis la session 1 (locaux, à pousser)
 
@@ -42,7 +42,8 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 | `3cad781` | 5 | Ordre des sections de la fiche quête |
 | `70bf964` | 5 | Sorties, coops et transits |
 | `09d0146` | 5 | Import de quêtes par capture d'écran (OCR) |
-| (suivant) | 5 | Journal (fin de session 5) |
+| `63a8ed7` | 5 | Journal (fin de session 5), poussé |
+| (suivant) | 5 | Journal : résultat du push |
 
 ### Tests (121)
 
@@ -266,7 +267,6 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 ## Idées pour la suite (prompts prêts à l'emploi)
 
 **À faire en premier**
-- Pousser la branche à la main si la tentative de la session 5 a échoué (voir « Push »).
 - « Voici mes captures du menu Tâches : mesure l'OCR dessus et ajuste les réglages. »
 - « Voici l'image de référence 3D ; je valide (ou non) la recommandation de l'étude 3D. »
 - Confirmer ou corriger la liste des libellés d'onglets.
