@@ -14,7 +14,36 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 | Tests | 84/84 au vert (`npm test`) |
 | Compilation | OK (`npm run build`) |
 | Vérifié dans le navigateur | Littoral + Signal - Partie 3 (page historique, prérequis en désaccord, brouilleur coché par erreur puis décoché via l'onglet Quête et via les Réglages), quête PVP ZONE (bandeau), quête avec clé (Health Care Privacy - Part 2), quête avec objets Find in raid (First in Line), version téléphone |
-| **Pas encore poussé** | Le `git push` échoue depuis la session de Claude (identifiants GitHub). **À faire à la main** : GitHub Desktop, ou `git push` dans un terminal. |
+| **Pas encore poussé** | **10 commits** en local, absents de GitHub : `origin` n'a que `ecbe77a` (session 1). Le `git push` échoue depuis la session de Claude (identifiants GitHub). **À faire à la main** : GitHub Desktop, ou `git push` dans un terminal. |
+
+### Commits depuis la session 1 (tous locaux, à pousser)
+
+| Commit | Session | Contenu |
+|---|---|---|
+| `1342d80` | 2 | Étages (sélecteur) et fonds en tuiles pour Labs, Labyrinth et Icebreaker |
+| `0fb439b` | 3 | Étages supérieurs affichés sur la carte de base |
+| `3591047` | 3 | Recherche bilingue tolérante aux fautes |
+| `8b74a2f` | 3 | Spawns d'objets de quête numérotés et photos du wiki |
+| `77c642c` | 3 | Journal |
+| `78d3e96` | 4 | Réinitialisation de la progression (par quête, tout le mode actuel) |
+| `e25a742` | 4 | Onglet Quête : objectifs à cocher, progression, réinitialisation |
+| `c79daf5` | 4 | Journal (rapport sur l'API du wiki) |
+| `708060c` | 4 | Onglet Quête : informations complètes du wiki et de tarkov.dev |
+| `e362f55` | 4 | Journal (fin de session 4) |
+
+### Tests (84)
+
+| Fichier | Ce qui est couvert |
+|---|---|
+| `src/map/crs.test.ts` | conversion de coordonnées identique à tarkov.dev |
+| `src/map/levels.test.ts` | étages supérieurs / souterrains, numéro d'étage, Icebreaker |
+| `src/api/tarkovJson.test.ts` | lecture de l'API tarkov.dev (traductions, positions, prérequis, clés, Find in raid, récompenses, noms d'objets) |
+| `src/api/wiki.test.ts` | accès au wiki : page partagée entre onglets, page absente, erreurs, photos, cache, demandes simultanées |
+| `src/lib/wikiText.test.ts` | lecture du wikitext sur des extraits réels (sections, Infobox, listes, tableaux, Find in raid, récompenses) |
+| `src/lib/questWiki.test.ts` | association, PVP ZONE, page historique, désaccords de prérequis, « à emporter », récompenses |
+| `src/lib/search.test.ts` | recherche bilingue et tolérance aux fautes |
+| `src/lib/points.test.ts` | points de la carte, spawns numérotés, progression |
+| `src/state/store.test.ts` | réinitialisation (par quête, tout, isolation entre modes) avec Signal - Partie 3 |
 
 ---
 
@@ -54,6 +83,12 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
   - croisement avec tarkov.dev : `src/lib/questWiki.ts` (prérequis et désaccords, liste « à emporter », comparaison des récompenses).
 - **Données tarkov.dev en plus** (`Task.details`, champs facultatifs des objectifs) : `taskRequirements`, `traderRequirements`, `neededKeys`, `requiredKeys`, `foundInRaid`, `finishRewards`, `failConditions`, `restartable`, `lightkeeperRequired`, et **noms français des objets** (`items_fr`, environ 1,7 Mo ; seuls les 3 918 objets cités par les quêtes sont gardés). Cache de données v5.
 - **Barre d'onglets** : six onglets dans 380 px ; les libellés longs passent à la ligne avec césure française. Sur téléphone, Quête et Photos n'affichent que leur logo.
+- **Corrigé pendant les vérifications** :
+  - l'onglet Photos envoyait deux requêtes `imageinfo` au lieu d'une (double rendu de React en développement) : le chargement des photos est maintenant partagé comme celui des pages ;
+  - une cellule du wiki écrite `||Texte` (sans attributs) gardait un « | » parasite ;
+  - « 3 × 1 objet au choix parmi 52 » est devenu « 3 objets au choix parmi 52 » ;
+  - les quêtes liées issues de tarkov.dev sont affichées avec leur nom français ; celles qui viennent du wiki gardent leur nom anglais.
+- **Exploration du wiki** : environ 12 requêtes au total pendant la session, espacées d'au moins 1,2 s. Les scripts d'exploration sont restés hors du dépôt (dossier temporaire).
 
 ---
 
