@@ -92,12 +92,25 @@ function asPosition(v: unknown): GamePosition | null {
   return { x, y: Number.isFinite(y) ? y : 0, z };
 }
 
+/** Variantes d'une même map (ids du jeu) : rattachées à la map de base et retirées de la liste. */
+const MAP_VARIANTS: Record<string, string> = {
+  "59fc81d786f774390775787e": "55f2d3fd4bdc2d5f408b4567", // Usine de nuit -> Usine
+  "6a294a5b5eb5f9a1700417b7": "5b0fc42d86f7744a585f9105", // Le labo (Dark) -> Le labo
+  "65b8d6f5cdde2479cb2a3125": "653e6760052c01c1c805532f", // Point zéro 21+ -> Point zéro
+  "68236e8153654e8c1200798a": "653e6760052c01c1c805532f", // Ground Zero Tutoriel -> Point zéro
+};
+/** Id de map, variante remplacée par sa map de base. */
+const mapRef = (v: unknown): string | null => {
+  const id = asString(v);
+  return id && (MAP_VARIANTS[id] ?? id);
+};
+
 /** Extrait toutes les positions connues d'un objectif. */
 function readLocations(obj: Dict): ApiLocation[] {
   const out: ApiLocation[] = [];
   // Zones (marquer, visiter, placer, tirer dans une zone…)
   for (const zone of values(obj.zones)) {
-    const mapId = asString(zone.map);
+    const mapId = mapRef(zone.map);
     const position = asPosition(zone.position);
     if (!mapId || !position) continue;
     const outline = asArray(zone.outline)
@@ -113,14 +126,21 @@ function readLocations(obj: Dict): ApiLocation[] {
   }
   // Emplacements possibles d'un objet de quête à trouver
   for (const loc of values(obj.possibleLocations)) {
-    const mapId = asString(loc.map);
+    const mapId = mapRef(loc.map);
     if (!mapId) continue;
     for (const raw of asArray(loc.positions)) {
       const position = asPosition(raw);
       if (position) out.push({ mapId, position, possible: true });
     }
   }
-  return out;
+  // les variantes répètent les points de la map de base, parfois à quelques centimètres près
+  const seen = new Set<string>();
+  return out.filter((l) => {
+    const key = `${l.mapId}|${l.possible ?? false}|${Math.round(l.position.x)}|${Math.round(l.position.z)}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 /** Identifiant d'une référence, donnée soit comme chaîne, soit comme objet { id }. */
@@ -185,7 +205,7 @@ function readDetails(raw: Dict, t: (k: unknown) => string): TaskDetails {
       .filter((r) => r.traderId),
     neededKeys: asArray(raw.neededKeys)
       .map(asDict)
-      .map((r) => ({ mapId: refId(r.map) ?? "", keyIds: refIds(r.keys) }))
+      .map((r) => ({ mapId: mapRef(refId(r.map)) ?? "", keyIds: refIds(r.keys) }))
       .filter((r) => r.keyIds.length > 0),
     rewards: readRewards(asDict(raw.finishRewards), raw.experience),
     failConditions: values(raw.failConditions).map((f) => ({
@@ -229,7 +249,7 @@ function readExits(raw: Dict, t: (k: unknown) => string, tEn: (k: unknown) => st
       factions: [],
       position,
       ...heights(tr),
-      ...(asString(tr.map) ? { destinationMapId: asString(tr.map)! } : {}),
+      ...(mapRef(tr.map) ? { destinationMapId: mapRef(tr.map)! } : {}),
     });
   }
   return mergeExits(exits);
@@ -244,7 +264,7 @@ function readTask(raw: Dict, t: (k: unknown) => string, tEn: (k: unknown) => str
       type: asString(obj.type) ?? "unknown",
       description: t(obj.description),
       optional: obj.optional === true,
-      mapIds: asArray(obj.maps).filter((m): m is string => typeof m === "string"),
+      mapIds: [...new Set(asArray(obj.maps).map(mapRef).filter((m): m is string => m !== null))],
       locations: readLocations(obj),
       ...readObjectiveExtras(obj),
     }));
@@ -255,7 +275,7 @@ function readTask(raw: Dict, t: (k: unknown) => string, tEn: (k: unknown) => str
     nameEn: tEn(raw.name) || id,
     normalizedName: asString(raw.normalizedName) ?? id,
     traderId: asString(raw.trader) ?? asString(asDict(raw.trader).id) ?? "",
-    mapId: asString(raw.map) ?? asString(asDict(raw.map).id),
+    mapId: mapRef(raw.map) ?? mapRef(asDict(raw.map).id),
     minPlayerLevel: typeof raw.minPlayerLevel === "number" ? raw.minPlayerLevel : null,
     kappaRequired: raw.kappaRequired === true,
     wikiLink: asString(raw.wikiLink),
@@ -291,7 +311,7 @@ export async function fetchTarkovData(
       normalizedName: asString(m.normalizedName) ?? "",
       exits: readExits(m, mapsRes.t, mapsRes.tEn),
     }))
-    .filter((m) => m.id)
+    .filter((m) => m.id && !MAP_VARIANTS[m.id])
     .sort((a, b) => a.name.localeCompare(b.name, lang));
 
   // traders : objet indexé par id directement sous "data"

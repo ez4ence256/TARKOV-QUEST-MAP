@@ -4,6 +4,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { API_BASE, fetchTarkovData } from "./tarkovJson";
 
+const FACTORY = "55f2d3fd4bdc2d5f408b4567";
+const NIGHT_FACTORY = "59fc81d786f774390775787e";
+
 const responses: Record<string, unknown> = {
   "regular/tasks": {
     data: {
@@ -77,6 +80,19 @@ const responses: Record<string, unknown> = {
               zones: [{ id: "z4", map: "m1" }],
               requiredKeys: [["key1", "key2"]],
             },
+            // Usine + Usine de nuit : mêmes points, à quelques centimètres près
+            {
+              id: "o5",
+              type: "visit",
+              description: "o5 desc",
+              optional: false,
+              maps: [FACTORY, NIGHT_FACTORY],
+              zones: [
+                { id: "z5", map: FACTORY, position: { x: 5, y: 0, z: 5 } },
+                { id: "z5n", map: NIGHT_FACTORY, position: { x: 5.2, y: 0, z: 4.9 } },
+                { id: "z6n", map: NIGHT_FACTORY, position: { x: 50, y: 0, z: 50 } },
+              ],
+            },
           ],
         },
       },
@@ -105,6 +121,7 @@ const responses: Record<string, unknown> = {
           ],
           transits: [{ id: "12", description: "FAC_TRANSIT", map: "m2", position: { x: 20.94, y: -0.33, z: 139.61 }, top: 1.82, bottom: -2.48 }],
         },
+        [NIGHT_FACTORY]: { id: NIGHT_FACTORY, name: "Night Factory", normalizedName: "night-factory" },
       },
     },
   },
@@ -138,6 +155,7 @@ describe("fetchTarkovData", () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     const data = await fetchTarkovData("regular", "fr");
 
+    expect(data.maps.map((m) => m.id)).toEqual(["m1"]); // variante (Usine de nuit) retirée
     const [customs] = data.maps;
     expect(customs).toMatchObject({ id: "m1", name: "Douanes", normalizedName: "customs" });
     expect(customs.exits).toEqual([
@@ -186,7 +204,10 @@ describe("fetchTarkovData", () => {
     expect(task.mapId).toBe("m1");
     expect(task.kappaRequired).toBe(true);
 
-    const [o1, o2, o3, o4] = task.objectives;
+    const [o1, o2, o3, o4, o5] = task.objectives;
+    // points de la variante rattachés à la map de base, doublons retirés
+    expect(o5.mapIds).toEqual([FACTORY]);
+    expect(o5.locations.map((l) => [l.mapId, l.position.x])).toEqual([[FACTORY, 5], [FACTORY, 50]]);
     expect(o1.description).toBe("Marquer");
     expect(o1.locations).toHaveLength(1);
     expect(o1.locations[0]).toMatchObject({ mapId: "m1", position: { x: 10, y: 2, z: -20 } });

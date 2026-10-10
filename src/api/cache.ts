@@ -6,7 +6,7 @@ import type { GameMode, TarkovData } from "../types";
 import { fetchTarkovData } from "./tarkovJson";
 
 export const DATA_TTL_MS = 6 * 60 * 60 * 1000; // 6 heures
-const CACHE_VERSION = 6;
+const CACHE_VERSION = 7;
 const cacheKey = (mode: GameMode, lang: string) => `tqp:data:v${CACHE_VERSION}:${mode}:${lang}`;
 
 export function readCachedData(mode: GameMode, lang: string): TarkovData | null {
