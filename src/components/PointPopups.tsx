@@ -13,6 +13,10 @@ interface ObjectivePopupProps {
   note: string;
   done: boolean;
   manual: boolean;
+  /** Étage du point, sur les maps qui en ont. */
+  levelLabel?: string;
+  /** Présent quand le point est sur un autre étage que celui affiché. */
+  onShowLevel?: () => void;
   onNote: (note: string) => void;
   onDone: (done: boolean) => void;
   onRemoveManual?: () => void;
@@ -31,6 +35,16 @@ export function ObjectivePopup(p: ObjectivePopupProps) {
         {p.manual && <span className="tag">placé à la main</span>}
       </div>
       <p className="popup-desc">{p.objective.description}</p>
+      {p.levelLabel && (
+        <div className="popup-level">
+          Étage : <strong>{p.levelLabel}</strong>
+          {p.onShowLevel && (
+            <button className="btn btn-ghost btn-small" onClick={p.onShowLevel}>
+              Afficher cet étage
+            </button>
+          )}
+        </div>
+      )}
       <label className="field">
         <span>Mes notes</span>
         <textarea

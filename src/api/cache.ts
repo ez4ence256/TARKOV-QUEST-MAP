@@ -6,7 +6,7 @@ import type { GameMode, TarkovData } from "../types";
 import { fetchTarkovData } from "./tarkovJson";
 
 export const DATA_TTL_MS = 6 * 60 * 60 * 1000; // 6 heures
-const CACHE_VERSION = 1;
+const CACHE_VERSION = 2;
 const cacheKey = (mode: GameMode, lang: string) => `tqp:data:v${CACHE_VERSION}:${mode}:${lang}`;
 
 export function readCachedData(mode: GameMode, lang: string): TarkovData | null {
@@ -20,6 +20,10 @@ export function readCachedData(mode: GameMode, lang: string): TarkovData | null 
 
 function writeCachedData(data: TarkovData) {
   try {
+    // les copies d'un ancien format prennent de la place pour rien
+    for (const key of Object.keys(localStorage)) {
+      if (key.startsWith("tqp:data:") && !key.startsWith(`tqp:data:v${CACHE_VERSION}:`)) localStorage.removeItem(key);
+    }
     localStorage.setItem(cacheKey(data.gameMode, data.language), JSON.stringify(data));
   } catch (error) {
     // Quota dépassé ou stockage désactivé : l'app fonctionne quand même, sans cache.

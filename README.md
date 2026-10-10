@@ -53,6 +53,7 @@ Le dossier `dist/` est un site statique. Vous pouvez le déposer tel quel sur n'
 - **« Fait »** retire le point de la carte et coche l'objectif dans le panneau, qui affiche la progression (ex. 2/4, sans compter les objectifs optionnels). Pour annuler, décochez l'objectif dans le panneau. Vous pouvez aussi activer « Afficher les objectifs faits » dans les réglages.
 - **Objectifs sans position** : si l'API ne donne pas de position, l'objectif est listé à part dans le panneau de la quête. Le bouton **Placer sur la carte** permet de le positionner à la main. Le point peut ensuite être déplacé par glisser-déposer.
 - **Points personnels** (onglet « Mes points ») : nom, icône, note, déplaçables.
+- **Étages** : sur les maps qui en ont (Douanes, Littoral, Usine, Labs, Icebreaker…), un sélecteur en haut à droite de la carte affiche l'étage voulu par-dessus le niveau principal, qui est alors atténué. Chaque étage indique combien de points il contient. Les points des autres étages restent visibles mais grisés, et leur popup donne leur étage avec un bouton **Afficher cet étage**. Cliquer sur un objectif dans le panneau affiche automatiquement le bon étage.
 - **Coordonnées du jeu** affichées sous le curseur (en bas à gauche), pratique pour vérifier le calibrage.
 - **Sauvegarde automatique** dans le navigateur : quêtes sélectionnées, progression, notes et points. Le bouton **Exporter / Importer (JSON)** dans « Réglages » permet de faire une copie ou de changer d'appareil.
 - **Interface sombre**, utilisable sur téléphone : le panneau des quêtes se replie au-dessus de la carte.
@@ -78,6 +79,8 @@ Positions utilisées pour placer les points (rien n'est inventé) :
 ### Fonds de carte et calibrage
 
 - Les **SVG** viennent de [tarkov-dev-svg-maps](https://github.com/the-hideout/tarkov-dev-svg-maps) et sont copiés dans `public/maps/svg/`.
+- **Labs, Labyrinth et Icebreaker** n'ont pas de SVG : leur fond est fait de tuiles d'image chargées depuis `assets.tarkov.dev`, comme sur le site tarkov.dev. Elles ne sont pas copiées dans le projet et demandent donc une connexion.
+- Les **étages** (tranches de hauteur, zones des bâtiments) viennent aussi de `maps.json`. La hauteur des points vient de l'API : `y` des positions, `top` et `bottom` des zones.
 - Le **calibrage** vient du fichier `src/data/maps.json` du site tarkov.dev : valeurs `transform`, `coordinateRotation`, `bounds` et `svgBounds`. Une copie est embarquée, et l'app essaie aussi de récupérer la version en ligne sur GitHub (cache de 24 h).
 - La **conversion des coordonnées** (`src/map/crs.ts`) est un portage fidèle du code de tarkov.dev. Un test vérifie qu'elle donne exactement les mêmes pixels que l'original sur toutes les maps.
 
@@ -87,9 +90,10 @@ Licences et sources détaillées : voir [CREDITS.md](./CREDITS.md).
 
 ## Limites connues
 
-- **Labs, Labyrinth et Icebreaker n'ont pas de SVG calibré** dans tarkov.dev (le site utilise des tuiles d'images). Ces maps s'affichent sur une grille neutre. Les points sont bien calibrés, mais il n'y a pas de dessin de fond.
+- **Fonds en tuiles (Labs, Labyrinth, Icebreaker)** : sans connexion, ou si `assets.tarkov.dev` ne répond pas, ces maps s'affichent sans fond. Les points restent bien placés.
+- Les **noms d'étages** sont traduits pour les cas courants (« 2e étage », « Sous-sol »…). Ceux d'Icebreaker restent en anglais, tels que fournis par tarkov.dev.
+- Les **points placés à la main** et les **points personnels** n'ont pas de hauteur : ils sont visibles à tous les étages.
 - Une **map absente du calibrage** (nouvelle map pas encore ajoutée à tarkov.dev) s'affiche en coordonnées brutes, avec un avertissement.
-- **Les étages ne sont pas gérés** : seul le niveau du sol du SVG est affiché. Un objectif situé à l'étage ou au sous-sol apparaît à sa position 2D.
 - Le format de l'API JSON n'est pas décrit par un schéma officiel. Il a été déduit du code source de tarkov.dev, et l'app ignore les champs inattendus au lieu de planter.
 
 ---
@@ -99,7 +103,7 @@ Licences et sources détaillées : voir [CREDITS.md](./CREDITS.md).
 ```
 src/
   api/          récupération des données (tarkovJson.ts) et cache local (cache.ts)
-  map/          calibrage, conversion de coordonnées, carte Leaflet, fond SVG, icônes
+  map/          calibrage, conversion de coordonnées, étages, carte Leaflet, fond SVG/tuiles, icônes
   state/        état personnel sauvegardé (sélection, progression, notes, points) + export/import
   lib/          types d'objectifs/icônes, calcul des points et de la progression
   components/   panneau : liste des quêtes, sélection, points perso, réglages, popups

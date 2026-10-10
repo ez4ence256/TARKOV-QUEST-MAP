@@ -7,7 +7,8 @@ import type { Action, CustomPoint, ModeState } from "../state/store";
 import type { MapCalibration, RawBounds } from "./calibration";
 import { gameToLatLng, getCRS, latLngToGame, toLatLngBounds } from "./crs";
 import { markerIcon } from "./icons";
-import { BaseLayer } from "./BaseLayer";
+import { BaseLayer, type BaseStatus } from "./BaseLayer";
+import { isOnLevel, levelName, levelOf, type Level } from "./levels";
 import { CUSTOM_POINT_COLOR, categoryOf } from "../lib/objectiveTypes";
 import { CustomPopup, ObjectivePopup } from "../components/PointPopups";
 
@@ -81,6 +82,15 @@ function ClosePopupsWhenPlacing({ placing }: { placing: Placing }) {
   return null;
 }
 
+/** Crédit du fond de carte (tuiles tarkov.dev), sans le lien Leaflet par défaut. */
+function AttributionPrefix() {
+  const map = useMap();
+  useEffect(() => {
+    map.attributionControl?.setPrefix(false);
+  }, [map]);
+  return null;
+}
+
 function FitBounds({ bounds }: { bounds: L.LatLngBounds }) {
   const map = useMap();
   useEffect(() => {
@@ -91,16 +101,19 @@ function FitBounds({ bounds }: { bounds: L.LatLngBounds }) {
 }
 
 /** Centre la carte sur un point demandé depuis le panneau et ouvre sa popup. */
-function FocusPoint({ focus, points, markers }: {
+function FocusPoint({ focus, points, markers, onLevel }: {
   focus: MapViewProps["focus"];
   points: { key: string; x: number; z: number }[];
   markers: React.RefObject<Map<string, L.Marker>>;
+  /** Affiche l'étage du point demandé. */
+  onLevel: (p: { x: number; z: number }) => void;
 }) {
   const map = useMap();
   useEffect(() => {
     if (!focus) return;
     const p = points.find((pt) => pt.key === focus.key);
     if (!p) return;
+    onLevel(p);
     map.setView(gameToLatLng(p), Math.max(map.getZoom(), map.getMinZoom() + 2));
     // la popup s'ouvre une fois le marqueur rendu
     setTimeout(() => markers.current?.get(focus.key)?.openPopup(), 0);
@@ -112,7 +125,9 @@ function FocusPoint({ focus, points, markers }: {
 function MapViewInner(props: MapViewProps) {
   const { calibration, points, customPoints, mode, dispatch } = props;
   const [cursor, setCursor] = useState<{ x: number; z: number } | null>(null);
-  const [baseStatus, setBaseStatus] = useState<"svg" | "grid" | "loading">("loading");
+  const [baseStatus, setBaseStatus] = useState<BaseStatus>("loading");
+  const [level, setLevel] = useState<Level>(null);
+  const layers = calibration?.layers ?? [];
   const markers = useMemo(() => ({ current: new Map<string, L.Marker>() }), []);
 
   const crs = useMemo(() => getCRS(calibration), [calibration]);
@@ -125,7 +140,21 @@ function MapViewInner(props: MapViewProps) {
   // un cran de dézoom de plus que tarkov.dev, pour voir les grandes maps en entier
   const minZoom = calibration ? calibration.minZoom - 1 : -2;
   const maxZoom = calibration ? calibration.maxZoom + 1 : 6;
-  const onStatus = useCallback((s: "svg" | "grid" | "loading") => setBaseStatus(s), []);
+  const onStatus = useCallback((s: BaseStatus) => setBaseStatus(s), []);
+  const showLevelOf = useCallback(
+    (p: { x: number; z: number }) => setLevel(levelOf(p, calibration)),
+    [calibration],
+  );
+  // nombre de points restants par niveau, pour le sélecteur
+  const levelCounts = useMemo(() => {
+    const counts = new Map<Level, number>();
+    for (const pt of points) {
+      if (mode.done[pt.objectiveId ?? ""]) continue;
+      const l = levelOf(pt, calibration);
+      counts.set(l, (counts.get(l) ?? 0) + 1);
+    }
+    return counts;
+  }, [points, mode.done, calibration]);
 
   const registerMarker = (key: string) => (m: L.Marker | null) => {
     if (m) markers.current.set(key, m);
@@ -148,14 +177,20 @@ function MapViewInner(props: MapViewProps) {
         zoomSnap={0.25}
         zoomDelta={0.5}
         wheelPxPerZoomLevel={90}
-        attributionControl={false}
+        attributionControl
         className="leaflet-map"
       >
         <FitBounds bounds={bounds} />
-        <BaseLayer calibration={calibration} fallbackBounds={rawBounds} onStatus={onStatus} />
+        <AttributionPrefix />
+        <BaseLayer
+          calibration={calibration}
+          fallbackBounds={rawBounds}
+          level={level === null ? null : (layers[level] ?? null)}
+          onStatus={onStatus}
+        />
         <ClosePopupsWhenPlacing placing={props.placing} />
         <MapEvents placing={props.placing} onPlace={props.onPlace} onMove={setCursor} />
-        <FocusPoint focus={props.focus} points={allFocusable} markers={markers} />
+        <FocusPoint focus={props.focus} points={allFocusable} markers={markers} onLevel={showLevelOf} />
 
         {points.map((pt) => {
           const task = pt.taskId ? props.tasksById.get(pt.taskId) : undefined;
@@ -164,13 +199,16 @@ function MapViewInner(props: MapViewProps) {
           const color = props.colorOf(task.id);
           const done = Boolean(mode.done[objective.id]);
           const manual = pt.kind === "manual";
+          const pointLevel = levelOf(pt, calibration);
+          const offLevel = !isOnLevel(pt, calibration, level);
           return (
             <MarkerWithOutline
               key={pt.key}
               point={pt}
               color={color}
               title={`${task.name} — ${objective.description}`}
-              icon={markerIcon(categoryOf(objective.type), color, { faded: done })}
+              icon={markerIcon(categoryOf(objective.type), color, { faded: done, offLevel })}
+              offLevel={offLevel}
               register={registerMarker(pt.key)}
               draggable={manual}
               onDragEnd={(p) =>
@@ -185,6 +223,8 @@ function MapViewInner(props: MapViewProps) {
                 note={mode.notes[pt.key] ?? ""}
                 done={done}
                 manual={manual}
+                levelLabel={layers.length > 0 && !manual ? levelName(calibration, pointLevel) : undefined}
+                onShowLevel={offLevel ? () => setLevel(pointLevel) : undefined}
                 onNote={(note) => dispatch({ type: "setNote", key: pt.key, note })}
                 onDone={(value) => dispatch({ type: "setDone", objectiveId: objective.id, done: value })}
                 onRemoveManual={() => dispatch({ type: "setManual", objectiveId: objective.id, position: null })}
@@ -217,6 +257,39 @@ function MapViewInner(props: MapViewProps) {
         ))}
       </MapContainer>
 
+      {layers.length > 0 && (
+        <div className="level-picker" role="radiogroup" aria-label="Étage affiché">
+          <div className="level-picker-title">Étage</div>
+          {[null, ...layers.map((_, i) => i)].map((l) => (
+            <button
+              key={l ?? "main"}
+              role="radio"
+              aria-checked={level === l}
+              className={`level-btn ${level === l ? "is-active" : ""}`}
+              onClick={() => setLevel(l)}
+            >
+              <span>{levelName(calibration, l)}</span>
+              {levelCounts.get(l) ? <span className="level-count">{levelCounts.get(l)}</span> : null}
+            </button>
+          ))}
+        </div>
+      )}
+      {layers.length > 0 && (
+        // version compacte pour téléphone (affichée par le CSS)
+        <select
+          className="input level-select"
+          aria-label="Étage affiché"
+          value={level ?? ""}
+          onChange={(e) => setLevel(e.target.value === "" ? null : Number(e.target.value))}
+        >
+          {[null, ...layers.map((_, i) => i)].map((l) => (
+            <option key={l ?? "main"} value={l ?? ""}>
+              {levelName(calibration, l)}
+              {levelCounts.get(l) ? ` (${levelCounts.get(l)})` : ""}
+            </option>
+          ))}
+        </select>
+      )}
       {props.placing && (
         <div className="map-banner">
           {props.placing.kind === "manual"
@@ -227,7 +300,7 @@ function MapViewInner(props: MapViewProps) {
       {baseStatus === "grid" && (
         <div className="map-notice">
           {calibration
-            ? "Pas de fond de carte SVG pour cette map : grille affichée, positions calibrées."
+            ? "Pas de fond de carte pour cette map : grille affichée, positions calibrées."
             : "Map non calibrée : positions brutes du jeu, sans fond de carte."}
         </div>
       )}
@@ -246,6 +319,7 @@ function MarkerWithOutline(props: {
   icon: L.DivIcon;
   register: (m: L.Marker | null) => void;
   draggable: boolean;
+  offLevel: boolean;
   onDragEnd: (p: { x: number; z: number }) => void;
   children: React.ReactNode;
 }) {
@@ -255,7 +329,13 @@ function MarkerWithOutline(props: {
       {point.outline && (
         <Polygon
           positions={point.outline.map(gameToLatLng)}
-          pathOptions={{ color: props.color, weight: 1, opacity: 0.7, fillOpacity: 0.12, dashArray: "4 3" }}
+          pathOptions={{
+            color: props.color,
+            weight: 1,
+            opacity: props.offLevel ? 0.25 : 0.7,
+            fillOpacity: props.offLevel ? 0.04 : 0.12,
+            dashArray: "4 3",
+          }}
           interactive={false}
         />
       )}
@@ -264,6 +344,7 @@ function MarkerWithOutline(props: {
         position={gameToLatLng(point)}
         icon={props.icon}
         title={props.title}
+        zIndexOffset={props.offLevel ? -1000 : 0}
         draggable={props.draggable}
         eventHandlers={
           props.draggable

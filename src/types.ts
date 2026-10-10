@@ -22,6 +22,9 @@ export interface ApiLocation {
   position: GamePosition;
   /** Contour de la zone, si l'API en fournit un. */
   outline?: GamePosition[];
+  /** Haut et bas de la zone (y du jeu), pour savoir à quel étage elle est. */
+  top?: number;
+  bottom?: number;
 }
 
 export interface Objective {
@@ -78,9 +81,12 @@ export interface MapPoint {
   key: string;
   kind: "objective" | "manual" | "custom";
   mapId: string;
-  /** Coordonnées du jeu (seuls x et z servent à l'affichage 2D). */
+  /** Coordonnées du jeu (x et z pour la position 2D, y/top/bottom pour l'étage). */
   x: number;
   z: number;
+  y?: number;
+  top?: number;
+  bottom?: number;
   taskId?: string;
   objectiveId?: string;
   outline?: GamePosition[];

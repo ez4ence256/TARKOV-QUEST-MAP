@@ -19,7 +19,17 @@ Ce que ça implique :
 - **Partage dans les mêmes conditions :** une version modifiée des SVG doit rester sous CC BY-NC-SA 4.0.
 - **Clause anti-triche du dépôt :** tout usage dans un logiciel de triche (radar, ESP, bots…) révoque automatiquement la licence.
 
-Les SVG sont copiés tels quels. L'application se contente de masquer, à l'affichage, les étages autres que le niveau du sol.
+Les SVG sont copiés tels quels. L'application se contente de choisir, à l'affichage, quels groupes (étages) sont visibles.
+
+---
+
+## Fonds de carte en tuiles : assets.tarkov.dev
+
+- **Source :** `https://assets.tarkov.dev/maps/…/{z}/{x}/{y}.png` (chemins `tilePath` de `maps.json`)
+- **Maps concernées :** Labs, Labyrinth et Icebreaker (pas de SVG), ainsi que les étages qui n'existent qu'en tuiles (Réserve, par exemple).
+- **Auteurs :** Tarkov.dev (Labs, Labyrinth), [TarkovBOT.eu](https://tarkovbot.eu/) (Icebreaker), comme indiqué dans `maps.json`. Le crédit s'affiche en bas à droite de la carte.
+- Les images sont chargées par le navigateur de l'utilisateur. **Elles ne sont pas incluses dans ce dépôt.**
+- Je n'ai pas trouvé de licence publiée pour ces images. Utilisez-les dans l'esprit du projet tarkov.dev : communautaire et non commercial.
 
 ---
 
@@ -27,8 +37,9 @@ Les SVG sont copiés tels quels. L'application se contente de masquer, à l'affi
 
 - **Source :** https://github.com/the-hideout/tarkov-dev (commit `97ff6e7`, 9 octobre 2026)
 - **Fichiers concernés :**
-  - `src/data/tarkov-dev-maps.json` : copie de `src/data/maps.json` (valeurs `transform`, `coordinateRotation`, `bounds`, `svgBounds`, `svgLayer`)
+  - `src/data/tarkov-dev-maps.json` : copie de `src/data/maps.json` (valeurs `transform`, `coordinateRotation`, `bounds`, `svgBounds`, `svgLayer`, `tilePath`, `heightRange`, `layers`)
   - `src/map/crs.ts` : portage des fonctions `getCRS`, `applyRotation`, `pos` et `getBounds` de `src/pages/map/index.jsx`
+  - `src/map/levels.ts` : portage des fonctions `markerIsOnLayer` et `markerIsOnActiveLayer` du même fichier (à quel étage appartient un point)
 - **Licence :** MIT
 
 ```

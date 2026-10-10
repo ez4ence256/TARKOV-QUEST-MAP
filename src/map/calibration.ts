@@ -27,6 +27,17 @@ const LOCAL_SVGS = new Set([
 /** [[x1, z1], [x2, z2]] en coordonnées du jeu, comme dans maps.json. */
 export type RawBounds = [[number, number], [number, number]];
 
+/** Étage d'une map (maps.json : layers[]). */
+export interface MapLayer {
+  name: string;
+  /** Groupe <g id="…"> du SVG qui dessine cet étage. */
+  svgLayer?: string;
+  /** Tuiles d'image de cet étage (https://assets.tarkov.dev/…/{z}/{x}/{y}.png). */
+  tilePath?: string;
+  /** Tranches de hauteur (y du jeu) de l'étage, éventuellement limitées à des zones. */
+  extents: { height: [number, number]; bounds?: RawBounds[] }[];
+}
+
 export interface MapCalibration {
   /** Clé de la carte interactive dans maps.json (ex. "customs"). */
   key: string;
@@ -41,6 +52,17 @@ export interface MapCalibration {
   svgUrl?: string;
   /** Groupe <g id="…"> du SVG à afficher (niveau du sol). */
   svgLayer?: string;
+  /** Tuiles d'image du niveau principal (maps sans SVG : Labs, Labyrinth, Icebreaker…). */
+  tilePath?: string;
+  tileSize: number;
+  /** Hauteurs couvertes par le niveau principal. */
+  heightRange?: [number, number];
+  /** Nom du niveau principal quand maps.json le nomme (ex. Icebreaker). */
+  mainLevelName?: string;
+  layers: MapLayer[];
+  /** Auteur du fond de carte, pour les crédits. */
+  author?: string;
+  authorLink?: string;
   minZoom: number;
   maxZoom: number;
 }
@@ -51,6 +73,31 @@ const isNumberArray = (v: unknown, length: number): v is number[] =>
   Array.isArray(v) && v.length === length && v.every((n) => typeof n === "number");
 const isBounds = (v: unknown): v is RawBounds =>
   Array.isArray(v) && v.length === 2 && v.every((p) => isNumberArray(p, 2));
+
+function parseLayers(raw: unknown): MapLayer[] {
+  if (!Array.isArray(raw)) return [];
+  const layers: MapLayer[] = [];
+  for (const l of raw as Record<string, unknown>[]) {
+    if (typeof l?.name !== "string" || !Array.isArray(l.extents)) continue;
+    const extents: MapLayer["extents"] = [];
+    for (const e of l.extents as Record<string, unknown>[]) {
+      if (!isNumberArray(e?.height, 2)) continue;
+      // bounds : [[x1, z1], [x2, z2], "nom de la zone"]
+      const bounds = Array.isArray(e.bounds)
+        ? (e.bounds as unknown[]).map((b) => (Array.isArray(b) ? b.slice(0, 2) : null)).filter(isBounds)
+        : undefined;
+      extents.push({ height: e.height as [number, number], bounds: bounds?.length ? bounds : undefined });
+    }
+    if (extents.length === 0) continue;
+    layers.push({
+      name: l.name,
+      svgLayer: typeof l.svgLayer === "string" ? l.svgLayer : undefined,
+      tilePath: typeof l.tilePath === "string" ? l.tilePath : undefined,
+      extents,
+    });
+  }
+  return layers;
+}
 
 function svgUrlFor(svgPath: unknown): string | undefined {
   if (typeof svgPath !== "string") return undefined;
@@ -82,9 +129,22 @@ export function parseCalibration(groups: unknown): CalibrationTable {
       svgBounds: isBounds(m.svgBounds) ? m.svgBounds : undefined,
       svgUrl: svgUrlFor(m.svgPath),
       svgLayer: typeof m.svgLayer === "string" ? m.svgLayer : undefined,
+      tilePath: typeof m.tilePath === "string" ? m.tilePath : undefined,
+      tileSize: typeof m.tileSize === "number" ? m.tileSize : 256,
+      // "_heightRange" (Interchange) est volontairement désactivé dans maps.json : on l'ignore aussi
+      heightRange: isNumberArray(m.heightRange, 2) ? (m.heightRange as [number, number]) : undefined,
+      layers: parseLayers(m.layers),
+      author: typeof m.author === "string" ? m.author : undefined,
+      authorLink: typeof m.authorLink === "string" ? m.authorLink : undefined,
       minZoom: typeof m.minZoom === "number" ? m.minZoom : 1,
       maxZoom: typeof m.maxZoom === "number" ? m.maxZoom : 6,
     };
+    // Icebreaker : le niveau principal est aussi listé comme étage ; on ne le garde qu'une fois.
+    const dup = calibration.layers.find((l) => !l.svgLayer && l.tilePath && l.tilePath === calibration.tilePath);
+    if (dup) {
+      calibration.mainLevelName = dup.name;
+      calibration.layers = calibration.layers.filter((l) => l !== dup);
+    }
     table[group.normalizedName] = calibration;
     for (const alt of Array.isArray(m.altMaps) ? m.altMaps : []) {
       if (typeof alt === "string") table[alt] = calibration;
@@ -95,7 +155,7 @@ export function parseCalibration(groups: unknown): CalibrationTable {
 
 export const BUNDLED_CALIBRATION = parseCalibration(bundledMaps);
 
-const CACHE_KEY = "tqp:calibration:v1";
+const CACHE_KEY = "tqp:calibration:v2";
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 /**

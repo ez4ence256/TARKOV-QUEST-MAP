@@ -1,9 +1,10 @@
 // Fond de carte : SVG de tarkov-dev-svg-maps posé sur l'emprise calibrée,
-// ou simple grille si aucun SVG n'est disponible pour cette map.
+// sinon tuiles d'image de tarkov.dev (Labs, Labyrinth, Icebreaker),
+// sinon simple grille. Par-dessus : l'étage choisi, le niveau principal étant atténué.
 import { useEffect, useState } from "react";
 import L from "leaflet";
 import { useMap } from "react-leaflet";
-import type { MapCalibration, RawBounds } from "./calibration";
+import type { MapCalibration, MapLayer, RawBounds } from "./calibration";
 import { toLatLngBounds } from "./crs";
 
 const svgCache = new Map<string, Promise<string>>();
@@ -64,34 +65,80 @@ function GridLayer({ bounds }: { bounds: RawBounds }) {
   return null;
 }
 
+export type BaseStatus = "svg" | "tiles" | "grid" | "loading";
+
+/** Panneaux Leaflet sous les marqueurs et les contours : fond, puis étage. */
+const BASE_PANE = "tqp-base";
+const LEVEL_PANE = "tqp-level";
+function usePanes() {
+  const map = useMap();
+  for (const [name, z] of [[BASE_PANE, 150], [LEVEL_PANE, 160]] as const) {
+    if (!map.getPane(name)) map.createPane(name).style.zIndex = String(z);
+  }
+  return map;
+}
+
+function tileLayer(url: string, calibration: MapCalibration, pane: string, attribution?: string) {
+  return L.tileLayer(url, {
+    pane,
+    tileSize: calibration.tileSize,
+    bounds: toLatLngBounds(calibration.bounds),
+    // mêmes niveaux de zoom natifs que tarkov.dev ; au-delà, Leaflet agrandit les tuiles
+    minNativeZoom: calibration.minZoom,
+    maxNativeZoom: calibration.maxZoom,
+    minZoom: calibration.minZoom - 1,
+    maxZoom: calibration.maxZoom + 1,
+    attribution,
+  });
+}
+
+/** Une image SVG (fond ou étage) : le fichier est partagé, seul le groupe affiché change. */
+function svgOverlay(text: string, layer: string | undefined, calibration: MapCalibration, pane: string) {
+  const el = buildSvgElement(text, layer);
+  const bounds = toLatLngBounds(calibration.svgBounds ?? calibration.bounds);
+  return L.svgOverlay(el, bounds, { interactive: false, className: "tqp-svg-map", pane });
+}
+
 export function BaseLayer({
   calibration,
   fallbackBounds,
+  level,
   onStatus,
 }: {
   calibration?: MapCalibration;
   fallbackBounds: RawBounds;
-  onStatus: (status: "svg" | "grid" | "loading") => void;
+  /** Étage affiché par-dessus le niveau principal (null = aucun). */
+  level: MapLayer | null;
+  onStatus: (status: BaseStatus) => void;
 }) {
-  const map = useMap();
+  const map = usePanes();
   const [failed, setFailed] = useState(false);
   const svgUrl = calibration?.svgUrl;
+  const tilePath = calibration?.tilePath;
 
+  // niveau principal
   useEffect(() => {
-    if (!svgUrl || !calibration) {
+    if (!calibration || (!svgUrl && !tilePath)) {
       onStatus("grid");
       return;
+    }
+    const credit = calibration.author
+      ? `Fond : <a href="${calibration.authorLink ?? "#"}" target="_blank" rel="noreferrer">${calibration.author}</a>`
+      : undefined;
+    if (!svgUrl && tilePath) {
+      const tiles = tileLayer(tilePath, calibration, BASE_PANE, credit).addTo(map);
+      onStatus("tiles");
+      return () => {
+        tiles.remove();
+      };
     }
     let overlay: L.SVGOverlay | null = null;
     let cancelled = false;
     onStatus("loading");
-    fetchSvg(svgUrl)
+    fetchSvg(svgUrl!)
       .then((text) => {
         if (cancelled) return;
-        const el = buildSvgElement(text, calibration.svgLayer);
-        const bounds = toLatLngBounds(calibration.svgBounds ?? calibration.bounds);
-        overlay = L.svgOverlay(el, bounds, { interactive: false, className: "tqp-svg-map" }).addTo(map);
-        overlay.bringToBack();
+        overlay = svgOverlay(text, calibration.svgLayer, calibration, BASE_PANE).addTo(map);
         onStatus("svg");
       })
       .catch((error) => {
@@ -105,8 +152,30 @@ export function BaseLayer({
       cancelled = true;
       overlay?.remove();
     };
-  }, [map, svgUrl, calibration, onStatus]);
+  }, [map, svgUrl, tilePath, calibration, onStatus]);
 
-  if (!svgUrl || failed) return <GridLayer bounds={calibration?.bounds ?? fallbackBounds} />;
+  // étage choisi : groupe du même SVG si la map en a un, sinon tuiles de l'étage
+  useEffect(() => {
+    if (!calibration || !level) return;
+    map.getPane(BASE_PANE)!.classList.add("is-dimmed");
+    let overlay: L.Layer | null = null;
+    let cancelled = false;
+    if (svgUrl && level.svgLayer) {
+      fetchSvg(svgUrl)
+        .then((text) => {
+          if (!cancelled) overlay = svgOverlay(text, level.svgLayer, calibration, LEVEL_PANE).addTo(map);
+        })
+        .catch((error) => console.warn("Étage indisponible", error));
+    } else if (level.tilePath) {
+      overlay = tileLayer(level.tilePath, calibration, LEVEL_PANE).addTo(map);
+    }
+    return () => {
+      cancelled = true;
+      overlay?.remove();
+      map.getPane(BASE_PANE)?.classList.remove("is-dimmed");
+    };
+  }, [map, svgUrl, calibration, level]);
+
+  if ((!svgUrl && !tilePath) || failed) return <GridLayer bounds={calibration?.bounds ?? fallbackBounds} />;
   return null;
 }

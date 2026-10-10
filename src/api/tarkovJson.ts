@@ -90,7 +90,13 @@ function readLocations(obj: Dict): ApiLocation[] {
     const outline = asArray(zone.outline)
       .map(asPosition)
       .filter((p): p is GamePosition => p !== null);
-    out.push({ mapId, position, outline: outline.length > 2 ? outline : undefined });
+    const { top, bottom } = zone;
+    out.push({
+      mapId,
+      position,
+      outline: outline.length > 2 ? outline : undefined,
+      ...(typeof top === "number" && typeof bottom === "number" ? { top, bottom } : {}),
+    });
   }
   // Emplacements possibles d'un objet de quête à trouver
   for (const loc of values(obj.possibleLocations)) {
