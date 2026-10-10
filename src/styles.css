@@ -308,15 +308,21 @@ button:focus-visible {
   border-bottom: 1px solid var(--line);
   flex: none;
 }
+/* six onglets dans 380 px : les libellés longs (« Quête sélectionnée ») passent à la ligne,
+   avec césure française plutôt qu'un débordement */
 .tab {
   flex: 1;
+  min-width: 0;
   border: 0;
   background: transparent;
-  padding: 0.7rem 0.25rem;
+  padding: 0.55rem 0.15rem;
   color: var(--muted);
   border-bottom: 2px solid transparent;
-  font-size: 0.9em;
-  white-space: nowrap;
+  font-size: 0.84em;
+  line-height: 1.2;
+  white-space: normal;
+  hyphens: auto;
+  overflow-wrap: anywhere;
 }
 .tab-logo {
   margin-right: 0.25em;
@@ -341,6 +347,113 @@ button:focus-visible {
 .quest-tab-title {
   margin: 0;
   font-size: 1.1em;
+}
+/* sections repliables de l'onglet Quête (balise details : clavier et téléphone sans script) */
+.quest-section {
+  margin-top: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+}
+.quest-section > summary {
+  padding: 0.6rem 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style-position: inside;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.quest-section > summary::before {
+  content: "▸";
+  color: var(--muted);
+}
+.quest-section[open] > summary::before {
+  content: "▾";
+}
+.quest-section > summary::-webkit-details-marker {
+  display: none;
+}
+.quest-section-body {
+  padding: 0 0.75rem 0.7rem;
+  font-size: 0.92em;
+  overflow-wrap: anywhere;
+}
+.warn-box,
+.pvp-banner {
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.65rem;
+  border-radius: var(--radius);
+  border: 1px solid #c9a227;
+  background: rgba(201, 162, 39, 0.1);
+  font-size: 0.9em;
+}
+.warn-box ul {
+  margin: 0.3rem 0 0;
+  padding-left: 1.1rem;
+}
+.pvp-banner {
+  border-width: 2px;
+  font-weight: 600;
+}
+.wiki-status {
+  margin: 0.75rem 0 0.25rem;
+}
+.wiki-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.wiki-heading {
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+.wiki-heading-4 {
+  font-size: 0.92em;
+  color: var(--accent-2);
+}
+.wiki-paragraph {
+  margin: 0;
+  white-space: pre-line;
+}
+.wiki-quote {
+  margin: 0.4rem 0;
+  padding: 0.3rem 0.7rem;
+  border-left: 3px solid var(--accent);
+  color: var(--muted);
+  font-style: italic;
+  white-space: pre-line;
+}
+.wiki-list,
+.plain-list {
+  margin: 0.2rem 0;
+  padding-left: 1.1rem;
+}
+.wiki-list li,
+.plain-list li {
+  margin: 0.15rem 0;
+  white-space: pre-line;
+}
+.wiki-table-title {
+  font-weight: 600;
+  font-size: 0.92em;
+}
+.fir-tag {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  font-size: 0.78em;
+  color: var(--muted);
+}
+.fir-tag.is-fir {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.pre-line {
+  white-space: pre-line;
 }
 .tab.is-active {
   color: var(--text);

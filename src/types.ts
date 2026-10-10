@@ -39,6 +39,45 @@ export interface Objective {
   mapIds: string[];
   /** Positions connues (zones + emplacements possibles d'objets de quête). */
   locations: ApiLocation[];
+  /** Quantité demandée (objets, éliminations…), si l'API la donne. */
+  count?: number;
+  /** Objets acceptés (au choix) pour les objectifs d'objets. */
+  itemIds?: string[];
+  /** Statut « trouvé en raid » exigé, quand l'API le précise (giveItem, findItem, plantItem, sellItem). */
+  foundInRaid?: boolean;
+  /** Objet de quête concerné (findQuestItem, giveQuestItem, plantQuestItem). */
+  questItemId?: string;
+  /** Clés requises : chaque groupe est une liste d'alternatives (une seule suffit). */
+  requiredKeyIds?: string[][];
+  /** Marqueur à poser (objectifs "mark"). */
+  markerItemId?: string;
+}
+
+/** Récompenses de fin de quête selon tarkov.dev (finishRewards + experience). */
+export interface TaskRewards {
+  experience: number;
+  items: { itemId: string; count: number }[];
+  standing: { traderId: string; value: number }[];
+  offerUnlocks: { itemId: string; traderId: string; level: number }[];
+  skills: { skill: string; level: number }[];
+}
+
+/** Informations complémentaires de tarkov.dev (prérequis, clés, récompenses…). */
+export interface TaskDetails {
+  /** Quêtes préalables et statut attendu (complete, active, failed). */
+  taskRequirements: { taskId: string; status: string[] }[];
+  /** Conditions de niveau ou de réputation auprès d'un marchand. */
+  traderRequirements: { traderId: string; type: string; compare: string; value: number }[];
+  /** Clés nécessaires, par map. */
+  neededKeys: { mapId: string; keyIds: string[] }[];
+  rewards: TaskRewards | null;
+  /**
+   * Conditions d'échec : texte de l'API (souvent vide), et pour le type "taskStatus"
+   * la quête concernée et son statut (ex. échoue si une autre quête est terminée).
+   */
+  failConditions: { type: string; description: string; taskId?: string; status?: string[] }[];
+  restartable: boolean;
+  lightkeeperRequired: boolean;
 }
 
 export interface Task {
@@ -54,6 +93,8 @@ export interface Task {
   kappaRequired: boolean;
   wikiLink: string | null;
   objectives: Objective[];
+  /** Absent dans les anciennes données en cache et dans les tests minimaux. */
+  details?: TaskDetails;
 }
 
 export interface GameMap {
@@ -77,6 +118,8 @@ export interface TarkovData {
   tasks: Task[];
   maps: GameMap[];
   traders: Trader[];
+  /** Noms des objets cités par les quêtes (clés, objets à rendre, récompenses), par id. */
+  itemNames?: Record<string, string>;
 }
 
 /** Point affichable sur la carte (calculé, jamais sauvegardé tel quel). */

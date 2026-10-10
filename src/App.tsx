@@ -226,7 +226,7 @@ export default function App() {
               [
                 ["selection", `Sélection${mode.selected.length ? ` (${mode.selected.length})` : ""}`],
                 ["quests", "Quêtes"],
-                ["quest", "Quête", "📜"],
+                ["quest", "Quête sélectionnée", "📜"],
                 ["photos", "Photos", "📷"],
                 ["custom", "Mes points"],
                 ["settings", "Réglages"],
@@ -294,6 +294,8 @@ export default function App() {
             <QuestTab
               tasks={tasks}
               traders={data.traders}
+              maps={maps}
+              itemNames={data.itemNames ?? {}}
               selectedIds={mode.selected.map((s) => s.taskId)}
               taskId={tabTaskId}
               onTaskChange={setTabTaskId}

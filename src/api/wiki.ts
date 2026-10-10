@@ -1,19 +1,21 @@
-// Photos des emplacements depuis le wiki Escape from Tarkov (Fandom), via son
-// API MediaWiki (api.php, autorisée par le robots.txt du wiki).
+// Seul accès de l'app au wiki Escape from Tarkov (Fandom), via son API MediaWiki
+// (api.php, autorisée par le robots.txt du wiki). Sert aux onglets Quête et Photos.
 //
 // Règles suivies :
-//  - uniquement à la demande (onglet Photos), une quête à la fois ;
-//  - au plus une requête par seconde vers le wiki (file d'attente) ;
+//  - uniquement à la demande (onglet ouvert sur une quête), une quête à la fois ;
+//  - au plus une requête par seconde vers le wiki (file d'attente commune) ;
 //  - cache local de 7 jours ;
-//  - seules les galeries de la section "Guide" de la page de la quête sont
-//    gardées : ce sont les photos d'emplacements. Les légendes du wiki ne
-//    donnent pas de coordonnées : une photo est rattachée à la quête, jamais à
-//    un point précis de la carte.
-// Licence : les fichiers du wiki n'indiquent pas de licence (voir CREDITS.md).
+//  - une seule requête "parse" par quête (wikitext + catégories), partagée par
+//    les deux onglets ; les photos ajoutent une requête "imageinfo".
+//  - seules les galeries de la section "Guide" sont gardées comme photos : les
+//    légendes ne donnent pas de coordonnées, une photo est rattachée à la quête.
+// Licences : texte CC BY-NC-SA ; images sans licence indiquée (voir CREDITS.md).
 
 export const WIKI_HOST = "escapefromtarkov.fandom.com";
 const WIKI_API = `https://${WIKI_HOST}/api.php`;
-const CACHE_PREFIX = "tqp:wiki:v1:";
+const CACHE_PREFIX = "tqp:wiki:v2:";
+/** Préfixe de l'ancien cache (photos seules), nettoyé au premier accès. */
+const OLD_CACHE_PREFIX = "tqp:wiki:v1:";
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 /** Pause minimale entre deux requêtes au wiki. */
 const REQUEST_GAP_MS = 1000;
@@ -106,8 +108,8 @@ function wikiRequest(params: Record<string, string>): Promise<Record<string, unk
     const res = await fetch(url);
     if (!res.ok) throw new Error(`wiki : HTTP ${res.status}`);
     const json = (await res.json()) as Record<string, unknown>;
-    const error = json.error as { info?: string } | undefined;
-    if (error) throw new Error(`wiki : ${error.info ?? "erreur"}`);
+    const error = json.error as { code?: string; info?: string } | undefined;
+    if (error) throw Object.assign(new Error(`wiki : ${error.info ?? "erreur"}`), { code: error.code });
     return json;
   });
   queue = run.catch(() => undefined);
@@ -149,36 +151,103 @@ async function fetchImageInfo(files: string[]): Promise<Map<string, ImageInfoPag
   return byTitle;
 }
 
-function readCache(title: string): WikiGallery | null {
+function readCache<T extends { fetchedAt: number }>(key: string): T | null {
   try {
-    const cached = JSON.parse(localStorage.getItem(CACHE_PREFIX + title) ?? "null") as WikiGallery | null;
+    const cached = JSON.parse(localStorage.getItem(CACHE_PREFIX + key) ?? "null") as T | null;
     return cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS ? cached : null;
   } catch {
     return null;
   }
 }
 
-function writeCache(title: string, gallery: WikiGallery) {
+function writeCache(key: string, value: unknown) {
   try {
-    localStorage.setItem(CACHE_PREFIX + title, JSON.stringify(gallery));
+    for (const old of Object.keys(localStorage)) {
+      if (old.startsWith(OLD_CACHE_PREFIX)) localStorage.removeItem(old);
+    }
+    localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(value));
   } catch {
     /* stockage plein : on s'en passe */
   }
+}
+
+/** Page wiki d'une quête, telle que renvoyée par action=parse. */
+export interface WikiPage {
+  /** Titre final, après redirection éventuelle. */
+  title: string;
+  pageUrl: string;
+  /** false si la page n'existe pas : rien n'est alors affiché du wiki. */
+  exists: boolean;
+  wikitext: string;
+  /** Catégories de la page, sans le préfixe "Category:" (ex. "Quests", "Historical content"). */
+  categories: string[];
+  fetchedAt: number;
+}
+
+const pageUrlFor = (title: string) => `https://${WIKI_HOST}/wiki/${encodeURIComponent(title.replace(/ /g, "_"))}`;
+
+/** Requêtes en cours, pour que les onglets Quête et Photos partagent la même. */
+const inFlight = new Map<string, Promise<WikiPage>>();
+
+/** Page wiki d'une quête (une requête parse, cache 7 jours, partagée entre les onglets). */
+export function loadWikiPage(wikiLink: string): Promise<WikiPage> {
+  const title = wikiTitleFromLink(wikiLink);
+  if (!title) return Promise.reject(new Error("Lien wiki non reconnu"));
+  const cached = readCache<WikiPage>(`page:${title}`);
+  if (cached) return Promise.resolve(cached);
+  let pending = inFlight.get(title);
+  if (!pending) {
+    pending = fetchWikiPage(title).finally(() => inFlight.delete(title));
+    inFlight.set(title, pending);
+  }
+  return pending;
+}
+
+async function fetchWikiPage(title: string): Promise<WikiPage> {
+  let page: WikiPage;
+  try {
+    const json = await wikiRequest({ action: "parse", page: title, prop: "wikitext|categories", redirects: "1" });
+    const parsed = (json.parse ?? {}) as { title?: string; wikitext?: string; categories?: { category?: string }[] };
+    const finalTitle = parsed.title ?? title;
+    page = {
+      title: finalTitle,
+      pageUrl: pageUrlFor(finalTitle),
+      exists: true,
+      wikitext: String(parsed.wikitext ?? ""),
+      categories: (parsed.categories ?? []).map((c) => String(c.category ?? "").replace(/_/g, " ")).filter(Boolean),
+      fetchedAt: Date.now(),
+    };
+  } catch (error) {
+    if ((error as { code?: string }).code !== "missingtitle") throw error;
+    page = { title, pageUrl: pageUrlFor(title), exists: false, wikitext: "", categories: [], fetchedAt: Date.now() };
+  }
+  writeCache(`page:${title}`, page);
+  return page;
 }
 
 /**
  * Photos d'emplacements d'une quête (section Guide de sa page wiki).
  * Renvoie une galerie vide si la page n'en a pas : rien n'est inventé.
  */
-export async function loadQuestPhotos(wikiLink: string): Promise<WikiGallery> {
+export function loadQuestPhotos(wikiLink: string): Promise<WikiGallery> {
   const title = wikiTitleFromLink(wikiLink);
-  if (!title) throw new Error("Lien wiki non reconnu");
-  const cached = readCache(title);
-  if (cached) return cached;
+  if (!title) return Promise.reject(new Error("Lien wiki non reconnu"));
+  const cached = readCache<WikiGallery>(`photos:${title}`);
+  if (cached) return Promise.resolve(cached);
+  // une demande déjà en cours (autre onglet, double rendu) est réutilisée
+  let pending = photosInFlight.get(title);
+  if (!pending) {
+    pending = fetchQuestPhotos(wikiLink, title).finally(() => photosInFlight.delete(title));
+    photosInFlight.set(title, pending);
+  }
+  return pending;
+}
 
-  const parsed = await wikiRequest({ action: "parse", page: title, prop: "wikitext", redirects: "1" });
-  const wikitext = String((parsed.parse as { wikitext?: string } | undefined)?.wikitext ?? "");
-  const entries = parseGuideGalleries(wikitext);
+const photosInFlight = new Map<string, Promise<WikiGallery>>();
+
+async function fetchQuestPhotos(wikiLink: string, title: string): Promise<WikiGallery> {
+  const page = await loadWikiPage(wikiLink);
+  const entries = page.exists ? parseGuideGalleries(page.wikitext) : [];
   const info = entries.length > 0 ? await fetchImageInfo(entries.map((e) => e.file)) : new Map();
 
   const photos: WikiPhoto[] = [];
@@ -194,7 +263,7 @@ export async function loadQuestPhotos(wikiLink: string): Promise<WikiGallery> {
       pageUrl: image.descriptionurl,
     });
   }
-  const gallery: WikiGallery = { pageUrl: wikiLink, photos, fetchedAt: Date.now() };
-  writeCache(title, gallery);
+  const gallery: WikiGallery = { pageUrl: page.pageUrl, photos, fetchedAt: Date.now() };
+  writeCache(`photos:${title}`, gallery);
   return gallery;
 }

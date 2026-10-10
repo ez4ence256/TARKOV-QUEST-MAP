@@ -68,6 +68,18 @@ SOFTWARE.
 
 ---
 
+## Texte des quêtes : wiki Escape from Tarkov (Fandom)
+
+- **Source :** https://escapefromtarkov.fandom.com/ , pages des quêtes (sections Dialogue, Requirements, Objectives, Rewards, Initial Equipment, Failure Dialogue, Guide et modèle Infobox quest), lues via l'API MediaWiki (`action=parse`).
+- **Licence du texte : CC BY-NC-SA** (indiquée par l'API du wiki : `rightsinfo`). Ce que ça implique :
+  - **Attribution :** chaque texte affiché porte la mention « Texte du wiki, en anglais » et un lien vers la page source. Fandom accepte un lien vers l'article comme attribution.
+  - **Pas d'usage commercial.**
+  - **Partage dans les mêmes conditions :** le texte affiché reste sous CC BY-NC-SA.
+- Le texte est chargé à la demande par le navigateur de l'utilisateur, affiché **sans traduction**, et **n'est pas inclus dans ce dépôt**. Les tests contiennent de courts extraits de pages réelles, sous la même licence.
+- Mêmes réserves que pour les photos : les conditions d'utilisation de Fandom restreignent les accès automatisés. Ce projet reste un **usage personnel et non commercial**, à la demande, une requête par seconde au plus, avec un cache de 7 jours.
+
+---
+
 ## Photos des emplacements : wiki Escape from Tarkov (Fandom)
 
 - **Source :** https://escapefromtarkov.fandom.com/ , section « Guide » des pages de quêtes, lue via l'API MediaWiki (`api.php`).

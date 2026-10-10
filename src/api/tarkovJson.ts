@@ -16,6 +16,8 @@ import type {
   Objective,
   TarkovData,
   Task,
+  TaskDetails,
+  TaskRewards,
   Trader,
 } from "../types";
 
@@ -118,6 +120,82 @@ function readLocations(obj: Dict): ApiLocation[] {
   return out;
 }
 
+/** Identifiant d'une référence, donnée soit comme chaîne, soit comme objet { id }. */
+const refId = (v: unknown): string | null => asString(v) ?? asString(asDict(v).id);
+const refIds = (v: unknown): string[] => asArray(v).map(refId).filter((id): id is string => id !== null);
+const asNumber = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null);
+
+/** Champs complémentaires d'un objectif (quantité, objets, Find in raid, clés…), seulement s'ils existent. */
+function readObjectiveExtras(obj: Dict): Partial<Objective> {
+  const extras: Partial<Objective> = {};
+  const count = asNumber(obj.count);
+  if (count !== null) extras.count = count;
+  const items = refIds(obj.items);
+  if (items.length > 0) extras.itemIds = items;
+  if (typeof obj.foundInRaid === "boolean") extras.foundInRaid = obj.foundInRaid;
+  const questItem = refId(obj.questItem);
+  if (questItem) extras.questItemId = questItem;
+  const keys = asArray(obj.requiredKeys).map(refIds).filter((group) => group.length > 0);
+  if (keys.length > 0) extras.requiredKeyIds = keys;
+  const marker = refId(obj.markerItem);
+  if (marker) extras.markerItemId = marker;
+  return extras;
+}
+
+function readRewards(raw: Dict, experience: unknown): TaskRewards | null {
+  if (!raw || Object.keys(raw).length === 0) return null;
+  return {
+    experience: asNumber(experience) ?? 0,
+    items: asArray(raw.items)
+      .map(asDict)
+      .map((r) => ({ itemId: refId(r.item) ?? "", count: asNumber(r.count) ?? 1 }))
+      .filter((r) => r.itemId),
+    standing: asArray(raw.traderStanding)
+      .map(asDict)
+      .map((r) => ({ traderId: refId(r.trader) ?? "", value: asNumber(r.standing) ?? 0 }))
+      .filter((r) => r.traderId),
+    offerUnlocks: asArray(raw.offerUnlock)
+      .map(asDict)
+      .map((r) => ({ itemId: refId(r.item) ?? "", traderId: refId(r.trader) ?? "", level: asNumber(r.level) ?? 0 }))
+      .filter((r) => r.itemId),
+    skills: asArray(raw.skillLevelReward)
+      .map(asDict)
+      .map((r) => ({ skill: asString(r.skill) ?? "", level: asNumber(r.level) ?? 0 }))
+      .filter((r) => r.skill),
+  };
+}
+
+function readDetails(raw: Dict, t: (k: unknown) => string): TaskDetails {
+  return {
+    taskRequirements: asArray(raw.taskRequirements)
+      .map(asDict)
+      .map((r) => ({ taskId: refId(r.task) ?? "", status: asArray(r.status).filter((s): s is string => typeof s === "string") }))
+      .filter((r) => r.taskId),
+    traderRequirements: asArray(raw.traderRequirements)
+      .map(asDict)
+      .map((r) => ({
+        traderId: refId(r.trader) ?? "",
+        type: asString(r.requirementType) ?? "",
+        compare: asString(r.compareMethod) ?? "",
+        value: asNumber(r.value) ?? 0,
+      }))
+      .filter((r) => r.traderId),
+    neededKeys: asArray(raw.neededKeys)
+      .map(asDict)
+      .map((r) => ({ mapId: refId(r.map) ?? "", keyIds: refIds(r.keys) }))
+      .filter((r) => r.keyIds.length > 0),
+    rewards: readRewards(asDict(raw.finishRewards), raw.experience),
+    failConditions: values(raw.failConditions).map((f) => ({
+      type: asString(f.type) ?? "",
+      // la clé de traduction est renvoyée telle quelle quand le texte manque : on la retire
+      description: t(f.description) === asString(f.description) ? "" : t(f.description),
+      ...(refId(f.task) ? { taskId: refId(f.task)!, status: asArray(f.status).filter((s): s is string => typeof s === "string") } : {}),
+    })),
+    restartable: raw.restartable === true,
+    lightkeeperRequired: raw.lightkeeperRequired === true,
+  };
+}
+
 function readTask(raw: Dict, t: (k: unknown) => string, tEn: (k: unknown) => string): Task | null {
   const id = asString(raw.id);
   if (!id) return null;
@@ -129,8 +207,10 @@ function readTask(raw: Dict, t: (k: unknown) => string, tEn: (k: unknown) => str
       optional: obj.optional === true,
       mapIds: asArray(obj.maps).filter((m): m is string => typeof m === "string"),
       locations: readLocations(obj),
+      ...readObjectiveExtras(obj),
     }));
   return {
+    details: readDetails(raw, t),
     id,
     name: t(raw.name) || id,
     nameEn: tEn(raw.name) || id,
@@ -186,5 +266,50 @@ export async function fetchTarkovData(
 
   if (tasks.length === 0) throw new Error("L'API n'a renvoyé aucune quête.");
 
-  return { gameMode, language: lang, fetchedAt: Date.now(), tasks, maps, traders };
+  const itemNames = await readItemNames(gameMode, lang, tasks, tasksRes, signal);
+
+  return { gameMode, language: lang, fetchedAt: Date.now(), tasks, maps, traders, itemNames };
+}
+
+/** Objets cités par les quêtes : clés, objets à rendre ou à poser, marqueurs, récompenses. */
+export function referencedItemIds(tasks: Task[]): Set<string> {
+  const ids = new Set<string>();
+  for (const task of tasks) {
+    for (const o of task.objectives) {
+      o.itemIds?.forEach((id) => ids.add(id));
+      o.requiredKeyIds?.flat().forEach((id) => ids.add(id));
+      if (o.markerItemId) ids.add(o.markerItemId);
+    }
+    task.details?.neededKeys.forEach((k) => k.keyIds.forEach((id) => ids.add(id)));
+    task.details?.rewards?.items.forEach((r) => ids.add(r.itemId));
+    task.details?.rewards?.offerUnlocks.forEach((r) => ids.add(r.itemId));
+  }
+  return ids;
+}
+
+/**
+ * Noms des objets utiles, dans la langue demandée. On lit seulement le fichier de
+ * traductions des objets (~1,7 Mo, clés "<id> Name") et on ne garde que les objets
+ * cités par les quêtes ; les objets de quête ont leurs noms dans le fichier des quêtes.
+ * En cas d'échec, l'app fonctionne sans les noms.
+ */
+async function readItemNames(
+  gameMode: GameMode,
+  lang: string,
+  tasks: Task[],
+  tasksRes: { data: Dict; t: (k: unknown) => string },
+  signal?: AbortSignal,
+): Promise<Record<string, string>> {
+  const names: Record<string, string> = {};
+  for (const q of values(tasksRes.data.questItems)) {
+    const id = asString(q.id);
+    const name = tasksRes.t(q.name);
+    if (id && name && name !== q.name) names[id] = name;
+  }
+  const translations = await fetchTranslations(`${gameMode}/items`, lang, signal);
+  for (const id of referencedItemIds(tasks)) {
+    const name = translations[`${id} Name`];
+    if (name) names[id] = name;
+  }
+  return names;
 }

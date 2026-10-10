@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanCaption, loadQuestPhotos, parseGuideGalleries, wikiTitleFromLink } from "./wikiPhotos";
+import { cleanCaption, loadQuestPhotos, loadWikiPage, parseGuideGalleries, wikiTitleFromLink } from "./wiki";
 
 // Extrait de wikitext construit pour le test (même structure que les pages de quêtes du wiki)
 const WIKITEXT = `==Objectives==
@@ -101,11 +101,76 @@ describe("loadQuestPhotos", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it("deux demandes simultanées des photos : une seule série de requêtes", async () => {
+    const fetchMock = vi.fn(async (url: string) => {
+      const params = new URL(url).searchParams;
+      if (params.get("action") === "parse") return new Response(JSON.stringify({ parse: { wikitext: WIKITEXT, categories: [] } }));
+      return new Response(JSON.stringify({ query: { pages: [] } }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const link = "https://escapefromtarkov.fandom.com/wiki/Serious_Allegations";
+    await Promise.all([loadQuestPhotos(link), loadQuestPhotos(link)]);
+    expect(fetchMock).toHaveBeenCalledTimes(2); // 1 parse + 1 imageinfo
+  });
+
   it("renvoie une galerie vide si la page n'a pas de photos dans le Guide", async () => {
     const fetchMock = vi.fn(async () => new Response(JSON.stringify({ parse: { wikitext: "==Guide==\nPas d'image." } })));
     vi.stubGlobal("fetch", fetchMock);
     const gallery = await loadQuestPhotos("https://escapefromtarkov.fandom.com/wiki/No_Photos");
     expect(gallery.photos).toEqual([]);
     expect(fetchMock).toHaveBeenCalledTimes(1); // pas de requête d'images inutile
+  });
+});
+
+describe("loadWikiPage", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    localStorage.clear();
+  });
+
+  it("une seule requête parse, partagée entre l'onglet Quête et l'onglet Photos", async () => {
+    const fetchMock = vi.fn(async (url: string) => {
+      const params = new URL(url).searchParams;
+      expect(params.get("action")).toBe("parse");
+      expect(params.get("redirects")).toBe("1");
+      expect(params.get("prop")).toBe("wikitext|categories");
+      return new Response(
+        JSON.stringify({
+          parse: {
+            title: "Signal - Part 3",
+            wikitext: "{{Historical content}}\n==Guide==\nPas d'image.",
+            categories: [{ category: "Historical_content" }, { category: "Quests" }],
+          },
+        }),
+      );
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const link = "https://escapefromtarkov.fandom.com/wiki/Signal_-_Part_3";
+    // les deux onglets demandent la page en même temps
+    const [page] = await Promise.all([loadWikiPage(link), loadQuestPhotos(link)]);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(page).toMatchObject({
+      title: "Signal - Part 3",
+      exists: true,
+      pageUrl: "https://escapefromtarkov.fandom.com/wiki/Signal_-_Part_3",
+      categories: ["Historical content", "Quests"],
+    });
+    await loadWikiPage(link); // cache
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("page absente : exists = false, sans erreur", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response(JSON.stringify({ error: { code: "missingtitle", info: "The page you specified doesn't exist." } }))),
+    );
+    const page = await loadWikiPage("https://escapefromtarkov.fandom.com/wiki/Delivery_from_the_Past");
+    expect(page.exists).toBe(false);
+    expect(page.wikitext).toBe("");
+  });
+
+  it("une autre erreur du wiki remonte (pas de page vide inventée)", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("down", { status: 503 })));
+    await expect(loadWikiPage("https://escapefromtarkov.fandom.com/wiki/Debut")).rejects.toThrow(/503/);
   });
 });

@@ -16,6 +16,18 @@ const responses: Record<string, unknown> = {
           map: "m1",
           minPlayerLevel: 5,
           kappaRequired: true,
+          experience: 8500,
+          restartable: true,
+          taskRequirements: [{ task: "t0", status: ["complete"] }],
+          traderRequirements: [{ trader: "tr1", requirementType: "level", compareMethod: ">=", value: 2 }],
+          neededKeys: [{ map: "m1", keys: ["key1"] }],
+          finishRewards: {
+            traderStanding: [{ trader: "tr1", standing: 0.02 }],
+            items: [{ item: "rub", count: 30000 }],
+            offerUnlock: [{ item: "gun", trader: "tr1", level: 1 }],
+            skillLevelReward: [{ skill: "Search", level: 1 }],
+          },
+          failConditions: [{ id: "f1", type: "taskStatus", description: "f1 desc", task: "t9", status: ["complete"] }],
           objectives: [
             {
               id: "o1",
@@ -47,17 +59,34 @@ const responses: Record<string, unknown> = {
               possibleLocations: [{ map: "m1", positions: [{ x: 1, y: 0, z: 2 }, { x: 3, y: 0, z: 4 }] }],
             },
             // objectif sans position (giveItem : l'API retire zones et maps)
-            { id: "o3", type: "giveItem", description: "o3 desc", optional: false },
+            {
+              id: "o3",
+              type: "giveItem",
+              description: "o3 desc",
+              optional: false,
+              count: 3,
+              items: ["med1", { id: "med2" }],
+              foundInRaid: true,
+            },
             // position invalide : ignorée
-            { id: "o4", type: "visit", description: "o4 desc", optional: false, zones: [{ id: "z4", map: "m1" }] },
+            {
+              id: "o4",
+              type: "visit",
+              description: "o4 desc",
+              optional: false,
+              zones: [{ id: "z4", map: "m1" }],
+              requiredKeys: [["key1", "key2"]],
+            },
           ],
         },
       },
-      questItems: {},
+      questItems: { qi1: { id: "qi1", name: "qi1 Name" } },
     },
     translations: ["$.data.tasks.*.name"],
   },
-  "regular/tasks_fr": { data: { "t1 name": "Quête un", "o1 desc": "Marquer" } },
+  "regular/tasks_fr": { data: { "t1 name": "Quête un", "o1 desc": "Marquer", "qi1 Name": "Dossier secret" } },
+  // noms d'objets : seuls ceux cités par les quêtes sont gardés
+  "regular/items_fr": { data: { "key1 Name": "Clé 306", "med1 Name": "Salewa", "rub Name": "Roubles", "autre Name": "Inutile" } },
   "regular/tasks_en": { data: { "t1 name": "Quest one", "o2 desc": "Find it" } },
   "regular/maps": { data: { maps: { m1: { id: "m1", name: "m1 name", normalizedName: "customs" } } } },
   "regular/maps_fr": { data: { "m1 name": "Douanes" } },
@@ -113,6 +142,27 @@ describe("fetchTarkovData", () => {
     expect(o3.description).toBe("o3 desc"); // ni FR ni EN : la clé est affichée
 
     expect(o4.locations).toEqual([]); // zone sans position : jamais inventée
+    expect(o4.requiredKeyIds).toEqual([["key1", "key2"]]);
+    expect(o3).toMatchObject({ count: 3, itemIds: ["med1", "med2"], foundInRaid: true });
+    expect(o1.foundInRaid).toBeUndefined(); // pas dit par l'API : pas de valeur
+
+    expect(task.details).toMatchObject({
+      taskRequirements: [{ taskId: "t0", status: ["complete"] }],
+      traderRequirements: [{ traderId: "tr1", type: "level", compare: ">=", value: 2 }],
+      neededKeys: [{ mapId: "m1", keyIds: ["key1"] }],
+      restartable: true,
+      lightkeeperRequired: false,
+      rewards: {
+        experience: 8500,
+        items: [{ itemId: "rub", count: 30000 }],
+        standing: [{ traderId: "tr1", value: 0.02 }],
+        offerUnlocks: [{ itemId: "gun", traderId: "tr1", level: 1 }],
+        skills: [{ skill: "Search", level: 1 }],
+      },
+      // texte absent : la clé de traduction n'est pas affichée
+      failConditions: [{ type: "taskStatus", description: "", taskId: "t9", status: ["complete"] }],
+    });
+    expect(data.itemNames).toEqual({ qi1: "Dossier secret", key1: "Clé 306", med1: "Salewa", rub: "Roubles" });
   });
 
   it("échoue clairement si l'API ne répond pas", async () => {

@@ -51,7 +51,11 @@ Le dossier `dist/` est un site statique. Vous pouvez le déposer tel quel sur n'
 
 - **Popup au clic sur un point** : nom de la quête, description de l'objectif, notes éditables et bouton **Fait**.
 - **« Fait »** retire le point de la carte et coche l'objectif dans le panneau, qui affiche la progression (ex. 2/4, sans compter les objectifs optionnels). Pour annuler, décochez l'objectif dans le panneau. Vous pouvez aussi activer « Afficher les objectifs faits » dans les réglages.
-- **Onglet « 📜 Quête »** (à côté de « 📷 Photos ») : nom de la quête, progression (ex. 2/3) et liste de tous ses objectifs (texte tarkov.dev), chacun avec une case à cocher. Décocher un objectif fait réapparaître ses points immédiatement. Un bouton « Réinitialiser cette quête » est disponible, avec confirmation. On l'ouvre depuis le bouton **📜 Quête** de la popup de n'importe quel point de la quête, ou depuis le lien « 📜 quête » de la quête dans l'onglet Sélection. Ce lien marche même quand tous ses points sont faits, donc absents de la carte. Sur téléphone, les onglets Quête et Photos n'affichent que leur logo.
+- **Onglet « 📜 Quête sélectionnée »** (à côté de « 📷 Photos ») :
+  - en haut : nom, progression (ex. 2/3), tous les objectifs (texte tarkov.dev, en français) avec une case à cocher chacun. Décocher un objectif fait réapparaître ses points immédiatement. Bouton « Réinitialiser cette quête », avec confirmation.
+  - en dessous, des **sections repliables** : Résumé (réplique du marchand, marchand, niveau, Kappa / Lightkeeper, mention « page historique »), Prérequis (tarkov.dev et wiki côte à côte, quêtes préalables et suivantes cliquables, **avertissement en cas de désaccord**), Objectifs (wiki), **À emporter** (clés, objets à trouver ou à rendre, objets à placer ou à marquer ; « Find in raid » seulement quand une source le dit), Récompenses (wiki, et tarkov.dev en comparaison si elles diffèrent), Équipement initial, Guide (texte du wiki nettoyé, conditions d'échec et « refaisable » de tarkov.dev). Une section sans données n'est pas affichée.
+  - le texte du wiki est affiché **en anglais, sans traduction**, avec le lien vers sa page source.
+  - quêtes « [PVP ZONE] » : un bandeau précise que le texte vient de la page de la quête normale et peut différer. On l'ouvre depuis le bouton **📜 Quête** de la popup de n'importe quel point de la quête, ou depuis le lien « 📜 quête » de la quête dans l'onglet Sélection. Ce lien marche même quand tous ses points sont faits, donc absents de la carte. Sur téléphone, les onglets Quête et Photos n'affichent que leur logo.
 - **Réinitialiser la progression** (Réglages) : la liste des quêtes qui ont de la progression dans le mode actuel, avec un bouton « Réinitialiser » par quête, et « Tout réinitialiser (mode actuel) ». Les deux demandent une confirmation, la seconde avec un rappel de faire d'abord un export JSON. Seuls les objectifs cochés sont remis à « pas fait » : les notes, les points perso, les positions placées à la main et les autres modes de jeu ne sont pas touchés.
 - **Spawns d'objets de quête** : tous les emplacements possibles fournis par l'API sont affichés et numérotés (« Emplacement possible 3 sur 13 » dans la popup et au survol). Le panneau indique leur nombre par map. En octobre 2026, l'API en donne pour les 109 objectifs « trouver un objet de quête » (301 emplacements, jusqu'à 16 pour un même objet).
 - **Objets sans emplacement** : l'API ne donne aucun emplacement pour les objets de loot ordinaires (144 objectifs « trouver », 296 « remettre »). Le panneau le signale sous l'objectif.
@@ -86,6 +90,13 @@ Positions utilisées pour placer les points (rien n'est inventé) :
 
 - `objectives[].zones[].position` : zones à marquer, visiter, etc. Le contour `outline` est dessiné en pointillés quand il existe.
 - `objectives[].possibleLocations[].positions` : emplacements possibles d'un objet de quête.
+
+### Texte des quêtes (wiki)
+
+- Il vient de la page wiki de la quête : le lien `wikiLink` de tarkov.dev, puis une requête `parse` avec `redirects=1`. La page n'est acceptée que si elle existe et est classée « Quests » ou « Historical content ».
+- Le wiki n'a **pas de données structurées** (ni Cargo ni Semantic MediaWiki). L'app lit le wikitext : paramètres du modèle `{{Infobox quest}}` et sections (Dialogue, Requirements, Objectives, Rewards, Initial Equipment, Failure Dialogue, Guide). Tout est converti en texte. **Aucun HTML du wiki n'est inséré dans la page.**
+- **Une seule requête par quête**, partagée avec l'onglet Photos, à la demande, une par seconde au plus, avec un cache de 7 jours.
+- Les noms français des objets (clés, objets à rendre, récompenses) viennent du fichier de traductions `items_<langue>` de tarkov.dev (environ 1,7 Mo, téléchargé avec les quêtes). Seuls les objets cités par les quêtes sont gardés.
 
 ### Photos des emplacements
 

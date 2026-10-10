@@ -1,8 +1,8 @@
 // Onglet "Photos" : photos d'emplacements d'une quête, tirées du wiki Escape from Tarkov.
-// Chargées seulement quand l'onglet est ouvert sur une quête (voir src/api/wikiPhotos.ts).
+// Chargées seulement quand l'onglet est ouvert sur une quête (voir src/api/wiki.ts).
 import { useEffect, useState } from "react";
 import type { Task } from "../types";
-import { loadQuestPhotos, type WikiGallery } from "../api/wikiPhotos";
+import { loadQuestPhotos, type WikiGallery } from "../api/wiki";
 
 interface Props {
   tasks: Task[];
