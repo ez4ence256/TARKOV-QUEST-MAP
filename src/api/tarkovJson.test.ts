@@ -105,6 +105,8 @@ describe("fetchTarkovData", () => {
     expect(o2.description).toBe("Find it"); // repli anglais
     expect(o2.optional).toBe(true);
     expect(o2.locations.map((l) => l.position.x)).toEqual([1, 3]);
+    expect(o2.locations.every((l) => l.possible)).toBe(true); // emplacements possibles d'objet
+    expect(o1.locations[0].possible).toBeUndefined(); // zone à marquer
 
     expect(o3.locations).toEqual([]);
     expect(o3.mapIds).toEqual([]);

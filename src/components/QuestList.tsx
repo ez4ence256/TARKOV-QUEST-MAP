@@ -12,9 +12,11 @@ interface Props {
   maps: GameMap[];
   mode: ModeState;
   onToggle: (taskId: string) => void;
+  /** Ouvre l'onglet Photos sur une quête. */
+  onPhotos: (taskId: string) => void;
 }
 
-export function QuestList({ tasks, traders, maps, mode, onToggle }: Props) {
+export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos }: Props) {
   const [query, setQuery] = useState("");
   const [trader, setTrader] = useState("");
   const [mapFilter, setMapFilter] = useState("");
@@ -93,7 +95,7 @@ export function QuestList({ tasks, traders, maps, mode, onToggle }: Props) {
           const isSelected = color !== undefined;
           const p = taskProgress(t, mode.done);
           return (
-            <li key={t.id}>
+            <li key={t.id} className="quest-item">
               <button
                 className={`quest-row ${isSelected ? "is-selected" : ""}`}
                 onClick={() => onToggle(t.id)}
@@ -118,6 +120,16 @@ export function QuestList({ tasks, traders, maps, mode, onToggle }: Props) {
                   </span>
                 )}
               </button>
+              {t.wikiLink && (
+                <button
+                  className="quest-photos"
+                  onClick={() => onPhotos(t.id)}
+                  title="Photos des emplacements (wiki)"
+                  aria-label={`Photos des emplacements de ${t.name}`}
+                >
+                  📷
+                </button>
+              )}
             </li>
           );
         })}

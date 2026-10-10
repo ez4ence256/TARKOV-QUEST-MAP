@@ -112,7 +112,7 @@ function readLocations(obj: Dict): ApiLocation[] {
     if (!mapId) continue;
     for (const raw of asArray(loc.positions)) {
       const position = asPosition(raw);
-      if (position) out.push({ mapId, position });
+      if (position) out.push({ mapId, position, possible: true });
     }
   }
   return out;

@@ -1,0 +1,200 @@
+// Photos des emplacements depuis le wiki Escape from Tarkov (Fandom), via son
+// API MediaWiki (api.php, autorisée par le robots.txt du wiki).
+//
+// Règles suivies :
+//  - uniquement à la demande (onglet Photos), une quête à la fois ;
+//  - au plus une requête par seconde vers le wiki (file d'attente) ;
+//  - cache local de 7 jours ;
+//  - seules les galeries de la section "Guide" de la page de la quête sont
+//    gardées : ce sont les photos d'emplacements. Les légendes du wiki ne
+//    donnent pas de coordonnées : une photo est rattachée à la quête, jamais à
+//    un point précis de la carte.
+// Licence : les fichiers du wiki n'indiquent pas de licence (voir CREDITS.md).
+
+export const WIKI_HOST = "escapefromtarkov.fandom.com";
+const WIKI_API = `https://${WIKI_HOST}/api.php`;
+const CACHE_PREFIX = "tqp:wiki:v1:";
+const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+/** Pause minimale entre deux requêtes au wiki. */
+const REQUEST_GAP_MS = 1000;
+/** Largeur des vignettes demandées au wiki. */
+const THUMB_WIDTH = 480;
+
+export interface WikiPhoto {
+  /** Nom du fichier sur le wiki (sans "File:"). */
+  file: string;
+  /** Légende du wiki, en texte brut (anglais, non traduite). */
+  caption: string;
+  thumbUrl: string;
+  fullUrl: string;
+  /** Page du fichier sur le wiki (source). */
+  pageUrl: string;
+}
+
+export interface WikiGallery {
+  pageUrl: string;
+  photos: WikiPhoto[];
+  fetchedAt: number;
+}
+
+/** Titre de page wiki à partir du wikiLink fourni par tarkov.dev (null si ce n'est pas ce wiki). */
+export function wikiTitleFromLink(link: string | null | undefined): string | null {
+  if (!link) return null;
+  try {
+    const url = new URL(link);
+    if (url.hostname !== WIKI_HOST || !url.pathname.startsWith("/wiki/")) return null;
+    return decodeURIComponent(url.pathname.slice("/wiki/".length)).replace(/_/g, " ");
+  } catch {
+    return null;
+  }
+}
+
+/** Légende wiki -> texte brut (liens, gras, modèles et balises retirés ; <br> -> retour à la ligne). */
+export function cleanCaption(raw: string): string {
+  return raw
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/\[\[(?:[^|\]]*\|)?([^\]]+)\]\]/g, "$1")
+    .replace(/\{\{[^}]*\}\}/g, "")
+    .replace(/'{2,}/g, "")
+    .replace(/<[^>]+>/g, "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join("\n");
+}
+
+/** Texte de la section "Guide" (jusqu'au titre de même niveau suivant). */
+function guideSection(wikitext: string): string {
+  const start = wikitext.match(/^==\s*Guide\s*==\s*$/m);
+  if (!start || start.index === undefined) return "";
+  const rest = wikitext.slice(start.index + start[0].length);
+  const next = rest.search(/^==[^=].*==\s*$/m);
+  return next === -1 ? rest : rest.slice(0, next);
+}
+
+/** Options de ligne de galerie MediaWiki, à ne pas prendre pour une légende. */
+const GALLERY_OPTION = /^\s*(alt|link|page|lang|class)\s*=/i;
+
+/** Photos des galeries de la section Guide : nom de fichier + légende. */
+export function parseGuideGalleries(wikitext: string): { file: string; caption: string }[] {
+  const photos: { file: string; caption: string }[] = [];
+  for (const gallery of guideSection(wikitext).matchAll(/<gallery[^>]*>([\s\S]*?)<\/gallery>/gi)) {
+    for (const line of gallery[1].split("\n")) {
+      const match = line.trim().match(/^(?:File|Image):([^|]+)(?:\|(.*))?$/i);
+      if (!match) continue;
+      const caption = (match[2] ?? "")
+        .split("|")
+        .filter((part) => !GALLERY_OPTION.test(part))
+        .join("|");
+      photos.push({ file: match[1].trim(), caption: cleanCaption(caption) });
+    }
+  }
+  return photos;
+}
+
+// --- Requêtes au wiki, une par seconde au plus ---
+
+let queue: Promise<unknown> = Promise.resolve();
+let lastRequestAt = 0;
+
+function wikiRequest(params: Record<string, string>): Promise<Record<string, unknown>> {
+  const url = `${WIKI_API}?${new URLSearchParams({ ...params, format: "json", formatversion: "2", origin: "*" })}`;
+  const run = queue.then(async () => {
+    const wait = lastRequestAt + REQUEST_GAP_MS - Date.now();
+    if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
+    lastRequestAt = Date.now();
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`wiki : HTTP ${res.status}`);
+    const json = (await res.json()) as Record<string, unknown>;
+    const error = json.error as { info?: string } | undefined;
+    if (error) throw new Error(`wiki : ${error.info ?? "erreur"}`);
+    return json;
+  });
+  queue = run.catch(() => undefined);
+  return run;
+}
+
+/** Normalisation MediaWiki d'un titre de fichier ("SA house1.png" -> "File:SA house1.png"). */
+const fileTitle = (file: string) => {
+  const name = file.replace(/_/g, " ").trim();
+  return `File:${name.charAt(0).toUpperCase()}${name.slice(1)}`;
+};
+
+interface ImageInfoPage {
+  title: string;
+  missing?: boolean;
+  imageinfo?: { url?: string; thumburl?: string; descriptionurl?: string }[];
+}
+
+/** Adresses des vignettes et des pages de fichiers, par lots de 50 (limite de l'API). */
+async function fetchImageInfo(files: string[]): Promise<Map<string, ImageInfoPage>> {
+  const byTitle = new Map<string, ImageInfoPage>();
+  const titles = [...new Set(files.map(fileTitle))];
+  for (let i = 0; i < titles.length; i += 50) {
+    const json = await wikiRequest({
+      action: "query",
+      prop: "imageinfo",
+      iiprop: "url",
+      iiurlwidth: String(THUMB_WIDTH),
+      titles: titles.slice(i, i + 50).join("|"),
+    });
+    const query = (json.query ?? {}) as { pages?: ImageInfoPage[]; normalized?: { from: string; to: string }[] };
+    for (const page of query.pages ?? []) byTitle.set(page.title, page);
+    // titre demandé -> titre normalisé par le wiki
+    for (const n of query.normalized ?? []) {
+      const page = byTitle.get(n.to);
+      if (page) byTitle.set(n.from, page);
+    }
+  }
+  return byTitle;
+}
+
+function readCache(title: string): WikiGallery | null {
+  try {
+    const cached = JSON.parse(localStorage.getItem(CACHE_PREFIX + title) ?? "null") as WikiGallery | null;
+    return cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS ? cached : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(title: string, gallery: WikiGallery) {
+  try {
+    localStorage.setItem(CACHE_PREFIX + title, JSON.stringify(gallery));
+  } catch {
+    /* stockage plein : on s'en passe */
+  }
+}
+
+/**
+ * Photos d'emplacements d'une quête (section Guide de sa page wiki).
+ * Renvoie une galerie vide si la page n'en a pas : rien n'est inventé.
+ */
+export async function loadQuestPhotos(wikiLink: string): Promise<WikiGallery> {
+  const title = wikiTitleFromLink(wikiLink);
+  if (!title) throw new Error("Lien wiki non reconnu");
+  const cached = readCache(title);
+  if (cached) return cached;
+
+  const parsed = await wikiRequest({ action: "parse", page: title, prop: "wikitext", redirects: "1" });
+  const wikitext = String((parsed.parse as { wikitext?: string } | undefined)?.wikitext ?? "");
+  const entries = parseGuideGalleries(wikitext);
+  const info = entries.length > 0 ? await fetchImageInfo(entries.map((e) => e.file)) : new Map();
+
+  const photos: WikiPhoto[] = [];
+  for (const entry of entries) {
+    const image = info.get(fileTitle(entry.file))?.imageinfo?.[0];
+    // fichier absent ou sans adresse : on ne l'affiche pas
+    if (!image?.url || !image.descriptionurl) continue;
+    photos.push({
+      file: entry.file,
+      caption: entry.caption,
+      thumbUrl: image.thumburl ?? image.url,
+      fullUrl: image.url,
+      pageUrl: image.descriptionurl,
+    });
+  }
+  const gallery: WikiGallery = { pageUrl: wikiLink, photos, fetchedAt: Date.now() };
+  writeCache(title, gallery);
+  return gallery;
+}

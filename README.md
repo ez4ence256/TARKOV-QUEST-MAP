@@ -51,6 +51,9 @@ Le dossier `dist/` est un site statique. Vous pouvez le déposer tel quel sur n'
 
 - **Popup au clic sur un point** : nom de la quête, description de l'objectif, notes éditables et bouton **Fait**.
 - **« Fait »** retire le point de la carte et coche l'objectif dans le panneau, qui affiche la progression (ex. 2/4, sans compter les objectifs optionnels). Pour annuler, décochez l'objectif dans le panneau. Vous pouvez aussi activer « Afficher les objectifs faits » dans les réglages.
+- **Spawns d'objets de quête** : tous les emplacements possibles fournis par l'API sont affichés et numérotés (« Emplacement possible 3 sur 13 » dans la popup et au survol). Le panneau indique leur nombre par map. En octobre 2026, l'API en donne pour les 109 objectifs « trouver un objet de quête » (301 emplacements, jusqu'à 16 pour un même objet).
+- **Objets sans emplacement** : l'API ne donne aucun emplacement pour les objets de loot ordinaires (144 objectifs « trouver », 296 « remettre »). Le panneau le signale sous l'objectif.
+- **Photos du wiki** (onglet « Photos ») : photos d'emplacements de la section « Guide » de la page de la quête sur le [wiki Escape from Tarkov](https://escapefromtarkov.fandom.com/wiki/Escape_from_Tarkov_Wiki), avec leur légende (en anglais) et un lien vers la page source de chaque photo. On l'ouvre avec le bouton 📷 d'une quête dans la liste, le lien « photos » du panneau ou le bouton **Photos** d'une popup. Les photos concernent la quête entière : le wiki ne dit pas à quel point de la carte correspond chaque photo, donc l'app ne les rattache pas aux points. Si la page n'a pas de photos, rien n'est affiché à la place. Détails et licence : voir [CREDITS.md](./CREDITS.md).
 - **Objectifs sans position** : si l'API ne donne pas de position, l'objectif est listé à part dans le panneau de la quête. Le bouton **Placer sur la carte** permet de le positionner à la main. Le point peut ensuite être déplacé par glisser-déposer.
 - **Points personnels** (onglet « Mes points ») : nom, icône, note, déplaçables.
 - **Étages** :
@@ -81,6 +84,12 @@ Positions utilisées pour placer les points (rien n'est inventé) :
 
 - `objectives[].zones[].position` : zones à marquer, visiter, etc. Le contour `outline` est dessiné en pointillés quand il existe.
 - `objectives[].possibleLocations[].positions` : emplacements possibles d'un objet de quête.
+
+### Photos des emplacements
+
+- Elles viennent du wiki Escape from Tarkov (Fandom), via son **API MediaWiki** (`api.php`, autorisée par le robots.txt du wiki). Il n'y a pas de lecture des pages HTML.
+- Elles sont récupérées **à la demande** (quand l'onglet Photos s'ouvre sur une quête), avec **une requête par seconde au plus**, puis gardées en **cache local 7 jours**. Il faut 2 requêtes par quête : le texte de la page, puis les adresses des images.
+- Les images sont chargées au fil du défilement, directement depuis les serveurs du wiki. Elles ne sont pas copiées dans le projet.
 
 ### Fonds de carte et calibrage
 

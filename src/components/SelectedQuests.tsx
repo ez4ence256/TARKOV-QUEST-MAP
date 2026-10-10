@@ -5,6 +5,9 @@ import { ICON_LABELS, QUEST_COLORS, categoryOf } from "../lib/objectiveTypes";
 import { hasApiPosition, manualPointKey, objectiveMapCounts, objectivePointKey, taskProgress } from "../lib/points";
 import { Icon } from "./Icon";
 
+/** Objectifs d'objets à trouver ou remettre : on signale quand l'API n'en donne aucun emplacement. */
+const LOOT_TYPES = new Set(["findItem", "giveItem", "findQuestItem", "sellItem"]);
+
 interface Props {
   tasks: Task[];
   traders: Trader[];
@@ -16,6 +19,8 @@ interface Props {
   onFocus: (pointKey: string, mapId: string) => void;
   onStartPlacing: (objective: Objective) => void;
   onBrowse: () => void;
+  /** Ouvre l'onglet Photos sur une quête. */
+  onPhotos: (taskId: string) => void;
 }
 
 export function SelectedQuests(props: Props) {
@@ -71,6 +76,7 @@ export function SelectedQuests(props: Props) {
           const manual = mode.manual[o.id];
           // premier point de l'objectif sur la map courante, pour le bouton "voir"
           const here = o.locations.find((l) => l.mapId === props.currentMapId);
+          const isSpawnList = o.locations.some((l) => l.possible);
           return (
             <li key={o.id} className={`objective ${done ? "is-done" : ""}`}>
               <label className="objective-check">
@@ -89,6 +95,9 @@ export function SelectedQuests(props: Props) {
                   {o.description || <em className="muted">(sans description)</em>}
                   {o.optional && <span className="tag">optionnel</span>}
                 </div>
+                {!hasApiPosition(o) && LOOT_TYPES.has(o.type) && (
+                  <div className="objective-note">L'API ne donne pas d'emplacement pour cet objet.</div>
+                )}
                 <div className="objective-links">
                   {[...counts.entries()].map(([mapId, n]) => (
                     <button
@@ -100,7 +109,8 @@ export function SelectedQuests(props: Props) {
                           : props.onShowMap(mapId)
                       }
                     >
-                      {mapName(mapId)} · {n} point{n > 1 ? "s" : ""}
+                      {mapName(mapId)} · {n}{" "}
+                      {isSpawnList ? `emplacement${n > 1 ? "s" : ""} possible${n > 1 ? "s" : ""}` : `point${n > 1 ? "s" : ""}`}
                     </button>
                   ))}
                   {!hasApiPosition(o) &&
@@ -141,6 +151,10 @@ export function SelectedQuests(props: Props) {
                   {task.mapId ? ` · ${mapName(task.mapId)}` : ""}
                   {task.wikiLink && (
                     <>
+                      {" · "}
+                      <button className="link" onClick={() => props.onPhotos(task.id)}>
+                        photos
+                      </button>
                       {" · "}
                       <a href={task.wikiLink} target="_blank" rel="noreferrer">
                         wiki

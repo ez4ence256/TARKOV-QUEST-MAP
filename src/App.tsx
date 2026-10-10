@@ -13,11 +13,12 @@ import { QuestList } from "./components/QuestList";
 import { SelectedQuests } from "./components/SelectedQuests";
 import { CustomPointsTab } from "./components/CustomPointsTab";
 import { SettingsTab } from "./components/SettingsTab";
+import { PhotosTab } from "./components/PhotosTab";
 
 /** Langue des noms de quêtes : français, l'anglais sert de secours (géré par l'API). */
 const LANG = "fr";
 
-type Tab = "selection" | "quests" | "custom" | "settings";
+type Tab = "selection" | "quests" | "photos" | "custom" | "settings";
 type LoadState =
   | { status: "loading"; data: TarkovData | null }
   | { status: "ready"; data: TarkovData; source: "cache" | "network" | "stale"; error?: string }
@@ -36,6 +37,8 @@ export default function App() {
   const [reloadToken, setReloadToken] = useState(0);
   const [calibration, setCalibration] = useState(BUNDLED_CALIBRATION);
   const [tab, setTab] = useState<Tab>("quests");
+  /** Quête affichée dans l'onglet Photos. */
+  const [photoTaskId, setPhotoTaskId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(() => !isMobile());
   const [placing, setPlacing] = useState<Placing>(null);
   const [focus, setFocus] = useState<{ key: string; n: number } | null>(null);
@@ -108,6 +111,13 @@ export default function App() {
     () => mode.customPoints.filter((p) => p.mapId === currentMap?.id),
     [mode.customPoints, currentMap],
   );
+
+  // ouvre l'onglet Photos sur une quête (bouton 📷 de la liste, du panneau ou d'une popup)
+  const showPhotos = useCallback((taskId: string) => {
+    setPhotoTaskId(taskId);
+    setTab("photos");
+    setPanelOpen(true);
+  }, []);
 
   const showMap = (mapId: string) => {
     dispatch({ type: "setMap", mapId });
@@ -212,6 +222,7 @@ export default function App() {
               [
                 ["selection", `Sélection${mode.selected.length ? ` (${mode.selected.length})` : ""}`],
                 ["quests", "Quêtes"],
+                ["photos", "Photos"],
                 ["custom", "Mes points"],
                 ["settings", "Réglages"],
               ] as [Tab, string][]
@@ -245,6 +256,7 @@ export default function App() {
               maps={maps}
               mode={mode}
               onToggle={(taskId) => dispatch({ type: "toggleTask", taskId })}
+              onPhotos={showPhotos}
             />
           )}
           {data && tab === "selection" && (
@@ -261,6 +273,15 @@ export default function App() {
                 startPlacing({ kind: "manual", objectiveId: o.id, label: o.description || "objectif" })
               }
               onBrowse={() => setTab("quests")}
+              onPhotos={showPhotos}
+            />
+          )}
+          {data && tab === "photos" && (
+            <PhotosTab
+              tasks={tasks}
+              selectedIds={mode.selected.map((s) => s.taskId)}
+              taskId={photoTaskId}
+              onTaskChange={setPhotoTaskId}
             />
           )}
           {data && tab === "custom" && (
@@ -304,6 +325,7 @@ export default function App() {
               placing={placing}
               onPlace={onPlace}
               focus={focus}
+              onPhotos={showPhotos}
             />
           ) : (
             <div className="map-empty muted">{load.status === "loading" ? "Chargement…" : "Aucune map."}</div>

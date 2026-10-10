@@ -13,6 +13,10 @@ interface ObjectivePopupProps {
   note: string;
   done: boolean;
   manual: boolean;
+  /** Emplacement possible d'un objet de quête (numéro / total). */
+  spawn?: { index: number; count: number };
+  /** Ouvre la galerie de photos du wiki pour cette quête. */
+  onPhotos?: () => void;
   /** Étage du point, sur les maps qui en ont. */
   levelLabel?: string;
   /** Présent quand le point est sur un autre étage que celui affiché. */
@@ -35,6 +39,11 @@ export function ObjectivePopup(p: ObjectivePopupProps) {
         {p.manual && <span className="tag">placé à la main</span>}
       </div>
       <p className="popup-desc">{p.objective.description}</p>
+      {p.spawn && (
+        <div className="popup-spawn">
+          Emplacement possible <strong>{p.spawn.index}</strong> sur {p.spawn.count}
+        </div>
+      )}
       {p.levelLabel && (
         <div className="popup-level">
           Étage : <strong>{p.levelLabel}</strong>
@@ -62,6 +71,11 @@ export function ObjectivePopup(p: ObjectivePopupProps) {
         ) : (
           <button className="btn btn-primary" onClick={() => p.onDone(true)}>
             ✓ Fait
+          </button>
+        )}
+        {p.onPhotos && (
+          <button className="btn btn-ghost" onClick={p.onPhotos}>
+            📷 Photos
           </button>
         )}
         {p.manual && p.onRemoveManual && (

@@ -68,6 +68,19 @@ SOFTWARE.
 
 ---
 
+## Photos des emplacements : wiki Escape from Tarkov (Fandom)
+
+- **Source :** https://escapefromtarkov.fandom.com/ , section « Guide » des pages de quêtes, lue via l'API MediaWiki (`api.php`).
+- Les photos sont chargées à la demande par le navigateur de l'utilisateur. **Elles ne sont pas incluses dans ce dépôt.** Chaque photo affiche un lien vers sa page source sur le wiki.
+- **Licence : pas claire.** Ce qui a été vérifié le 10 octobre 2026 :
+  - Le texte du wiki est sous **CC BY-NC-SA** (d'après l'API du wiki).
+  - La [page de licence de Fandom](https://www.fandom.com/licensing) précise que les médias (images) **ne suivent pas forcément la licence du texte**, et qu'il faut consulter la page de chaque fichier.
+  - Les pages de fichiers vérifiées **n'indiquent aucune licence**. Ce sont des captures du jeu, dont les droits appartiennent à Battlestate Games.
+  - Les [conditions d'utilisation de Fandom](https://www.fandom.com/terms-of-use) interdisent les accès automatisés (« robot, spider, scraper ») sans autorisation écrite. Le robots.txt du wiki autorise l'API (`api.php`) pour tous les robots, mais bloque ClaudeBot et les autres robots d'IA sur tout le site.
+- Le propriétaire du projet a choisi d'afficher ces photos **pour un usage personnel et non commercial**, à la demande, sans les copier, en citant la source. Ne réutilisez pas ces images ailleurs sans vérifier leurs droits.
+
+---
+
 ## Données des quêtes : API JSON de tarkov.dev
 
 - **Source :** https://json.tarkov.dev/ (endpoints `<mode>/tasks`, `<mode>/maps`, `<mode>/traders` et leurs traductions `_fr` / `_en`)

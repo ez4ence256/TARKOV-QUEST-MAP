@@ -35,6 +35,33 @@ describe("points", () => {
     expect(pts.find((p) => p.kind === "manual")?.key).toBe(manualPointKey("c"));
   });
 
+  it("numérote les emplacements possibles d'un objet de quête, sur toutes les maps", () => {
+    const spawnTask: Task = {
+      ...task,
+      objectives: [
+        {
+          id: "q",
+          type: "findQuestItem",
+          description: "",
+          optional: false,
+          mapIds: ["m1", "m2"],
+          locations: [
+            { mapId: "m1", position: { x: 1, y: 0, z: 1 }, possible: true },
+            { mapId: "m2", position: { x: 2, y: 0, z: 2 }, possible: true },
+            { mapId: "m1", position: { x: 3, y: 0, z: 3 }, possible: true },
+          ],
+        },
+      ],
+    };
+    const pts = buildObjectivePoints([spawnTask], emptyModeState(), "m1", false);
+    expect(pts.map((p) => p.spawn)).toEqual([
+      { index: 1, count: 3 },
+      { index: 3, count: 3 },
+    ]);
+    // une zone à visiter n'est pas un "emplacement possible"
+    expect(buildObjectivePoints([task], emptyModeState(), "m1", false)[0].spawn).toBeUndefined();
+  });
+
   it("calcule la progression sans compter les objectifs optionnels", () => {
     expect(taskProgress(task, { a: 1, d: 1 })).toEqual({ done: 1, total: 3 });
   });

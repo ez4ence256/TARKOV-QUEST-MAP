@@ -268,7 +268,7 @@ button:focus-visible {
   flex: 1;
   border: 0;
   background: transparent;
-  padding: 0.7rem 0.3rem;
+  padding: 0.7rem 0.25rem;
   color: var(--muted);
   border-bottom: 2px solid transparent;
   font-size: 0.9em;
@@ -329,7 +329,29 @@ button:focus-visible {
   flex-direction: column;
   gap: 2px;
 }
+/* ligne de quête + bouton photos à droite */
+.quest-item {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.quest-photos {
+  flex: none;
+  padding: 0.4rem;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  opacity: 0.55;
+  cursor: pointer;
+}
+.quest-photos:hover,
+.quest-photos:focus-visible {
+  opacity: 1;
+  background: var(--bg-3);
+}
 .quest-row {
+  flex: 1;
+  min-width: 0;
   width: 100%;
   display: flex;
   align-items: center;
@@ -468,6 +490,11 @@ button:focus-visible {
 }
 .objective-desc {
   font-size: 0.92em;
+}
+.objective-note {
+  font-size: 0.8em;
+  color: var(--muted);
+  font-style: italic;
 }
 .objective.is-done .objective-desc {
   color: var(--muted);
@@ -704,6 +731,43 @@ button:focus-visible {
 }
 .tqp-pin.is-off-level {
   opacity: 0.3;
+}
+/* emplacement possible d'un objet de quête */
+.popup-spawn {
+  margin-top: 0.4rem;
+  font-size: 0.9em;
+  color: var(--muted);
+}
+.popup-spawn strong {
+  color: var(--text);
+}
+/* Onglet Photos */
+.photo-grid {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.9rem;
+}
+.photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* 16/9 réserve la place avant le chargement, puis les proportions réelles (plans annotés non rognés) */
+  aspect-ratio: auto 16 / 9;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--bg-3);
+}
+.photo-caption {
+  margin: 0.35rem 0 0.15rem;
+  font-size: 0.88em;
+  white-space: pre-line;
+}
+.photo-source {
+  font-size: 0.78em;
+  color: var(--muted);
+  word-break: break-all;
 }
 .popup-level {
   display: flex;

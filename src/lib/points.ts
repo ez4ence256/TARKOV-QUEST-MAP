@@ -44,9 +44,13 @@ export function buildObjectivePoints(
   for (const task of tasks) {
     for (const o of task.objectives) {
       if (!showDone && mode.done[o.id]) continue;
+      // emplacements possibles d'un objet de quête, numérotés sur toutes les maps
+      const spawns = o.locations.filter((l) => l.possible);
       for (const loc of o.locations) {
         if (loc.mapId !== mapId) continue;
+        const spawnIndex = loc.possible && spawns.length > 1 ? spawns.indexOf(loc) + 1 : 0;
         points.push({
+          ...(spawnIndex ? { spawn: { index: spawnIndex, count: spawns.length } } : {}),
           key: objectivePointKey(o.id, loc.position),
           kind: "objective",
           mapId,

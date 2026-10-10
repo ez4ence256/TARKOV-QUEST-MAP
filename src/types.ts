@@ -25,6 +25,8 @@ export interface ApiLocation {
   /** Haut et bas de la zone (y du jeu), pour savoir à quel étage elle est. */
   top?: number;
   bottom?: number;
+  /** Emplacement possible d'un objet de quête (possibleLocations) : l'objet est à l'un d'eux. */
+  possible?: true;
 }
 
 export interface Objective {
@@ -92,4 +94,6 @@ export interface MapPoint {
   taskId?: string;
   objectiveId?: string;
   outline?: GamePosition[];
+  /** Emplacement possible d'un objet de quête : numéro (à partir de 1) et nombre total. */
+  spawn?: { index: number; count: number };
 }
