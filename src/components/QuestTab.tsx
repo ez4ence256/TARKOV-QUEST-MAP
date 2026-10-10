@@ -1,7 +1,8 @@
 // Onglet "Quête" : tout ce qu'il faut savoir et faire pour une quête.
 //  - en haut : progression, objectifs tarkov.dev à cocher, réinitialisation ;
-//  - dessous, sections repliables : Résumé, Prérequis, Objectifs, À emporter,
-//    Récompenses, Équipement initial, Guide (texte du wiki en anglais + tarkov.dev).
+//  - dessous, sections repliables dans l'ordre de lib/questSections.ts : Objectifs,
+//    À emporter, Guide (ouvertes, texte du wiki mis en avant), puis Récompenses,
+//    Prérequis, Équipement initial et Résumé (repliées).
 // Reste atteignable même quand tous les points sont faits (donc absents de la carte) :
 // depuis la popup d'un autre point de la quête, ou depuis la quête dans le panneau.
 import { useEffect, useMemo, useState, type ReactNode } from "react";
@@ -25,6 +26,7 @@ import {
 import { Icon } from "./Icon";
 import { ConfirmButton } from "./ConfirmButton";
 import { WikiBlocks } from "./WikiBlocks";
+import { QUEST_SECTIONS, type QuestSectionId } from "../lib/questSections";
 
 interface Props {
   tasks: Task[];
@@ -192,6 +194,211 @@ export function QuestTab(p: Props) {
   const hasRewards = (wiki?.rewards.length ?? 0) > 0 || showTarkovRewards;
   const hasGuide = (wiki?.guide.length ?? 0) > 0 || failConditions.length > 0 || task.details?.restartable === true;
 
+  /** Mention de la source, en tête des sections où le texte du wiki est mis en avant. */
+  const wikiSource = wiki && (
+    <div className="wiki-source small">
+      Texte du wiki, en anglais :{" "}
+      <a href={wiki.pageUrl} target="_blank" rel="noreferrer">
+        {wiki.pageTitle}
+      </a>
+    </div>
+  );
+
+  // contenu de chaque section ; null = pas de données, section masquée
+  const sections: Record<QuestSectionId, ReactNode | null> = {
+    objectives:
+      wiki && wiki.objectives.length > 0 ? (
+        <div className="wiki-highlight">
+          {wikiSource}
+          <WikiBlocks blocks={wiki.objectives} />
+        </div>
+      ) : null,
+
+    pack: hasPack ? (
+      <>
+        {wiki && wiki.relatedItems.length > 0 && (
+          <div className="wiki-highlight">
+            {wikiSource}
+            <div className="wiki-heading wiki-heading-4">Tableau « Related Quest Items »</div>
+            <ul className="plain-list pack-list">
+              {wiki.relatedItems.map((r, k) => (
+                <li key={k}>
+                  {r.amount && r.amount !== "1" ? `${r.amount} × ` : ""}
+                  {r.name}
+                  {r.requirement && <span className="muted small"> · {r.requirement}</span>}
+                  {firLabel(r.foundInRaid) && <span className={`fir-tag ${r.foundInRaid ? "is-fir" : ""}`}>{firLabel(r.foundInRaid)}</span>}
+                  {r.notes && <div className="muted small pre-line">{r.notes}</div>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {pack.length > 0 && (
+          <>
+            <div className="muted small">Pour toute la quête, d'après tarkov.dev (à reprendre après une mort) :</div>
+            {PACK_GROUPS.map((g) => {
+              const items = pack.filter((i) => g.kinds.includes(i.kind));
+              if (items.length === 0) return null;
+              return (
+                <div key={g.title}>
+                  <div className="wiki-heading wiki-heading-4">{g.title}</div>
+                  <ul className="plain-list pack-list">
+                    {items.map((i, k) => (
+                      <li key={k}>
+                        {!i.countInLabel && i.count && i.count > 1 ? `${i.count} × ` : ""}
+                        {i.label}
+                        {i.kind === "sell" && " (à vendre)"}
+                        {firLabel(i.foundInRaid) && <span className={`fir-tag ${i.foundInRaid ? "is-fir" : ""}`}>{firLabel(i.foundInRaid)}</span>}
+                        {i.detail && <span className="muted small"> · {i.detail}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </>
+        )}
+      </>
+    ) : null,
+
+    guide: hasGuide ? (
+      <>
+        {wiki && wiki.guide.length > 0 && (
+          <div className="wiki-highlight">
+            {wikiSource}
+            <WikiBlocks blocks={wiki.guide} />
+          </div>
+        )}
+        {(failConditions.length > 0 || task.details?.restartable) && (
+          <>
+            <div className="wiki-heading wiki-heading-3">Selon tarkov.dev</div>
+            <ul className="plain-list">
+              {failConditions.map((f, i) => (
+                <li key={i}>{failConditionText(f, tasksById)}</li>
+              ))}
+              {task.details && failConditions.length > 0 && (
+                <li>Refaisable après un échec : {task.details.restartable ? "oui" : "non"}</li>
+              )}
+              {task.details?.restartable && failConditions.length === 0 && <li>Refaisable après un échec : oui</li>}
+            </ul>
+          </>
+        )}
+      </>
+    ) : null,
+
+    rewards: hasRewards ? (
+      <>
+        {wiki && wiki.rewards.length > 0 && <WikiBlocks blocks={wiki.rewards} />}
+        <Warnings items={rewardDiffs} />
+        {showTarkovRewards && rewards && (
+          <>
+            <div className="wiki-heading wiki-heading-3">Selon tarkov.dev</div>
+            <ul className="plain-list">
+              {rewards.experience > 0 && <li>+{fmt(rewards.experience)} EXP</li>}
+              {rewards.standing.map((s, i) => (
+                <li key={`s${i}`}>
+                  Réputation {traderName(s.traderId)} {s.value > 0 ? "+" : ""}
+                  {s.value}
+                </li>
+              ))}
+              {rewards.items.map((r, i) => (
+                <li key={`i${i}`}>
+                  {fmt(r.count)} × {itemName(r.itemId)}
+                </li>
+              ))}
+              {rewards.offerUnlocks.map((u, i) => (
+                <li key={`o${i}`}>
+                  Débloque l'achat de {itemName(u.itemId)} chez {traderName(u.traderId)} (niveau {u.level})
+                </li>
+              ))}
+              {rewards.skills.map((s, i) => (
+                <li key={`k${i}`}>
+                  Compétence « {s.skill} » : niveau {s.level}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </>
+    ) : null,
+
+    prereq: hasPrereq ? (
+      <>
+        <Warnings items={prereq.warnings} />
+        <div className="wiki-heading wiki-heading-3">Selon tarkov.dev</div>
+        <ul className="plain-list">
+          {task.minPlayerLevel ? <li>Niveau {task.minPlayerLevel}</li> : null}
+          {traderReqs.map((r, i) => (
+            <li key={i}>
+              {traderName(r.traderId)} : {r.type === "level" ? "niveau de fidélité" : "réputation"} {r.compare} {r.value}
+            </li>
+          ))}
+          {prereq.tarkovTasks.length === 0 && <li>Aucune quête préalable</li>}
+        </ul>
+        {prereq.tarkovTasks.length > 0 && (
+          <>
+            <div className="muted small">Quêtes préalables :</div>
+            <QuestLinks links={prereq.tarkovTasks} onOpen={p.onTaskChange} suffix={statusText} displayName={appName} />
+          </>
+        )}
+        {wiki && (
+          <>
+            <div className="wiki-heading wiki-heading-3">Selon le wiki (en anglais)</div>
+            {wiki.loyaltyLevel !== null && <div className="small">LL requirement : {wiki.loyaltyLevel}</div>}
+            {wiki.requirements.length > 0 && <WikiBlocks blocks={wiki.requirements} />}
+            {prereq.wikiTasks.length > 0 && (
+              <>
+                <div className="muted small">Quêtes précédentes (previous) :</div>
+                <QuestLinks links={prereq.wikiTasks} onOpen={p.onTaskChange} />
+              </>
+            )}
+            {wiki.requirements.length === 0 && prereq.wikiTasks.length === 0 && wiki.loyaltyLevel === null && (
+              <div className="muted small">Le wiki ne donne pas de prérequis.</div>
+            )}
+          </>
+        )}
+        {(prereq.tarkovNext.length > 0 || prereq.wikiNext.length > 0) && (
+          <>
+            <div className="wiki-heading wiki-heading-3">Quêtes suivantes</div>
+            {prereq.tarkovNext.length > 0 && (
+              <QuestLinks links={prereq.tarkovNext} onOpen={p.onTaskChange} suffix={() => " (tarkov.dev)"} displayName={appName} />
+            )}
+            {prereq.wikiNext.length > 0 && <QuestLinks links={prereq.wikiNext} onOpen={p.onTaskChange} suffix={() => " (wiki)"} />}
+          </>
+        )}
+      </>
+    ) : null,
+
+    equipment: wiki && wiki.initialEquipment.length > 0 ? <WikiBlocks blocks={wiki.initialEquipment} /> : null,
+
+    summary: (
+      <>
+        {wiki?.briefing && <blockquote className="wiki-quote">{wiki.briefing}</blockquote>}
+        <ul className="plain-list">
+          <li>
+            Marchand : {traderName(task.traderId)}
+            {wiki?.givenBy && wiki.givenBy.toLowerCase() !== p.traders.find((t) => t.id === task.traderId)?.normalizedName
+              ? ` (wiki : ${wiki.givenBy})`
+              : ""}
+          </li>
+          {wiki?.location && <li>Lieu (wiki) : {wiki.location}</li>}
+          {task.minPlayerLevel ? <li>Niveau requis : {task.minPlayerLevel}</li> : null}
+          <li>
+            Kappa : {task.kappaRequired ? "requise" : "non requise"} (tarkov.dev)
+            {wiki && wiki.kappa !== null ? ` · ${wiki.kappa ? "requise" : "non requise"} (wiki)` : ""}
+          </li>
+          {task.details?.lightkeeperRequired && <li>Requise pour Lightkeeper (tarkov.dev)</li>}
+        </ul>
+        {wiki?.failureDialogue && (
+          <>
+            <div className="wiki-heading wiki-heading-3">Réplique en cas d'échec</div>
+            <blockquote className="wiki-quote">{wiki.failureDialogue}</blockquote>
+          </>
+        )}
+      </>
+    ),
+  };
+
   return (
     <div className="tab-body quest-tab">
       <div className="subhead">Quête sélectionnée</div>
@@ -209,6 +416,11 @@ export function QuestTab(p: Props) {
         <div className="pvp-banner" role="note">
           Cette quête PVP ZONE n'a pas de page propre sur le wiki : le texte affiché est celui de la quête normale «{" "}
           {wiki!.pageTitle} » et peut différer (objectifs, récompenses).
+        </div>
+      )}
+      {wiki?.historical && (
+        <div className="warn-box" role="note">
+          Page historique : d'après le wiki, cette quête n'est plus dans le jeu (catégorie « Historical content »).
         </div>
       )}
 
@@ -296,194 +508,16 @@ export function QuestTab(p: Props) {
         )}
       </div>
 
-      <Section title="Résumé" open>
-        {wiki?.historical && (
-          <div className="warn-box" role="note">
-            Page historique : d'après le wiki, cette quête n'est plus dans le jeu (catégorie « Historical content »).
-          </div>
-        )}
-        {wiki?.briefing && <blockquote className="wiki-quote">{wiki.briefing}</blockquote>}
-        <ul className="plain-list">
-          <li>
-            Marchand : {traderName(task.traderId)}
-            {wiki?.givenBy && wiki.givenBy.toLowerCase() !== p.traders.find((t) => t.id === task.traderId)?.normalizedName
-              ? ` (wiki : ${wiki.givenBy})`
-              : ""}
-          </li>
-          {wiki?.location && <li>Lieu (wiki) : {wiki.location}</li>}
-          {task.minPlayerLevel ? <li>Niveau requis : {task.minPlayerLevel}</li> : null}
-          <li>
-            Kappa : {task.kappaRequired ? "requise" : "non requise"} (tarkov.dev)
-            {wiki && wiki.kappa !== null ? ` · ${wiki.kappa ? "requise" : "non requise"} (wiki)` : ""}
-          </li>
-          {task.details?.lightkeeperRequired && <li>Requise pour Lightkeeper (tarkov.dev)</li>}
-        </ul>
-        {wiki?.failureDialogue && (
-          <>
-            <div className="wiki-heading wiki-heading-3">Réplique en cas d'échec</div>
-            <blockquote className="wiki-quote">{wiki.failureDialogue}</blockquote>
-          </>
-        )}
-      </Section>
-
-      {hasPrereq && (
-        <Section title="Prérequis" open={prereq.warnings.length > 0}>
-          <Warnings items={prereq.warnings} />
-          <div className="wiki-heading wiki-heading-3">Selon tarkov.dev</div>
-          <ul className="plain-list">
-            {task.minPlayerLevel ? <li>Niveau {task.minPlayerLevel}</li> : null}
-            {traderReqs.map((r, i) => (
-              <li key={i}>
-                {traderName(r.traderId)} : {r.type === "level" ? "niveau de fidélité" : "réputation"} {r.compare} {r.value}
-              </li>
-            ))}
-            {prereq.tarkovTasks.length === 0 && <li>Aucune quête préalable</li>}
-          </ul>
-          {prereq.tarkovTasks.length > 0 && (
-            <>
-              <div className="muted small">Quêtes préalables :</div>
-              <QuestLinks links={prereq.tarkovTasks} onOpen={p.onTaskChange} suffix={statusText} displayName={appName} />
-            </>
-          )}
-          {wiki && (
-            <>
-              <div className="wiki-heading wiki-heading-3">Selon le wiki (en anglais)</div>
-              {wiki.loyaltyLevel !== null && <div className="small">LL requirement : {wiki.loyaltyLevel}</div>}
-              {wiki.requirements.length > 0 && <WikiBlocks blocks={wiki.requirements} />}
-              {prereq.wikiTasks.length > 0 && (
-                <>
-                  <div className="muted small">Quêtes précédentes (previous) :</div>
-                  <QuestLinks links={prereq.wikiTasks} onOpen={p.onTaskChange} />
-                </>
-              )}
-              {wiki.requirements.length === 0 && prereq.wikiTasks.length === 0 && wiki.loyaltyLevel === null && (
-                <div className="muted small">Le wiki ne donne pas de prérequis.</div>
-              )}
-            </>
-          )}
-          {(prereq.tarkovNext.length > 0 || prereq.wikiNext.length > 0) && (
-            <>
-              <div className="wiki-heading wiki-heading-3">Quêtes suivantes</div>
-              {prereq.tarkovNext.length > 0 && <QuestLinks links={prereq.tarkovNext} onOpen={p.onTaskChange} suffix={() => " (tarkov.dev)"} displayName={appName} />}
-              {prereq.wikiNext.length > 0 && <QuestLinks links={prereq.wikiNext} onOpen={p.onTaskChange} suffix={() => " (wiki)"} />}
-            </>
-          )}
-        </Section>
-      )}
-
-      {wiki && wiki.objectives.length > 0 && (
-        <Section title="Objectifs (wiki)">
-          <WikiBlocks blocks={wiki.objectives} />
-        </Section>
-      )}
-
-      {hasPack && (
-        <Section title="À emporter" open>
-          {pack.length > 0 && (
-            <>
-              <div className="muted small">Pour toute la quête, d'après tarkov.dev (à reprendre après une mort) :</div>
-              {PACK_GROUPS.map((g) => {
-                const items = pack.filter((i) => g.kinds.includes(i.kind));
-                if (items.length === 0) return null;
-                return (
-                  <div key={g.title}>
-                    <div className="wiki-heading wiki-heading-4">{g.title}</div>
-                    <ul className="plain-list pack-list">
-                      {items.map((i, k) => (
-                        <li key={k}>
-                          {!i.countInLabel && i.count && i.count > 1 ? `${i.count} × ` : ""}
-                          {i.label}
-                          {i.kind === "sell" && " (à vendre)"}
-                          {firLabel(i.foundInRaid) && <span className={`fir-tag ${i.foundInRaid ? "is-fir" : ""}`}>{firLabel(i.foundInRaid)}</span>}
-                          {i.detail && <span className="muted small"> · {i.detail}</span>}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })}
-            </>
-          )}
-          {wiki && wiki.relatedItems.length > 0 && (
-            <>
-              <div className="wiki-heading wiki-heading-4">Selon le wiki (tableau « Related Quest Items », en anglais)</div>
-              <ul className="plain-list pack-list">
-                {wiki.relatedItems.map((r, k) => (
-                  <li key={k}>
-                    {r.amount && r.amount !== "1" ? `${r.amount} × ` : ""}
-                    {r.name}
-                    {r.requirement && <span className="muted small"> · {r.requirement}</span>}
-                    {firLabel(r.foundInRaid) && <span className={`fir-tag ${r.foundInRaid ? "is-fir" : ""}`}>{firLabel(r.foundInRaid)}</span>}
-                    {r.notes && <div className="muted small pre-line">{r.notes}</div>}
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </Section>
-      )}
-
-      {hasRewards && (
-        <Section title="Récompenses">
-          {wiki && wiki.rewards.length > 0 && <WikiBlocks blocks={wiki.rewards} />}
-          <Warnings items={rewardDiffs} />
-          {showTarkovRewards && rewards && (
-            <>
-              <div className="wiki-heading wiki-heading-3">Selon tarkov.dev</div>
-              <ul className="plain-list">
-                {rewards.experience > 0 && <li>+{fmt(rewards.experience)} EXP</li>}
-                {rewards.standing.map((s, i) => (
-                  <li key={`s${i}`}>
-                    Réputation {traderName(s.traderId)} {s.value > 0 ? "+" : ""}
-                    {s.value}
-                  </li>
-                ))}
-                {rewards.items.map((r, i) => (
-                  <li key={`i${i}`}>
-                    {fmt(r.count)} × {itemName(r.itemId)}
-                  </li>
-                ))}
-                {rewards.offerUnlocks.map((u, i) => (
-                  <li key={`o${i}`}>
-                    Débloque l'achat de {itemName(u.itemId)} chez {traderName(u.traderId)} (niveau {u.level})
-                  </li>
-                ))}
-                {rewards.skills.map((s, i) => (
-                  <li key={`k${i}`}>
-                    Compétence « {s.skill} » : niveau {s.level}
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </Section>
-      )}
-
-      {wiki && wiki.initialEquipment.length > 0 && (
-        <Section title="Équipement initial">
-          <WikiBlocks blocks={wiki.initialEquipment} />
-        </Section>
-      )}
-
-      {hasGuide && (
-        <Section title="Guide">
-          {(failConditions.length > 0 || task.details?.restartable) && (
-            <>
-              <div className="wiki-heading wiki-heading-3">Selon tarkov.dev</div>
-              <ul className="plain-list">
-                {failConditions.map((f, i) => (
-                  <li key={i}>{failConditionText(f, tasksById)}</li>
-                ))}
-                {task.details && failConditions.length > 0 && (
-                  <li>Refaisable après un échec : {task.details.restartable ? "oui" : "non"}</li>
-                )}
-                {task.details?.restartable && failConditions.length === 0 && <li>Refaisable après un échec : oui</li>}
-              </ul>
-            </>
-          )}
-          {wiki && wiki.guide.length > 0 && <WikiBlocks blocks={wiki.guide} />}
-        </Section>
-      )}
+      {QUEST_SECTIONS.map((s) => {
+        const content = sections[s.id];
+        if (!content) return null; // section sans données : masquée
+        const title = s.id === "prereq" && prereq.warnings.length > 0 ? `${s.title} ⚠ désaccord` : s.title;
+        return (
+          <Section key={`${task.id}:${s.id}`} title={title} open={s.open}>
+            {content}
+          </Section>
+        );
+      })}
     </div>
   );
 }

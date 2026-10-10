@@ -454,6 +454,18 @@ body.is-resizing {
 .wiki-status {
   margin: 0.75rem 0 0.25rem;
 }
+/* texte du wiki mis en avant (Objectifs, À emporter, Guide) */
+.wiki-highlight {
+  margin: 0.2rem 0 0.6rem;
+  padding: 0.45rem 0.65rem;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: rgba(200, 178, 122, 0.07);
+}
+.wiki-source {
+  margin-bottom: 0.35rem;
+  color: var(--muted);
+}
 .wiki-blocks {
   display: flex;
   flex-direction: column;
