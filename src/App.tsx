@@ -16,11 +16,27 @@ import { SettingsTab } from "./components/SettingsTab";
 import { PhotosTab } from "./components/PhotosTab";
 import { ResetProgressSection } from "./components/ResetProgressSection";
 import { QuestTab } from "./components/QuestTab";
+import { PanelResizer } from "./components/PanelResizer";
+import { clampPanelWidth, readPanelWidth } from "./lib/panelWidth";
 
 /** Langue des noms de quêtes : français, l'anglais sert de secours (géré par l'API). */
 const LANG = "fr";
 
 type Tab = "selection" | "quests" | "quest" | "photos" | "custom" | "settings";
+
+/**
+ * Onglets du panneau. `label` : texte visible sur ordinateur (au plus deux mots courts,
+ * pour tenir sur deux lignes sans couper de mot) ; `full` : nom complet (lecteur d'écran,
+ * infobulle) ; `logo` : seul affiché sur téléphone.
+ */
+const TABS: { id: Tab; label: string; full?: string; logo: string }[] = [
+  { id: "selection", label: "Sélection", logo: "📌" },
+  { id: "quests", label: "Quêtes", full: "Toutes les quêtes", logo: "📋" },
+  { id: "quest", label: "Fiche quête", full: "Quête sélectionnée", logo: "📜" },
+  { id: "photos", label: "Photos", logo: "📷" },
+  { id: "custom", label: "Mes points", logo: "📍" },
+  { id: "settings", label: "Réglages", logo: "⚙️" },
+];
 type LoadState =
   | { status: "loading"; data: TarkovData | null }
   | { status: "ready"; data: TarkovData; source: "cache" | "network" | "stale"; error?: string }
@@ -42,6 +58,14 @@ export default function App() {
   /** Quête affichée dans l'onglet Photos. */
   const [tabTaskId, setTabTaskId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(() => !isMobile());
+  /** Largeur du panneau sur ordinateur (poignée de redimensionnement, enregistrée). */
+  const [panelWidth, setPanelWidth] = useState(() => readPanelWidth(window.innerWidth));
+  // fenêtre réduite : la largeur reste dans les bornes (sans écraser la valeur enregistrée)
+  useEffect(() => {
+    const onResize = () => setPanelWidth((w) => clampPanelWidth(w, window.innerWidth));
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
   const [placing, setPlacing] = useState<Placing>(null);
   const [focus, setFocus] = useState<{ key: string; n: number } | null>(null);
 
@@ -181,7 +205,7 @@ export default function App() {
       : "";
 
   return (
-    <div className="app">
+    <div className="app" style={{ ["--panel-user-w" as string]: `${panelWidth}px` }}>
       <header className="topbar">
         <button
           className="btn btn-small panel-toggle"
@@ -222,34 +246,28 @@ export default function App() {
       <div className="layout">
         <aside id="side-panel" className={`panel ${panelOpen ? "is-open" : ""}`}>
           <nav className="tabs" role="tablist">
-            {(
-              [
-                ["selection", `Sélection${mode.selected.length ? ` (${mode.selected.length})` : ""}`],
-                ["quests", "Quêtes"],
-                ["quest", "Quête sélectionnée", "📜"],
-                ["photos", "Photos", "📷"],
-                ["custom", "Mes points"],
-                ["settings", "Réglages"],
-              ] as [Tab, string, string?][]
-            ).map(([id, label, logo]) => (
-              <button
-                key={id}
-                role="tab"
-                aria-selected={tab === id}
-                aria-label={label}
-                title={label}
-                className={`tab ${tab === id ? "is-active" : ""}`}
-                onClick={() => setTab(id)}
-              >
-                {logo && (
+            {TABS.map(({ id, label, full, logo }) => {
+              const count = id === "selection" && mode.selected.length > 0 ? mode.selected.length : null;
+              const name = `${full ?? label}${count ? ` (${count})` : ""}`;
+              return (
+                <button
+                  key={id}
+                  role="tab"
+                  aria-selected={tab === id}
+                  aria-label={name}
+                  title={name}
+                  className={`tab ${tab === id ? "is-active" : ""}`}
+                  onClick={() => setTab(id)}
+                >
+                  {/* ordinateur : texte (deux lignes au plus, sans couper de mot) ; téléphone : logo seul */}
                   <span className="tab-logo" aria-hidden="true">
                     {logo}
                   </span>
-                )}
-                {/* sur téléphone, les onglets à logo n'affichent que le logo (voir styles.css) */}
-                <span className={logo ? "tab-text" : undefined}>{label}</span>
-              </button>
-            ))}
+                  <span className="tab-text">{label}</span>
+                  {count && <span className="tab-count">({count})</span>}
+                </button>
+              );
+            })}
           </nav>
 
           {load.status === "loading" && !data && <div className="tab-body notice muted">Chargement des quêtes…</div>}
@@ -348,6 +366,7 @@ export default function App() {
             />
           )}
         </aside>
+        {panelOpen && <PanelResizer width={panelWidth} onChange={setPanelWidth} />}
 
         <main className="map-area">
           {currentMap ? (

@@ -71,6 +71,8 @@ Le dossier `dist/` est un site statique. Vous pouvez le déposer tel quel sur n'
 - **Coordonnées du jeu** affichées sous le curseur (en bas à gauche), pratique pour vérifier le calibrage.
 - **Sauvegarde automatique** dans le navigateur : quêtes sélectionnées, progression, notes et points. Le bouton **Exporter / Importer (JSON)** dans « Réglages » permet de faire une copie ou de changer d'appareil.
 - **Interface sombre**, utilisable sur téléphone : le panneau des quêtes se replie au-dessus de la carte.
+- **Panneau réglable** (ordinateur) : 440 px par défaut, de 400 à 720 px (et au plus 60 % de la fenêtre). On le règle avec la poignée entre le panneau et la carte : glisser à la souris, flèches gauche/droite au clavier, double-clic pour revenir à 440 px. La largeur est enregistrée dans le navigateur, et la carte occupe tout l'espace restant.
+- **Onglets** : Sélection, Quêtes, Fiche quête, Photos, Mes points, Réglages. Les libellés ne sont jamais coupés au milieu d'un mot. Les logos s'ajoutent au texte quand le panneau est large (540 px et plus), et sur téléphone seuls les logos restent (📌 📋 📜 📷 📍 ⚙️), avec le nombre de quêtes sélectionnées.
 
 ---
 

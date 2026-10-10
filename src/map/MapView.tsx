@@ -104,6 +104,17 @@ function AttributionPrefix() {
   return null;
 }
 
+/** Leaflet ne suit que la taille de la fenêtre : on le prévient quand le panneau change de largeur. */
+function InvalidateOnResize() {
+  const map = useMap();
+  useEffect(() => {
+    const observer = new ResizeObserver(() => map.invalidateSize({ pan: false }));
+    observer.observe(map.getContainer());
+    return () => observer.disconnect();
+  }, [map]);
+  return null;
+}
+
 function FitBounds({ bounds }: { bounds: L.LatLngBounds }) {
   const map = useMap();
   useEffect(() => {
@@ -196,6 +207,7 @@ function MapViewInner(props: MapViewProps) {
         className="leaflet-map"
       >
         <FitBounds bounds={bounds} />
+        <InvalidateOnResize />
         <AttributionPrefix />
         <BaseLayer
           calibration={calibration}

@@ -11,7 +11,8 @@
   --danger: #e5675f;
   --ok: #6fcf97;
   --radius: 8px;
-  --panel-w: 380px;
+  /* largeur par défaut du panneau ; la poignée la remplace par --panel-user-w */
+  --panel-w: 440px;
   --topbar-h: 52px;
   color-scheme: dark;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -292,8 +293,10 @@ button:focus-visible {
 
 /* --- Panneau latéral --- */
 .panel {
-  width: var(--panel-w);
+  width: var(--panel-user-w, var(--panel-w));
   flex: none;
+  /* les onglets s'adaptent à la largeur du panneau (requêtes de conteneur) */
+  container-type: inline-size;
   display: none;
   flex-direction: column;
   background: var(--bg-2);
@@ -308,33 +311,84 @@ button:focus-visible {
   border-bottom: 1px solid var(--line);
   flex: none;
 }
-/* six onglets dans 380 px : les libellés longs (« Quête sélectionnée ») passent à la ligne,
-   avec césure française plutôt qu'un débordement */
+/* Onglets : jamais de mot coupé. Chaque libellé a au plus deux mots courts, donc au plus
+   deux lignes ; la largeur minimale du panneau (lib/panelWidth.ts) est choisie pour ça. */
 .tab {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 auto;
   border: 0;
   background: transparent;
-  padding: 0.55rem 0.15rem;
+  padding: 0.55rem 0.3rem;
   color: var(--muted);
   border-bottom: 2px solid transparent;
-  font-size: 0.84em;
+  font-size: 0.86em;
   line-height: 1.2;
   white-space: normal;
-  hyphens: auto;
-  overflow-wrap: anywhere;
+  hyphens: manual;
+  overflow-wrap: normal;
+  word-break: normal;
 }
+.tab-count {
+  margin-left: 0.25em;
+}
+/* logos : seulement si le panneau est assez large pour logo + texte */
 .tab-logo {
-  margin-right: 0.25em;
+  display: none;
+  margin-right: 0.3em;
 }
-/* téléphone : les onglets à logo (Quête, Photos) n'affichent que le logo */
+@container (min-width: 520px) {
+  .tab-logo {
+    display: inline;
+  }
+}
+/* téléphone : logos seuls (le nombre de quêtes sélectionnées reste visible) */
 @media (max-width: 480px) {
   .tab-text {
     display: none;
   }
   .tab-logo {
+    display: inline;
     margin-right: 0;
+    font-size: 1.15em;
   }
+  .tab-count {
+    margin-left: 0.1em;
+    font-size: 0.85em;
+  }
+}
+/* poignée entre le panneau et la carte (ordinateur) */
+.panel-resizer {
+  flex: none;
+  width: 7px;
+  margin-left: -4px;
+  margin-right: -3px;
+  cursor: col-resize;
+  position: relative;
+  z-index: 600;
+  touch-action: none;
+  background: transparent;
+}
+.panel-resizer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 1px;
+  background: transparent;
+  transition: background 0.15s;
+}
+.panel-resizer:hover::after,
+.panel-resizer:focus-visible::after {
+  width: 3px;
+  left: 2px;
+  background: var(--accent);
+}
+.panel-resizer:focus-visible {
+  outline: none;
+}
+body.is-resizing {
+  cursor: col-resize;
+  user-select: none;
 }
 /* titre de l'onglet Quête */
 .quest-tab-head {
@@ -1103,10 +1157,8 @@ button:focus-visible {
 
 /* --- Téléphone : le panneau passe par-dessus la carte --- */
 @media (max-width: 800px) {
-  :root {
-    --panel-w: 100%;
-  }
   .panel {
+    width: 100%;
     position: absolute;
     inset: 0;
     z-index: 1100; /* au-dessus des contrôles Leaflet (z-index 1000) */
@@ -1121,6 +1173,9 @@ button:focus-visible {
   }
   .tab {
     font-size: 0.85em;
+  }
+  .panel-resizer {
+    display: none;
   }
   /* cibles tactiles plus grandes */
   .quest-row {
