@@ -14,7 +14,7 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 | Tests | 84/84 au vert (`npm test`) |
 | Compilation | OK (`npm run build`) |
 | Vérifié dans le navigateur | Littoral + Signal - Partie 3 (page historique, prérequis en désaccord, brouilleur coché par erreur puis décoché via l'onglet Quête et via les Réglages), quête PVP ZONE (bandeau), quête avec clé (Health Care Privacy - Part 2), quête avec objets Find in raid (First in Line), version téléphone |
-| **Pas encore poussé** | **10 commits** en local, absents de GitHub : `origin` n'a que `ecbe77a` (session 1). Le `git push` échoue depuis la session de Claude (identifiants GitHub). **À faire à la main** : GitHub Desktop, ou `git push` dans un terminal. |
+| **Pas encore poussé** | **Tous les commits après `ecbe77a`** (session 1) sont seulement en local : GitHub n'a que `ecbe77a`. Pour les compter : `git rev-list --count origin/claude/tarkov-quest-planner-axir48..HEAD`. Le `git push` échoue depuis la session de Claude (identifiants GitHub). **À faire à la main** : GitHub Desktop, ou `git push` dans un terminal. |
 
 ### Commits depuis la session 1 (tous locaux, à pousser)
 
@@ -30,6 +30,7 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 | `c79daf5` | 4 | Journal (rapport sur l'API du wiki) |
 | `708060c` | 4 | Onglet Quête : informations complètes du wiki et de tarkov.dev |
 | `e362f55` | 4 | Journal (fin de session 4) |
+| (suivants) | 4 | Journal : cette liste, tests par fichier, corrections |
 
 ### Tests (84)
 
