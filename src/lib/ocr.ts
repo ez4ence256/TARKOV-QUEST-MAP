@@ -1,0 +1,164 @@
+// Lecture du texte d'une capture d'écran, entièrement dans le navigateur (aucune image
+// n'est envoyée nulle part). Moteur : Tesseract.js (Apache-2.0), chargé seulement à la
+// première capture (import dynamique : fichier séparé, l'app ne s'alourdit pas).
+//  - worker et moteur WebAssembly : servis par l'app (copiés au build, pas de code de CDN) ;
+//  - données de langue fra + eng (~0,7 + ~3 Mo) : téléchargées depuis le CDN jsdelivr la
+//    première fois, puis gardées par Tesseract.js dans IndexedDB.
+import workerUrl from "tesseract.js/dist/worker.min.js?url";
+import coreUrl from "tesseract.js-core/tesseract-core-simd-lstm.wasm.js?url";
+import type { Worker } from "tesseract.js";
+
+export interface OcrLine {
+  text: string;
+  /** Confiance de Tesseract, de 0 à 100. */
+  confidence: number;
+}
+
+export interface OcrProgress {
+  status: string;
+  /** 0 à 1. */
+  progress: number;
+}
+
+export type Preprocess = "none" | "upscale" | "full";
+
+let workerPromise: Promise<Worker> | null = null;
+let onProgress: ((p: OcrProgress) => void) | null = null;
+
+function getWorker(): Promise<Worker> {
+  if (!workerPromise) {
+    workerPromise = import("tesseract.js")
+      .then(({ createWorker }) =>
+        // 1 = OEM.LSTM_ONLY (réseau de neurones, le plus précis)
+        createWorker(["fra", "eng"], 1, {
+          workerPath: workerUrl,
+          corePath: coreUrl,
+          logger: (m: { status: string; progress: number }) => onProgress?.({ status: m.status, progress: m.progress }),
+        }),
+      )
+      .catch((error) => {
+        workerPromise = null; // nouvel essai possible (ex. connexion revenue)
+        throw error;
+      });
+  }
+  return workerPromise;
+}
+
+/**
+ * Prépare l'image pour l'OCR :
+ *  - "upscale" : agrandit les petites captures (texte plus gros = mieux lu) ;
+ *  - "full" : agrandit, passe en niveaux de gris, étire le contraste et inverse si le
+ *    fond est sombre. Gardé pour les essais : sur fond très sombre, l'étirement se cale
+ *    sur le fond et écrase le texte (mesuré : 1/8 contre 7/8 pour "upscale").
+ */
+export async function preprocess(image: Blob, mode: Preprocess = "upscale"): Promise<HTMLCanvasElement> {
+  const bitmap = await createImageBitmap(image);
+  const scale = mode === "none" ? 1 : Math.min(3, Math.max(1, 2200 / bitmap.width));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  if (mode !== "full") return canvas;
+
+  const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const d = img.data;
+  const gray = new Uint8ClampedArray(d.length / 4);
+  const histogram = new Array(256).fill(0);
+  for (let i = 0, j = 0; i < d.length; i += 4, j++) {
+    const g = Math.round(0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]);
+    gray[j] = g;
+    histogram[g]++;
+  }
+  // bornes à 2 % et 98 % de l'histogramme pour étirer le contraste
+  const total = gray.length;
+  let low = 0;
+  let high = 255;
+  for (let acc = 0; low < 255 && (acc += histogram[low]) < total * 0.02; low++);
+  for (let acc = 0; high > 0 && (acc += histogram[high]) < total * 0.02; high--);
+  const mean = gray.reduce((s, g) => s + g, 0) / total;
+  const invert = mean < 128;
+  const range = Math.max(1, high - low);
+  for (let i = 0, j = 0; i < d.length; i += 4, j++) {
+    let v = ((gray[j] - low) * 255) / range;
+    if (invert) v = 255 - v;
+    d[i] = d[i + 1] = d[i + 2] = v;
+  }
+  ctx.putImageData(img, 0, 0);
+  return canvas;
+}
+
+export interface OcrOptions {
+  preprocess?: Preprocess;
+  /**
+   * Découpage de page de Tesseract : "auto" (3, paragraphes) ou "sparse" (11, texte
+   * épars : adapté aux interfaces, chaque morceau de texte est trouvé séparément).
+   */
+  layout?: "auto" | "sparse";
+  /** Coupe une ligne là où l'espace entre deux mots dépasse ce multiple de la hauteur du texte (colonnes). */
+  columnGap?: number;
+}
+
+/**
+ * Réglages retenus après mesure sur une image de synthèse du menu Tâches (session 5,
+ * voir JOURNAL.md) : agrandir seulement, texte épars, colonnes séparées -> 7/7 quêtes,
+ * aucune fausse. Le prétraitement "full" (contraste + inversion) faisait tomber à 1/8.
+ */
+export const DEFAULT_OCR_OPTIONS: Required<OcrOptions> = { preprocess: "upscale", layout: "sparse", columnGap: 1.6 };
+
+interface Box {
+  x0: number;
+  x1: number;
+  y0: number;
+  y1: number;
+}
+interface Word {
+  text: string;
+  confidence: number;
+  bbox: Box;
+}
+
+/** Sépare les colonnes d'une ligne (nom | marchand | lieu) d'après les grands espaces entre mots. */
+export function splitByGaps(words: Word[], gapFactor: number): Word[][] {
+  if (words.length === 0) return [];
+  const height = Math.max(1, ...words.map((w) => w.bbox.y1 - w.bbox.y0));
+  const groups: Word[][] = [[words[0]]];
+  for (let i = 1; i < words.length; i++) {
+    const gap = words[i].bbox.x0 - words[i - 1].bbox.x1;
+    if (gap > height * gapFactor) groups.push([words[i]]);
+    else groups[groups.length - 1].push(words[i]);
+  }
+  return groups;
+}
+
+/** Lit les lignes de texte d'une image (capture collée ou choisie). */
+export async function readImageLines(
+  image: Blob,
+  progress?: (p: OcrProgress) => void,
+  options: OcrOptions = {},
+): Promise<OcrLine[]> {
+  const o = { ...DEFAULT_OCR_OPTIONS, ...options };
+  onProgress = progress ?? null;
+  try {
+    const [worker, canvas] = await Promise.all([getWorker(), preprocess(image, o.preprocess)]);
+    await worker.setParameters({ tessedit_pageseg_mode: (o.layout === "sparse" ? "11" : "3") as never });
+    const { data } = await worker.recognize(canvas, {}, { blocks: true, text: true });
+    const lines: OcrLine[] = [];
+    for (const block of data.blocks ?? []) {
+      for (const paragraph of block.paragraphs) {
+        for (const line of paragraph.lines) {
+          for (const group of splitByGaps(line.words as Word[], o.columnGap)) {
+            const text = group.map((w) => w.text).join(" ").replace(/\s+/g, " ").trim();
+            const confidence = group.reduce((s, w) => s + w.confidence, 0) / group.length;
+            if (text) lines.push({ text, confidence });
+          }
+        }
+      }
+    }
+    return lines;
+  } finally {
+    onProgress = null;
+  }
+}

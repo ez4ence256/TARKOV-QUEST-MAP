@@ -16,13 +16,15 @@ import { SettingsTab } from "./components/SettingsTab";
 import { PhotosTab } from "./components/PhotosTab";
 import { ResetProgressSection } from "./components/ResetProgressSection";
 import { QuestTab } from "./components/QuestTab";
+import { CaptureTab } from "./components/CaptureTab";
+import { dominantMap } from "./lib/ocrMatch";
 import { PanelResizer } from "./components/PanelResizer";
 import { clampPanelWidth, readPanelWidth } from "./lib/panelWidth";
 
 /** Langue des noms de quêtes : français, l'anglais sert de secours (géré par l'API). */
 const LANG = "fr";
 
-type Tab = "selection" | "quests" | "quest" | "photos" | "custom" | "settings";
+type Tab = "selection" | "quests" | "capture" | "quest" | "photos" | "custom" | "settings";
 
 /**
  * Onglets du panneau. `label` : texte visible sur ordinateur (au plus deux mots courts,
@@ -32,6 +34,7 @@ type Tab = "selection" | "quests" | "quest" | "photos" | "custom" | "settings";
 const TABS: { id: Tab; label: string; full?: string; logo: string }[] = [
   { id: "selection", label: "Sélection", logo: "📌" },
   { id: "quests", label: "Quêtes", full: "Toutes les quêtes", logo: "📋" },
+  { id: "capture", label: "Capture", full: "Importer une capture", logo: "📥" },
   { id: "quest", label: "Fiche quête", full: "Quête sélectionnée", logo: "📜" },
   { id: "photos", label: "Photos", logo: "📷" },
   { id: "custom", label: "Mes points", logo: "📍" },
@@ -146,6 +149,28 @@ export default function App() {
   }, []);
   const showPhotos = useCallback((taskId: string) => showTaskTab(taskId, "photos"), [showTaskTab]);
   const showQuest = useCallback((taskId: string) => showTaskTab(taskId, "quest"), [showTaskTab]);
+
+  // Ctrl+V d'une image n'importe où (sauf dans un champ de texte) : import par capture
+  const [pastedImage, setPastedImage] = useState<{ blob: Blob; n: number } | null>(null);
+  useEffect(() => {
+    const onPaste = (e: ClipboardEvent) => {
+      const el = document.activeElement as HTMLElement | null;
+      const typing =
+        el?.isContentEditable ||
+        el instanceof HTMLTextAreaElement ||
+        (el instanceof HTMLInputElement && !["checkbox", "radio", "button", "submit", "file", "range"].includes(el.type));
+      if (typing) return; // collage de texte normal dans les notes, la recherche…
+      const item = [...(e.clipboardData?.items ?? [])].find((i) => i.kind === "file" && i.type.startsWith("image/"));
+      const blob = item?.getAsFile();
+      if (!blob) return;
+      e.preventDefault();
+      setPastedImage({ blob, n: Date.now() });
+      setTab("capture");
+      setPanelOpen(true);
+    };
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, []);
 
   const showMap = (mapId: string) => {
     dispatch({ type: "setMap", mapId });
@@ -322,6 +347,23 @@ export default function App() {
               onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })}
               onReset={(task) => dispatch({ type: "resetProgress", objectiveIds: task.objectives.map((o) => o.id) })}
               onPhotos={showPhotos}
+            />
+          )}
+          {data && tab === "capture" && (
+            <CaptureTab
+              tasks={tasks}
+              pasted={pastedImage}
+              onApply={(taskIds, replace) => {
+                dispatch({ type: "selectTasks", taskIds, replace });
+                const added = taskIds.map((id) => tasksById.get(id)).filter((t): t is Task => Boolean(t));
+                const mapId = dominantMap(added);
+                const n = `${added.length} quête${added.length > 1 ? "s" : ""} ${replace ? "sélectionnée" : "ajoutée"}${added.length > 1 ? "s" : ""}.`;
+                if (mapId && maps.some((m) => m.id === mapId)) {
+                  dispatch({ type: "setMap", mapId });
+                  return `${n} Map affichée : ${maps.find((m) => m.id === mapId)!.name} (la plupart de leurs points s'y trouvent).`;
+                }
+                return `${n} Leurs points sont répartis sur plusieurs maps (ou absents) : la map affichée n'a pas changé.`;
+              }}
             />
           )}
           {data && tab === "photos" && (

@@ -114,3 +114,6 @@ Le format a été déduit, sans copier de code, des dépôts suivants :
 | [Leaflet](https://leafletjs.com) | BSD-2-Clause |
 | [React Leaflet](https://react-leaflet.js.org) | Hippocratic License 2.1 |
 | [Vite](https://vite.dev), [Vitest](https://vitest.dev), [TypeScript](https://www.typescriptlang.org) (outils de développement) | MIT / Apache-2.0 |
+| [Tesseract.js](https://github.com/naptha/tesseract.js) 7.0.0 (OCR de l'import par capture, chargé à la demande) | Apache-2.0 |
+| [tesseract.js-core](https://github.com/naptha/tesseract.js-core) 6.1.2 (moteur [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) compilé en WebAssembly, intégré au build) | Apache-2.0 |
+| Données de langue `fra` et `eng` ([@tesseract.js-data](https://www.npmjs.com/org/tesseract.js-data), modèles `4.0.0_best_int` issus de [tessdata_best](https://github.com/tesseract-ocr/tessdata_best)) : téléchargées depuis le CDN jsdelivr à la première capture, **non incluses dans ce dépôt** | paquets npm : MIT ; modèles tessdata : Apache-2.0 |

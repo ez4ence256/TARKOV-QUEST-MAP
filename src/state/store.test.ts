@@ -96,6 +96,17 @@ describe("réinitialisation de la progression", () => {
     expect(reducer(noMode, { type: "resetAllProgress" })).toBe(noMode);
   });
 
+  it("import par capture : ajoute sans retirer, ou remplace la sélection ; progression intacte", () => {
+    const base = stateWith({ selected: [{ taskId: "deja", color: 0 }], done: { [JAMMER_1]: 10 } }, {});
+    const added = reducer(base, { type: "selectTasks", taskIds: ["a", "deja", "b"], replace: false });
+    expect(added.modes.regular!.selected.map((s) => s.taskId)).toEqual(["deja", "a", "b"]);
+    expect(new Set(added.modes.regular!.selected.map((s) => s.color)).size).toBe(3); // couleurs distinctes
+    const replaced = reducer(base, { type: "selectTasks", taskIds: ["a"], replace: true });
+    expect(replaced.modes.regular!.selected).toEqual([{ taskId: "a", color: 0 }]);
+    expect(replaced.modes.regular!.done).toBe(base.modes.regular!.done);
+    expect(replaced.modes.pve).toBe(base.modes.pve);
+  });
+
   it("liste les quêtes qui ont de la progression, et les objectifs orphelins", () => {
     const done = initial.modes.regular!.done;
     expect(tasksWithProgress([otherTask, signal3], done).map((t) => t.name)).toEqual(["Autre", "Signal - Partie 3"]);

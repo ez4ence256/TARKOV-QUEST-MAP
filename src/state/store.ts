@@ -110,7 +110,16 @@ export type Action =
   /** Remet à "pas fait" les objectifs donnés (une quête), dans le mode courant seulement. */
   | { type: "resetProgress"; objectiveIds: string[] }
   /** Remet à "pas fait" tous les objectifs du mode courant (notes et points perso gardés). */
-  | { type: "resetAllProgress" };
+  | { type: "resetAllProgress" }
+  /** Ajoute des quêtes à la sélection (import par capture) ; replace = vide d'abord la sélection. */
+  | { type: "selectTasks"; taskIds: string[]; replace: boolean };
+
+/** Première couleur libre, sinon on recommence la palette. */
+function nextColor(selected: SelectedTask[]): number {
+  const used = new Set(selected.map((s) => s.color));
+  const color = QUEST_COLORS.findIndex((_, i) => !used.has(i));
+  return color === -1 ? selected.length % QUEST_COLORS.length : color;
+}
 
 /** Applique une modification au ModeState du mode courant. */
 function updateMode(state: AppState, fn: (m: ModeState) => ModeState): AppState {
@@ -132,11 +141,7 @@ export function reducer(state: AppState, action: Action): AppState {
         if (m.selected.some((s) => s.taskId === action.taskId)) {
           return { ...m, selected: m.selected.filter((s) => s.taskId !== action.taskId) };
         }
-        // première couleur libre, sinon on recommence la palette
-        const used = new Set(m.selected.map((s) => s.color));
-        let color = QUEST_COLORS.findIndex((_, i) => !used.has(i));
-        if (color === -1) color = m.selected.length % QUEST_COLORS.length;
-        return { ...m, selected: [...m.selected, { taskId: action.taskId, color }] };
+        return { ...m, selected: [...m.selected, { taskId: action.taskId, color: nextColor(m.selected) }] };
       });
     case "clearSelection":
       return updateMode(state, (m) => ({ ...m, selected: [] }));
@@ -187,6 +192,15 @@ export function reducer(state: AppState, action: Action): AppState {
       });
     case "resetAllProgress":
       return updateMode(state, (m) => ({ ...m, done: {} }));
+    case "selectTasks":
+      return updateMode(state, (m) => {
+        const selected = action.replace ? [] : [...m.selected];
+        for (const taskId of action.taskIds) {
+          if (selected.some((s) => s.taskId === taskId)) continue;
+          selected.push({ taskId, color: nextColor(selected) });
+        }
+        return { ...m, selected };
+      });
   }
 }
 
