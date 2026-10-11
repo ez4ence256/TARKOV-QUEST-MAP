@@ -324,6 +324,7 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 - Nouveaux champs de données **facultatifs**.
 - Un commit par tâche, en français, avec tests et build verts avant.
 - **Version** : `version` de `package.json`, affichée en bas à droite de l'écran d'accueil (choix PvP / PvE / PvP Saison). **À augmenter à chaque livraison**, avant le dernier commit : `0.<session>.<n° de livraison dans la session>` (0.7.0 = fin de session 7).
+- **Production (tarkov.aprilox.fr, derrière Cloudflare)** : déployée automatiquement à chaque push sur `main` (~1 min). L'hébergeur publie `index.html` avant les fichiers de `assets/` ; pendant cet écart, un fichier absent reçoit la page HTML, **mise en cache ~2 h 30** à cette adresse (« Failed to load module script … text/html »). Parade dans l'app (0.7.2) : un petit script dans `index.html` redemande le fichier avec `?r=<date>`. Vraie correction côté hébergeur : 404 (sans cache) pour un fichier absent de `assets/`, ou fichiers envoyés avant `index.html`. Les morceaux chargés plus tard (OCR) ne sont pas couverts par la parade.
 
 **Commandes** : `npm run dev` · `npm test` · `npm run build` · `npm run sync:maps`. Node est dans `C:\Program Files\nodejs`. npm 12 bloque le script d'après-installation de tesseract.js (simple annonce de financement, inutile).
 
