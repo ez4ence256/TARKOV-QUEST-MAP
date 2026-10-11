@@ -22,7 +22,7 @@ import {
 import { CUSTOM_POINT_COLOR, categoryOf } from "../lib/objectiveTypes";
 import { CustomPopup, ObjectivePopup } from "../components/PointPopups";
 import { tr, getLang } from "../lib/i18n";
-import { visibleExits } from "../lib/exits";
+import { exitsNearMap, visibleExits } from "../lib/exits";
 
 const SHOW_EXITS_KEY = "tqp:showExits";
 
@@ -183,7 +183,10 @@ function MapViewInner(props: MapViewProps) {
       }
       return !v;
     });
-  const exits = useMemo(() => visibleExits(props.map.exits ?? [], props.showScavExits), [props.map, props.showScavExits]);
+  const exits = useMemo(
+    () => visibleExits(exitsNearMap(props.map.exits ?? [], calibration?.bounds), props.showScavExits),
+    [props.map, props.showScavExits, calibration],
+  );
   const layers = calibration?.layers ?? [];
   // niveaux du sélecteur : principal + souterrains (les étages supérieurs sont sur la carte de base)
   const pickerLevels = useMemo(() => selectableLevels(calibration), [calibration]);
