@@ -2,6 +2,7 @@
 // libellés. Fonctions pures, testées dans exits.test.ts.
 
 import type { MapExit } from "../types";
+import type { RawBounds } from "../map/calibration";
 import { tr } from "./i18n";
 
 /** L'API n'a pas de champ « coop » : seul le nom anglais l'indique (« (Co-op) » ou « (Co-Op) »). */
@@ -57,6 +58,24 @@ export function exitIconKind(exit: Pick<MapExit, "kind" | "factions">): ExitIcon
 /** Sorties à afficher : sans les sorties Scav seules quand la case « Extracts Scav » est décochée. */
 export function visibleExits<T extends Pick<MapExit, "kind" | "factions">>(exits: T[], showScav: boolean): T[] {
   return showScav ? exits : exits.filter((e) => exitIconKind(e) !== "scav");
+}
+
+/** Part de la taille de la map tolérée hors emprise (relevé : sorties réelles à 4 % au plus, aberrantes à 119 % et plus). */
+const OFF_MAP_MARGIN = 0.5;
+
+/**
+ * Retire les sorties très loin hors de la map (Point zéro : « Barrage ONU » et « Bunker scav » sont
+ * à plus d'une largeur de map, donnée de l'API telle quelle). Une sortie juste au bord reste.
+ */
+export function exitsNearMap<T extends Pick<MapExit, "position">>(exits: T[], bounds: RawBounds | undefined): T[] {
+  if (!bounds) return exits;
+  const [[x1, z1], [x2, z2]] = bounds;
+  const mx = Math.abs(x2 - x1) * OFF_MAP_MARGIN;
+  const mz = Math.abs(z2 - z1) * OFF_MAP_MARGIN;
+  return exits.filter(
+    ({ position: { x, z } }) =>
+      x >= Math.min(x1, x2) - mx && x <= Math.max(x1, x2) + mx && z >= Math.min(z1, z2) - mz && z <= Math.max(z1, z2) + mz,
+  );
 }
 
 export function factionLabel(factions: MapExit["factions"]): string {

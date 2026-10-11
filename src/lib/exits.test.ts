@@ -5,7 +5,7 @@ import type { MapExit } from "../types";
 import { BUNDLED_CALIBRATION } from "../map/calibration";
 import { isInBounds } from "../map/crs";
 import { displayLevelOf, levelName, upperLevelOf } from "../map/levels";
-import { exitIconKind, factionLabel, factionsOf, isCoopName, mergeExits, visibleExits } from "./exits";
+import { exitIconKind, factionLabel, factionsOf, isCoopName, exitsNearMap, mergeExits, visibleExits } from "./exits";
 import { escapeHtml } from "../map/exitIcons";
 
 describe("nom affiché sur la carte", () => {
@@ -141,5 +141,32 @@ describe("placement de sorties réelles (calibrage et étages)", () => {
     const admin = exit("Admin Basement", -256.87, -7.71, -149.78, { top: -5.95, bottom: -9.46 });
     expect(levelName(shoreline, displayLevelOf(pos(admin), shoreline))).toBe("Sous-sol");
     expect(isInBounds(shoreline.bounds, admin.position)).toBe(true);
+  });
+});
+
+describe("cas rapportés (données tarkov.dev d'octobre 2026)", () => {
+  it("Douanes : ZB-1011 (ligne PMC + ligne Scav au nom français différent) est une seule sortie, au sous-sol", () => {
+    const merged = mergeExits([
+      exit("ZB-1011", 621.5, -2.07, -126.48, { factions: ["pmc"], top: 0.11, bottom: -4.25 }),
+      exit("ZB-1011", 625.57, -2.72, -127.71, { factions: ["scav"], top: -0.31, bottom: -5.13 }),
+    ]);
+    expect(merged).toHaveLength(1);
+    expect(merged[0].factions).toEqual(["pmc", "scav"]);
+    const customs = BUNDLED_CALIBRATION["customs"];
+    const p = { ...merged[0].position, top: merged[0].top, bottom: merged[0].bottom };
+    expect(levelName(customs, displayLevelOf(p, customs))).toBe("Sous-sol"); // pas sur le niveau principal
+  });
+
+  it("Point zéro : « Barrage ONU » et « Bunker scav » (à plus d'une largeur de map) sont écartés, Pinewood au bord reste", () => {
+    const gz = BUNDLED_CALIBRATION["ground-zero"];
+    const exits = [
+      exit("UN Roadblock", -527.87, 1.68, 288.23),
+      exit("Scav Bunker", 220.43, 20.54, -705.8),
+      exit("Pinewood Basement (Co-Op)", -113.71, -2.93, 65.63),
+      exit("Mira Ave (Flare)", 218.23, 17.99, -38.51),
+    ];
+    expect(exits.filter((e) => !isInBounds(gz.bounds, e.position)).map((e) => e.nameEn)).toContain("UN Roadblock");
+    expect(exitsNearMap(exits, gz.bounds).map((e) => e.nameEn)).toEqual(["Pinewood Basement (Co-Op)", "Mira Ave (Flare)"]);
+    expect(exitsNearMap(exits, undefined)).toHaveLength(4);
   });
 });
