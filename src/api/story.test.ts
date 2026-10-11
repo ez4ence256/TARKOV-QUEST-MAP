@@ -34,11 +34,39 @@ describe("liste des chapitres", () => {
       { id: "Tour", nameEn: "Tour", name: "Excursion", frTitle: "Excursion" },
       { id: "Batya", nameEn: "Batya", name: "Batya", frTitle: null }, // lien rouge : pas de page française
     ]);
-    expect(calls(fetchMock).map((u) => u.pathname)).toEqual(["/api.php", "/fr/api.php"]);
+    // liste EN + catégorie EN (chapitres hors tableau) + liste FR
+    expect(calls(fetchMock).map((u) => u.pathname)).toEqual(["/api.php", "/api.php", "/fr/api.php"]);
 
     await loadStoryChapters("fr");
     await loadStoryChapters("en");
-    expect(fetchMock).toHaveBeenCalledTimes(2); // tout vient du cache
+    expect(fetchMock).toHaveBeenCalledTimes(3); // tout vient du cache
+  });
+
+  it("chapitres de la catégorie absents du tableau : ajoutés à la suite (hors liste et redirections)", async () => {
+    const fetchMock = vi.fn(async (url: string) => {
+      const p = new URL(url).searchParams;
+      if (p.get("generator") === "categorymembers") {
+        return new Response(
+          JSON.stringify({ query: { pages: [{ title: "Tour" }, { title: "Story chapters" }, { title: "Old Name", redirect: true }, { title: "Zeta (story chapter)" }, { title: "Alpha" }] } }),
+        );
+      }
+      return new Response(JSON.stringify({ parse: { wikitext: LIST_EN } }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const chapters = await loadStoryChapters("en");
+    expect(chapters.map((c) => `${c.id}|${c.name}`)).toEqual(["Tour|Tour", "Batya|Batya", "Alpha|Alpha", "Zeta (story chapter)|Zeta"]);
+    await loadStoryChapters("en");
+    expect(fetchMock).toHaveBeenCalledTimes(2); // en cache ensuite
+  });
+
+  it("catégorie en panne : le tableau suffit, sans cache pour retenter", async () => {
+    const fetchMock = vi.fn(async (url: string) =>
+      new URL(url).searchParams.get("generator") ? new Response("", { status: 503 }) : new Response(JSON.stringify({ parse: { wikitext: LIST_EN } })),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    expect((await loadStoryChapters("en")).map((c) => c.id)).toEqual(["Tour", "Batya"]);
+    await loadStoryChapters("en");
+    expect(fetchMock).toHaveBeenCalledTimes(4);
   });
 
   it("liste française en panne : les noms anglais suffisent", async () => {

@@ -164,7 +164,7 @@ function updateMode(state: AppState, fn: (m: ModeState) => ModeState): AppState 
 /**
  * Réducteur de l'état. Les réinitialisations ne touchent qu'aux cases cochées (objectifs `done`
  * et étapes de la Main story) du mode courant : notes, positions placées à la main, points perso,
- * chapitres choisis et autres modes sont conservés.
+ * chapitres choisis (sauf « Tout désélectionner », qui les vide avec les quêtes) et autres modes sont conservés.
  */
 export function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
@@ -178,7 +178,8 @@ export function reducer(state: AppState, action: Action): AppState {
         return { ...m, selected: [...m.selected, { taskId: action.taskId, color: nextColor(m.selected) }] };
       });
     case "clearSelection":
-      return updateMode(state, (m) => ({ ...m, selected: [] }));
+      // chapitres de la Main story compris (même groupe « Quêtes sélectionnées ») ; cases cochées gardées
+      return updateMode(state, (m) => ({ ...m, selected: [], ...(m.story ? { story: { ...m.story, selected: [] } } : {}) }));
     case "toggleStory":
       return updateMode(state, (m) => {
         const story = m.story ?? { selected: [], done: {} };

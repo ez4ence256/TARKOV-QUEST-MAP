@@ -9,9 +9,9 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 | Élément | État |
 |---|---|
 | Branche | `claude/tarkov-quest-planner-axir48` (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**) |
-| Derniers commits | Fiche quête : photos du wiki dans le Guide (ce commit) · `72e0a00` pages wiki supprimées si stockage plein · `c3dc322` main story · `3302076` cache du wiki renouvelé à chaque utilisation · `6ff1ee9` cache libéré si plein · `959bb7c` images fiche quête |
+| Derniers commits | Main story : chapitres mélangés aux quêtes (ce commit) · `d51bc68` photos du wiki dans le Guide · `72e0a00` pages wiki supprimées si stockage plein · `c3dc322` main story · `3302076` cache du wiki renouvelé à chaque utilisation · `6ff1ee9` cache libéré si plein · `959bb7c` images fiche quête |
 | Travail non commité | Seulement `.claude/launch.json` (volontairement hors du dépôt : chemin propre à cette machine) |
-| Tests | 171/171 au vert (`npx vitest run`) |
+| Tests | 183/183 au vert (`npx vitest run`) |
 | Compilation | OK (`npm run build`). Avertissement Vite : le fichier principal fait 516 Ko (> 500 Ko). L'OCR est dans des fichiers séparés, chargés à la demande. |
 | Vérifié dans le navigateur | Panneau à 400 / 440 / 520 / 540 / 560 / 720 px, fenêtre de 1024 px et zoom simulé à 125 %, téléphone · sélection épinglée avec filtre et recherche, « Tout désélectionner » · ordre des sections sur Signal - Partie 3 · sorties sur Douanes (niveau principal + sous-sol) et Labs (principal + niveau technique) · import d'une **image de synthèse** (Ctrl+V, vérification, ajout, map choisie) |
 | **Pas vérifié** | **Import avec les captures de l'utilisateur** : elles ne sont pas arrivées en session 5 (ni l'image de référence 3D). |
@@ -56,9 +56,10 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 | `3302076` | 7 | Wiki : cache renouvelé à chaque utilisation, entrées expirées purgées |
 | `c3dc322` | 7 | Main story : chapitres du wiki suivis étape par étape |
 | `72e0a00` | 7 | Wiki : pages les moins utilisées supprimées si le stockage est plein |
-| (ce commit) | 7 | Fiche quête : photos du wiki dans la section Guide |
+| `d51bc68` | 7 | Fiche quête : photos du wiki dans la section Guide |
+| (ce commit) | 7 | Main story : chapitres mélangés aux quêtes, « Main story » à la place du marchand |
 
-### Tests (171)
+### Tests (183)
 
 | Fichier | Ce qui est couvert |
 |---|---|
@@ -203,8 +204,8 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 - Environ 22 requêtes wiki dépensées pour la recherche.
 
 ### Session 7 : Main story (chapitres du wiki)
-- **Où** : onglet Quêtes (section « Main story » au-dessus des quêtes, recherche FR/EN), fiche d'un chapitre dans l'onglet Fiche quête (liste déroulante, identifiant `story:<titre anglais>`), carte courte dans l'onglet Sélection. Code : `src/lib/story.ts` (lecture, clés, choix de la langue), `src/api/story.ts` (chargement, cache compact), `src/components/StoryView.tsx`.
-- **État** : `ModeState.story?: { selected: string[]; done: Record<string, true> }`, séparé de `selected` (rien sur la carte). Case = `<titre anglais du chapitre>::<titre anglais normalisé de l'étape>#<n° d'occurrence>`. « Tout réinitialiser » vide aussi `story.done` ; « Tout désélectionner » ne touche que les quêtes.
+- **Où** : onglet Quêtes (chapitres mélangés aux quêtes, triés avec elles, « Main story » à la place du marchand, filtre marchand « Main story », recherche FR/EN), fiche d'un chapitre dans l'onglet Fiche quête (liste déroulante, identifiant `story:<titre anglais>`), carte courte dans l'onglet Sélection. Code : `src/lib/story.ts` (lecture, clés, choix de la langue), `src/api/story.ts` (chargement, cache compact), `src/components/StoryView.tsx`.
+- **État** : `ModeState.story?: { selected: string[]; done: Record<string, true> }`, séparé de `selected` (rien sur la carte). Case = `<titre anglais du chapitre>::<titre anglais normalisé de l'étape>#<n° d'occurrence>`. « Tout réinitialiser » vide aussi `story.done` ; « Tout désélectionner » vide aussi les chapitres choisis (étapes cochées gardées).
 - **Écart au plan** : l'association FR/EN ne passe **pas** par `langlinks` (1 chapitre sur 10 seulement en a un) mais par la liste « Chapitres de l'histoire » du wiki FR, rapprochée de la liste EN par le **nom du fichier d'icône**. `links` dit quelles pages FR existent.
 - **The Ticket** : le Guide appelle quatre modèles (une fin chacun) que `prop=wikitext` ne développe pas : 1 requête de plus pour les lire ; début commun une seule fois, puis étapes de chaque fin étiquetées. La progression n'atteint donc jamais le total (fins alternatives).
 - **Langue** : texte français seulement si la page FR a le même nombre d'étapes et aucune étape dont les nombres distinctifs (quantités, sommes) viennent d'une autre position (Tour / Excursion a deux étapes inversées). Sinon anglais, avec une mention.
@@ -274,6 +275,7 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 - **Sécurité** : aucun HTML du wiki inséré ; les noms affichés dans les marqueurs sont échappés.
 - **Réinitialisation** : seulement `done` du mode actuel, avec confirmation.
 - **Un seul accès au wiki** (`src/api/wiki.ts`, 1 requête/s, cache 7 jours).
+- **Main story (session 7, après validation)** : chapitres **mélangés aux quêtes** (pas de section à part) dans « Quêtes sélectionnées » / « Autres quêtes » et dans l'onglet Sélection, triés par nom affiché ; « Main story » à la place du marchand ; « Tout désélectionner » les inclut ; `story` reste séparé de `selected` (rien sur la carte). Liste = tableau « Story chapters » + pages de `Category:Story_chapters` absentes du tableau (1 requête de plus, constaté : 10 aussi, rien à ajouter ; le wiki FR n'a pas de chapitre en plus).
 - **Session 6** :
   - `tr(fr, en)` en ligne, sans dictionnaire ;
   - français par défaut ;

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { Task } from "../types";
 import { emptyModeState, reducer, type AppState } from "../state/store";
-import { filterQuests, pinSelected, type QuestFilters } from "./questFilter";
+import { filterQuests, filterStory, mergeRows, pinSelected, STORY_TRADER, type QuestFilters, type Row } from "./questFilter";
+import type { StoryChapter } from "./story";
 
 const CUSTOMS = "customs";
 const WOODS = "woods";
@@ -26,7 +27,7 @@ const tasks = [
   task("s3", "Signal - Partie 3", "Signal - Part 3", "mechanic", WOODS),
 ];
 const none: QuestFilters = { query: "", traderId: "", mapId: "", hideCompleted: false };
-const names = (rs: { task: Task }[]) => rs.map((r) => r.task.name);
+const names = (rs: Row[]) => rs.map((r) => ("task" in r ? r.task.name : r.chapter.name));
 
 describe("liste des quêtes : sélection épinglée", () => {
   it("les quêtes sélectionnées passent en tête, les autres gardent leur ordre", () => {
@@ -64,7 +65,61 @@ describe("liste des quêtes : sélection épinglée", () => {
   });
 });
 
+const chapter = (id: string, nameEn: string, name = nameEn): StoryChapter => ({ id, nameEn, name, frTitle: null });
+const chapters = [chapter("Tour", "Tour", "Excursion"), chapter("Batya", "Batya"), chapter("Falling Skies", "Falling Skies", "Tombé du ciel")];
+
+describe("Main story mélangée aux quêtes", () => {
+  const merged = (f: QuestFilters, lang = "fr") => mergeRows(filterQuests(tasks, f, {}), filterStory(chapters, f, lang), lang, Boolean(f.query));
+
+  it("sans recherche : tout est trié ensemble par nom affiché (français)", () => {
+    expect(names(merged(none))).toEqual(["Appâtage", "Batya", "Debut", "Excursion", "Signal - Partie 2", "Signal - Partie 3", "Tombé du ciel"]);
+  });
+
+  it("en anglais : noms anglais", () => {
+    expect(names(merged(none, "en"))).toContain("Falling Skies");
+  });
+
+  it("recherche française ou anglaise : trouve les chapitres, rappel du nom anglais", () => {
+    expect(names(merged({ ...none, query: "excursion" }))).toEqual(["Excursion"]);
+    const viaEn = merged({ ...none, query: "falling" });
+    expect(names(viaEn)).toEqual(["Tombé du ciel"]);
+    expect(viaEn[0].viaEnglish).toBe(true);
+  });
+
+  it("filtre marchand « Main story » : chapitres seulement ; autre marchand ou map : aucun chapitre", () => {
+    expect(names(merged({ ...none, traderId: STORY_TRADER }))).toEqual(["Batya", "Excursion", "Tombé du ciel"]);
+    expect(names(merged({ ...none, traderId: "prapor" }))).toEqual(["Debut"]);
+    expect(names(merged({ ...none, mapId: WOODS }))).toEqual(["Signal - Partie 2", "Signal - Partie 3"]);
+    expect(names(merged({ ...none, traderId: STORY_TRADER, mapId: WOODS }))).toEqual([]);
+  });
+
+  it("« Masquer les terminées » laisse les chapitres", () => {
+    expect(names(merged({ ...none, hideCompleted: true }, "fr"))).toContain("Batya");
+  });
+
+  it("les chapitres sélectionnés sont épinglés avec les quêtes (clé story:<chapitre>)", () => {
+    const { pinned, others, hiddenSelected } = pinSelected(merged(none), ["s3", "story:Tour", "story:Absent"]);
+    expect(names(pinned)).toEqual(["Excursion", "Signal - Partie 3"]);
+    expect(names(others)).toHaveLength(5);
+    expect(hiddenSelected).toBe(1);
+    expect(names(pinSelected(merged({ ...none, mapId: WOODS }), ["story:Tour"]).pinned)).toEqual([]);
+  });
+});
+
 describe("Tout désélectionner", () => {
+  it("vide aussi les chapitres de la Main story, en gardant leurs étapes cochées", () => {
+    const story = { selected: ["Tour", "Batya"], done: { "Tour::a#0": true as const } };
+    const state: AppState = { version: 1, gameMode: "regular", showDone: false, modes: { regular: { ...emptyModeState(), selected: [{ taskId: "a", color: 0 }], story } } };
+    const next = reducer(state, { type: "clearSelection" }).modes.regular!;
+    expect(next.selected).toEqual([]);
+    expect(next.story).toEqual({ selected: [], done: story.done });
+  });
+
+  it("sans Main story : pas de champ story créé", () => {
+    const state: AppState = { version: 1, gameMode: "regular", showDone: false, modes: { regular: emptyModeState() } };
+    expect(reducer(state, { type: "clearSelection" }).modes.regular!.story).toBeUndefined();
+  });
+
   it("vide la sélection sans toucher à la progression, aux notes ni aux points", () => {
     const regular = {
       ...emptyModeState(),

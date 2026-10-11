@@ -41,14 +41,40 @@ function loadList(lang: WikiLang): Promise<ListCache> {
       const parsed = (json.parse ?? {}) as { wikitext?: string; links?: { title?: string; exists?: boolean }[] };
       const rows = parseChapterList(String(parsed.wikitext ?? ""));
       if (rows.length === 0) throw new Error(tr("Liste des chapitres introuvable", "Chapter list not found"));
+      // EN : les pages de la catégorie absentes du tableau (futurs chapitres) sont ajoutées à la suite
+      let complete = true;
+      if (lang === "en") {
+        try {
+          rows.push(...(await categoryExtras(new Set(rows.map((r) => r.title)))));
+        } catch {
+          complete = false; // le tableau suffit ; sans cache, la catégorie sera redemandée
+        }
+      }
       const existing = (parsed.links ?? []).filter((l) => l.exists && l.title).map((l) => String(l.title));
       const value: ListCache = { rows, existing, fetchedAt: Date.now() };
-      writeCache(`story:list:${lang}`, value);
+      if (complete) writeCache(`story:list:${lang}`, value);
       return value;
     })().finally(() => listInFlight.delete(lang));
     listInFlight.set(lang, pending);
   }
   return pending;
+}
+
+/** Pages de « Category:Story chapters » (articles, hors redirections et hors la liste) qui ne sont pas dans le tableau. */
+async function categoryExtras(known: Set<string>): Promise<ChapterRow[]> {
+  const json = await wikiRequest({
+    action: "query",
+    generator: "categorymembers",
+    gcmtitle: "Category:Story_chapters",
+    gcmnamespace: "0",
+    gcmlimit: "100",
+    prop: "info",
+  });
+  const pages = ((json.query ?? {}) as { pages?: { title?: string; redirect?: boolean }[] }).pages ?? [];
+  return pages
+    .filter((p) => p.title && !p.redirect && p.title !== LIST_TITLE.en && !known.has(p.title))
+    .sort((a, b) => a.title!.localeCompare(b.title!))
+    .map((p) => ({ title: p.title!, name: p.title!.replace(/ \((?:story )?chapter\)$/i, ""), icon: `category:${p.title}` }));
 }
 
 /**
