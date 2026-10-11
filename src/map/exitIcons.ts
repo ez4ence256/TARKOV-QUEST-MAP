@@ -1,7 +1,8 @@
-// Pastilles des sorties : rectangle vertical avec un bonhomme blanc (vert = sortie,
-// orange = transit), deux bonhommes et « coop » pour les sorties coop, nom écrit à côté.
+// Pastilles des sorties : rectangle vertical avec un bonhomme blanc (vert = sortie sans faction,
+// bleu = PMC, violet = Scav, mi-bleu mi-violet = commune, orange = transit), deux bonhommes et « coop » pour les sorties coop, nom écrit à côté.
 import L from "leaflet";
 import type { MapExit } from "../types";
+import { exitIconKind, type ExitIconKind } from "../lib/exits";
 
 /** Le nom vient des données de l'API : on l'échappe avant de l'insérer dans le HTML du marqueur. */
 export const escapeHtml = (s: string) =>
@@ -12,20 +13,34 @@ const PERSON =
 
 const cache = new Map<string, L.DivIcon>();
 
-export function exitIcon(exit: Pick<MapExit, "kind" | "name">, opts: { offLevel?: boolean; badge?: string } = {}) {
-  const key = `${exit.kind}|${exit.name}|${opts.offLevel ? 1 : 0}|${opts.badge ?? ""}`;
+/** Lettres sous le bonhomme : la forme distingue les factions, pas seulement la couleur. */
+const FACTION_LETTERS: Partial<Record<ExitIconKind, string>> = { pmc: "P", scav: "S", shared: "P+S" };
+
+/** Taille de la pastille (largeur, hauteur). */
+const pinSize = (kind: ExitIconKind): [number, number] => (kind === "coop" ? [30, 32] : FACTION_LETTERS[kind] ? [20, 30] : [17, 26]);
+
+/** HTML de la pastille seule (sans nom) ; aussi utilisé par la légende des réglages. Aucune donnée de l'API. */
+export function exitPinHtml(kind: ExitIconKind, extraClass = "", badge = "") {
+  const persons = kind === "coop" ? PERSON + PERSON : PERSON;
+  const text = kind === "coop" ? "coop" : FACTION_LETTERS[kind];
+  const [w, h] = pinSize(kind);
+  return (
+    `<div class="exit-pin exit-${kind} ${extraClass}" style="width:${w}px;height:${h}px">` +
+    `<span class="exit-persons">${persons}</span>${text ? `<span class="exit-coop-text">${text}</span>` : ""}${badge}</div>`
+  );
+}
+
+export function exitIcon(exit: Pick<MapExit, "kind" | "name" | "factions">, opts: { offLevel?: boolean; badge?: string } = {}) {
+  const kind = exitIconKind(exit);
+  const key = `${kind}|${exit.name}|${opts.offLevel ? 1 : 0}|${opts.badge ?? ""}`;
   let icon = cache.get(key);
   if (!icon) {
-    const coop = exit.kind === "coop";
-    const persons = coop ? PERSON + PERSON : PERSON;
-    const classes = ["exit-pin", `exit-${exit.kind}`, opts.offLevel ? "is-off-level" : ""].join(" ");
     const badge = opts.badge ? `<span class="exit-badge">${escapeHtml(opts.badge)}</span>` : "";
-    const [w, h] = coop ? [30, 32] : [17, 26];
+    const [w, h] = pinSize(kind);
     icon = L.divIcon({
       className: "exit-marker",
       html:
-        `<div class="${classes}" style="width:${w}px;height:${h}px">` +
-        `<span class="exit-persons">${persons}</span>${coop ? '<span class="exit-coop-text">coop</span>' : ""}${badge}</div>` +
+        exitPinHtml(kind, opts.offLevel ? "is-off-level" : "", badge) +
         `<span class="exit-label${opts.offLevel ? " is-off-level" : ""}">${escapeHtml(exit.name)}</span>`,
       iconSize: [w, h],
       iconAnchor: [w / 2, h / 2],

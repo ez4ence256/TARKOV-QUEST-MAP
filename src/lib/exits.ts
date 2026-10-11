@@ -43,6 +43,17 @@ export function mergeExits(exits: MapExit[]): MapExit[] {
   return merged;
 }
 
+export type ExitIconKind = "extract" | "pmc" | "scav" | "shared" | "coop" | "transit";
+
+/** Icône d'une sortie : coop et transit priment ; sinon d'après les factions (aucune : icône générique). */
+export function exitIconKind(exit: Pick<MapExit, "kind" | "factions">): ExitIconKind {
+  if (exit.kind !== "extract") return exit.kind;
+  const pmc = exit.factions.includes("pmc");
+  const scav = exit.factions.includes("scav");
+  if (pmc && scav) return "shared";
+  return pmc ? "pmc" : scav ? "scav" : "extract";
+}
+
 export function factionLabel(factions: MapExit["factions"]): string {
   if (factions.length === 2) return tr("PMC et Scav", "PMC and Scav");
   if (factions[0] === "pmc") return "PMC";

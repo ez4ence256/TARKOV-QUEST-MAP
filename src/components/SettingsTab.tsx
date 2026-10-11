@@ -4,6 +4,8 @@ import { GAME_MODES, type GameMode, type TarkovData } from "../types";
 import { ICON_LABELS, type IconId } from "../lib/objectiveTypes";
 import { readImportFile, type AppState } from "../state/store";
 import { getLang, tr } from "../lib/i18n";
+import { exitPinHtml } from "../map/exitIcons";
+import { EXIT_KIND_LABELS, type ExitIconKind } from "../lib/exits";
 import { Icon } from "./Icon";
 
 interface Props {
@@ -21,6 +23,16 @@ interface Props {
 }
 
 const LEGEND: IconId[] = ["mark", "visit", "search", "item", "plant", "other"];
+
+// getter : la langue est lue au rendu
+const exitLegend = (): [ExitIconKind, string][] => [
+  ["pmc", tr("Sortie PMC", "PMC exit")],
+  ["scav", tr("Sortie Scav", "Scav exit")],
+  ["shared", tr("Sortie PMC + Scav", "PMC + Scav exit")],
+  ["extract", tr("Sortie sans faction précisée", "Exit, faction not specified")],
+  ["coop", EXIT_KIND_LABELS.coop],
+  ["transit", EXIT_KIND_LABELS.transit],
+];
 
 export function SettingsTab(p: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -79,6 +91,13 @@ export function SettingsTab(p: Props) {
           {LEGEND.map((id) => (
             <li key={id}>
               <Icon id={id} /> {ICON_LABELS[id]}
+            </li>
+          ))}
+        </ul>
+        <ul className="legend">
+          {exitLegend().map(([kind, label]) => (
+            <li key={kind}>
+              <span dangerouslySetInnerHTML={{ __html: exitPinHtml(kind) }} /> {label}
             </li>
           ))}
         </ul>

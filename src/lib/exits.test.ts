@@ -5,7 +5,7 @@ import type { MapExit } from "../types";
 import { BUNDLED_CALIBRATION } from "../map/calibration";
 import { isInBounds } from "../map/crs";
 import { displayLevelOf, levelName, upperLevelOf } from "../map/levels";
-import { factionLabel, factionsOf, isCoopName, mergeExits } from "./exits";
+import { exitIconKind, factionLabel, factionsOf, isCoopName, mergeExits } from "./exits";
 import { escapeHtml } from "../map/exitIcons";
 
 describe("nom affiché sur la carte", () => {
@@ -61,6 +61,28 @@ describe("classement des sorties", () => {
       exit("Transit to Shoreline", 20, 0, 139, { kind: "extract" }),
     ]);
     expect(merged).toHaveLength(2);
+  });
+});
+
+describe("icône d'une sortie", () => {
+  const kindOf = (kind: MapExit["kind"], factions: MapExit["factions"]) => exitIconKind({ kind, factions });
+  it("PMC seul, Scav seul, commune", () => {
+    expect(kindOf("extract", ["pmc"])).toBe("pmc");
+    expect(kindOf("extract", ["scav"])).toBe("scav");
+    expect(kindOf("extract", factionsOf("shared"))).toBe("shared");
+  });
+  it("doublon PMC + Scav fusionné : commune", () => {
+    const [m] = mergeExits([exit("A", 0, 0, 0, { factions: ["pmc"] }), exit("A", 1, 0, 1, { factions: ["scav"] })]);
+    expect(kindOf(m.kind, m.factions)).toBe("shared");
+  });
+  it("faction inconnue : icône générique", () => {
+    expect(kindOf("extract", [])).toBe("extract");
+    expect(kindOf("extract", factionsOf("autre"))).toBe("extract");
+  });
+  it("coop et transit priment sur la faction", () => {
+    expect(kindOf("coop", ["pmc", "scav"])).toBe("coop");
+    expect(kindOf("coop", ["scav"])).toBe("coop");
+    expect(kindOf("transit", ["pmc"])).toBe("transit");
   });
 });
 

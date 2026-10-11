@@ -888,6 +888,11 @@ kbd {
 .settings p {
   margin: 0;
 }
+.legend .exit-pin {
+  display: inline-flex;
+  vertical-align: middle;
+  transform: scale(0.8);
+}
 .legend {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -962,6 +967,15 @@ kbd {
 }
 .exit-extract {
   background: #2f9e44;
+}
+.exit-pmc {
+  background: #1c7ed6;
+}
+.exit-scav {
+  background: #9c36b5;
+}
+.exit-shared {
+  background: linear-gradient(90deg, #1c7ed6 50%, #9c36b5 50%);
 }
 .exit-transit,
 .exit-coop {
