@@ -13,7 +13,7 @@ import { QuestList } from "./components/QuestList";
 import { SelectedQuests } from "./components/SelectedQuests";
 import { CustomPointsTab } from "./components/CustomPointsTab";
 import { SettingsTab } from "./components/SettingsTab";
-import { PhotosTab } from "./components/PhotosTab";
+import { PhotosTab, type ExitPhotosTarget } from "./components/PhotosTab";
 import { ResetProgressSection } from "./components/ResetProgressSection";
 import { QuestTab } from "./components/QuestTab";
 import { CaptureTab } from "./components/CaptureTab";
@@ -81,6 +81,8 @@ export default function App() {
   const [tab, setTab] = useState<Tab>("quests");
   /** Quête affichée dans l'onglet Photos. */
   const [tabTaskId, setTabTaskId] = useState<string | null>(null);
+  // sortie cliquée sur la carte : l'onglet Photos montre la sienne plutôt que celles d'une quête
+  const [photoExit, setPhotoExit] = useState<ExitPhotosTarget | null>(null);
   const [panelOpen, setPanelOpen] = useState(() => !isMobile());
   /** Largeur du panneau sur ordinateur (poignée de redimensionnement, enregistrée). */
   const [panelWidth, setPanelWidth] = useState(() => readPanelWidth(window.innerWidth));
@@ -165,7 +167,13 @@ export default function App() {
   // ouvre l'onglet Quête ou Photos sur une quête (boutons de la liste, du panneau ou d'une popup)
   const showTaskTab = useCallback((taskId: string, which: "quest" | "photos") => {
     setTabTaskId(taskId);
+    if (which === "photos") setPhotoExit(null);
     setTab(which);
+    setPanelOpen(true);
+  }, []);
+  const showExitPhotos = useCallback((target: ExitPhotosTarget) => {
+    setPhotoExit(target);
+    setTab("photos");
     setPanelOpen(true);
   }, []);
   const showPhotos = useCallback((taskId: string) => showTaskTab(taskId, "photos"), [showTaskTab]);
@@ -444,7 +452,11 @@ export default function App() {
               tasks={tasks}
               selectedIds={mode.selected.map((s) => s.taskId)}
               taskId={tabTaskId}
-              onTaskChange={setTabTaskId}
+              onTaskChange={(id) => {
+                setPhotoExit(null);
+                setTabTaskId(id);
+              }}
+              exit={photoExit}
             />
           )}
           {data && tab === "custom" && (
@@ -505,6 +517,7 @@ export default function App() {
               focus={focus}
               showScavExits={showScavExits}
               onPhotos={showPhotos}
+              onExit={showExitPhotos}
               onQuest={showQuest}
             />
           ) : (

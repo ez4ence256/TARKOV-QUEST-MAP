@@ -2,7 +2,7 @@
 // Étages comme pour les points de quête : une sortie d'un étage souterrain n'apparaît
 // que sur cet étage ; une sortie d'un étage supérieur est sur la carte de base, avec
 // son numéro d'étage. Les noms sont masqués quand la carte est trop dézoomée.
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import type L from "leaflet";
 import { Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import type { GameMap, MapExit } from "../types";
@@ -12,7 +12,7 @@ import { displayLevelOf, levelBadge, levelName, upperLevelOf, type Level } from 
 import { exitIcon } from "./exitIcons";
 import { EXIT_KIND_LABELS, factionLabel } from "../lib/exits";
 import { tr } from "../lib/i18n";
-import { WIKI_HOST, loadExitPhotos, photosForExit, type ExitPhotosPage } from "../api/wiki";
+import type { ExitPhotosTarget } from "../components/PhotosTab";
 
 /** Zoom (au-dessus du zoom d'ouverture, qui montre toute la carte) à partir duquel les noms s'affichent. */
 const LABEL_ZOOM_MARGIN = 0.5;
@@ -51,55 +51,6 @@ function ExitInfo({ exit, maps, floor }: { exit: MapExit; maps: GameMap[]; floor
   );
 }
 
-type PhotosState = { status: "loading" } | { status: "ready"; page: ExitPhotosPage } | { status: "error" };
-
-/**
- * Photos du wiki pour une sortie, chargées à l'ouverture de la bulle (une page par map, en cache).
- * Hauteur et largeur fixes : la bulle ne change pas de taille au chargement, sinon Leaflet
- * recentre la carte. Sans photo ou en cas d'erreur : lien vers la page de la map.
- */
-function ExitPhotos({ exit, mapTitle }: { exit: MapExit; mapTitle: string }) {
-  const [state, setState] = useState<PhotosState>({ status: "loading" });
-  useEffect(() => {
-    let cancelled = false;
-    loadExitPhotos(mapTitle).then(
-      (page) => !cancelled && setState({ status: "ready", page }),
-      () => !cancelled && setState({ status: "error" }),
-    );
-    return () => {
-      cancelled = true;
-    };
-  }, [mapTitle]);
-
-  const photos = state.status === "ready" ? photosForExit(state.page, exit.nameEn) : [];
-  const pageUrl = state.status === "ready" ? state.page.pageUrl : `https://${WIKI_HOST}/wiki/${encodeURIComponent(mapTitle.replace(/ /g, "_"))}`;
-  return (
-    <div className="exit-photos">
-      {state.status === "loading" && <span className="exit-photos-note">{tr("Photos du wiki : chargement…", "Wiki photos: loading…")}</span>}
-      {state.status !== "loading" && photos.length === 0 && (
-        <a href={pageUrl} target="_blank" rel="noopener noreferrer">
-          {tr("Voir la page du wiki", "See the wiki page")}
-        </a>
-      )}
-      {photos.length > 0 && (
-        <>
-          <div className="exit-photo-strip">
-            {photos.map((photo) => (
-              <a key={photo.file} className="exit-photo" href={photo.fullUrl} target="_blank" rel="noopener noreferrer" title={photo.caption || undefined}>
-                <img src={photo.thumbUrl} alt={photo.caption || exit.nameEn} loading="lazy" />
-                <span>{photo.caption}</span>
-              </a>
-            ))}
-          </div>
-          <span className="exit-photos-note">
-            <a href={pageUrl} target="_blank" rel="noopener noreferrer">{tr("Photos : wiki Tarkov", "Photos: Tarkov wiki")}</a> (CC BY-NC-SA)
-          </span>
-        </>
-      )}
-    </div>
-  );
-}
-
 export function ExitsLayer(props: {
   exits: MapExit[];
   maps: GameMap[];
@@ -109,6 +60,8 @@ export function ExitsLayer(props: {
   bounds: L.LatLngBounds;
   /** Nom anglais de la map : titre de sa page sur le wiki. */
   mapTitle: string;
+  /** Clic sur une sortie : ses photos s'affichent dans l'onglet Photos. */
+  onExit: (target: ExitPhotosTarget) => void;
 }) {
   const { calibration, level } = props;
   return (
@@ -132,13 +85,13 @@ export function ExitsLayer(props: {
             })}
             zIndexOffset={offLevel ? -1100 : -100}
             keyboard={false}
+            eventHandlers={{ click: () => props.onExit({ mapTitle: props.mapTitle, name: exit.name, nameEn: exit.nameEn, kind: exit.kind }) }}
           >
             <Tooltip direction="top" className="exit-tooltip">
               <ExitInfo exit={exit} maps={props.maps} floor={floor} />
             </Tooltip>
             <Popup minWidth={180}>
               <ExitInfo exit={exit} maps={props.maps} floor={floor} />
-              <ExitPhotos exit={exit} mapTitle={props.mapTitle} />
             </Popup>
           </Marker>
         );

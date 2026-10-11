@@ -9,6 +9,7 @@ import { gameToLatLng, getCRS, latLngToGame, toLatLngBounds } from "./crs";
 import { markerIcon } from "./icons";
 import { BaseLayer, type BaseStatus } from "./BaseLayer";
 import { ExitsLayer } from "./ExitsLayer";
+import type { ExitPhotosTarget } from "../components/PhotosTab";
 import {
   displayLevelOf,
   extentOf,
@@ -44,6 +45,8 @@ interface MapViewProps {
   onPlace: (pos: { x: number; z: number }) => void;
   /** Ouvre l'onglet Photos sur une quête. */
   onPhotos: (taskId: string) => void;
+  /** Clic sur une sortie : ouvre l'onglet Photos sur elle. */
+  onExit: (target: ExitPhotosTarget) => void;
   /** Ouvre l'onglet Quête sur une quête. */
   onQuest: (taskId: string) => void;
   /** Point à centrer / ouvrir (ex. clic dans le panneau) ; n change à chaque demande. */
@@ -245,7 +248,7 @@ function MapViewInner(props: MapViewProps) {
         <FitBounds bounds={bounds} mapId={props.map.id} />
         <InvalidateOnResize />
         {showExits && exits.length > 0 && (
-          <ExitsLayer exits={exits} maps={props.maps} calibration={calibration} level={level} bounds={bounds} mapTitle={props.map.nameEn ?? props.map.name} />
+          <ExitsLayer exits={exits} maps={props.maps} calibration={calibration} level={level} bounds={bounds} mapTitle={props.map.nameEn ?? props.map.name} onExit={props.onExit} />
         )}
         <AttributionPrefix />
         <BaseLayer
