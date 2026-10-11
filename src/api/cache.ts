@@ -6,7 +6,7 @@ import type { GameMode, TarkovData } from "../types";
 import { fetchTarkovData } from "./tarkovJson";
 
 export const DATA_TTL_MS = 6 * 60 * 60 * 1000; // 6 heures
-const CACHE_VERSION = 8;
+const CACHE_VERSION = 9;
 const cacheKey = (mode: GameMode, lang: string) => `tqp:data:v${CACHE_VERSION}:${mode}:${lang}`;
 
 export function readCachedData(mode: GameMode, lang: string): TarkovData | null {
@@ -18,12 +18,20 @@ export function readCachedData(mode: GameMode, lang: string): TarkovData | null 
   }
 }
 
-function writeCachedData(data: TarkovData) {
+/** Les copies d'un ancien format prennent de la place pour rien. */
+function purgeOldCaches() {
   try {
-    // les copies d'un ancien format prennent de la place pour rien
     for (const key of Object.keys(localStorage)) {
       if (key.startsWith("tqp:data:") && !key.startsWith(`tqp:data:v${CACHE_VERSION}:`)) localStorage.removeItem(key);
     }
+  } catch {
+    // stockage indisponible : rien à nettoyer
+  }
+}
+
+function writeCachedData(data: TarkovData) {
+  try {
+    purgeOldCaches();
     localStorage.setItem(cacheKey(data.gameMode, data.language), JSON.stringify(data));
   } catch (error) {
     // Quota dépassé ou stockage désactivé : l'app fonctionne quand même, sans cache.
@@ -49,6 +57,7 @@ export async function loadTarkovData(
   lang: string,
   { force = false, signal }: { force?: boolean; signal?: AbortSignal } = {},
 ): Promise<LoadResult> {
+  purgeOldCaches();
   const cached = readCachedData(mode, lang);
   if (!force && cached && Date.now() - cached.fetchedAt < DATA_TTL_MS) {
     return { data: cached, source: "cache" };

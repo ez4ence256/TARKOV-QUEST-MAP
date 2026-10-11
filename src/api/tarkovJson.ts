@@ -26,6 +26,10 @@ import { tr } from "../lib/i18n";
 
 export const API_BASE = "https://json.tarkov.dev/";
 const FALLBACK_LANG = "en";
+/** Début commun des images d'objets : retiré avant mise en cache (4 000 objets, ~100 Ko gagnés), remis par iconUrl. */
+export const ICON_BASE = "https://assets.tarkov.dev/";
+export const iconUrl = (stored: string) => (/^https?:/.test(stored) ? stored : ICON_BASE + stored);
+const storedIcon = (url: string) => (url.startsWith(ICON_BASE) ? url.slice(ICON_BASE.length) : url);
 
 type Dict = Record<string, unknown>;
 type Translations = Record<string, string>;
@@ -327,9 +331,9 @@ export async function fetchTarkovData(
 
   if (tasks.length === 0) throw new Error(tr("L'API n'a renvoyé aucune quête.", "The API returned no quests."));
 
-  const itemNames = await readItemNames(gameMode, lang, tasks, tasksRes, signal);
+  const { names: itemNames, icons: itemIcons } = await readItems(gameMode, lang, tasks, tasksRes, signal);
 
-  return { gameMode, language: lang, fetchedAt: Date.now(), tasks, maps, traders, itemNames };
+  return { gameMode, language: lang, fetchedAt: Date.now(), tasks, maps, traders, itemNames, itemIcons };
 }
 
 /** Objets cités par les quêtes : clés, objets à rendre ou à poser, marqueurs, récompenses. */
@@ -349,28 +353,42 @@ export function referencedItemIds(tasks: Task[]): Set<string> {
 }
 
 /**
- * Noms des objets utiles, dans la langue demandée. On lit seulement le fichier de
- * traductions des objets (~1,7 Mo, clés "<id> Name") et on ne garde que les objets
- * cités par les quêtes ; les objets de quête ont leurs noms dans le fichier des quêtes.
- * En cas d'échec, l'app fonctionne sans les noms.
+ * Noms et images des objets utiles, dans la langue demandée. Les noms viennent du fichier
+ * de traductions des objets (~1,7 Mo, clés "<id> Name"), les images (champ iconLink, 64 px,
+ * assets.tarkov.dev) du fichier principal des objets (~17 Mo, mis en cache : seuls les
+ * objets cités par les quêtes sont gardés). Les objets de quête ont nom et image dans le
+ * fichier des quêtes. En cas d'échec, l'app fonctionne sans les noms ou sans les images.
  */
-async function readItemNames(
+async function readItems(
   gameMode: GameMode,
   lang: string,
   tasks: Task[],
   tasksRes: { data: Dict; t: (k: unknown) => string },
   signal?: AbortSignal,
-): Promise<Record<string, string>> {
+): Promise<{ names: Record<string, string>; icons: Record<string, string> }> {
   const names: Record<string, string> = {};
+  const icons: Record<string, string> = {};
   for (const q of values(tasksRes.data.questItems)) {
     const id = asString(q.id);
     const name = tasksRes.t(q.name);
     if (id && name && name !== q.name) names[id] = name;
+    const icon = asString(q.iconLink);
+    if (id && icon) icons[id] = storedIcon(icon);
   }
-  const translations = await fetchTranslations(`${gameMode}/items`, lang, signal);
+  const [translations, main] = await Promise.all([
+    fetchTranslations(`${gameMode}/items`, lang, signal),
+    fetchJson(`${gameMode}/items`, signal).catch((error) => {
+      if ((error as Error).name === "AbortError") throw error;
+      console.warn("Images des objets indisponibles", error);
+      return {} as Dict;
+    }),
+  ]);
+  const raw = asDict(asDict(main.data).items);
   for (const id of referencedItemIds(tasks)) {
     const name = translations[`${id} Name`];
     if (name) names[id] = name;
+    const icon = asString(asDict(raw[id]).iconLink);
+    if (icon) icons[id] = storedIcon(icon);
   }
-  return names;
+  return { names, icons };
 }

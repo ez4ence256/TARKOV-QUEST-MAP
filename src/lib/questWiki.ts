@@ -193,6 +193,8 @@ export interface PackItem {
   foundInRaid?: boolean;
   /** Précision (map d'une clé, choix possibles…). */
   detail?: string;
+  /** Objets nommés dans le libellé (pour afficher leurs images) ; absent pour « N objets au choix parmi… ». */
+  itemIds?: string[];
   /** La quantité est déjà dans le libellé (« 3 objets au choix parmi 52 »). */
   countInLabel?: true;
 }
@@ -211,7 +213,7 @@ export function packingList(task: Task, itemNames: Record<string, string>, maps:
     items.push(item);
   };
   const choices = (ids: string[], count: number | null) => {
-    if (ids.length <= MAX_LISTED_CHOICES) return { label: ids.map(name).join(tr(" ou ", " or ")) };
+    if (ids.length <= MAX_LISTED_CHOICES) return { label: ids.map(name).join(tr(" ou ", " or ")), itemIds: ids };
     const n = count ?? 1;
     return {
       label: tr(`${n} objet${n > 1 ? "s" : ""} au choix parmi ${ids.length}`, `${n} item${n > 1 ? "s" : ""} of your choice among ${ids.length}`),
@@ -222,11 +224,11 @@ export function packingList(task: Task, itemNames: Record<string, string>, maps:
 
   // clés (par map, puis par objectif), une seule fois chacune
   for (const k of task.details?.neededKeys ?? []) {
-    add(`key:${[...k.keyIds].sort().join("|")}`, { kind: "key", label: k.keyIds.map(name).join(tr(" ou ", " or ")), count: 1, detail: mapName(k.mapId) || undefined });
+    add(`key:${[...k.keyIds].sort().join("|")}`, { kind: "key", label: k.keyIds.map(name).join(tr(" ou ", " or ")), itemIds: k.keyIds, count: 1, detail: mapName(k.mapId) || undefined });
   }
   for (const o of task.objectives) {
     for (const group of o.requiredKeyIds ?? []) {
-      add(`key:${[...group].sort().join("|")}`, { kind: "key", label: group.map(name).join(tr(" ou ", " or ")), count: 1 });
+      add(`key:${[...group].sort().join("|")}`, { kind: "key", label: group.map(name).join(tr(" ou ", " or ")), itemIds: group, count: 1 });
     }
   }
 
@@ -247,14 +249,14 @@ export function packingList(task: Task, itemNames: Record<string, string>, maps:
     } else if (o.type === "plantItem" && o.itemIds?.length) {
       add(`place:${o.id}`, { kind: "place", count, ...fir, ...choices(o.itemIds, count) });
     } else if (o.type === "plantQuestItem" && o.questItemId) {
-      add(`place:${o.id}`, { kind: "place", count, label: name(o.questItemId) });
+      add(`place:${o.id}`, { kind: "place", count, label: name(o.questItemId), itemIds: [o.questItemId] });
     } else if ((o.type === "findQuestItem" || o.type === "giveQuestItem") && o.questItemId) {
-      add(`quest:${o.questItemId}`, { kind: "questItem", count, label: name(o.questItemId) });
+      add(`quest:${o.questItemId}`, { kind: "questItem", count, label: name(o.questItemId), itemIds: [o.questItemId] });
     } else if (o.type === "mark" && o.markerItemId) {
       markers.set(o.markerItemId, (markers.get(o.markerItemId) ?? 0) + 1);
     }
   }
-  for (const [id, n] of markers) add(`marker:${id}`, { kind: "marker", count: n, label: name(id) });
+  for (const [id, n] of markers) add(`marker:${id}`, { kind: "marker", count: n, label: name(id), itemIds: [id] });
   return items;
 }
 

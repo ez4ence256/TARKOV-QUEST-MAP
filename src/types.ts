@@ -165,6 +165,8 @@ export interface TarkovData {
   traders: Trader[];
   /** Noms des objets cités par les quêtes (clés, objets à rendre, récompenses), par id. */
   itemNames?: Record<string, string>;
+  /** Image (iconLink, 64 px) des mêmes objets, par id (absent dans les anciennes données en cache). */
+  itemIcons?: Record<string, string>;
 }
 
 /** Point affichable sur la carte (calculé, jamais sauvegardé tel quel). */

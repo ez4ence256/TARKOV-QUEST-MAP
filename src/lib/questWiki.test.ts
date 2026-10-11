@@ -236,13 +236,13 @@ describe("à emporter", () => {
   it("clés, objets (Find in raid seulement si tarkov.dev le dit), outils à poser, sans doublons", () => {
     const list = packingList(hcp2, names, [{ id: "shoreline", name: "Littoral", normalizedName: "shoreline" }]);
     expect(list).toEqual([
-      { kind: "key", label: "Clé 306 aile ouest", count: 1, detail: "Littoral" },
-      { kind: "key", label: "Clé 306 (copie) ou Clé 306 aile ouest", count: 1 },
-      { kind: "questItem", count: null, label: "Dossier 0060" },
+      { kind: "key", label: "Clé 306 aile ouest", itemIds: ["key306"], count: 1, detail: "Littoral" },
+      { kind: "key", label: "Clé 306 (copie) ou Clé 306 aile ouest", itemIds: ["key306b", "key306"], count: 1 },
+      { kind: "questItem", count: null, label: "Dossier 0060", itemIds: ["folder"] },
       // findItem + giveItem des mêmes objets : une seule ligne
       { kind: "handover", count: 3, foundInRaid: true, label: "3 objets au choix parmi 4", detail: "ex. Grizzly, IFAK, AI-2…", countInLabel: true },
-      { kind: "place", count: 1, foundInRaid: false, label: "Brouilleur" },
-      { kind: "marker", count: 2, label: "Marqueur MS2000" },
+      { kind: "place", count: 1, foundInRaid: false, label: "Brouilleur", itemIds: ["jammer"] },
+      { kind: "marker", count: 2, label: "Marqueur MS2000", itemIds: ["ms2000"] },
     ]);
     // objet de quête : pas de mention Find in raid (tarkov.dev ne la donne pas)
     expect(list.find((i) => i.kind === "questItem")).not.toHaveProperty("foundInRaid");

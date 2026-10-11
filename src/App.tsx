@@ -372,6 +372,7 @@ export default function App() {
               traders={data.traders}
               maps={maps}
               itemNames={data.itemNames ?? {}}
+              itemIcons={data.itemIcons ?? {}}
               selectedIds={mode.selected.map((s) => s.taskId)}
               taskId={tabTaskId}
               onTaskChange={setTabTaskId}

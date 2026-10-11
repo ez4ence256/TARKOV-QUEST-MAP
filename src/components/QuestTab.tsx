@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import type { GameMap, Task, Trader } from "../types";
 import { ICON_LABELS, categoryOf } from "../lib/objectiveTypes";
 import { taskProgress } from "../lib/points";
+import { iconUrl } from "../api/tarkovJson";
 import { loadWikiPage, type WikiPage } from "../api/wiki";
 import {
   acceptWikiPage,
@@ -34,6 +35,8 @@ interface Props {
   traders: Trader[];
   maps: GameMap[];
   itemNames: Record<string, string>;
+  /** Images des objets (id -> URL) ; un objet sans image est affiché par son nom seul. */
+  itemIcons: Record<string, string>;
   /** Quêtes sélectionnées (proposées dans la liste). */
   selectedIds: string[];
   /** Quête affichée. */
@@ -141,8 +144,14 @@ const PACK_GROUPS: { kinds: PackItem["kind"][]; title: [string, string] }[] = [
   { kinds: ["place", "marker"], title: ["À placer ou à marquer", "To place or mark"] },
 ];
 
+// seulement si la source le précise
 const firLabel = (fir: boolean | null | undefined) =>
-  fir === true ? "Find in raid" : fir === false ? tr("Pas Find in raid", "Not Found in raid") : null;
+  fir === true ? tr("Found in raid : oui", "Found in raid: yes") : fir === false ? tr("Found in raid : non", "Found in raid: no") : null;
+
+/** Image d'un objet, à taille fixe (pas de saut de page) ; rien si l'URL est inconnue. */
+function ItemIcon({ url, name }: { url?: string; name: string }) {
+  return url ? <img className="item-icon" src={iconUrl(url)} alt={name} width={32} height={32} loading="lazy" /> : null;
+}
 
 const fmt = (n: number) => n.toLocaleString(getLang() === "en" ? "en-US" : "fr-FR");
 
@@ -176,8 +185,15 @@ export function QuestTab(p: Props) {
   const showTarkovRewards = rewards !== null && (rewardDiffs.length > 0 || !wiki || wiki.rewards.length === 0);
   const pvp = isPvpZone(task) && wiki !== null;
   const itemName = (id: string) => p.itemNames[id] ?? tr(`objet inconnu (${id})`, `unknown item (${id})`);
+  const icon = (id: string) => <ItemIcon url={p.itemIcons[id]} name={itemName(id)} />;
   const statusText = (l: QuestLink & { status?: string[] }) =>
     l.status?.length ? ` (${l.status.map((s) => STATUS_LABELS[s] ?? s).join(tr(" ou ", " or "))})` : "";
+  // niveau et marchand de la quête préalable, quand tarkov.dev les donne
+  const requirementText = (l: QuestLink) => {
+    const t = l.taskId ? tasksById.get(l.taskId) : undefined;
+    const parts = [t?.minPlayerLevel ? tr(`niveau ${t.minPlayerLevel}`, `level ${t.minPlayerLevel}`) : "", t ? traderName(t.traderId) : ""].filter(Boolean);
+    return parts.length > 0 ? ` · ${parts.join(" · ")}` : "";
+  };
   // quêtes de tarkov.dev : nom de l'app (français) ; celles du wiki gardent leur nom anglais
   const appName = (l: QuestLink) => (l.taskId ? tasksById.get(l.taskId)?.name : undefined) ?? l.name;
   const traderReqs = task.details?.traderRequirements ?? [];
@@ -193,7 +209,7 @@ export function QuestTab(p: Props) {
     (wiki?.requirements.length ?? 0) > 0 ||
     prereq.warnings.length > 0;
   const hasPack = pack.length > 0 || (wiki?.relatedItems.length ?? 0) > 0;
-  const hasRewards = (wiki?.rewards.length ?? 0) > 0 || showTarkovRewards;
+  const hasRewards = (wiki?.rewards.length ?? 0) > 0 || showTarkovRewards || (rewards?.items.length ?? 0) > 0;
   const hasGuide = (wiki?.guide.length ?? 0) > 0 || failConditions.length > 0 || task.details?.restartable === true;
 
   /** Mention de la source, en tête des sections où le texte du wiki est mis en avant. */
@@ -247,6 +263,7 @@ export function QuestTab(p: Props) {
                   <ul className="plain-list pack-list">
                     {items.map((i, k) => (
                       <li key={k}>
+                        {i.itemIds?.map((id) => <span key={id}>{icon(id)}</span>)}
                         {!i.countInLabel && i.count && i.count > 1 ? `${i.count} × ` : ""}
                         {i.label}
                         {i.kind === "sell" && tr(" (à vendre)", " (to sell)")}
@@ -292,6 +309,19 @@ export function QuestTab(p: Props) {
       <>
         {wiki && wiki.rewards.length > 0 && <WikiBlocks blocks={wiki.rewards} />}
         <Warnings items={rewardDiffs} />
+        {rewards && rewards.items.length > 0 && (
+          <>
+            <div className="wiki-heading wiki-heading-3">{tr("Objets reçus (tarkov.dev)", "Items received (tarkov.dev)")}</div>
+            <ul className="plain-list">
+              {rewards.items.map((r, i) => (
+                <li key={i}>
+                  {icon(r.itemId)}
+                  {fmt(r.count)} × {itemName(r.itemId)}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
         {showTarkovRewards && rewards && (
           <>
             <div className="wiki-heading wiki-heading-3">{tr("Selon tarkov.dev", "According to tarkov.dev")}</div>
@@ -303,13 +333,9 @@ export function QuestTab(p: Props) {
                   {s.value}
                 </li>
               ))}
-              {rewards.items.map((r, i) => (
-                <li key={`i${i}`}>
-                  {fmt(r.count)} × {itemName(r.itemId)}
-                </li>
-              ))}
               {rewards.offerUnlocks.map((u, i) => (
                 <li key={`o${i}`}>
+                  {icon(u.itemId)}
                   {tr(`Débloque l'achat de ${itemName(u.itemId)} chez ${traderName(u.traderId)} (niveau ${u.level})`, `Unlocks purchase of ${itemName(u.itemId)} at ${traderName(u.traderId)} (level ${u.level})`)}
                 </li>
               ))}
@@ -340,7 +366,7 @@ export function QuestTab(p: Props) {
         {prereq.tarkovTasks.length > 0 && (
           <>
             <div className="muted small">{tr("Quêtes préalables :", "Prerequisite quests:")}</div>
-            <QuestLinks links={prereq.tarkovTasks} onOpen={p.onTaskChange} suffix={statusText} displayName={appName} />
+            <QuestLinks links={prereq.tarkovTasks} onOpen={p.onTaskChange} suffix={(l) => statusText(l) + requirementText(l)} displayName={appName} />
           </>
         )}
         {wiki && (

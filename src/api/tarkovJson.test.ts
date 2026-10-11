@@ -2,7 +2,7 @@
 // Le format imité ici est celui produit par tarkov-data-manager
 // (jobs/update-quests.mjs, update-maps.mjs, update-traders.mjs).
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { API_BASE, fetchTarkovData } from "./tarkovJson";
+import { API_BASE, fetchTarkovData, iconUrl } from "./tarkovJson";
 
 const FACTORY = "55f2d3fd4bdc2d5f408b4567";
 const NIGHT_FACTORY = "59fc81d786f774390775787e";
@@ -96,12 +96,23 @@ const responses: Record<string, unknown> = {
           ],
         },
       },
-      questItems: { qi1: { id: "qi1", name: "qi1 Name" } },
+      questItems: { qi1: { id: "qi1", name: "qi1 Name", iconLink: "https://assets.tarkov.dev/qi1-icon.webp" } },
     },
     translations: ["$.data.tasks.*.name"],
   },
   "regular/tasks_fr": { data: { "t1 name": "Quête un", "o1 desc": "Marquer", "qi1 Name": "Dossier secret" } },
   // noms d'objets : seuls ceux cités par les quêtes sont gardés
+  // fichier principal des objets : seule l'image (iconLink) des objets cités est gardée
+  "regular/items": {
+    data: {
+      items: {
+        key1: { id: "key1", iconLink: "https://assets.tarkov.dev/key1-icon.webp", gridImageLink: "https://assets.tarkov.dev/key1-grid.webp" },
+        rub: { id: "rub", iconLink: "https://assets.tarkov.dev/rub-icon.webp" },
+        med1: { id: "med1" }, // sans image : absent
+        autre: { id: "autre", iconLink: "https://assets.tarkov.dev/autre-icon.webp" },
+      },
+    },
+  },
   "regular/items_fr": { data: { "key1 Name": "Clé 306", "med1 Name": "Salewa", "rub Name": "Roubles", "autre Name": "Inutile" } },
   "regular/tasks_en": { data: { "t1 name": "Quest one", "o2 desc": "Find it" } },
   // sorties réelles de Douanes (positions de l'API), réduites aux champs utiles
@@ -245,6 +256,22 @@ describe("fetchTarkovData", () => {
       failConditions: [{ type: "taskStatus", description: "", taskId: "t9", status: ["complete"] }],
     });
     expect(data.itemNames).toEqual({ qi1: "Dossier secret", key1: "Clé 306", med1: "Salewa", rub: "Roubles" });
+    expect(data.itemIcons).toEqual({
+      qi1: "qi1-icon.webp",
+      key1: "key1-icon.webp",
+      rub: "rub-icon.webp",
+    });
+    expect(iconUrl(data.itemIcons!.key1)).toBe("https://assets.tarkov.dev/key1-icon.webp");
+    expect(iconUrl("https://ailleurs.test/x.webp")).toBe("https://ailleurs.test/x.webp");
+  });
+
+  it("garde les noms si le fichier des objets (images) est indisponible", async () => {
+    const base = mockFetch();
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => (url.endsWith("regular/items") ? new Response("down", { status: 503 }) : base(url))));
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const data = await fetchTarkovData("regular", "fr");
+    expect(data.itemNames?.key1).toBe("Clé 306");
+    expect(data.itemIcons).toEqual({ qi1: "qi1-icon.webp" });
   });
 
   it("échoue clairement si l'API ne répond pas", async () => {
