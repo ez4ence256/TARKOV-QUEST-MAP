@@ -319,7 +319,8 @@ export function reducer(state: AppState, action: Action): AppState {
     case "roomOps":
       return updateModeId(state, action.mode, (m) => applyRoomOps(m, action.ops));
     case "restoreMode":
-      return { ...state, modes: { ...state.modes, [action.mode]: action.state } };
+      // seulement ce que la room partage : notes, points perso et positions faits depuis restent
+      return updateModeId(state, action.mode, (m) => ({ ...m, selected: action.state.selected, done: action.state.done, story: action.state.story }));
   }
 }
 

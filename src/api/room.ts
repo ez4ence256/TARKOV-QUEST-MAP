@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState, type Dispatch } from "react";
 import type { GameMode } from "../types";
 import { tr } from "../lib/i18n";
 import { applyOpsToRoom, diffRoom, parseRoomOps, parseRoomState, roomStateOf, type RoomOp, type RoomState } from "../lib/roomSync";
-import { emptyModeState, sanitizeState, type Action, type AppState, type ModeState } from "../state/store";
+import { emptyModeState, reducer, sanitizeState, type Action, type AppState, type ModeState } from "../state/store";
 
 export type RoomStatus = "connecting" | "connected" | "reconnecting" | "closed" | "unavailable";
 export interface RoomInfo {
@@ -173,6 +173,7 @@ export class RoomClient {
     if (this.recovering) return;
     this.recovering = true;
     this.hooks.onInfo({ status: "reconnecting" });
+    let missing = 0; // réponses « room inconnue » seulement : une coupure du serveur ne compte pas
     try {
       for (let attempt = 0; !this.stopped; attempt++) {
         try {
@@ -181,11 +182,12 @@ export class RoomClient {
           if (r.status === 404 && this.creator && this.mode) {
             const put = await api("PUT", `/api/rooms/${this.id}`, { mode: this.mode, state: roomStateOf(this.hooks.getMode(this.mode)) });
             if (put.status === 200) return this.connect();
-          } else if (!this.creator && attempt + 1 >= CLOSED_AFTER) {
+          } else if (r.status === 404 && ++missing >= CLOSED_AFTER) {
             return this.hooks.onInfo({ status: "closed" });
           }
         } catch (e) {
-          if (e instanceof Unavailable && (e.hosting || !this.hadSnapshot)) return this.hooks.onInfo({ status: "unavailable" });
+          // une page d'erreur HTML (proxy, redéploiement) après une connexion réussie est passagère
+          if (e instanceof Unavailable && !this.hadSnapshot) return this.hooks.onInfo({ status: "unavailable" });
         }
         await sleep(Math.min(2500 + attempt * 1000, 10000));
       }
@@ -247,6 +249,11 @@ export function useRoom(state: AppState, dispatch: Dispatch<Action>) {
       stop();
       setError(null);
       setOffer(null);
+      // l'action est aussi appliquée tout de suite à la copie de l'état : un envoi planifié ne voit jamais un état en retard
+      const apply = (action: Action) => {
+        stateRef.current = reducer(stateRef.current, action);
+        dispatch(action);
+      };
       activeRoom = true;
       writeSaved({ id, creator, mode });
       setInfo({ id, creator, status: "connecting", members: 1 });
@@ -264,11 +271,11 @@ export function useRoom(state: AppState, dispatch: Dispatch<Action>) {
           }
           if (cur.gameMode !== m) {
             if (cur.gameMode) setNotice(tr(`La room est en mode ${m === "regular" ? "PvP" : m === "pve" ? "PvE" : "PvP Saison"} : vous y avez été basculé.`, `The room is in ${m === "regular" ? "PvP" : m === "pve" ? "PvE" : "PvP Season"} mode: you were switched to it.`));
-            dispatch({ type: "setGameMode", mode: m });
+            apply({ type: "setGameMode", mode: m });
           }
-          dispatch({ type: "roomSnapshot", mode: m, state: roomState, replace: !first });
+          apply({ type: "roomSnapshot", mode: m, state: roomState, replace: !first });
         },
-        onOps: (m, ops) => dispatch({ type: "roomOps", mode: m, ops }),
+        onOps: (m, ops) => apply({ type: "roomOps", mode: m, ops }),
         onInfo: (patch) => setInfo((prev) => (prev && prev.id === id ? { ...prev, ...patch } : prev)),
         onError: setError,
       });

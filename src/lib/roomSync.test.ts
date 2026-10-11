@@ -104,6 +104,21 @@ describe("état local et room", () => {
     expect(off.done).toEqual({});
   });
 
+  it("restauration : sélection et cases d'avant, mais notes et points faits dans la room gardés", () => {
+    const before = mode({ selected: [{ taskId: "z", color: 1 }], done: { o9: 5 } });
+    const state: AppState = {
+      version: 1,
+      gameMode: "pve",
+      showDone: false,
+      modes: { pve: mode({ selected: [{ taskId: "a", color: 0 }], done: { o1: 1 }, notes: { k: "écrite dans la room" }, mapId: "customs" }) },
+    };
+    const next = reducer(state, { type: "restoreMode", mode: "pve", state: before });
+    expect(next.modes.pve?.selected.map((s) => s.taskId)).toEqual(["z"]);
+    expect(Object.keys(next.modes.pve!.done)).toEqual(["o9"]);
+    expect(next.modes.pve?.notes).toEqual({ k: "écrite dans la room" });
+    expect(next.modes.pve?.mapId).toBe("customs");
+  });
+
   it("un état appliqué ne produit aucune opération en retour", () => {
     const m = mergeRoomState(emptyModeState(), room, true);
     expect(diffRoom(room, roomStateOf(m))).toEqual([]);
