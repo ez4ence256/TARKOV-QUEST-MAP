@@ -1,6 +1,8 @@
 // Écran d'accueil : choix du mode de jeu à chaque ouverture de l'app.
 import { GAME_MODES, type GameMode } from "../types";
 import { tr, type Lang } from "../lib/i18n";
+// version affichée en bas à droite : à augmenter à chaque livraison (voir JOURNAL.md)
+import { version } from "../../package.json";
 
 export function ModePicker({
   last,
@@ -42,6 +44,7 @@ export function ModePicker({
           ))}
         </div>
       </div>
+      <span className="app-version muted small">v{version}</span>
     </div>
   );
 }

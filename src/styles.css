@@ -208,6 +208,11 @@ button:focus-visible {
   place-items: center;
   padding: 1.5rem;
 }
+.app-version {
+  position: fixed;
+  right: 0.6rem;
+  bottom: 0.4rem;
+}
 .mode-card {
   width: min(460px, 100%);
   text-align: center;

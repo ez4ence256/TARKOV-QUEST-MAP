@@ -8,7 +8,7 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 
 | Élément | État |
 |---|---|
-| Branche | `claude/tarkov-quest-planner-axir48` (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**) |
+| Branche | **`main`** (renommée depuis `claude/tarkov-quest-planner-axir48` en session 7 ; dépôt **`ez4ence256/TARKOV-QUEST-MAP`**). L'ancienne branche distante sera supprimée quand `main` sera la branche par défaut sur GitHub. |
 | Derniers commits | `c12988e` case « Extracts Scav » · `709720a` main story mélangée aux quêtes · `d51bc68` photos du wiki dans le Guide · `72e0a00` pages wiki supprimées si stockage plein · `c3dc322` main story · `3302076` cache du wiki renouvelé à chaque utilisation · `6ff1ee9` cache libéré si plein · `959bb7c` images fiche quête |
 | Travail non commité | Seulement `.claude/launch.json` (volontairement hors du dépôt : chemin propre à cette machine) |
 | Tests | 183/183 au vert (`npx vitest run`) |
@@ -23,6 +23,7 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 - Session 5 : **une tentative à la toute fin, réussie** : `git push origin claude/tarkov-quest-planner-axir48` a envoyé `ecbe77a..63a8ed7` (18 commits). Après `git fetch`, local et origin sont identiques (0 en avance, 0 en retard). Les identifiants GitHub sont donc maintenant disponibles dans la session (gestionnaire d'identifiants Windows ou GitHub Desktop) ; aucune configuration Git n'a été modifiée.
 - Ce commit de journal a été poussé ensuite par un second push.
 - **Session 6** : le dépôt est maintenant `ez4ence256/TARKOV-QUEST-MAP`. Le remote `origin` est en SSH et ne marche pas sur ce PC. Pousser avec `git push https://github.com/ez4ence256/TARKOV-QUEST-MAP.git claude/tarkov-quest-planner-axir48`, puis vérifier avec `git ls-remote <url> claude/tarkov-quest-planner-axir48` contre `HEAD` (`origin/...` n'est pas mis à jour par un push par URL).
+- **Session 7 (fin)** : branche renommée en `main`. Pousser avec `git push https://github.com/ez4ence256/TARKOV-QUEST-MAP.git main`, vérifier avec `git ls-remote https://github.com/ez4ence256/TARKOV-QUEST-MAP.git main`.
 
 ### Commits depuis la session 1 (locaux, à pousser)
 
@@ -322,6 +323,7 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 - Dans l'app, `lat = z`, `lng = x`, `y` = hauteur.
 - Nouveaux champs de données **facultatifs**.
 - Un commit par tâche, en français, avec tests et build verts avant.
+- **Version** : `version` de `package.json`, affichée en bas à droite de l'écran d'accueil (choix PvP / PvE / PvP Saison). **À augmenter à chaque livraison**, avant le dernier commit : `0.<session>.<n° de livraison dans la session>` (0.7.0 = fin de session 7).
 
 **Commandes** : `npm run dev` · `npm test` · `npm run build` · `npm run sync:maps`. Node est dans `C:\Program Files\nodejs`. npm 12 bloque le script d'après-installation de tesseract.js (simple annonce de financement, inutile).
 
