@@ -10,7 +10,7 @@ import type { GameMap, Task, Trader } from "../types";
 import { ICON_LABELS, categoryOf } from "../lib/objectiveTypes";
 import { taskProgress } from "../lib/points";
 import { iconUrl } from "../api/tarkovJson";
-import { loadWikiPage, type WikiPage } from "../api/wiki";
+import { loadQuestPhotos, loadWikiPage, type WikiPage, type WikiPhoto } from "../api/wiki";
 import {
   acceptWikiPage,
   compareRewards,
@@ -92,6 +92,33 @@ function Section({ title, open = false, children }: { title: string; open?: bool
       <summary>{title}</summary>
       <div className="quest-section-body">{children}</div>
     </details>
+  );
+}
+
+/** Photos de la section Guide du wiki (même chargeur et même cache que l'onglet Photos), en bandeau de vignettes. */
+function GuidePhotos({ wikiLink }: { wikiLink: string }) {
+  const [state, setState] = useState<{ photos: WikiPhoto[] } | "loading" | "error">("loading");
+  useEffect(() => {
+    let cancelled = false;
+    setState("loading");
+    loadQuestPhotos(wikiLink)
+      .then((g) => !cancelled && setState({ photos: g.photos }))
+      .catch(() => !cancelled && setState("error"));
+    return () => {
+      cancelled = true;
+    };
+  }, [wikiLink]);
+  if (state === "loading") return <p className="muted small">{tr("Chargement des photos du wiki…", "Loading wiki photos…")}</p>;
+  if (state === "error") return <p className="muted small">{tr("Photos du wiki indisponibles.", "Wiki photos unavailable.")}</p>;
+  if (state.photos.length === 0) return null;
+  return (
+    <div className="story-photos">
+      {state.photos.map((p) => (
+        <a key={p.file} className="story-photo" href={p.fullUrl} target="_blank" rel="noopener noreferrer" title={p.caption || tr("Voir en grand", "View full size")}>
+          <img src={p.thumbUrl} alt={p.caption || p.file} width={120} height={68} loading="lazy" referrerPolicy="no-referrer" />
+        </a>
+      ))}
+    </div>
   );
 }
 
@@ -327,6 +354,7 @@ export function QuestTab(p: Props) {
           <div className="wiki-highlight">
             {wikiSource}
             <WikiBlocks blocks={wiki.guide} />
+            {task.wikiLink && <GuidePhotos wikiLink={task.wikiLink} />}
           </div>
         )}
         {(failConditions.length > 0 || task.details?.restartable) && (

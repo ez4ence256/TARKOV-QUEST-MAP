@@ -9,13 +9,13 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 | Élément | État |
 |---|---|
 | Branche | `claude/tarkov-quest-planner-axir48` (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**) |
-| Derniers commits | Wiki : pages les moins utilisées supprimées si le stockage est plein (ce commit) · `c3dc322` main story · `3302076` cache du wiki renouvelé à chaque utilisation · `6ff1ee9` cache libéré si plein · `959bb7c` images fiche quête |
+| Derniers commits | Fiche quête : photos du wiki dans le Guide (ce commit) · `72e0a00` pages wiki supprimées si stockage plein · `c3dc322` main story · `3302076` cache du wiki renouvelé à chaque utilisation · `6ff1ee9` cache libéré si plein · `959bb7c` images fiche quête |
 | Travail non commité | Seulement `.claude/launch.json` (volontairement hors du dépôt : chemin propre à cette machine) |
 | Tests | 171/171 au vert (`npx vitest run`) |
 | Compilation | OK (`npm run build`). Avertissement Vite : le fichier principal fait 516 Ko (> 500 Ko). L'OCR est dans des fichiers séparés, chargés à la demande. |
 | Vérifié dans le navigateur | Panneau à 400 / 440 / 520 / 540 / 560 / 720 px, fenêtre de 1024 px et zoom simulé à 125 %, téléphone · sélection épinglée avec filtre et recherche, « Tout désélectionner » · ordre des sections sur Signal - Partie 3 · sorties sur Douanes (niveau principal + sous-sol) et Labs (principal + niveau technique) · import d'une **image de synthèse** (Ctrl+V, vérification, ajout, map choisie) |
 | **Pas vérifié** | **Import avec les captures de l'utilisateur** : elles ne sont pas arrivées en session 5 (ni l'image de référence 3D). |
-| **Poussé sur GitHub** | Voir « Push » (session 6 : push par URL HTTPS). |
+| **Poussé sur GitHub** | Session 7 poussée jusqu'à `72e0a00` par URL HTTPS (vérifié avec `git ls-remote`). Voir « Push ». |
 | **En attente de validation** | Main story : chapitres suivis en session 7, à valider à l'usage ; étude 3D (session 5) ; liste finale des libellés d'onglets (proposition) |
 
 ### Push
@@ -55,9 +55,10 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 | `6ff1ee9` | 6 | Cache : place libérée si le stockage local est plein |
 | `3302076` | 7 | Wiki : cache renouvelé à chaque utilisation, entrées expirées purgées |
 | `c3dc322` | 7 | Main story : chapitres du wiki suivis étape par étape |
-| (ce commit) | 7 | Wiki : pages les moins utilisées supprimées si le stockage est plein |
+| `72e0a00` | 7 | Wiki : pages les moins utilisées supprimées si le stockage est plein |
+| (ce commit) | 7 | Fiche quête : photos du wiki dans la section Guide |
 
-### Tests (131)
+### Tests (171)
 
 | Fichier | Ce qui est couvert |
 |---|---|
