@@ -61,14 +61,6 @@ function boundsFromPoints(points: { x: number; z: number }[]): RawBounds {
   ];
 }
 
-/** Agrandit une emprise d'un facteur (comme getScaledBounds de tarkov.dev). */
-function scaleBounds(b: L.LatLngBounds, factor: number) {
-  const c = b.getCenter();
-  const dLat = ((b.getNorth() - b.getSouth()) * factor) / 2;
-  const dLng = ((b.getEast() - b.getWest()) * factor) / 2;
-  return L.latLngBounds([c.lat - dLat, c.lng - dLng], [c.lat + dLat, c.lng + dLng]);
-}
-
 function MapEvents({ placing, onPlace, onMove }: {
   placing: Placing;
   onPlace: MapViewProps["onPlace"];
@@ -220,8 +212,8 @@ function MapViewInner(props: MapViewProps) {
     <div className={`map-wrap ${props.placing ? "is-placing" : ""}`}>
       <MapContainer
         crs={crs}
+        // pas de maxBounds : déplacement libre, sans retour en arrière ; le recadrage se fait au changement de map
         bounds={bounds}
-        maxBounds={scaleBounds(bounds, 1.5)}
         minZoom={minZoom}
         maxZoom={maxZoom}
         zoomSnap={0.25}
