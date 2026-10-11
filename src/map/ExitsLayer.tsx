@@ -3,6 +3,7 @@
 // que sur cet étage ; une sortie d'un étage supérieur est sur la carte de base, avec
 // son numéro d'étage. Les noms sont masqués quand la carte est trop dézoomée.
 import { useEffect } from "react";
+import type L from "leaflet";
 import { Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import type { GameMap, MapExit } from "../types";
 import type { MapCalibration } from "./calibration";
@@ -16,11 +17,11 @@ import { tr } from "../lib/i18n";
 const LABEL_ZOOM_MARGIN = 0.5;
 
 /** Ajoute la classe « exit-labels-hidden » à la carte tant qu'elle est trop dézoomée. */
-function LabelZoom() {
+function LabelZoom({ bounds }: { bounds: L.LatLngBounds }) {
   const map = useMap();
   useEffect(() => {
-    // la carte vient d'être cadrée sur toute la map (FitBounds) : c'est la vue la plus chargée
-    const threshold = map.getZoom() + LABEL_ZOOM_MARGIN;
+    // zoom qui montre toute la map (la vue peut avoir été restaurée plus zoomée par FitBounds)
+    const threshold = map.getBoundsZoom(bounds) + LABEL_ZOOM_MARGIN;
     const update = () => {
       const container = map.getContainer();
       container.classList.toggle("exit-labels-hidden", map.getZoom() < threshold);
@@ -54,11 +55,13 @@ export function ExitsLayer(props: {
   maps: GameMap[];
   calibration?: MapCalibration;
   level: Level;
+  /** Emprise de la map : le seuil des noms part du zoom qui la montre en entier. */
+  bounds: L.LatLngBounds;
 }) {
   const { calibration, level } = props;
   return (
     <>
-      <LabelZoom />
+      <LabelZoom bounds={props.bounds} />
       {props.exits.map((exit) => {
         const p = { ...exit.position, top: exit.top, bottom: exit.bottom };
         const shownOn = displayLevelOf(p, calibration);

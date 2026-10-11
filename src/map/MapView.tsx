@@ -113,11 +113,25 @@ function InvalidateOnResize() {
   return null;
 }
 
-function FitBounds({ bounds }: { bounds: L.LatLngBounds }) {
+// Dernière vue de la map affichée : MapView est recréé (langue, calibrage en ligne) sans changement de map.
+let lastView: { mapId: string; center: L.LatLng; zoom: number } | null = null;
+
+function FitBounds({ bounds, mapId }: { bounds: L.LatLngBounds; mapId: string }) {
   const map = useMap();
   useEffect(() => {
-    map.fitBounds(bounds);
-    // seulement au montage : on ne recadre pas à chaque nouveau point
+    // on ne recadre qu'au changement de map ; sinon on reprend la vue où elle était
+    if (lastView?.mapId === mapId) map.setView(lastView.center, lastView.zoom, { animate: false });
+    else {
+      map.fitBounds(bounds);
+      lastView = { mapId, center: map.getCenter(), zoom: map.getZoom() };
+    }
+    const save = () => {
+      lastView = { mapId, center: map.getCenter(), zoom: map.getZoom() };
+    };
+    map.on("moveend zoomend", save);
+    return () => {
+      map.off("moveend zoomend", save);
+    };
   }, [map]);
   return null;
 }
@@ -222,10 +236,10 @@ function MapViewInner(props: MapViewProps) {
         attributionControl
         className="leaflet-map"
       >
-        <FitBounds bounds={bounds} />
+        <FitBounds bounds={bounds} mapId={props.map.id} />
         <InvalidateOnResize />
         {showExits && exits.length > 0 && (
-          <ExitsLayer exits={exits} maps={props.maps} calibration={calibration} level={level} />
+          <ExitsLayer exits={exits} maps={props.maps} calibration={calibration} level={level} bounds={bounds} />
         )}
         <AttributionPrefix />
         <BaseLayer
