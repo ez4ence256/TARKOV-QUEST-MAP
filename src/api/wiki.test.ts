@@ -1,5 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanCaption, exitKey, loadQuestPhotos, loadWikiPage, parseExitTables, parseGuideGalleries, wikiTitleFromLink } from "./wiki";
+import {
+  cleanCaption,
+  exitKey,
+  loadQuestPhotos,
+  loadWikiPage,
+  parseExitTables,
+  parseGuideGalleries,
+  purgeExpiredCache,
+  wikiTitleFromLink,
+} from "./wiki";
 
 // Extrait de wikitext construit pour le test (même structure que les pages de quêtes du wiki)
 const WIKITEXT = `==Objectives==
@@ -232,5 +241,53 @@ describe("photos des sorties", () => {
     expect(exitKey("Boiler Room Basement (Co-Op)")).toBe(exitKey("boiler room basement"));
     expect(exitKey("Railroad Passage (Flare)")).toBe("railroad passage");
     expect(exitKey("Smugglers' Bunker (ZB-1012)")).toBe(exitKey("Smugglers Bunker"));
+  });
+});
+
+describe("durée de vie du cache", () => {
+  const DAY = 24 * 60 * 60 * 1000;
+  const link = "https://escapefromtarkov.fandom.com/wiki/Debut";
+  const stubWiki = () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ parse: { title: "Debut", wikitext: "x", categories: [] } })));
+    vi.stubGlobal("fetch", fetchMock);
+    return fetchMock;
+  };
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+    localStorage.clear();
+  });
+
+  it("une lecture avant 7 jours renouvelle le cache pour 7 jours de plus", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] }); // les setTimeout restent réels (pause entre requêtes)
+    vi.setSystemTime(0);
+    const fetchMock = stubWiki();
+    await loadWikiPage(link);
+    vi.setSystemTime(6 * DAY);
+    await loadWikiPage(link); // renouvelle
+    vi.setSystemTime(12 * DAY); // 12 j après le téléchargement, 6 j après le dernier usage
+    await loadWikiPage(link);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("une entrée non utilisée pendant plus de 7 jours est retéléchargée", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(0);
+    const fetchMock = stubWiki();
+    await loadWikiPage(link);
+    vi.setSystemTime(8 * DAY);
+    await loadWikiPage(link);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("la purge retire les entrées expirées et illisibles, garde les fraîches et les autres clés", () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(10 * DAY);
+    localStorage.setItem("tqp:wiki:v2:page:vieille", JSON.stringify({ fetchedAt: 0 }));
+    localStorage.setItem("tqp:wiki:v2:page:cassee", "{pas du json");
+    localStorage.setItem("tqp:wiki:v2:page:fraiche", JSON.stringify({ fetchedAt: 0, usedAt: 9 * DAY }));
+    localStorage.setItem("tqp:state:v1", "garde");
+    purgeExpiredCache();
+    expect(Object.keys(localStorage).sort()).toEqual(["tqp:state:v1", "tqp:wiki:v2:page:fraiche"]);
   });
 });

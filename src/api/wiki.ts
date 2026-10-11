@@ -4,7 +4,7 @@
 // Règles suivies :
 //  - uniquement à la demande (onglet ouvert sur une quête), une quête à la fois ;
 //  - au plus une requête par seconde vers le wiki (file d'attente commune) ;
-//  - cache local de 7 jours ;
+//  - cache local de 7 jours, renouvelé à chaque utilisation ;
 //  - une seule requête "parse" par quête (wikitext + catégories), partagée par
 //    les deux onglets ; les photos ajoutent une requête "imageinfo".
 //  - seules les galeries de la section "Guide" sont gardées comme photos : les
@@ -153,10 +153,47 @@ async function fetchImageInfo(files: string[]): Promise<Map<string, ImageInfoPag
   return byTitle;
 }
 
-function readCache<T extends { fetchedAt: number }>(key: string): T | null {
+/** Un renouvellement réécrit toute l'entrée : pas plus d'une fois par jour. */
+const RENEW_AFTER_MS = 24 * 60 * 60 * 1000;
+let purged = false;
+
+/** Dernier usage d'une entrée (les anciennes entrées n'ont que fetchedAt). */
+const lastUse = (entry: { fetchedAt: number; usedAt?: number }) => entry.usedAt ?? entry.fetchedAt;
+
+/** Retire les entrées du wiki expirées ou illisibles : sans cela elles s'accumulent et saturent le stockage. */
+export function purgeExpiredCache() {
+  purged = true;
   try {
-    const cached = JSON.parse(localStorage.getItem(CACHE_PREFIX + key) ?? "null") as T | null;
-    return cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS ? cached : null;
+    for (const k of Object.keys(localStorage)) {
+      if (!k.startsWith(CACHE_PREFIX)) continue;
+      let expired = true;
+      try {
+        expired = Date.now() - lastUse(JSON.parse(localStorage.getItem(k) ?? "null")) >= CACHE_TTL_MS;
+      } catch {
+        /* illisible : supprimée */
+      }
+      if (expired) localStorage.removeItem(k);
+    }
+  } catch {
+    /* stockage inaccessible */
+  }
+}
+
+function readCache<T extends { fetchedAt: number }>(key: string): T | null {
+  if (!purged) purgeExpiredCache();
+  try {
+    const cached = JSON.parse(localStorage.getItem(CACHE_PREFIX + key) ?? "null") as (T & { usedAt?: number }) | null;
+    if (!cached || Date.now() - lastUse(cached) >= CACHE_TTL_MS) return null;
+    // cache glissant : chaque usage repousse l'expiration de 7 jours
+    if (Date.now() - lastUse(cached) > RENEW_AFTER_MS) {
+      cached.usedAt = Date.now();
+      try {
+        localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(cached));
+      } catch {
+        /* stockage plein : on garde l'ancienne date */
+      }
+    }
+    return cached;
   } catch {
     return null;
   }
