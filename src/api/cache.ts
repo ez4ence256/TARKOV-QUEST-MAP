@@ -29,10 +29,18 @@ function purgeOldCaches() {
   }
 }
 
-function writeCachedData(data: TarkovData) {
+export function writeCachedData(data: TarkovData) {
+  const key = cacheKey(data.gameMode, data.language);
+  const json = JSON.stringify(data);
   try {
     purgeOldCaches();
-    localStorage.setItem(cacheKey(data.gameMode, data.language), JSON.stringify(data));
+    try {
+      localStorage.setItem(key, json);
+    } catch {
+      // Chaque entrée pèse ~1,8 M caractères : si le quota est atteint, on libère les autres modes/langues puis on réessaie.
+      for (const k of Object.keys(localStorage)) if (k.startsWith("tqp:data:") && k !== key) localStorage.removeItem(k);
+      localStorage.setItem(key, json);
+    }
   } catch (error) {
     // Quota dépassé ou stockage désactivé : l'app fonctionne quand même, sans cache.
     console.warn("Impossible de mettre les données en cache", error);
