@@ -4,24 +4,25 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 
 ---
 
-## État actuel (11 octobre 2026, fin de session 5)
+## État actuel (11 octobre 2026, fin de session 6)
 
 | Élément | État |
 |---|---|
-| Branche | `claude/tarkov-quest-planner-axir48` (dépôt `ez4ence256/testss`) |
-| Derniers commits | `09d0146` import par capture (OCR) · `70bf964` sorties/coops/transits · `3cad781` ordre des sections · `7d2655a` sélection épinglée · `010a9b4` panneau réglable |
+| Branche | `claude/tarkov-quest-planner-axir48` (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**) |
+| Derniers commits | cache libéré si plein · `959bb7c` images fiche quête · `188e0b8` photos des sorties · `df9e5f3` icônes PMC/Scav · `8ad2e50` interface bilingue FR/EN |
 | Travail non commité | Seulement `.claude/launch.json` (volontairement hors du dépôt : chemin propre à cette machine) |
-| Tests | 121/121 au vert (`npm test`) |
+| Tests | 131/131 au vert (`npx vitest run`) |
 | Compilation | OK (`npm run build`). Avertissement Vite : le fichier principal fait 516 Ko (> 500 Ko). L'OCR est dans des fichiers séparés, chargés à la demande. |
 | Vérifié dans le navigateur | Panneau à 400 / 440 / 520 / 540 / 560 / 720 px, fenêtre de 1024 px et zoom simulé à 125 %, téléphone · sélection épinglée avec filtre et recherche, « Tout désélectionner » · ordre des sections sur Signal - Partie 3 · sorties sur Douanes (niveau principal + sous-sol) et Labs (principal + niveau technique) · import d'une **image de synthèse** (Ctrl+V, vérification, ajout, map choisie) |
 | **Pas vérifié** | **Import avec les captures de l'utilisateur** : elles ne sont pas arrivées en session 5 (ni l'image de référence 3D). |
-| **Poussé sur GitHub** | Oui, en fin de session 5 (voir « Push »). Pour vérifier qu'il ne reste rien à pousser : `git rev-list --count origin/claude/tarkov-quest-planner-axir48..HEAD` (doit donner 0). |
-| **En attente de validation** | Étude 3D (tâche 6, rapport ci-dessous) ; liste finale des libellés d'onglets (proposition) |
+| **Poussé sur GitHub** | Voir « Push » (session 6 : push par URL HTTPS). |
+| **En attente de validation** | Plan de la main story (session 6, recherche seulement) ; étude 3D (session 5) ; liste finale des libellés d'onglets (proposition) |
 
 ### Push
 - Sessions 2 à 4 : jamais poussé (identifiants GitHub absents de la session de Claude).
 - Session 5 : **une tentative à la toute fin, réussie** : `git push origin claude/tarkov-quest-planner-axir48` a envoyé `ecbe77a..63a8ed7` (18 commits). Après `git fetch`, local et origin sont identiques (0 en avance, 0 en retard). Les identifiants GitHub sont donc maintenant disponibles dans la session (gestionnaire d'identifiants Windows ou GitHub Desktop) ; aucune configuration Git n'a été modifiée.
 - Ce commit de journal a été poussé ensuite par un second push.
+- **Session 6** : le dépôt est maintenant `ez4ence256/TARKOV-QUEST-MAP`. Le remote `origin` est en SSH et ne marche pas sur ce PC. Pousser avec `git push https://github.com/ez4ence256/TARKOV-QUEST-MAP.git claude/tarkov-quest-planner-axir48`, puis vérifier avec `git ls-remote <url> claude/tarkov-quest-planner-axir48` contre `HEAD` (`origin/...` n'est pas mis à jour par un push par URL).
 
 ### Commits depuis la session 1 (locaux, à pousser)
 
@@ -44,14 +45,23 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 | `09d0146` | 5 | Import de quêtes par capture d'écran (OCR) |
 | `63a8ed7` | 5 | Journal (fin de session 5), poussé |
 | (suivant) | 5 | Journal : résultat du push |
+| `8ad2e50` | 6 | Interface bilingue FR/EN : `tr(fr, en)` dans `src/lib/i18n.ts`, choix enregistré (`tqp:lang`), sélecteur dans la barre du haut et sur l'écran de choix du mode ; changer de langue reconstruit la mise en page |
+| `7355d20` | 6 | Variantes de maps regroupées sur leur map de base |
+| `bd5db84`, `879395c` | 6 | Carte libre sans effet ressort ; vue conservée au changement de langue et au chargement du calibrage |
+| `1a441f1` | 6 | Filtre de map = map affichée |
+| `df9e5f3` | 6 | Icônes de sorties PMC / Scav / communes (légende dans Réglages → Affichage) |
+| `188e0b8` | 6 | Photos du wiki dans la bulle des sorties |
+| `959bb7c` | 6 | Images de la fiche quête (objets, clés, récompenses), prérequis cliquables |
+| `6ff1ee9` | 6 | Cache : place libérée si le stockage local est plein |
 
-### Tests (121)
+### Tests (131)
 
 | Fichier | Ce qui est couvert |
 |---|---|
 | `src/map/crs.test.ts` | conversion de coordonnées identique à tarkov.dev |
 | `src/map/levels.test.ts` | étages supérieurs / souterrains, numéro d'étage, Icebreaker |
 | `src/api/tarkovJson.test.ts` | lecture de l'API (traductions, positions, prérequis, clés, Find in raid, récompenses, noms d'objets, **sorties, coops et transits**) |
+| `src/api/cache.test.ts` | écriture du cache : autres entrées `tqp:data:` supprimées si le stockage est plein, avertissement si l'échec persiste |
 | `src/api/wiki.test.ts` | accès au wiki : page partagée, page absente, erreurs, photos, cache, demandes simultanées |
 | `src/lib/wikiText.test.ts` | lecture du wikitext sur des extraits réels |
 | `src/lib/questWiki.test.ts` | association, PVP ZONE, page historique, désaccords, « à emporter », récompenses |
@@ -145,6 +155,49 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 **Tâche 6 : étude 3D** (aucun code, en attente de validation)
 - Voir « Étude 3D » ci-dessous.
 
+### Session 6
+
+**Bilingue** (`8ad2e50`)
+- Pas de dictionnaire à clés : des paires en ligne `tr(fr, en)`. Les constantes de module sont résolues à l'affichage (getters ou tuples `[fr, en]`).
+
+**Photos des sorties** (`188e0b8`)
+- Les pages de map du wiki ont des wikitables `==Extractions==` et `==Transits==`, une ligne par sortie, colonne 1 = `[[File:..|240px]]`. Association par `nameEn` normalisé : **145 / 163 (89 %)** sur 12 maps.
+
+| Map | Photos trouvées |
+|---|---|
+| Reserve | 14/14 |
+| Woods | 22/22 |
+| Icebreaker | 1/1 |
+| The Lab | 8/8 |
+| Labyrinth | 2/2 |
+| Lighthouse | 15/15 |
+| Factory | 11/12 |
+| Interchange | 8/9 |
+| Streets | 20/22 |
+| Customs | 20/26 |
+| Shoreline | 17/22 |
+| Ground Zero | 7/10 |
+
+- Les manques sont des sorties absentes des tableaux du wiki : repli sur un lien.
+- 2 requêtes wiki par map à la première ouverture d'une bulle, puis cache 7 jours. Bulle de taille fixe (plus de saut d'autoPan).
+- Environ 36 requêtes wiki dépensées une fois pour la mesure.
+
+**Images de la fiche quête** (`959bb7c`)
+- Source : `json.tarkov.dev/<mode>/items` (**17,3 Mo**, 5476 objets), champ `iconLink` (webp 64 px). Gardé seulement pour les `referencedItemIds` (4037).
+- Préfixe `https://assets.tarkov.dev/` retiré dans le cache ; entrée de 1,57 M à 1,83 M caractères ; anciennes versions de cache purgées.
+- « Found in raid » oui/non seulement quand une source le dit. Prérequis cliquables, avec niveau et marchand.
+
+**Icônes des sorties** (`df9e5f3`)
+- PMC : « P » bleu. Scav : « S » violet. Communes : moitié/moitié « P+S ». Sans faction : vert générique. Coop et transit inchangés.
+
+**Main story (tâche 6)** : recherche seulement, **en attente de validation**
+- Wiki : page « Story chapters » et une page par chapitre (10) : Tour, Falling Skies, The Ticket, Batya, The Unheard, Blue Fire, Boreas, The Labyrinth (chapitre d'histoire), They Are Already Here, Accidental Witness.
+- Les champs `previous` / `leads to` de l'infobox sont presque vides (seulement Falling Skies → The Ticket) : **l'ordre de jeu n'est pas donné par le wiki**.
+- Les étapes du Guide sont des titres `===` avec `<gallery>`. Les fins Savior / Debtor / Survivor / Fallen sont dans The Ticket.
+- Wiki FR (`escapefromtarkov.fandom.com/fr`) : « Chapitres de l'histoire » et au moins 3 chapitres traduits.
+- Endpoint histoire de tarkov.dev : introuvable (json 404, GraphQL indisponible à ce moment).
+- Environ 22 requêtes wiki dépensées pour la recherche.
+
 ---
 
 ## Étude 3D (session 5, en attente de validation)
@@ -208,6 +261,11 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 - **Sécurité** : aucun HTML du wiki inséré ; les noms affichés dans les marqueurs sont échappés.
 - **Réinitialisation** : seulement `done` du mode actuel, avec confirmation.
 - **Un seul accès au wiki** (`src/api/wiki.ts`, 1 requête/s, cache 7 jours).
+- **Session 6** :
+  - `tr(fr, en)` en ligne, sans dictionnaire ;
+  - français par défaut ;
+  - préfixe d'URL des icônes retiré dans le cache ;
+  - photos des bulles de sorties chargées à la demande, map par map.
 - **Session 5** :
   - libellés d'onglets courts : Sélection, Quêtes, Capture, Fiche quête, Photos, Mes points, Réglages (**proposition à confirmer** ; « Quête sélectionnée » reste le nom complet) ;
   - **coop repérée par « (Co-op) » dans le nom anglais** (pas de champ dans l'API) ;
@@ -223,7 +281,7 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 
 | Sujet | Où regarder |
 |---|---|
-| API tarkov.dev (quêtes, maps, **sorties**, marchands, noms d'objets) | `src/api/tarkovJson.ts`, cache `src/api/cache.ts` (données v6) |
+| API tarkov.dev (quêtes, maps, **sorties**, marchands, noms d'objets) | `src/api/tarkovJson.ts`, cache `src/api/cache.ts` (données v9) |
 | Wiki (requêtes, file d'attente, cache) | `src/api/wiki.ts` |
 | Wikitext, croisement wiki ↔ tarkov.dev | `src/lib/wikiText.ts`, `src/lib/questWiki.ts` |
 | Fiche quête et ordre des sections | `src/components/QuestTab.tsx`, `src/lib/questSections.ts`, `src/components/WikiBlocks.tsx` |
@@ -261,12 +319,20 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 - **Libellés d'onglets** : à 400 px, « Fiche quête » et « Mes points » passent sur 2 lignes. Le zoom à 125 % n'a été que simulé.
 - Plans des étages supérieurs non affichables ; photos par quête ; texte du wiki en anglais et parfois incomplet ; récompenses comparées seulement sur l'expérience, l'argent et la réputation.
 - Erreur Leaflet `_leaflet_pos` possible si on change de map pendant un zoom.
+- **Session 6** :
+  - le premier chargement télécharge le fichier d'objets de 17 Mo par langue, et de nouveau quand le cache de 6 h expire ;
+  - localStorage proche du plein quand plusieurs modes / langues sont en cache (le dernier commit libère la place) ;
+  - 18 sorties sans photo du wiki ;
+  - images « lazy » non observées en chargement dans le navigateur masqué (URLs vérifiées avec `new Image()`) ;
+  - pastilles de sorties vérifiées par le DOM seulement (pas de capture d'écran) ;
+  - erreurs Leaflet vues seulement avec des événements synthétiques.
 
 ---
 
 ## Idées pour la suite (prompts prêts à l'emploi)
 
 **À faire en premier**
+- « Valide le plan de la main story (tâche 6) » : voir la recherche de la session 6.
 - « Voici mes captures du menu Tâches : mesure l'OCR dessus et ajuste les réglages. »
 - « Voici l'image de référence 3D ; je valide (ou non) la recommandation de l'étude 3D. »
 - Confirmer ou corriger la liste des libellés d'onglets.
@@ -284,6 +350,7 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 - « Héberge les données de langue fra/eng dans l'app (sans CDN). »
 
 **Qualité**
+- « Dérive les icônes de l'id (`assets.tarkov.dev/<id>-icon.webp`) pour éviter le fichier d'objets de 17 Mo. »
 - « Découpe le fichier principal (> 500 Ko) avec des imports dynamiques. »
 - « Configure Vite en usePolling si l'observateur rate encore des modifications sur M:. »
 - « Audit du projet sans rien modifier, corrections par priorité. »
