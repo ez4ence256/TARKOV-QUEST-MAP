@@ -10,7 +10,7 @@ Tout tourne dans le navigateur : pas de serveur, pas de compte.
 
 ## Lancer le projet
 
-Il faut [Node.js](https://nodejs.org) **22.12 ou plus récent** (demandé par Vite et Vitest).
+Il faut [Node.js](https://nodejs.org) **22.12 ou plus récent** (exigé par Vite et Vitest).
 
 ```bash
 npm install
