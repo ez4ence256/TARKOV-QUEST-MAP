@@ -8,7 +8,7 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 
 | Élément | État |
 |---|---|
-| Branche | **`main`** (renommée depuis `claude/tarkov-quest-planner-axir48` en session 7 ; dépôt **`ez4ence256/TARKOV-QUEST-MAP`**). L'ancienne branche distante sera supprimée quand `main` sera la branche par défaut sur GitHub. |
+| Branche | **`main`** (renommée depuis `claude/tarkov-quest-planner-axir48` en session 7 ; dépôt **`ez4ence256/TARKOV-QUEST-MAP`**). Sur GitHub, `main` est la seule branche et la branche par défaut. |
 | Derniers commits | `c12988e` case « Extracts Scav » · `709720a` main story mélangée aux quêtes · `d51bc68` photos du wiki dans le Guide · `72e0a00` pages wiki supprimées si stockage plein · `c3dc322` main story · `3302076` cache du wiki renouvelé à chaque utilisation · `6ff1ee9` cache libéré si plein · `959bb7c` images fiche quête |
 | Travail non commité | Seulement `.claude/launch.json` (volontairement hors du dépôt : chemin propre à cette machine) |
 | Tests | 183/183 au vert (`npx vitest run`) |
