@@ -18,9 +18,11 @@ interface Props {
   onPhotos: (taskId: string) => void;
   /** Vide la sélection (progression, notes et points perso gardés). */
   onClearSelection: () => void;
+  /** Une map choisie dans le filtre devient aussi la map affichée. */
+  onShowMap: (mapId: string) => void;
 }
 
-export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onClearSelection }: Props) {
+export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onClearSelection, onShowMap }: Props) {
   const [query, setQuery] = useState("");
   const [trader, setTrader] = useState("");
   const [mapFilter, setMapFilter] = useState("");
@@ -110,7 +112,10 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onCl
               </option>
             ))}
           </select>
-          <select className="input" value={mapFilter} onChange={(e) => setMapFilter(e.target.value)} aria-label={tr("Filtrer par map", "Filter by map")}>
+          <select className="input" value={mapFilter} onChange={(e) => {
+              setMapFilter(e.target.value);
+              if (e.target.value) onShowMap(e.target.value);
+            }} aria-label={tr("Filtrer par map", "Filter by map")}>
             <option value="">{tr("Toutes les maps", "All maps")}</option>
             {maps.map((m) => (
               <option key={m.id} value={m.id}>
