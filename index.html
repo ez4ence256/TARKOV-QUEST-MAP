@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#111417" />
     <title>Tarkov Quest Planner</title>
+    <script>
+      // Juste après une mise en ligne, l'hébergement peut garder en cache une page HTML à la place
+      // d'un fichier de l'app : on le redemande une fois avec une adresse unique (contourne ce cache).
+      addEventListener("error", function (e) {
+        var el = e.target, url = el && (el.src || el.href);
+        if (!url || url.indexOf("/assets/") < 0 || el.dataset.retried) return;
+        var copy = document.createElement(el.tagName);
+        if (el.tagName === "SCRIPT") { copy.type = "module"; copy.crossOrigin = ""; copy.src = url + "?r=" + Date.now(); }
+        else { copy.rel = "stylesheet"; copy.crossOrigin = ""; copy.href = url + "?r=" + Date.now(); }
+        copy.dataset.retried = "1";
+        el.replaceWith(copy);
+      }, true);
+    </script>
   </head>
   <body>
     <div id="root"></div>
