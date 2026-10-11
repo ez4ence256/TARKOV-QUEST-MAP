@@ -11,7 +11,7 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 | Branche | **`main`** (renommée depuis `claude/tarkov-quest-planner-axir48` en session 7 ; dépôt **`ez4ence256/TARKOV-QUEST-MAP`**). Sur GitHub, `main` est la seule branche et la branche par défaut. |
 | Derniers commits | `c12988e` case « Extracts Scav » · `709720a` main story mélangée aux quêtes · `d51bc68` photos du wiki dans le Guide · `72e0a00` pages wiki supprimées si stockage plein · `c3dc322` main story · `3302076` cache du wiki renouvelé à chaque utilisation · `6ff1ee9` cache libéré si plein · `959bb7c` images fiche quête |
 | Travail non commité | Seulement `.claude/launch.json` (volontairement hors du dépôt : chemin propre à cette machine) |
-| Tests | 183/183 au vert (`npx vitest run`) |
+| Tests | 206/206 au vert (`npx vitest run`) |
 | Compilation | OK (`npm run build`). Avertissement Vite : le fichier principal fait 516 Ko (> 500 Ko). L'OCR est dans des fichiers séparés, chargés à la demande. |
 | Vérifié dans le navigateur | Panneau à 400 / 440 / 520 / 540 / 560 / 720 px, fenêtre de 1024 px et zoom simulé à 125 %, téléphone · sélection épinglée avec filtre et recherche, « Tout désélectionner » · ordre des sections sur Signal - Partie 3 · sorties sur Douanes (niveau principal + sous-sol) et Labs (principal + niveau technique) · import d'une **image de synthèse** (Ctrl+V, vérification, ajout, map choisie) |
 | **Pas vérifié** | **Import avec les captures de l'utilisateur** : elles ne sont pas arrivées en session 5 (ni l'image de référence 3D). |
@@ -61,7 +61,7 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 | `709720a` | 7 | Main story : chapitres mélangés aux quêtes, « Main story » à la place du marchand |
 | `c12988e` | 7 | Carte : case « Extracts Scav » dans la barre du haut (sorties Scav seules masquées, sorties communes gardées ; choix retenu `tqp:showScavExits`) |
 
-### Tests (183)
+### Tests (206)
 
 | Fichier | Ce qui est couvert |
 |---|---|
@@ -81,6 +81,8 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 | `src/lib/search.test.ts` | recherche bilingue |
 | `src/lib/points.test.ts` | points de la carte, spawns numérotés, progression |
 | `src/state/store.test.ts` | réinitialisation, isolation entre modes, ajout de quêtes par capture |
+| `src/lib/roomSync.test.ts` | rooms : différences d'état, validation, fusion, opérations distantes |
+| `server/rooms.test.ts` | rooms et serveur statique sur un vrai port (SSE à deux clients, limites, 404, MIME, traversée) |
 
 ---
 
@@ -214,6 +216,20 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 - Le wiki FR écrit les noms d'objets en {{identifiant tarkov.dev}} (192 dans les 8 pages) : gardés comme repères puis remplacés par le nom de `itemNames` (tarkov.dev), « […] » si l'objet est inconnu ; ils ne comptent pas dans la comparaison des nombres.
 - Limites : le cache des chapitres (≈ 0,6 M caractères pour les 10 chapitres, FR compris) s'ajoute aux données de quêtes ; avec plusieurs modes en cache, une écriture peut échouer en silence et le chapitre est relu à chaque ouverture (The Ticket : environ 7 requêtes).
 
+### Rooms (jouer en groupe)
+- **Principe** : bouton « Room » à côté du sélecteur de map. « Créer une room » donne un ID de 6 caractères (sans 0 O 1 I L) à envoyer ; les autres le saisissent et « Rejoignent ». Sont partagés : **quêtes choisies, objectifs cochés, chapitres Main story choisis et étapes cochées**. Couleurs, notes, points perso et positions manuelles restent locaux.
+- **Protocole** (`server/rooms.mjs`, JavaScript simple car le Node de production n'importe pas `src/*.ts`) : `POST /api/rooms {mode,state}` crée ; `GET /api/rooms/:id/events?client=…` flux **SSE** (snapshot, puis `op`, `members`, battement toutes les 25 s) ; `POST /api/rooms/:id/ops {client,ops:[{kind:task|done|story|step,id,on}]}` ; `PUT /api/rooms/:id` recrée une room de même ID ; `GET /api/rooms/:id` (existe ?). Opérations **absolues** (« on » = présent), dernier écrit gagne.
+- **Client** (`src/api/room.ts`, `src/lib/roomSync.ts`, `src/components/RoomControl.tsx`) : synchronisation **par différence d'état** (pas par action) : après chaque changement local (délai 150 ms), l'état partageable est comparé au dernier état connu du serveur et les écarts sont envoyés. Les opérations reçues sont aussi appliquées à cet état connu, donc elles ne repartent pas. Le reducer a 3 actions : `roomSnapshot`, `roomOps`, `restoreMode`.
+- **Jointure = fusion** : à la première connexion, union de l'état local et de la room (le surplus local est envoyé). L'état du mode est sauvegardé avant dans `localStorage` `tqp:beforeRoom:<mode>` ; « Quitter » propose de garder l'état de la room ou de restaurer l'ancien. Un joiner d'un autre mode est basculé sur celui de la room (bandeau d'information). Après une reconnexion, le snapshot **remplace** l'état local (les changements faits hors ligne non envoyés sont perdus).
+- **Réinitialisations** : « Réinitialiser » et « Tout désélectionner » valent pour tout le monde ; les confirmations le disent (`ConfirmButton`, `inRoom()`). « Tout désélectionner » n'a pas de confirmation, comme avant.
+- **Reprise** : la room (ID, créateur, mode) est gardée dans `sessionStorage` `tqp:room` : un rechargement rejoint à nouveau. Si le serveur répond « room inconnue » (redémarrage, redéploiement), le **créateur** la recrée avec `PUT` (même ID, son état) ; les autres réessaient 6 fois (2,5 s) puis affichent « Room fermée ».
+- **Hébergement statique** : une réponse n'est acceptée que si c'est du JSON (ou un flux d'événements) ; sinon « Rooms indisponibles sur cet hébergement », sans plantage. Le site marche toujours en statique, sans rooms.
+- **Production : `npm start` est nécessaire** (Node >= 22.12, variable `PORT`, 3000 par défaut). `server/index.mjs` **remplace le serveur statique sur le même port** : il sert `dist/` (après `npm run build`) et `/api/rooms`, aucun autre port. Fichier absent = **404 sans cache** (plus de repli sur `index.html`) : c'est la vraie correction de la panne de cache décrite plus haut. `index.html` et `/` : `no-cache` ; `/assets/*` : `immutable` 1 an ; MIME complets ; chemin hors de `dist/` refusé (403). La parade de `index.html` (0.7.2) reste utile derrière un autre hébergeur.
+- **Dev** : `vite.config.ts` monte le même gestionnaire (plugin `tqp-rooms`, dev et preview). `server.host: "::"` : Vite n'écoutait que sur `::1`, donc `127.0.0.1` ne répondait pas (utile pour tester avec deux origines, donc deux `localStorage`). Conséquence : le serveur de dev est **aussi visible sur le réseau local**.
+- **Limites et sécurité** : rooms **en mémoire** (perdues au redémarrage, recréées par le créateur) ; **aucune authentification** : qui a l'ID modifie la room ; corps 256 Ko, 500 rooms, 20 membres, 20 000 identifiants par room, 1000 opérations par envoi, room vide supprimée après 30 min. Identifiants validés (quêtes et objectifs `[A-Za-z0-9_-:.]` 100 max ; Main story 200 max sans caractère de contrôle) des deux côtés ; rien n'est inséré comme HTML. Pas de limite par adresse IP (un client peut remplir les 500 rooms) ni de HTTPS/CORS (même origine uniquement).
+- **Vérifié dans le navigateur** (`localhost:5173` et `127.0.0.1:5173`, deux `localStorage`) : création / jointure avec bascule de mode, quête cochée A -> B, objectif coché B -> A, chapitre Main story, réinitialisation propagée, Quitter -> restauration, redémarrage du serveur de dev (la room revient avec une sélection faite pendant la coupure), rechargement, 375 px sans débordement, hébergement statique (`python -m http.server`) -> message d'indisponibilité ; `npm run build` puis `PORT=4123 npm start` : site, room, 404 sans cache. **Non vérifié** : étapes cochées de la Main story entre navigateurs (couvert par les tests), vrai déploiement derrière Cloudflare (SSE et tampon à vérifier ; l'en-tête `X-Accel-Buffering: no` est envoyé), plus de 2 navigateurs.
+- **Tests** (+23 : 206 au total) : `src/lib/roomSync.test.ts` (différences, validation, fusion/remplacement, opérations distantes) et `server/rooms.test.ts` (serveur réel sur un port libre : deux clients SSE, validation, 413, plafond de rooms, PUT, MIME, 404 sans cache, traversée de chemin).
+
 ---
 
 ## Étude 3D (session 5, en attente de validation)
@@ -310,6 +326,7 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 | Import par capture | `src/components/CaptureTab.tsx`, OCR `src/lib/ocr.ts`, rapprochement `src/lib/ocrMatch.ts`, Ctrl+V global dans `src/App.tsx` |
 | Étages | `src/map/levels.ts` |
 | Carte, fond, popups | `src/map/MapView.tsx`, `src/map/BaseLayer.tsx`, `src/components/PointPopups.tsx` |
+| Rooms (serveur, client, bouton) | `server/rooms.mjs`, `server/index.mjs`, `src/api/room.ts`, `src/lib/roomSync.ts`, `src/components/RoomControl.tsx` |
 | État sauvegardé (dont `selectTasks`, `clearSelection`, resets) | `src/state/store.ts` |
 | Conversion de coordonnées | `src/map/crs.ts` (ne pas modifier sans les tests) |
 
@@ -327,7 +344,7 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 - **Production (tarkov.aprilox.fr, derrière Cloudflare)** : déployée automatiquement à chaque push sur `main` (~1 min). L'hébergeur publie `index.html` avant les fichiers de `assets/` ; pendant cet écart, un fichier absent reçoit la page HTML, **mise en cache ~2 h 30** à cette adresse (« Failed to load module script … text/html »). Parade dans l'app (0.7.2) : un petit script dans `index.html` redemande le fichier avec `?r=<date>`. Vraie correction côté hébergeur : 404 (sans cache) pour un fichier absent de `assets/`, ou fichiers envoyés avant `index.html`. Les morceaux chargés plus tard (OCR) ne sont pas couverts par la parade.
 - **Sorties (0.7.3)** : un clic sur une sortie ouvre l'onglet **Photos** avec ses photos du wiki (la bulle ne garde que nom, type, faction, destination, étage). Sorties à plus de 50 % de la taille de la map hors de son emprise **masquées** (`exitsNearMap`) : données tarkov.dev fausses pour Point zéro « Barrage ONU » (UN Roadblock, x = -528) et « Bunker Scav » (z = -706) ; toutes les autres sorties sont à moins de 4 % du bord. ZB-1011 (Douanes) est au **sous-sol** : visible seulement avec l'étage « Sous-sol » (règle de la session 5, inchangée).
 
-**Commandes** : `npm run dev` · `npm test` · `npm run build` · `npm run sync:maps`. Node est dans `C:\Program Files\nodejs`. npm 12 bloque le script d'après-installation de tesseract.js (simple annonce de financement, inutile).
+**Commandes** : `npm run dev` · `npm start` (production : `dist/` + rooms, voir « Rooms ») · `npm test` · `npm run build` · `npm run sync:maps`. Node est dans `C:\Program Files\nodejs`. npm 12 bloque le script d'après-installation de tesseract.js (simple annonce de financement, inutile).
 
 ---
 
