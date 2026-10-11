@@ -7,6 +7,7 @@ import {
   parseExitTables,
   parseGuideGalleries,
   purgeExpiredCache,
+  writeCache,
   wikiTitleFromLink,
 } from "./wiki";
 
@@ -289,5 +290,46 @@ describe("durée de vie du cache", () => {
     localStorage.setItem("tqp:state:v1", "garde");
     purgeExpiredCache();
     expect(Object.keys(localStorage).sort()).toEqual(["tqp:state:v1", "tqp:wiki:v2:page:fraiche"]);
+  });
+});
+
+describe("stockage plein", () => {
+  const P = "tqp:wiki:v2:";
+  const realSet = Storage.prototype.setItem;
+  /** Faux quota : setItem lève si le total des valeurs dépasse la limite. */
+  const quota = (limit: number) =>
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(function (this: Storage, k: string, v: string) {
+      const others = Object.keys(this).reduce((n, o) => (o === k ? n : n + (this.getItem(o) ?? "").length), 0);
+      if (others + v.length > limit) throw new DOMException("plein", "QuotaExceededError");
+      realSet.call(this, k, v);
+    });
+  afterEach(() => {
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+  const put = (k: string, usedAt: number) => localStorage.setItem(P + k, JSON.stringify({ fetchedAt: 1, usedAt, pad: "x".repeat(50) }));
+
+  it("supprime les pages les moins utilisées d'abord, garde les récentes et les autres clés", () => {
+    put("a", 100);
+    put("b", 300);
+    put("c", 200);
+    localStorage.setItem("tqp:data:x", "y".repeat(500));
+    quota(800);
+    writeCache("neuve", { fetchedAt: 5, pad: "z".repeat(150) });
+    expect(localStorage.getItem(P + "neuve")).not.toBeNull();
+    expect(localStorage.getItem(P + "a")).toBeNull(); // la plus ancienne
+    expect(localStorage.getItem(P + "c")).toBeNull();
+    expect(localStorage.getItem(P + "b")).not.toBeNull(); // la plus récente survit
+    expect(localStorage.getItem("tqp:data:x")).toHaveLength(500);
+  });
+
+  it("abandonne sans erreur quand il ne reste plus rien à libérer, sans toucher aux autres clés", () => {
+    put("a", 100);
+    localStorage.setItem("tqp:data:x", "y".repeat(500));
+    quota(600);
+    expect(() => writeCache("neuve", { fetchedAt: 5, pad: "z".repeat(300) })).not.toThrow();
+    expect(localStorage.getItem(P + "neuve")).toBeNull();
+    expect(localStorage.getItem(P + "a")).toBeNull();
+    expect(localStorage.getItem("tqp:data:x")).toHaveLength(500);
   });
 });

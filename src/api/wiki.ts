@@ -209,9 +209,31 @@ export function writeCache(key: string, value: unknown) {
     for (const old of Object.keys(localStorage)) {
       if (old.startsWith(OLD_CACHE_PREFIX)) localStorage.removeItem(old);
     }
-    localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(value));
+    const json = JSON.stringify(value);
+    // stockage plein : on libère les pages du wiki les moins utilisées plutôt que de retélécharger à chaque ouverture
+    for (;;) {
+      try {
+        localStorage.setItem(CACHE_PREFIX + key, json);
+        return;
+      } catch (e) {
+        let lru: string | null = null;
+        let lruAt = Infinity;
+        for (const k of Object.keys(localStorage)) {
+          if (!k.startsWith(CACHE_PREFIX) || k === CACHE_PREFIX + key) continue;
+          let at = 0; // illisible : à supprimer en premier
+          try {
+            at = lastUse(JSON.parse(localStorage.getItem(k) ?? "null"));
+          } catch {
+            /* at = 0 */
+          }
+          if (at < lruAt) [lru, lruAt] = [k, at];
+        }
+        if (!lru) throw e;
+        localStorage.removeItem(lru);
+      }
+    }
   } catch {
-    /* stockage plein : on s'en passe */
+    /* stockage plein et plus rien à libérer : on s'en passe */
   }
 }
 

@@ -4,19 +4,19 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 
 ---
 
-## État actuel (11 octobre 2026, fin de session 6)
+## État actuel (11 octobre 2026, fin de session 7)
 
 | Élément | État |
 |---|---|
 | Branche | `claude/tarkov-quest-planner-axir48` (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**) |
-| Derniers commits | cache libéré si plein · `959bb7c` images fiche quête · `188e0b8` photos des sorties · `df9e5f3` icônes PMC/Scav · `8ad2e50` interface bilingue FR/EN |
+| Derniers commits | Wiki : pages les moins utilisées supprimées si le stockage est plein (ce commit) · `c3dc322` main story · `3302076` cache du wiki renouvelé à chaque utilisation · `6ff1ee9` cache libéré si plein · `959bb7c` images fiche quête |
 | Travail non commité | Seulement `.claude/launch.json` (volontairement hors du dépôt : chemin propre à cette machine) |
-| Tests | 169/169 au vert (`npx vitest run`) |
+| Tests | 171/171 au vert (`npx vitest run`) |
 | Compilation | OK (`npm run build`). Avertissement Vite : le fichier principal fait 516 Ko (> 500 Ko). L'OCR est dans des fichiers séparés, chargés à la demande. |
 | Vérifié dans le navigateur | Panneau à 400 / 440 / 520 / 540 / 560 / 720 px, fenêtre de 1024 px et zoom simulé à 125 %, téléphone · sélection épinglée avec filtre et recherche, « Tout désélectionner » · ordre des sections sur Signal - Partie 3 · sorties sur Douanes (niveau principal + sous-sol) et Labs (principal + niveau technique) · import d'une **image de synthèse** (Ctrl+V, vérification, ajout, map choisie) |
 | **Pas vérifié** | **Import avec les captures de l'utilisateur** : elles ne sont pas arrivées en session 5 (ni l'image de référence 3D). |
 | **Poussé sur GitHub** | Voir « Push » (session 6 : push par URL HTTPS). |
-| **En attente de validation** | Plan de la main story (session 6, recherche seulement) ; étude 3D (session 5) ; liste finale des libellés d'onglets (proposition) |
+| **En attente de validation** | Main story : chapitres suivis en session 7, à valider à l'usage ; étude 3D (session 5) ; liste finale des libellés d'onglets (proposition) |
 
 ### Push
 - Sessions 2 à 4 : jamais poussé (identifiants GitHub absents de la session de Claude).
@@ -53,6 +53,9 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 | `188e0b8` | 6 | Photos du wiki dans la bulle des sorties |
 | `959bb7c` | 6 | Images de la fiche quête (objets, clés, récompenses), prérequis cliquables |
 | `6ff1ee9` | 6 | Cache : place libérée si le stockage local est plein |
+| `3302076` | 7 | Wiki : cache renouvelé à chaque utilisation, entrées expirées purgées |
+| `c3dc322` | 7 | Main story : chapitres du wiki suivis étape par étape |
+| (ce commit) | 7 | Wiki : pages les moins utilisées supprimées si le stockage est plein |
 
 ### Tests (131)
 
@@ -335,6 +338,8 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
   - images « lazy » non observées en chargement dans le navigateur masqué (URLs vérifiées avec `new Image()`) ;
   - pastilles de sorties vérifiées par le DOM seulement (pas de capture d'écran) ;
   - erreurs Leaflet vues seulement avec des événements synthétiques.
+- **localStorage proche du quota** (~4,3 M sur ~5 M de caractères avec un seul mode en FR+EN et tous les chapitres) : l'éviction des pages du wiki les moins utilisées protège le wiki, mais mettre plusieurs modes en cache peut encore évincer des données ou des chapitres.
+- **The Ticket** affiche 4 fins empilées (129 étapes) : son X/N n'atteint jamais N.
 
 ---
 
@@ -345,6 +350,10 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 - « Voici mes captures du menu Tâches : mesure l'OCR dessus et ajuste les réglages. »
 - « Voici l'image de référence 3D ; je valide (ou non) la recommandation de l'étude 3D. »
 - Confirmer ou corriger la liste des libellés d'onglets.
+
+**Main story / cache**
+- « Main story : choisir sa fin dans The Ticket pour n'afficher que ses étapes. »
+- « Déplacer le cache du wiki vers IndexedDB (plus de place). »
 
 **Mise en ligne**
 - « Publie l'app sur GitHub Pages depuis ez4ence256/testss, avec un workflow GitHub Actions. »
