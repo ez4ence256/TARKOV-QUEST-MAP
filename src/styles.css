@@ -1459,3 +1459,83 @@ kbd {
   font-size: 0.78em;
   color: var(--muted);
 }
+
+/* Main story : chapitres du wiki, étape par étape */
+.story-list {
+  margin-bottom: 0.6rem;
+}
+.story-steps {
+  list-style: none;
+  margin: 0.3rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.story-step {
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--line);
+  border-left-width: 3px;
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  scroll-margin-top: 0.5rem;
+}
+/* première étape non cochée */
+.story-step.is-current {
+  border-color: var(--accent);
+  background: rgba(200, 178, 122, 0.1);
+}
+.story-step.is-done {
+  border-left-color: var(--ok);
+}
+.story-step.is-done .story-step-title {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+.story-step.is-done .story-step-body {
+  opacity: 0.6;
+}
+.story-step-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+.story-step-head input {
+  margin-top: 0.2rem;
+  flex: none;
+}
+.story-step-title {
+  font-weight: 600;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.story-step-n {
+  color: var(--muted);
+  font-weight: 400;
+}
+.tag-current {
+  background: var(--accent);
+  color: #111;
+}
+.story-step-body {
+  margin-top: 0.4rem;
+  padding-left: 1.5rem;
+  font-size: 0.92em;
+}
+/* vignettes à taille fixe : la page ne saute pas au chargement */
+.story-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+.story-photo img {
+  display: block;
+  width: 120px;
+  height: 68px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  background: var(--bg-3);
+}

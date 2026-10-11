@@ -3,6 +3,9 @@
 import { useMemo, useState } from "react";
 import type { GameMap, Task, Trader } from "../types";
 import type { ModeState } from "../state/store";
+import { questScore } from "../lib/search";
+import { pageUrlFor } from "../api/wiki";
+import { useStoryChapters } from "./StoryView";
 import { QUEST_COLORS } from "../lib/objectiveTypes";
 import { taskProgress } from "../lib/points";
 import { getLang, tr } from "../lib/i18n";
@@ -20,9 +23,13 @@ interface Props {
   onClearSelection: () => void;
   /** Une map choisie dans le filtre devient aussi la map affichée. */
   onShowMap: (mapId: string) => void;
+  /** Main story : ajoute ou retire un chapitre (titre de la page anglaise). */
+  onToggleStory: (chapter: string) => void;
+  /** Main story : ouvre la fiche d'un chapitre. */
+  onOpenStory: (chapter: string) => void;
 }
 
-export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onClearSelection, onShowMap }: Props) {
+export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onClearSelection, onShowMap, onToggleStory, onOpenStory }: Props) {
   const [query, setQuery] = useState("");
   const [trader, setTrader] = useState("");
   const [mapFilter, setMapFilter] = useState("");
@@ -46,6 +53,60 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onCl
     () => pinSelected(filtered, mode.selected.map((s) => s.taskId)),
     [filtered, mode.selected],
   );
+
+  // Main story : les chapitres du wiki, chargés (1 requête, en cache ensuite) à l'ouverture de l'onglet.
+  // Recherche bilingue comme pour les quêtes ; masqués si un filtre marchand ou map est actif.
+  const [storyRetry, setStoryRetry] = useState(0);
+  const storyChapters = useStoryChapters(true, storyRetry);
+  const storySelected = mode.story?.selected ?? [];
+  const storyRows = useMemo(() => {
+    if (trader || mapFilter || !storyChapters.chapters) return [];
+    const q = query.trim();
+    const lang = getLang();
+    const rows = storyChapters.chapters.flatMap((c) => {
+      const name = lang === "en" ? c.nameEn : c.name;
+      const m = q ? questScore(q, { name, nameEn: c.nameEn }) : { score: 1, viaEnglish: false };
+      return m.score > 0 ? [{ id: c.id, name, nameEn: c.nameEn, ...m }] : [];
+    });
+    if (q) rows.sort((a, b) => b.score - a.score);
+    // sélectionnés en tête, ordre du wiki (ou de la recherche) conservé dans chaque groupe
+    return [...rows.filter((r) => storySelected.includes(r.id)), ...rows.filter((r) => !storySelected.includes(r.id))];
+  }, [storyChapters.chapters, query, trader, mapFilter, storySelected]);
+
+  const renderStoryRow = (r: (typeof storyRows)[number]) => {
+    const isSelected = storySelected.includes(r.id);
+    const prefix = `${r.id}::`;
+    const ticked = Object.keys(mode.story?.done ?? {}).filter((k) => k.startsWith(prefix)).length;
+    return (
+      <li key={r.id} className="quest-item">
+        <button
+          className={`quest-row ${isSelected ? "is-selected" : ""}`}
+          onClick={() => onToggleStory(r.id)}
+          aria-pressed={isSelected}
+          title={isSelected ? tr("Cliquer pour désélectionner", "Click to deselect") : tr("Cliquer pour sélectionner", "Click to select")}
+          style={isSelected ? { ["--q" as string]: "var(--accent)" } : undefined}
+        >
+          <span className="quest-check" aria-hidden="true">
+            {isSelected ? "✓" : ""}
+          </span>
+          <span className="quest-main">
+            <span className="quest-name">{r.name}</span>
+            {r.viaEnglish && <span className="quest-alt">EN : {r.nameEn}</span>}
+            <span className="quest-meta">Main story</span>
+          </span>
+          {ticked > 0 && <span className="quest-progress">{tr(`${ticked} faite${ticked > 1 ? "s" : ""}`, `${ticked} done`)}</span>}
+        </button>
+        <button
+          className="quest-photos"
+          onClick={() => onOpenStory(r.id)}
+          title={tr("Ouvrir la fiche du chapitre", "Open the chapter")}
+          aria-label={tr(`Ouvrir ${r.name}`, `Open ${r.name}`)}
+        >
+          📜
+        </button>
+      </li>
+    );
+  };
 
   const renderRow = ({ task: t, viaEnglish }: QuestResult) => {
     const color = selected.get(t.id);
@@ -135,6 +196,25 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onCl
           )}
         </div>
       </div>
+
+      {(storyRows.length > 0 || (storyChapters.status !== "ready" && !trader && !mapFilter)) && (
+        <section className="story-list" aria-label="Main story">
+          <div className="subhead">Main story{storyRows.length > 0 ? ` (${storyRows.length})` : ""}</div>
+          {storyChapters.status === "loading" && <p className="muted small">{tr("Chargement des chapitres du wiki…", "Loading the chapters from the wiki…")}</p>}
+          {storyChapters.status === "error" && (
+            <p className="muted small">
+              {tr("Les chapitres n'ont pas pu être chargés (le wiki ne répond pas).", "The chapters could not be loaded (the wiki is not responding).")}{" "}
+              <button className="link" onClick={() => setStoryRetry((n) => n + 1)}>
+                {tr("Réessayer", "Retry")}
+              </button>{" · "}
+              <a href={pageUrlFor("Story chapters")} target="_blank" rel="noopener noreferrer">
+                wiki
+              </a>
+            </p>
+          )}
+          <ul className="quest-list">{storyRows.map(renderStoryRow)}</ul>
+        </section>
+      )}
 
       {mode.selected.length > 0 && (
         <section className="pinned" aria-label={tr("Quêtes sélectionnées", "Selected quests")}>

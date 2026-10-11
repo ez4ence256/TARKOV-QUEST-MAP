@@ -76,6 +76,7 @@ SOFTWARE.
   - **Pas d'usage commercial.**
   - **Partage dans les mêmes conditions :** le texte affiché reste sous CC BY-NC-SA.
 - Le texte est chargé à la demande par le navigateur de l'utilisateur, affiché **sans traduction**, et **n'est pas inclus dans ce dépôt**. Les tests contiennent de courts extraits de pages réelles, sous la même licence.
+- **Main story (session 7) :** les chapitres de l'histoire sont lus sur le wiki anglais et, en mode français, sur le **wiki français** (même hôte, sous `/fr/`, même licence CC BY-NC-SA) quand sa page correspond à la page anglaise. La mention « Texte et photos : wiki Escape from Tarkov (CC BY-NC-SA) » et le lien vers la page utilisée (française ou anglaise) sont affichés dans la fiche du chapitre. Le texte n'est pas traduit par l'application.
 - Mêmes réserves que pour les photos : les conditions d'utilisation de Fandom restreignent les accès automatisés. Ce projet reste un **usage personnel et non commercial**, à la demande, une requête par seconde au plus, avec un cache de 7 jours.
 
 ---

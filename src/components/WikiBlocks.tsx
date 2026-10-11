@@ -2,6 +2,7 @@
 // tout est du texte échappé, aucun HTML du wiki n'est inséré dans la page.
 import type { WikiBlock } from "../lib/wikiText";
 import { tr } from "../lib/i18n";
+import { fillItems } from "../lib/story";
 
 /** Ligne de tableau -> "En-tête : valeur · …" (cellules vides, comme l'icône, ignorées). */
 function rowText(headers: string[], row: string[]) {
@@ -11,7 +12,9 @@ function rowText(headers: string[], row: string[]) {
     .join(" · ");
 }
 
-export function WikiBlocks({ blocks }: { blocks: WikiBlock[] }) {
+/** itemNames : remplace les repères d'objets des chapitres de la Main story (voir lib/story.ts). */
+export function WikiBlocks({ blocks, itemNames }: { blocks: WikiBlock[]; itemNames?: Record<string, string> }) {
+  const t = (s: string) => (itemNames ? fillItems(s, itemNames) : s);
   return (
     <div className="wiki-blocks">
       {blocks.map((b, i) => {
@@ -19,19 +22,19 @@ export function WikiBlocks({ blocks }: { blocks: WikiBlock[] }) {
           case "heading":
             return (
               <div key={i} className={`wiki-heading wiki-heading-${Math.min(b.level, 4)}`}>
-                {b.text}
+                {t(b.text)}
               </div>
             );
           case "paragraph":
             return (
               <p key={i} className="wiki-paragraph">
-                {b.text}
+                {t(b.text)}
               </p>
             );
           case "quote":
             return (
               <blockquote key={i} className="wiki-quote">
-                {b.text}
+                {t(b.text)}
               </blockquote>
             );
           case "list":
@@ -39,7 +42,7 @@ export function WikiBlocks({ blocks }: { blocks: WikiBlock[] }) {
               <ul key={i} className="wiki-list">
                 {b.items.map((item, j) => (
                   <li key={j} style={{ marginLeft: `${(item.depth - 1) * 1.1}em` }}>
-                    {item.text}
+                    {t(item.text)}
                   </li>
                 ))}
               </ul>
@@ -47,10 +50,10 @@ export function WikiBlocks({ blocks }: { blocks: WikiBlock[] }) {
           case "table":
             return (
               <div key={i} className="wiki-table">
-                {b.title && <div className="wiki-table-title">{b.title}</div>}
+                {b.title && <div className="wiki-table-title">{t(b.title)}</div>}
                 <ul className="wiki-list">
                   {b.rows.map((row, j) => {
-                    const text = rowText(b.headers, row);
+                    const text = t(rowText(b.headers, row));
                     return text ? <li key={j}>{text}</li> : null;
                   })}
                 </ul>

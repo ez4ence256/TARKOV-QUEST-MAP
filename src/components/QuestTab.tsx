@@ -29,6 +29,8 @@ import { ConfirmButton } from "./ConfirmButton";
 import { WikiBlocks } from "./WikiBlocks";
 import { QUEST_SECTIONS, type QuestSectionId } from "../lib/questSections";
 import { getLang, tr } from "../lib/i18n";
+import { chapterOf, isStoryId } from "../lib/story";
+import { StoryChapterView, chapterName, useStoryChapters } from "./StoryView";
 
 interface Props {
   tasks: Task[];
@@ -47,6 +49,10 @@ interface Props {
   onSetDone: (objectiveId: string, done: boolean) => void;
   onReset: (task: Task) => void;
   onPhotos: (taskId: string) => void;
+  /** Étapes cochées de la Main story (voir StoryState). */
+  storyDone: Record<string, true>;
+  onStoryStep: (chapter: string, stepKey: string, done: boolean) => void;
+  onStoryReset: (chapter: string) => void;
 }
 
 /** Quêtes proposées dans un onglet (Quête, Photos) : la quête demandée, puis la sélection. */
@@ -157,14 +163,49 @@ const fmt = (n: number) => n.toLocaleString(getLang() === "en" ? "en-US" : "fr-F
 
 export function QuestTab(p: Props) {
   const tasksById = useMemo(() => new Map(p.tasks.map((t) => [t.id, t])), [p.tasks]);
-  const optionIds = tabTaskOptions(p.taskId, p.selectedIds).filter((id) => tasksById.has(id));
-  const task = optionIds.length > 0 ? tasksById.get(optionIds[0]) : undefined;
+  // chapitres de la Main story : identifiants « story:<titre> », absents de tasksById
+  const optionIds = tabTaskOptions(p.taskId, p.selectedIds).filter((id) => tasksById.has(id) || isStoryId(id));
+  const storyId = isStoryId(optionIds[0]) ? chapterOf(optionIds[0]) : null;
+  const task = optionIds.length > 0 && !storyId ? tasksById.get(optionIds[0]) : undefined;
+  const [chaptersRetry, setChaptersRetry] = useState(0);
+  const chapters = useStoryChapters(optionIds.some(isStoryId), chaptersRetry);
   const wikiState = useWikiPage(task?.wikiLink ?? null);
 
   const wiki: WikiQuest | null = useMemo(
     () => (wikiState.status === "ready" && acceptWikiPage(wikiState.page) ? readWikiQuest(wikiState.page) : null),
     [wikiState],
   );
+
+  const optionLabel = (id: string) => (isStoryId(id) ? `Main story · ${chapterName(chapters.chapters, chapterOf(id))}` : tasksById.get(id)!.name);
+  const picker =
+    optionIds.length > 1 ? (
+      <select className="input" value={optionIds[0]} onChange={(e) => p.onTaskChange(e.target.value)} aria-label={tr("Quête affichée", "Displayed quest")}>
+        {optionIds.map((id) => (
+          <option key={id} value={id}>
+            {optionLabel(id)}
+          </option>
+        ))}
+      </select>
+    ) : null;
+
+  if (storyId) {
+    return (
+      <div className="tab-body quest-tab">
+        <div className="subhead">{tr("Quête sélectionnée", "Selected quest")}</div>
+        {picker}
+        <StoryChapterView
+          key={storyId}
+          chapterId={storyId}
+          itemNames={p.itemNames}
+          chapters={chapters}
+          done={p.storyDone}
+          onSetStep={(stepKey, value) => p.onStoryStep(storyId, stepKey, value)}
+          onReset={() => p.onStoryReset(storyId)}
+          onRetryChapters={() => setChaptersRetry((n) => n + 1)}
+        />
+      </div>
+    );
+  }
 
   if (!task) {
     return (
@@ -430,15 +471,7 @@ export function QuestTab(p: Props) {
   return (
     <div className="tab-body quest-tab">
       <div className="subhead">{tr("Quête sélectionnée", "Selected quest")}</div>
-      {optionIds.length > 1 && (
-        <select className="input" value={task.id} onChange={(e) => p.onTaskChange(e.target.value)} aria-label={tr("Quête affichée", "Displayed quest")}>
-          {optionIds.map((id) => (
-            <option key={id} value={id}>
-              {tasksById.get(id)!.name}
-            </option>
-          ))}
-        </select>
-      )}
+      {picker}
 
       {pvp && (
         <div className="pvp-banner" role="note">

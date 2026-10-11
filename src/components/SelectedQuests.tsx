@@ -5,6 +5,7 @@ import { ICON_LABELS, QUEST_COLORS, categoryOf } from "../lib/objectiveTypes";
 import { hasApiPosition, manualPointKey, objectiveMapCounts, objectivePointKey, taskProgress } from "../lib/points";
 import { tr } from "../lib/i18n";
 import { Icon } from "./Icon";
+import { StoryCard, useStoryChapters } from "./StoryView";
 
 /** Objectifs d'objets à trouver ou remettre : on signale quand l'API n'en donne aucun emplacement. */
 const LOOT_TYPES = new Set(["findItem", "giveItem", "findQuestItem", "sellItem"]);
@@ -24,6 +25,8 @@ interface Props {
   onPhotos: (taskId: string) => void;
   /** Ouvre l'onglet Quête sur une quête (même quand tous ses points sont faits). */
   onQuest: (taskId: string) => void;
+  /** Ouvre la fiche d'un chapitre de la Main story. */
+  onStory: (chapter: string) => void;
 }
 
 export function SelectedQuests(props: Props) {
@@ -31,8 +34,11 @@ export function SelectedQuests(props: Props) {
   const tasksById = new Map(props.tasks.map((t) => [t.id, t]));
   const mapName = (id: string) => props.maps.find((m) => m.id === id)?.name ?? tr("Map inconnue", "Unknown map");
   const traderName = (id: string) => props.traders.find((t) => t.id === id)?.name ?? "";
+  const storySelected = mode.story?.selected ?? [];
+  // noms des chapitres : la liste (en cache) n'est demandée que s'il y a des chapitres choisis
+  const chapters = useStoryChapters(storySelected.length > 0);
 
-  if (mode.selected.length === 0) {
+  if (mode.selected.length === 0 && storySelected.length === 0) {
     return (
       <div className="tab-body empty">
         <p>{tr("Aucune quête sélectionnée.", "No quest selected.")}</p>
@@ -45,12 +51,14 @@ export function SelectedQuests(props: Props) {
 
   return (
     <div className="tab-body">
-      <div className="selection-head">
-        <span className="muted small">{tr(`${mode.selected.length} quête(s) sur la carte`, `${mode.selected.length} quest(s) on the map`)}</span>
-        <button className="btn btn-ghost btn-small" onClick={() => dispatch({ type: "clearSelection" })}>
-          {tr("Tout désélectionner", "Deselect all")}
-        </button>
-      </div>
+      {mode.selected.length > 0 && (
+        <div className="selection-head">
+          <span className="muted small">{tr(`${mode.selected.length} quête(s) sur la carte`, `${mode.selected.length} quest(s) on the map`)}</span>
+          <button className="btn btn-ghost btn-small" onClick={() => dispatch({ type: "clearSelection" })}>
+            {tr("Tout désélectionner", "Deselect all")}
+          </button>
+        </div>
+      )}
 
       {mode.selected.map(({ taskId, color }) => {
         const task = tasksById.get(taskId);
@@ -202,6 +210,22 @@ export function SelectedQuests(props: Props) {
           </section>
         );
       })}
+
+      {storySelected.length > 0 && (
+        <>
+          <div className="subhead">{tr(`Main story (${storySelected.length}) · pas de point sur la carte`, `Main story (${storySelected.length}) · no map points`)}</div>
+          {storySelected.map((chapter) => (
+            <StoryCard
+              key={chapter}
+              chapterId={chapter}
+              chapters={chapters}
+              done={mode.story?.done ?? {}}
+              onOpen={() => props.onStory(chapter)}
+              onRemove={() => dispatch({ type: "toggleStory", chapter })}
+            />
+          ))}
+        </>
+      )}
     </div>
   );
 }

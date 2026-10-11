@@ -99,7 +99,7 @@ export function cleanInline(text: string, pageTitle = ""): string {
     // autres modèles : retirés (Navbox, Historical content…)
     .replace(/\{\{[^{}]*\}\}/g, "")
     // fichiers, catégories et liens vers les autres langues : retirés
-    .replace(/\[\[(?:file|image|category|[a-z]{2}(?:-[a-z]{2})?):[^\]]*\]\]/gi, "")
+    .replace(/\[\[(?:file|image|fichier|category|catégorie|[a-z]{2}(?:-[a-z]{2})?):[^\]]*\]\]/gi, "")
     .replace(/\[\[[^\]|]*\|([^\]]*)\]\]/g, "$1")
     .replace(/\[\[([^\]]*)\]\]/g, (_, target: string) => target.split("#")[0])
     .replace(/\[https?:\/\/\S+\s+([^\]]+)\]/g, "$1")

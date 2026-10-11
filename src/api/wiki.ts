@@ -14,7 +14,9 @@
 import { tr } from "../lib/i18n";
 
 export const WIKI_HOST = "escapefromtarkov.fandom.com";
-const WIKI_API = `https://${WIKI_HOST}/api.php`;
+/** Le wiki français est sur le même hôte, sous /fr/ : même file d'attente pour les deux. */
+export type WikiLang = "en" | "fr";
+const wikiApi = (lang: WikiLang) => `https://${WIKI_HOST}${lang === "fr" ? "/fr" : ""}/api.php`;
 const CACHE_PREFIX = "tqp:wiki:v2:";
 /** Préfixe de l'ancien cache (photos seules), nettoyé au premier accès. */
 const OLD_CACHE_PREFIX = "tqp:wiki:v1:";
@@ -79,12 +81,12 @@ function guideSection(wikitext: string): string {
 /** Options de ligne de galerie MediaWiki, à ne pas prendre pour une légende. */
 const GALLERY_OPTION = /^\s*(alt|link|page|lang|class)\s*=/i;
 
-/** Photos des galeries de la section Guide : nom de fichier + légende. */
-export function parseGuideGalleries(wikitext: string): { file: string; caption: string }[] {
+/** Photos des galeries d'un texte : nom de fichier + légende. */
+export function parseGalleries(text: string): { file: string; caption: string }[] {
   const photos: { file: string; caption: string }[] = [];
-  for (const gallery of guideSection(wikitext).matchAll(/<gallery[^>]*>([\s\S]*?)<\/gallery>/gi)) {
+  for (const gallery of text.matchAll(/<gallery[^>]*>([\s\S]*?)<\/gallery>/gi)) {
     for (const line of gallery[1].split("\n")) {
-      const match = line.trim().match(/^(?:File|Image):([^|]+)(?:\|(.*))?$/i);
+      const match = line.trim().match(/^(?:File|Image|Fichier):([^|]+)(?:\|(.*))?$/i);
       if (!match) continue;
       const caption = (match[2] ?? "")
         .split("|")
@@ -96,13 +98,16 @@ export function parseGuideGalleries(wikitext: string): { file: string; caption: 
   return photos;
 }
 
+/** Photos des galeries de la section Guide. */
+export const parseGuideGalleries = (wikitext: string) => parseGalleries(guideSection(wikitext));
+
 // --- Requêtes au wiki, une par seconde au plus ---
 
 let queue: Promise<unknown> = Promise.resolve();
 let lastRequestAt = 0;
 
-function wikiRequest(params: Record<string, string>): Promise<Record<string, unknown>> {
-  const url = `${WIKI_API}?${new URLSearchParams({ ...params, format: "json", formatversion: "2", origin: "*" })}`;
+export function wikiRequest(params: Record<string, string>, lang: WikiLang = "en"): Promise<Record<string, unknown>> {
+  const url = `${wikiApi(lang)}?${new URLSearchParams({ ...params, format: "json", formatversion: "2", origin: "*" })}`;
   const run = queue.then(async () => {
     const wait = lastRequestAt + REQUEST_GAP_MS - Date.now();
     if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
@@ -119,19 +124,19 @@ function wikiRequest(params: Record<string, string>): Promise<Record<string, unk
 }
 
 /** Normalisation MediaWiki d'un titre de fichier ("SA house1.png" -> "File:SA house1.png"). */
-const fileTitle = (file: string) => {
+export const fileTitle = (file: string) => {
   const name = file.replace(/_/g, " ").trim();
   return `File:${name.charAt(0).toUpperCase()}${name.slice(1)}`;
 };
 
-interface ImageInfoPage {
+export interface ImageInfoPage {
   title: string;
   missing?: boolean;
   imageinfo?: { url?: string; thumburl?: string; descriptionurl?: string }[];
 }
 
 /** Adresses des vignettes et des pages de fichiers, par lots de 50 (limite de l'API). */
-async function fetchImageInfo(files: string[]): Promise<Map<string, ImageInfoPage>> {
+export async function fetchImageInfo(files: string[], lang: WikiLang = "en"): Promise<Map<string, ImageInfoPage>> {
   const byTitle = new Map<string, ImageInfoPage>();
   const titles = [...new Set(files.map(fileTitle))];
   for (let i = 0; i < titles.length; i += 50) {
@@ -141,7 +146,7 @@ async function fetchImageInfo(files: string[]): Promise<Map<string, ImageInfoPag
       iiprop: "url",
       iiurlwidth: String(THUMB_WIDTH),
       titles: titles.slice(i, i + 50).join("|"),
-    });
+    }, lang);
     const query = (json.query ?? {}) as { pages?: ImageInfoPage[]; normalized?: { from: string; to: string }[] };
     for (const page of query.pages ?? []) byTitle.set(page.title, page);
     // titre demandé -> titre normalisé par le wiki
@@ -179,7 +184,7 @@ export function purgeExpiredCache() {
   }
 }
 
-function readCache<T extends { fetchedAt: number }>(key: string): T | null {
+export function readCache<T extends { fetchedAt: number }>(key: string): T | null {
   if (!purged) purgeExpiredCache();
   try {
     const cached = JSON.parse(localStorage.getItem(CACHE_PREFIX + key) ?? "null") as (T & { usedAt?: number }) | null;
@@ -199,7 +204,7 @@ function readCache<T extends { fetchedAt: number }>(key: string): T | null {
   }
 }
 
-function writeCache(key: string, value: unknown) {
+export function writeCache(key: string, value: unknown) {
   try {
     for (const old of Object.keys(localStorage)) {
       if (old.startsWith(OLD_CACHE_PREFIX)) localStorage.removeItem(old);
@@ -223,7 +228,8 @@ export interface WikiPage {
   fetchedAt: number;
 }
 
-const pageUrlFor = (title: string) => `https://${WIKI_HOST}/wiki/${encodeURIComponent(title.replace(/ /g, "_"))}`;
+export const pageUrlFor = (title: string, lang: WikiLang = "en") =>
+  `https://${WIKI_HOST}${lang === "fr" ? "/fr" : ""}/wiki/${encodeURIComponent(title.replace(/ /g, "_"))}`;
 
 /** Requêtes en cours, pour que les onglets Quête et Photos partagent la même. */
 const inFlight = new Map<string, Promise<WikiPage>>();

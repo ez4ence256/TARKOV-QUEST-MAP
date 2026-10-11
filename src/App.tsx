@@ -21,6 +21,7 @@ import { dominantMap } from "./lib/ocrMatch";
 import { PanelResizer } from "./components/PanelResizer";
 import { getLang, setLang as applyLang, tr, type Lang } from "./lib/i18n";
 import { clampPanelWidth, readPanelWidth } from "./lib/panelWidth";
+import { storyIdOf } from "./lib/story";
 
 type Tab = "selection" | "quests" | "capture" | "quest" | "photos" | "custom" | "settings";
 
@@ -300,7 +301,8 @@ export default function App() {
             {TABS.map(({ id, label: labelPair, full: fullPair, logo }) => {
               const label = tr(...labelPair);
               const full = fullPair && tr(...fullPair);
-              const count = id === "selection" && mode.selected.length > 0 ? mode.selected.length : null;
+              const selectedCount = mode.selected.length + (mode.story?.selected.length ?? 0);
+              const count = id === "selection" && selectedCount > 0 ? selectedCount : null;
               const name = `${full ?? label}${count ? ` (${count})` : ""}`;
               return (
                 <button
@@ -346,6 +348,8 @@ export default function App() {
               onPhotos={showPhotos}
               onClearSelection={() => dispatch({ type: "clearSelection" })}
               onShowMap={(mapId) => dispatch({ type: "setMap", mapId })}
+              onToggleStory={(chapter) => dispatch({ type: "toggleStory", chapter })}
+              onOpenStory={(chapter) => showQuest(storyIdOf(chapter))}
             />
           )}
           {data && tab === "selection" && (
@@ -364,6 +368,7 @@ export default function App() {
               onBrowse={() => setTab("quests")}
               onPhotos={showPhotos}
               onQuest={showQuest}
+              onStory={(chapter) => showQuest(storyIdOf(chapter))}
             />
           )}
           {data && tab === "quest" && (
@@ -373,9 +378,12 @@ export default function App() {
               maps={maps}
               itemNames={data.itemNames ?? {}}
               itemIcons={data.itemIcons ?? {}}
-              selectedIds={mode.selected.map((s) => s.taskId)}
+              selectedIds={[...mode.selected.map((s) => s.taskId), ...(mode.story?.selected ?? []).map(storyIdOf)]}
               taskId={tabTaskId}
               onTaskChange={setTabTaskId}
+              storyDone={mode.story?.done ?? {}}
+              onStoryStep={(chapter, stepKey, value) => dispatch({ type: "setStoryStep", chapter, stepKey, done: value })}
+              onStoryReset={(chapter) => dispatch({ type: "resetStory", chapter })}
               done={mode.done}
               onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })}
               onReset={(task) => dispatch({ type: "resetProgress", objectiveIds: task.objectives.map((o) => o.id) })}
@@ -442,6 +450,7 @@ export default function App() {
                 <ResetProgressSection
                   tasks={tasks}
                   done={mode.done}
+                  storyDone={Object.keys(mode.story?.done ?? {}).length}
                   modeLabel={modeLabel ?? ""}
                   onResetTask={(task) =>
                     dispatch({ type: "resetProgress", objectiveIds: task.objectives.map((o) => o.id) })

@@ -6,6 +6,7 @@ import { useEffect, useReducer } from "react";
 import type { GameMode } from "../types";
 import { tr } from "../lib/i18n";
 import { QUEST_COLORS, type IconId } from "../lib/objectiveTypes";
+import { storyStepId } from "../lib/story";
 
 export const STATE_KEY = "tqp:state:v1";
 export const STATE_VERSION = 1;
@@ -33,6 +34,16 @@ export interface CustomPoint {
   createdAt: number;
 }
 
+/**
+ * Main story (chapitres du wiki), à part des quêtes : rien ici ne touche aux points de la carte,
+ * aux couleurs ni aux compteurs. Chapitre = titre de la page anglaise du wiki.
+ */
+export interface StoryState {
+  selected: string[];
+  /** storyStepId(chapitre, clé d'étape) -> true */
+  done: Record<string, true>;
+}
+
 export interface ModeState {
   selected: SelectedTask[];
   mapId: string | null;
@@ -43,6 +54,8 @@ export interface ModeState {
   /** Positions placées à la main pour les objectifs sans position. */
   manual: Record<string, ManualPosition>;
   customPoints: CustomPoint[];
+  /** Facultatif : absent tant qu'aucun chapitre n'a été choisi. */
+  story?: StoryState;
 }
 
 export interface AppState {
@@ -68,6 +81,17 @@ const initialState = (): AppState => ({
   modes: {},
 });
 
+function sanitizeStory(raw: unknown): StoryState | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const r = raw as Partial<StoryState>;
+  const selected = Array.isArray(r.selected) ? [...new Set(r.selected.filter((t): t is string => typeof t === "string"))] : [];
+  const done: Record<string, true> = {};
+  if (r.done && typeof r.done === "object") {
+    for (const [id, value] of Object.entries(r.done)) if (value === true) done[id] = true;
+  }
+  return { selected, done };
+}
+
 /** Valide grossièrement un état lu (localStorage ou import) et complète les champs manquants. */
 export function sanitizeState(raw: unknown): AppState {
   const base = initialState();
@@ -85,6 +109,8 @@ export function sanitizeState(raw: unknown): AppState {
       manual: v.manual && typeof v.manual === "object" ? v.manual : {},
       customPoints: Array.isArray(v.customPoints) ? v.customPoints.filter((p) => p && typeof p.id === "string") : [],
     };
+    const story = sanitizeStory(v.story);
+    if (story) modes[mode as GameMode]!.story = story;
   }
   return {
     version: STATE_VERSION,
@@ -99,6 +125,12 @@ export type Action =
   | { type: "setGameMode"; mode: GameMode | null }
   | { type: "toggleTask"; taskId: string }
   | { type: "clearSelection" }
+  /** Ajoute ou retire un chapitre de la Main story (titre de la page anglaise). */
+  | { type: "toggleStory"; chapter: string }
+  /** Coche ou décoche une étape d'un chapitre. */
+  | { type: "setStoryStep"; chapter: string; stepKey: string; done: boolean }
+  /** Décoche toutes les étapes d'un chapitre. */
+  | { type: "resetStory"; chapter: string }
   | { type: "setMap"; mapId: string }
   | { type: "setDone"; objectiveId: string; done: boolean }
   | { type: "setNote"; key: string; note: string }
@@ -130,8 +162,9 @@ function updateMode(state: AppState, fn: (m: ModeState) => ModeState): AppState 
 }
 
 /**
- * Réducteur de l'état. Les réinitialisations ne touchent qu'à `done` du mode courant :
- * notes, positions placées à la main, points perso et autres modes sont conservés.
+ * Réducteur de l'état. Les réinitialisations ne touchent qu'aux cases cochées (objectifs `done`
+ * et étapes de la Main story) du mode courant : notes, positions placées à la main, points perso,
+ * chapitres choisis et autres modes sont conservés.
  */
 export function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
@@ -146,6 +179,30 @@ export function reducer(state: AppState, action: Action): AppState {
       });
     case "clearSelection":
       return updateMode(state, (m) => ({ ...m, selected: [] }));
+    case "toggleStory":
+      return updateMode(state, (m) => {
+        const story = m.story ?? { selected: [], done: {} };
+        const selected = story.selected.includes(action.chapter)
+          ? story.selected.filter((c) => c !== action.chapter)
+          : [...story.selected, action.chapter];
+        return { ...m, story: { ...story, selected } };
+      });
+    case "setStoryStep":
+      return updateMode(state, (m) => {
+        const story = m.story ?? { selected: [], done: {} };
+        const done = { ...story.done };
+        const id = storyStepId(action.chapter, action.stepKey);
+        if (action.done) done[id] = true;
+        else delete done[id];
+        return { ...m, story: { ...story, done } };
+      });
+    case "resetStory":
+      return updateMode(state, (m) => {
+        if (!m.story) return m;
+        const prefix = storyStepId(action.chapter, "");
+        const done = Object.fromEntries(Object.entries(m.story.done).filter(([id]) => !id.startsWith(prefix)));
+        return { ...m, story: { ...m.story, done } };
+      });
     case "setMap":
       return updateMode(state, (m) => ({ ...m, mapId: action.mapId }));
     case "setDone":
@@ -192,7 +249,7 @@ export function reducer(state: AppState, action: Action): AppState {
         return { ...m, done };
       });
     case "resetAllProgress":
-      return updateMode(state, (m) => ({ ...m, done: {} }));
+      return updateMode(state, (m) => ({ ...m, done: {}, ...(m.story ? { story: { ...m.story, done: {} } } : {}) }));
     case "selectTasks":
       return updateMode(state, (m) => {
         const selected = action.replace ? [] : [...m.selected];

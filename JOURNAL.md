@@ -11,7 +11,7 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 | Branche | `claude/tarkov-quest-planner-axir48` (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**) |
 | Derniers commits | cache libéré si plein · `959bb7c` images fiche quête · `188e0b8` photos des sorties · `df9e5f3` icônes PMC/Scav · `8ad2e50` interface bilingue FR/EN |
 | Travail non commité | Seulement `.claude/launch.json` (volontairement hors du dépôt : chemin propre à cette machine) |
-| Tests | 131/131 au vert (`npx vitest run`) |
+| Tests | 169/169 au vert (`npx vitest run`) |
 | Compilation | OK (`npm run build`). Avertissement Vite : le fichier principal fait 516 Ko (> 500 Ko). L'OCR est dans des fichiers séparés, chargés à la demande. |
 | Vérifié dans le navigateur | Panneau à 400 / 440 / 520 / 540 / 560 / 720 px, fenêtre de 1024 px et zoom simulé à 125 %, téléphone · sélection épinglée avec filtre et recherche, « Tout désélectionner » · ordre des sections sur Signal - Partie 3 · sorties sur Douanes (niveau principal + sous-sol) et Labs (principal + niveau technique) · import d'une **image de synthèse** (Ctrl+V, vérification, ajout, map choisie) |
 | **Pas vérifié** | **Import avec les captures de l'utilisateur** : elles ne sont pas arrivées en session 5 (ni l'image de référence 3D). |
@@ -197,6 +197,15 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 - Wiki FR (`escapefromtarkov.fandom.com/fr`) : « Chapitres de l'histoire » et au moins 3 chapitres traduits.
 - Endpoint histoire de tarkov.dev : introuvable (json 404, GraphQL indisponible à ce moment).
 - Environ 22 requêtes wiki dépensées pour la recherche.
+
+### Session 7 : Main story (chapitres du wiki)
+- **Où** : onglet Quêtes (section « Main story » au-dessus des quêtes, recherche FR/EN), fiche d'un chapitre dans l'onglet Fiche quête (liste déroulante, identifiant `story:<titre anglais>`), carte courte dans l'onglet Sélection. Code : `src/lib/story.ts` (lecture, clés, choix de la langue), `src/api/story.ts` (chargement, cache compact), `src/components/StoryView.tsx`.
+- **État** : `ModeState.story?: { selected: string[]; done: Record<string, true> }`, séparé de `selected` (rien sur la carte). Case = `<titre anglais du chapitre>::<titre anglais normalisé de l'étape>#<n° d'occurrence>`. « Tout réinitialiser » vide aussi `story.done` ; « Tout désélectionner » ne touche que les quêtes.
+- **Écart au plan** : l'association FR/EN ne passe **pas** par `langlinks` (1 chapitre sur 10 seulement en a un) mais par la liste « Chapitres de l'histoire » du wiki FR, rapprochée de la liste EN par le **nom du fichier d'icône**. `links` dit quelles pages FR existent.
+- **The Ticket** : le Guide appelle quatre modèles (une fin chacun) que `prop=wikitext` ne développe pas : 1 requête de plus pour les lire ; début commun une seule fois, puis étapes de chaque fin étiquetées. La progression n'atteint donc jamais le total (fins alternatives).
+- **Langue** : texte français seulement si la page FR a le même nombre d'étapes et aucune étape dont les nombres distinctifs (quantités, sommes) viennent d'une autre position (Tour / Excursion a deux étapes inversées). Sinon anglais, avec une mention.
+- Le wiki FR écrit les noms d'objets en {{identifiant tarkov.dev}} (192 dans les 8 pages) : gardés comme repères puis remplacés par le nom de `itemNames` (tarkov.dev), « […] » si l'objet est inconnu ; ils ne comptent pas dans la comparaison des nombres.
+- Limites : le cache des chapitres (≈ 0,6 M caractères pour les 10 chapitres, FR compris) s'ajoute aux données de quêtes ; avec plusieurs modes en cache, une écriture peut échouer en silence et le chapitre est relu à chaque ouverture (The Ticket : environ 7 requêtes).
 
 ---
 
