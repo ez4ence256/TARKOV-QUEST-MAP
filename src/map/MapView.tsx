@@ -22,6 +22,7 @@ import {
 import { CUSTOM_POINT_COLOR, categoryOf } from "../lib/objectiveTypes";
 import { CustomPopup, ObjectivePopup } from "../components/PointPopups";
 import { tr, getLang } from "../lib/i18n";
+import { visibleExits } from "../lib/exits";
 
 const SHOW_EXITS_KEY = "tqp:showExits";
 
@@ -47,6 +48,8 @@ interface MapViewProps {
   onQuest: (taskId: string) => void;
   /** Point à centrer / ouvrir (ex. clic dans le panneau) ; n change à chaque demande. */
   focus: { key: string; n: number } | null;
+  /** Case « Extracts Scav » de la barre du haut. */
+  showScavExits: boolean;
 }
 
 /** Emprise par défaut quand une map n'a pas de calibrage : celle des points, sinon un carré. */
@@ -180,7 +183,7 @@ function MapViewInner(props: MapViewProps) {
       }
       return !v;
     });
-  const exits = props.map.exits ?? [];
+  const exits = useMemo(() => visibleExits(props.map.exits ?? [], props.showScavExits), [props.map, props.showScavExits]);
   const layers = calibration?.layers ?? [];
   // niveaux du sélecteur : principal + souterrains (les étages supérieurs sont sur la carte de base)
   const pickerLevels = useMemo(() => selectableLevels(calibration), [calibration]);

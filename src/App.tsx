@@ -61,6 +61,22 @@ export default function App() {
     applyLang(next);
     setLang(next);
   };
+  // sorties Scav affichées par défaut ; le choix est retenu dans le navigateur
+  const [showScavExits, setShowScavExits] = useState(() => {
+    try {
+      return localStorage.getItem("tqp:showScavExits") !== "0";
+    } catch {
+      return true;
+    }
+  });
+  const changeScavExits = (on: boolean) => {
+    setShowScavExits(on);
+    try {
+      localStorage.setItem("tqp:showScavExits", on ? "1" : "0");
+    } catch {
+      /* préférence non retenue */
+    }
+  };
   const [calibration, setCalibration] = useState(BUNDLED_CALIBRATION);
   const [tab, setTab] = useState<Tab>("quests");
   /** Quête affichée dans l'onglet Photos. */
@@ -270,6 +286,11 @@ export default function App() {
             </option>
           ))}
         </select>
+        <label className="scav-check">
+          <input type="checkbox" checked={showScavExits} onChange={(e) => changeScavExits(e.target.checked)} />
+          <span className="scav-check-long">{tr("Extracts Scav", "Scav extracts")}</span>
+          <span className="scav-check-short" aria-hidden="true">Scav</span>
+        </label>
         <select
           className="input lang-select"
           value={lang}
@@ -482,6 +503,7 @@ export default function App() {
               placing={placing}
               onPlace={onPlace}
               focus={focus}
+              showScavExits={showScavExits}
               onPhotos={showPhotos}
               onQuest={showQuest}
             />

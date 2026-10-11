@@ -276,6 +276,18 @@ button:focus-visible {
   width: auto;
   max-width: 50%;
 }
+.scav-check {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex: none;
+  white-space: nowrap;
+  font-size: 0.85em;
+  cursor: pointer;
+}
+.scav-check-short {
+  display: none;
+}
 .lang-select {
   width: auto;
   flex: none;
@@ -1398,6 +1410,13 @@ kbd {
   .map-select {
     max-width: none;
     flex: 1;
+    min-width: 0;
+  }
+  .scav-check-long {
+    display: none;
+  }
+  .scav-check-short {
+    display: inline;
   }
   .tab {
     font-size: 0.85em;

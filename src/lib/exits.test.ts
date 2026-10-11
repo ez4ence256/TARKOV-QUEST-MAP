@@ -5,7 +5,7 @@ import type { MapExit } from "../types";
 import { BUNDLED_CALIBRATION } from "../map/calibration";
 import { isInBounds } from "../map/crs";
 import { displayLevelOf, levelName, upperLevelOf } from "../map/levels";
-import { exitIconKind, factionLabel, factionsOf, isCoopName, mergeExits } from "./exits";
+import { exitIconKind, factionLabel, factionsOf, isCoopName, mergeExits, visibleExits } from "./exits";
 import { escapeHtml } from "../map/exitIcons";
 
 describe("nom affiché sur la carte", () => {
@@ -83,6 +83,21 @@ describe("icône d'une sortie", () => {
     expect(kindOf("coop", ["pmc", "scav"])).toBe("coop");
     expect(kindOf("coop", ["scav"])).toBe("coop");
     expect(kindOf("transit", ["pmc"])).toBe("transit");
+  });
+});
+
+describe("case « Extracts Scav »", () => {
+  const all = [
+    exit("Scav", 0, 0, 0, { factions: ["scav"] }),
+    exit("Shared", 0, 0, 1, { factions: ["pmc", "scav"] }),
+    exit("Pmc", 0, 0, 2, { factions: ["pmc"] }),
+    exit("Coop", 0, 0, 3, { kind: "coop", factions: ["scav"] }),
+    exit("Transit", 0, 0, 4, { kind: "transit" }),
+    exit("None", 0, 0, 5, { factions: [] }),
+  ];
+  it("cochée : tout reste", () => expect(visibleExits(all, true)).toHaveLength(6));
+  it("décochée : seules les sorties Scav seules disparaissent", () => {
+    expect(visibleExits(all, false).map((e) => e.nameEn)).toEqual(["Shared", "Pmc", "Coop", "Transit", "None"]);
   });
 });
 

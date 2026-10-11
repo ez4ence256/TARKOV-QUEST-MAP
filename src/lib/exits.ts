@@ -54,6 +54,11 @@ export function exitIconKind(exit: Pick<MapExit, "kind" | "factions">): ExitIcon
   return pmc ? "pmc" : scav ? "scav" : "extract";
 }
 
+/** Sorties à afficher : sans les sorties Scav seules quand la case « Extracts Scav » est décochée. */
+export function visibleExits<T extends Pick<MapExit, "kind" | "factions">>(exits: T[], showScav: boolean): T[] {
+  return showScav ? exits : exits.filter((e) => exitIconKind(e) !== "scav");
+}
+
 export function factionLabel(factions: MapExit["factions"]): string {
   if (factions.length === 2) return tr("PMC et Scav", "PMC and Scav");
   if (factions[0] === "pmc") return "PMC";
