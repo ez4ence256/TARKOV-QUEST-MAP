@@ -7,6 +7,7 @@ import type { GameMode } from "../types";
 import { tr } from "../lib/i18n";
 import { QUEST_COLORS, type IconId } from "../lib/objectiveTypes";
 import { storyStepId } from "../lib/story";
+import type { RoomOp, RoomState } from "../lib/roomSync";
 
 export const STATE_KEY = "tqp:state:v1";
 export const STATE_VERSION = 1;
@@ -145,7 +146,13 @@ export type Action =
   /** Remet à "pas fait" tous les objectifs du mode courant (notes et points perso gardés). */
   | { type: "resetAllProgress" }
   /** Ajoute des quêtes à la sélection (import par capture) ; replace = vide d'abord la sélection. */
-  | { type: "selectTasks"; taskIds: string[]; replace: boolean };
+  | { type: "selectTasks"; taskIds: string[]; replace: boolean }
+  /** Room : état reçu du serveur. replace = remplace sélection et cases cochées ; sinon fusion (union). */
+  | { type: "roomSnapshot"; mode: GameMode; state: RoomState; replace: boolean }
+  /** Room : opérations venant d'un autre membre. */
+  | { type: "roomOps"; mode: GameMode; ops: RoomOp[] }
+  /** Room quittée : remet l'état sauvegardé avant d'entrer. */
+  | { type: "restoreMode"; mode: GameMode; state: ModeState };
 
 /** Première couleur libre, sinon on recommence la palette. */
 function nextColor(selected: SelectedTask[]): number {
@@ -154,11 +161,58 @@ function nextColor(selected: SelectedTask[]): number {
   return color === -1 ? selected.length % QUEST_COLORS.length : color;
 }
 
+function updateModeId(state: AppState, mode: GameMode, fn: (m: ModeState) => ModeState): AppState {
+  return { ...state, modes: { ...state.modes, [mode]: fn(state.modes[mode] ?? emptyModeState()) } };
+}
+
 /** Applique une modification au ModeState du mode courant. */
 function updateMode(state: AppState, fn: (m: ModeState) => ModeState): AppState {
   if (!state.gameMode) return state;
   const current = state.modes[state.gameMode] ?? emptyModeState();
   return { ...state, modes: { ...state.modes, [state.gameMode]: fn(current) } };
+}
+
+/**
+ * Met un ModeState en accord avec un état de room, en gardant couleurs et dates existantes.
+ * replace : le local devient exactement la room ; sinon union (jointure).
+ */
+export function mergeRoomState(m: ModeState, room: RoomState, replace: boolean): ModeState {
+  const inRoom = new Set(room.selected);
+  const selected = replace ? m.selected.filter((s) => inRoom.has(s.taskId)) : [...m.selected];
+  for (const taskId of room.selected) if (!selected.some((s) => s.taskId === taskId)) selected.push({ taskId, color: nextColor(selected) });
+  const done: Record<string, number> = replace ? {} : { ...m.done };
+  for (const id of room.done) done[id] = m.done[id] ?? Date.now();
+  const story = m.story ?? { selected: [], done: {} };
+  const storySelected = replace ? story.selected.filter((c) => room.storySelected.includes(c)) : [...story.selected];
+  for (const c of room.storySelected) if (!storySelected.includes(c)) storySelected.push(c);
+  const storyDone: Record<string, true> = replace ? {} : { ...story.done };
+  for (const id of room.storyDone) storyDone[id] = true;
+  return { ...m, selected, done, story: { selected: storySelected, done: storyDone } };
+}
+
+/** Applique les opérations d'un autre membre (états absolus : on = présent). */
+export function applyRoomOps(m: ModeState, ops: RoomOp[]): ModeState {
+  const selected = [...m.selected];
+  const done = { ...m.done };
+  const story = m.story ?? { selected: [], done: {} };
+  const storySelected = [...story.selected];
+  const storyDone = { ...story.done };
+  for (const { kind, id, on } of ops) {
+    if (kind === "task") {
+      const i = selected.findIndex((s) => s.taskId === id);
+      if (on && i < 0) selected.push({ taskId: id, color: nextColor(selected) });
+      if (!on && i >= 0) selected.splice(i, 1);
+    } else if (kind === "done") {
+      if (on) done[id] ??= Date.now();
+      else delete done[id];
+    } else if (kind === "story") {
+      const i = storySelected.indexOf(id);
+      if (on && i < 0) storySelected.push(id);
+      if (!on && i >= 0) storySelected.splice(i, 1);
+    } else if (on) storyDone[id] = true;
+    else delete storyDone[id];
+  }
+  return { ...m, selected, done, story: { selected: storySelected, done: storyDone } };
 }
 
 /**
@@ -260,6 +314,12 @@ export function reducer(state: AppState, action: Action): AppState {
         }
         return { ...m, selected };
       });
+    case "roomSnapshot":
+      return updateModeId(state, action.mode, (m) => mergeRoomState(m, action.state, action.replace));
+    case "roomOps":
+      return updateModeId(state, action.mode, (m) => applyRoomOps(m, action.ops));
+    case "restoreMode":
+      return { ...state, modes: { ...state.modes, [action.mode]: action.state } };
   }
 }
 

@@ -2,6 +2,7 @@
 // un premier clic affiche la question, un second confirme.
 import { useState, type ReactNode } from "react";
 import { tr } from "../lib/i18n";
+import { inRoom } from "../api/room";
 
 interface Props {
   label: ReactNode;
@@ -23,7 +24,10 @@ export function ConfirmButton({ label, question, confirmLabel, onConfirm, classN
   }
   return (
     <span className="confirm" role="group">
-      <span className="confirm-question">{question}</span>
+      <span className="confirm-question">
+        {question}
+        {inRoom() && ` ${tr("Dans une room, cela s'applique à tout le monde.", "In a room, this applies to everyone.")}`}
+      </span>
       <button
         className="btn btn-small btn-danger"
         onClick={() => {

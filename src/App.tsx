@@ -22,6 +22,8 @@ import { PanelResizer } from "./components/PanelResizer";
 import { getLang, setLang as applyLang, tr, type Lang } from "./lib/i18n";
 import { clampPanelWidth, readPanelWidth } from "./lib/panelWidth";
 import { storyIdOf } from "./lib/story";
+import { useRoom } from "./api/room";
+import { RoomControl } from "./components/RoomControl";
 
 type Tab = "selection" | "quests" | "capture" | "quest" | "photos" | "custom" | "settings";
 
@@ -53,6 +55,7 @@ const newId = () =>
 export default function App() {
   const { state, modeState: mode, dispatch } = useAppState();
   const gameMode = state.gameMode;
+  const room = useRoom(state, dispatch);
   const [load, setLoad] = useState<LoadState>({ status: "loading", data: null });
   const [reloadToken, setReloadToken] = useState(0);
   const [lang, setLang] = useState<Lang>(getLang);
@@ -294,6 +297,7 @@ export default function App() {
             </option>
           ))}
         </select>
+        <RoomControl room={room} />
         <label className="scav-check">
           <input type="checkbox" checked={showScavExits} onChange={(e) => changeScavExits(e.target.checked)} />
           <span className="scav-check-long">{tr("Extracts Scav", "Scav extracts")}</span>
@@ -310,6 +314,15 @@ export default function App() {
           <option value="en">EN</option>
         </select>
       </header>
+
+      {room.notice && (
+        <div className="alert" role="status">
+          {room.notice}{" "}
+          <button className="link" onClick={room.dismissNotice}>
+            OK
+          </button>
+        </div>
+      )}
 
       {load.status === "ready" && load.source === "stale" && (
         <div className="alert">
