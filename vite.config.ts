@@ -20,9 +20,6 @@ const roomsPlugin: Plugin = {
 export default defineConfig({
   base: "./",
   plugins: [react(), roomsPlugin],
-  // "::" = IPv6 + IPv4 : sans cela Vite n'écoute que sur ::1 (localhost) et 127.0.0.1 ne répond pas
-  // (test des rooms avec deux origines). Attention : visible aussi depuis le réseau local en dev.
-  server: { host: "::" },
   test: {
     environment: "jsdom",
   },
