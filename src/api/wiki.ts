@@ -269,3 +269,104 @@ async function fetchQuestPhotos(wikiLink: string, title: string): Promise<WikiGa
   writeCache(`photos:${title}`, gallery);
   return gallery;
 }
+
+// --- Photos des sorties (tableaux « Extractions » et « Transits » de la page d'une map) ---
+
+export interface ExitPhotoEntry {
+  /** Nom de la sortie sur le wiki (anglais). */
+  name: string;
+  photos: WikiPhoto[];
+}
+
+export interface ExitPhotosPage {
+  pageUrl: string;
+  /** Sections « Extractions » du wiki, pour le lien de repli. */
+  entries: ExitPhotoEntry[];
+  fetchedAt: number;
+}
+
+const IMAGE_FILE = /\.(png|jpe?g|webp|gif)$/i;
+
+/** Texte d'une section de niveau 2 (jusqu'au titre suivant). */
+function sectionText(wikitext: string, names: string[]): string {
+  const start = wikitext.match(new RegExp(`^==\s*(?:${names.join("|")})\s*==\s*$`, "mi"));
+  if (!start || start.index === undefined) return "";
+  const rest = wikitext.slice(start.index + start[0].length);
+  const next = rest.search(/^==[^=].*==\s*$/m);
+  return next === -1 ? rest : rest.slice(0, next);
+}
+
+/**
+ * Sorties du wiki et leurs photos : une ligne de tableau par sortie, le nom dans la cellule
+ * « ! ... |Nom », les photos dans les [[File:...]] de la ligne (liens-icônes et sons ignorés).
+ * Légende = texte qui suit la photo sur sa ligne (vide pour la vignette de la 1re colonne).
+ */
+export function parseExitTables(wikitext: string): { name: string; photos: { file: string; caption: string }[] }[] {
+  const entries: { name: string; photos: { file: string; caption: string }[] }[] = [];
+  // le premier morceau de chaque section est l'en-tête du tableau
+  const rows = [sectionText(wikitext, ["Extractions", "Extracts"]), sectionText(wikitext, ["Transits"])].flatMap((section) =>
+    section.split(/^\|-.*$/m).slice(1),
+  );
+  for (const row of rows) {
+    const name = row.match(/^!(?!\s*\[\[)[^|\n]*\|\s*(.+?)\s*$/m)?.[1] ?? row.match(/^!(?!\s*\[\[)\s*([^\n=|]+?)\s*$/m)?.[1];
+    if (!name) continue;
+    const photos: { file: string; caption: string }[] = [];
+    for (const m of row.matchAll(/\[\[(?:File|Image):([^|\]]+)([^\]\n]*)\]\]([^\n]*)/gi)) {
+      const file = m[1].trim();
+      if (!IMAGE_FILE.test(file) || /\blink=/i.test(m[2]) || photos.some((p) => p.file === file)) continue;
+      photos.push({ file, caption: cleanCaption(m[3].replace(/\[\[(?:File|Image):[\s\S]*$/i, "")) });
+    }
+    entries.push({ name: cleanCaption(name), photos });
+  }
+  return entries;
+}
+
+/** Clé de comparaison d'un nom de sortie : sans casse, ponctuation ni parenthèses ("(Co-op)", "(Flare)"). */
+export function exitKey(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+/** Photos du wiki pour une sortie (nom anglais), [] si le wiki n'en a pas. */
+export function photosForExit(page: ExitPhotosPage, nameEn: string): WikiPhoto[] {
+  const key = exitKey(nameEn);
+  return key ? page.entries.filter((e) => exitKey(e.name) === key).flatMap((e) => e.photos) : [];
+}
+
+const exitPhotosInFlight = new Map<string, Promise<ExitPhotosPage>>();
+
+/**
+ * Photos des sorties d'une map : une page parse + une requête imageinfo, en cache 7 jours,
+ * déclenchées à la première bulle de sortie ouverte sur cette map.
+ */
+export function loadExitPhotos(mapTitle: string): Promise<ExitPhotosPage> {
+  const cached = readCache<ExitPhotosPage>(`exits:${mapTitle}`);
+  if (cached) return Promise.resolve(cached);
+  let pending = exitPhotosInFlight.get(mapTitle);
+  if (!pending) {
+    pending = fetchExitPhotos(mapTitle).finally(() => exitPhotosInFlight.delete(mapTitle));
+    exitPhotosInFlight.set(mapTitle, pending);
+  }
+  return pending;
+}
+
+async function fetchExitPhotos(mapTitle: string): Promise<ExitPhotosPage> {
+  const page = await loadWikiPage(pageUrlFor(mapTitle));
+  const parsed = page.exists ? parseExitTables(page.wikitext) : [];
+  const files = parsed.flatMap((e) => e.photos.map((p) => p.file));
+  const info = files.length > 0 ? await fetchImageInfo(files) : new Map<string, ImageInfoPage>();
+  const entries = parsed.map((entry) => ({
+    name: entry.name,
+    photos: entry.photos.flatMap((p): WikiPhoto[] => {
+      const image = info.get(fileTitle(p.file))?.imageinfo?.[0];
+      if (!image?.url || !image.descriptionurl) return [];
+      return [{ file: p.file, caption: p.caption, thumbUrl: image.thumburl ?? image.url, fullUrl: image.url, pageUrl: image.descriptionurl }];
+    }),
+  }));
+  const result: ExitPhotosPage = { pageUrl: page.pageUrl, entries, fetchedAt: Date.now() };
+  writeCache(`exits:${mapTitle}`, result);
+  return result;
+}

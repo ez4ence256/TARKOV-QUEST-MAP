@@ -239,7 +239,7 @@ function MapViewInner(props: MapViewProps) {
         <FitBounds bounds={bounds} mapId={props.map.id} />
         <InvalidateOnResize />
         {showExits && exits.length > 0 && (
-          <ExitsLayer exits={exits} maps={props.maps} calibration={calibration} level={level} bounds={bounds} />
+          <ExitsLayer exits={exits} maps={props.maps} calibration={calibration} level={level} bounds={bounds} mapTitle={props.map.nameEn ?? props.map.name} />
         )}
         <AttributionPrefix />
         <BaseLayer

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanCaption, loadQuestPhotos, loadWikiPage, parseGuideGalleries, wikiTitleFromLink } from "./wiki";
+import { cleanCaption, exitKey, loadQuestPhotos, loadWikiPage, parseExitTables, parseGuideGalleries, wikiTitleFromLink } from "./wiki";
 
 // Extrait de wikitext construit pour le test (même structure que les pages de quêtes du wiki)
 const WIKITEXT = `==Objectives==
@@ -172,5 +172,65 @@ describe("loadWikiPage", () => {
   it("une autre erreur du wiki remonte (pas de page vide inventée)", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response("down", { status: 503 })));
     await expect(loadWikiPage("https://escapefromtarkov.fandom.com/wiki/Debut")).rejects.toThrow(/503/);
+  });
+});
+
+// Extrait réel (raccourci) des sections Extractions et Transits de la page « Customs » du wiki
+const EXITS_WIKITEXT = `==Extractions==
+To locate the extractions use the [[Customs#Maps|maps]] below the table.
+{| class="wikitable sortable stickyheader" style="text-align: center;"
+!Extraction
+!Name
+!Faction
+!Notes
+|-
+![[File:Administration Gate.png|240px]]
+! style="text-align: left;" |Administration Gate
+|Scav
+|
+|-
+![[File:Boiler room basement.png|240px]]
+! style="text-align: left;" |Boiler Room Basement (Co-op)
+|All
+|[[Scav]] + PMC
+|[[File:Boiler room basement2.png|240px]]<br/>In the basement of the boiler building.
+|-
+! [[File:Fac Gate 3.png|240px]]
+! style="text-align: left;" | Gate 3
+|All
+|[[File:Factory key icon.png|frameless|64px|link=Factory emergency exit key]]<br/>Used to open the door
+|[[File:GCargoElevatorAnnouncement.wav|282px]]
+|}
+
+==Transits==
+{| class="wikitable"
+!Transit
+!Name
+|-
+![[File:CustomsTransitToFactory.png|240px]]
+! style="text-align: left;" |Transit to Factory
+|All
+|}
+
+==Maps==
+![[File:Hors section.png|240px]]`;
+
+describe("photos des sorties", () => {
+  const entries = parseExitTables(EXITS_WIKITEXT);
+  it("lit une ligne par sortie, sans l'en-tête ni les sections voisines", () => {
+    expect(entries.map((e) => e.name)).toEqual(["Administration Gate", "Boiler Room Basement (Co-op)", "Gate 3", "Transit to Factory"]);
+  });
+  it("garde les photos (colonne 1 et notes) avec leur légende, sans icônes ni sons", () => {
+    expect(entries[0].photos).toEqual([{ file: "Administration Gate.png", caption: "" }]);
+    expect(entries[1].photos).toEqual([
+      { file: "Boiler room basement.png", caption: "" },
+      { file: "Boiler room basement2.png", caption: "In the basement of the boiler building." },
+    ]);
+    expect(entries[2].photos).toEqual([{ file: "Fac Gate 3.png", caption: "" }]);
+  });
+  it("compare les noms sans casse, ponctuation ni suffixe entre parenthèses", () => {
+    expect(exitKey("Boiler Room Basement (Co-Op)")).toBe(exitKey("boiler room basement"));
+    expect(exitKey("Railroad Passage (Flare)")).toBe("railroad passage");
+    expect(exitKey("Smugglers' Bunker (ZB-1012)")).toBe(exitKey("Smugglers Bunker"));
   });
 });

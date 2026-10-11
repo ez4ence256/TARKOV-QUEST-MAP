@@ -308,6 +308,7 @@ export async function fetchTarkovData(
     .map((m) => ({
       id: asString(m.id) ?? "",
       name: mapsRes.t(m.name),
+      nameEn: mapsRes.tEn(m.name),
       normalizedName: asString(m.normalizedName) ?? "",
       exits: readExits(m, mapsRes.t, mapsRes.tEn),
     }))

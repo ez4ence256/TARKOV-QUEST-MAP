@@ -141,6 +141,8 @@ export interface MapExit {
 export interface GameMap {
   id: string;
   name: string;
+  /** Nom anglais, pour retrouver la page du wiki (absent dans les anciennes données en cache). */
+  nameEn?: string;
   normalizedName: string;
   /** Sorties et transits (absent dans les anciennes données en cache). */
   exits?: MapExit[];
