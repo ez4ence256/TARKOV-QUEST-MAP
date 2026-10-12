@@ -481,8 +481,10 @@ export function QuestTab(p: Props) {
           {wiki?.location && <li>{tr("Lieu (wiki) : ", "Location (wiki): ")}{wiki.location}</li>}
           {task.minPlayerLevel ? <li>{tr("Niveau requis : ", "Required level: ")}{task.minPlayerLevel}</li> : null}
           <li>
-            Kappa{tr(" : ", ": ")}{task.kappaRequired ? tr("requise", "required") : tr("non requise", "not required")} (tarkov.dev)
-            {wiki && wiki.kappa !== null ? ` · ${wiki.kappa ? tr("requise", "required") : tr("non requise", "not required")} (wiki)` : ""}
+            Kappa{tr(" : ", ": ")}
+            {/* quête absente de tarkov.dev : seul l'avis du wiki compte */}
+            {task.source !== "wiki" && <>{task.kappaRequired ? tr("requise", "required") : tr("non requise", "not required")} (tarkov.dev)</>}
+            {wiki && wiki.kappa !== null ? `${task.source !== "wiki" ? " · " : ""}${wiki.kappa ? tr("requise", "required") : tr("non requise", "not required")} (wiki)` : ""}
           </li>
           {task.details?.lightkeeperRequired && <li>{tr("Requise pour Lightkeeper (tarkov.dev)", "Required for Lightkeeper (tarkov.dev)")}</li>}
         </ul>
