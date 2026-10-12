@@ -125,9 +125,17 @@ export function selectableLevels(calibration: MapCalibration | undefined): Level
   ];
 }
 
-/** Le point s'affiche-t-il en pleine opacité sur le niveau choisi ? (le niveau principal montre aussi les étages supérieurs) */
+/** Le point s'affiche-t-il en pleine opacité sur le niveau choisi ? (le niveau principal montre aussi les étages supérieurs, sauf ceux du sélecteur) */
 export function isShownOnLevel(p: PointHeight, calibration: MapCalibration | undefined, level: Level): boolean {
-  return level === null ? displayLevelOf(p, calibration) === null : levelOf(p, calibration) === level;
+  if (level !== null) return levelOf(p, calibration) === level;
+  // les étages supérieurs du sélecteur (2e étage du mall d'Interchange) sont grisés au niveau principal
+  return displayLevelOf(p, calibration) === null && selectableUpperOf(p, calibration) === null;
+}
+
+/** Étage supérieur proposé dans le sélecteur où se trouve le point, sinon null. */
+export function selectableUpperOf(p: PointHeight, calibration: MapCalibration | undefined): number | null {
+  const u = upperLevelOf(p, calibration);
+  return u !== null && calibration && selectableLevels(calibration).includes(u) ? u : null;
 }
 
 /** Niveau "naturel" d'un point : le premier où il apparaît, principal en priorité. */

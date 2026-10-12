@@ -11,6 +11,7 @@ import {
   levelName,
   levelOf,
   selectableLevels,
+  selectableUpperOf,
   isCellarEntrance,
   upperLevelOf,
 } from "./levels";
@@ -89,7 +90,11 @@ describe("Interchange : le mall est surélevé", () => {
     expect(isShownOnLevel(mall, interchange, null)).toBe(true);
     expect(isShownOnLevel(mall, interchange, upper)).toBe(false);
     expect(isShownOnLevel({ x: 0, z: 0, y: 37 }, interchange, upper)).toBe(true);
-    expect(isShownOnLevel({ x: 0, z: 0, y: 37 }, interchange, null)).toBe(true); // le principal montre tout
+    expect(isShownOnLevel({ x: 0, z: 0, y: 37 }, interchange, null)).toBe(false); // 2e étage du mall : grisé au principal (comme le sous-sol)
+    expect(isShownOnLevel(mall, interchange, null)).toBe(true); // rez-de-chaussée du mall : plein au principal
+    expect(selectableUpperOf({ x: 0, z: 0, y: 37 }, interchange)).toBe(upper);
+    // autres maps : les étages supérieurs hors sélecteur restent pleins au principal
+    expect(isShownOnLevel({ x: 200, z: 150, y: 4 }, customs, null)).toBe(true);
   });
   it("pas d'entrée de cave sur Labs (map sans fond de plein air)", () => {
     expect(isCellarEntrance({ x: 0, z: 0 }, BUNDLED_CALIBRATION["the-lab"])).toBe(false);

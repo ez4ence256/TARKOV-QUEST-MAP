@@ -19,6 +19,7 @@ import {
   levelName,
   levelOf,
   selectableLevels,
+  selectableUpperOf,
   upperLevelOf,
   type Level,
 } from "./levels";
@@ -209,7 +210,7 @@ function MapViewInner(props: MapViewProps) {
   const maxZoom = calibration ? calibration.maxZoom + 1 : 6;
   const onStatus = useCallback((s: BaseStatus) => setBaseStatus(s), []);
   const showLevelOf = useCallback(
-    (p: { x: number; z: number }) => setLevel(displayLevelOf(p, calibration)),
+    (p: { x: number; z: number }) => setLevel(selectableUpperOf(p, calibration) ?? displayLevelOf(p, calibration)),
     [calibration],
   );
   // nombre de points restants par niveau, pour le sélecteur
@@ -217,13 +218,11 @@ function MapViewInner(props: MapViewProps) {
     const counts = new Map<Level, number>();
     for (const pt of points) {
       if (mode.done[pt.objectiveId ?? ""]) continue;
-      const l = displayLevelOf(pt, calibration);
+      const l = selectableUpperOf(pt, calibration) ?? displayLevelOf(pt, calibration); // étage supérieur du sélecteur : compté chez lui seulement
       counts.set(l, (counts.get(l) ?? 0) + 1);
-      const u = upperLevelOf(pt, calibration);
-      if (u !== null && pickerLevels.includes(u)) counts.set(u, (counts.get(u) ?? 0) + 1); // étage supérieur du sélecteur
     }
     return counts;
-  }, [points, mode.done, calibration, pickerLevels]);
+  }, [points, mode.done, calibration]);
 
   const registerMarker = (key: string) => (m: L.Marker | null) => {
     if (m) markers.current.set(key, m);
