@@ -1,10 +1,17 @@
-// Sous-sol (parking) d'Interchange : plan du wiki posé sur l'emprise du centre commercial.
+// Sous-sol (parking) d'Interchange : plan redessiné posé sur l'emprise du centre commercial.
 //
-// tarkov.dev n'a aucun calque souterrain pour Interchange. On utilise le panneau « PARKING »
-// (sections A à D) de l'affiche « Interchange Interactive Map Base.webp » (re3mr.com avec le wiki
-// Escape from Tarkov, CC BY-NC-SA 4.0), recadré, rendu transparent hors du plan et réduit
-// (public/maps/interchange-parking.webp). Les garages est de l'affiche sont détachés : non repris.
-// C'est un plan schématique : position juste à quelques mètres près (voir RESIDUALS).
+// tarkov.dev n'a aucun calque souterrain pour Interchange. On redessine en SVG
+// (public/maps/interchange-parking.svg, cadre 822x1350) le contour du panneau « PARKING » de l'affiche
+// « Interchange Interactive Map Base.webp » (re3mr.com avec le wiki Escape from Tarkov, CC BY-NC-SA 4.0) :
+// sections A à D **et** garages Idea, Goshan et Oli, dessinés à leur place dans la même image. Contour en
+// cases de 1,2 m simplifiées + flèches des escaliers ; ni texte, ni butin, ni icônes. La carte de Lorathor
+// (v0.8.2, 2020) montre un parking plus plein (tout le mall) : en cas d'écart on suit l'affiche re3mr, plus récente.
+// Contrôles de position hors recalage : la rampe de surface de (-191, -61 .. -48) tombe sur la flèche
+// « montée » du bord est du garage Goshan (-183, -52) ; la sortie coop « basement » (-97, -73)
+// tombe sur le couloir qui relie les deux parkings. Les rampes est (x -191 .. -159) vers les
+// garages Idea (z -294, -230) et Oli (z 122, 183) et le tunnel vers la sortie « Hole Exfill »
+// (-220, -37, y 14), à l'est du bord du plan, ne sont pas dessinées.
+// C'est un plan schématique : position juste à quelques mètres près (voir plus bas).
 //
 // Recalage en deux étages (pixels -> coordonnées du jeu) :
 //  1. plan Minibus du wiki (File:InterchangeMinibusLocations.jpg, 987x971) -> jeu : affine ajustée par
@@ -18,8 +25,8 @@ import type { MapLayer, RawBounds } from "./calibration";
 import { tr } from "../lib/i18n";
 
 export const PARKING_IMAGE = {
-  file: "maps/interchange-parking.webp",
-  width: 430,
+  file: "maps/interchange-parking.svg",
+  width: 822,
   height: 1350,
   /** Pixel de l'image réduite -> pixel du panneau recadré (facteur 2), puis plan Minibus (x*sx+tx, y*sy+ty). */
   panelToMinibus: { sx: 0.249375, sy: 0.28275, tx: 310, ty: 125, scale: 2 },
@@ -29,14 +36,24 @@ export const PARKING_IMAGE = {
 
 /** Crédit du plan, dans la langue affichée (calculé au rendu, pas à l'import). */
 export const parkingAttribution = () =>
-  tr("Plan du parking : ", "Parking plan: ") +
-  '<a href="https://escapefromtarkov.fandom.com/wiki/File:Interchange_Interactive_Map_Base.webp" target="_blank" rel="noreferrer">wiki Escape from Tarkov, re3mr.com</a>' +
-  tr(" (CC BY-NC-SA 4.0, recadré)", " (CC BY-NC-SA 4.0, cropped)");
+  tr("Plan du parking redessiné d'après le ", "Parking plan redrawn from the ") +
+  '<a href="https://escapefromtarkov.fandom.com/wiki/File:Interchange_Interactive_Map_Base.webp" target="_blank" rel="noreferrer">' +
+  tr("wiki Escape from Tarkov (affiche re3mr, CC BY-NC-SA 4.0)", "Escape from Tarkov wiki (re3mr poster, CC BY-NC-SA 4.0)") +
+  "</a>" +
+  tr(" et la carte de Lorathor", " and Lorathor's map");
 
 export type Affine = [number, number, number, number, number, number];
 
 /** Emprise mesurée du bâtiment (coins du mall, SVG tarkov.dev), en coordonnées du jeu. */
 export const MALL_FOOTPRINT: RawBounds = [[94.2, -314.6], [-157.2, 204.2]];
+/** Emprise du sous-sol : le mall + les parties du plan qui en dépassent (garage Goshan à l'est, pointes nord et sud). */
+export const BASEMENT_FOOTPRINT: RawBounds[] = [
+  MALL_FOOTPRINT,
+  [[-157.2, -185], [-200, 80]],
+  [[-40, -335], [-110, -314.6]],
+  [[-40, 204.2], [-95, 230]],
+  [[-200, -60], [-230, -15]], // sortie « Hole Exfill » (-220, -37, y 12-15) : sous terre, hors du plan dessiné
+];
 /** Le niveau principal du mall est à ~28 m : en dessous de 25 m, dans l'emprise, on est au sous-sol. */
 export const BASEMENT_TOP = 25;
 
@@ -68,19 +85,20 @@ export interface LayerImage {
   height: number;
 }
 
-/** Ajoute le calque « Sous-sol » à Interchange (sans effet ailleurs, ni s'il y est déjà). */
+/** Ajoute le calque « Sous-sol » à Interchange (sans effet ailleurs ; remplace une version en cache). */
 export function withBasement<T extends { key: string; layers: MapLayer[] }>(calibration: T): T {
-  if (calibration.key !== "interchange" || calibration.layers.some((l) => l.name === BASEMENT_LAYER_NAME)) return calibration;
+  if (calibration.key !== "interchange") return calibration;
   const layer: MapLayer = {
     name: BASEMENT_LAYER_NAME,
-    extents: [{ height: [-1000, BASEMENT_TOP], bounds: [MALL_FOOTPRINT] }],
+    extents: [{ height: [-1000, BASEMENT_TOP], bounds: BASEMENT_FOOTPRINT }],
     image: {
       url: `${import.meta.env.BASE_URL}${PARKING_IMAGE.file}`,
       width: PARKING_IMAGE.width,
       height: PARKING_IMAGE.height,
     },
   };
-  return { ...calibration, layers: [...calibration.layers, layer] };
+  // remplace une version déjà en cache (ancienne image) plutôt que de la garder
+  return { ...calibration, layers: [...calibration.layers.filter((l) => l.name !== BASEMENT_LAYER_NAME), layer] };
 }
 
 /** Points de contrôle du plan Minibus : [nom, x jeu, z jeu, px, py]. Coordonnées du jeu : SVG tarkov.dev + bornes maps.json. */
