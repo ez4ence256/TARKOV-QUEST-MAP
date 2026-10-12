@@ -24,6 +24,7 @@ import { clampPanelWidth, readPanelWidth } from "./lib/panelWidth";
 import { storyIdOf } from "./lib/story";
 import { useRoom } from "./api/room";
 import { RoomControl } from "./components/RoomControl";
+import { MapPicker } from "./components/MapPicker";
 
 type Tab = "selection" | "quests" | "capture" | "quest" | "photos" | "custom" | "settings";
 
@@ -283,20 +284,7 @@ export default function App() {
         <div className="brand">
           Quest Planner <span className="mode-badge">{modeLabel}</span>
         </div>
-        <select
-          className="input map-select"
-          value={currentMap?.id ?? ""}
-          onChange={(e) => showMap(e.target.value)}
-          aria-label={tr("Map affichée", "Displayed map")}
-          disabled={maps.length === 0}
-        >
-          {maps.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.name}
-              {pointsPerMap.get(m.id) ? ` (${pointsPerMap.get(m.id)})` : ""}
-            </option>
-          ))}
-        </select>
+        <MapPicker maps={maps} currentId={currentMap?.id ?? ""} counts={pointsPerMap} onPick={showMap} />
         <RoomControl room={room} />
         <label className="scav-check">
           <input type="checkbox" checked={showScavExits} onChange={(e) => changeScavExits(e.target.checked)} />
