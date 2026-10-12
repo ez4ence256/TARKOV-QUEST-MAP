@@ -114,6 +114,8 @@ export interface Task {
   minPlayerLevel: number | null;
   kappaRequired: boolean;
   wikiLink: string | null;
+  /** "wiki" : quête d'événement absente de tarkov.dev, lue sur le wiki (objectifs sans position sur la carte). */
+  source?: "wiki";
   objectives: Objective[];
   /** Absent dans les anciennes données en cache et dans les tests minimaux. */
   details?: TaskDetails;

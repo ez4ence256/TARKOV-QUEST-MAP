@@ -23,6 +23,7 @@ import { getLang, setLang as applyLang, tr, type Lang } from "./lib/i18n";
 import { clampPanelWidth, readPanelWidth } from "./lib/panelWidth";
 import { storyIdOf } from "./lib/story";
 import { useRoom } from "./api/room";
+import { buildEventTasks, loadEventEntries, type EventEntry } from "./api/eventQuests";
 import { RoomControl } from "./components/RoomControl";
 import { MapPicker } from "./components/MapPicker";
 
@@ -121,7 +122,14 @@ export default function App() {
   }, [gameMode, reloadToken, lang]);
 
   const data = load.data;
-  const tasks = useMemo(() => data?.tasks ?? [], [data]);
+  // Quêtes d'événement du wiki absentes de tarkov.dev : chargées une fois les données prêtes, sans bloquer l'app
+  const [eventEntries, setEventEntries] = useState<EventEntry[]>([]);
+  const dataReady = Boolean(data);
+  useEffect(() => {
+    if (!dataReady) return;
+    loadEventEntries().then(setEventEntries, (e) => console.warn("Quêtes d'événement du wiki indisponibles :", e));
+  }, [dataReady]);
+  const tasks = useMemo(() => (data ? [...data.tasks, ...buildEventTasks(eventEntries, data)] : []), [data, eventEntries]);
   const maps = useMemo(() => data?.maps ?? [], [data]);
   const tasksById = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
   const objectivesById = useMemo(() => {

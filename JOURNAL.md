@@ -309,6 +309,9 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
   - réglages OCR par défaut : agrandi, texte épars, colonnes séparées ;
   - **jamais d'activation silencieuse** après un import : écran de vérification obligatoire ;
   - « Tout désélectionner » sans confirmation (action non destructive).
+- **Quêtes d'événement absentes de tarkov.dev** : ajoutées depuis le wiki (objectifs du wiki, pas de points sur la carte), retirées automatiquement quand tarkov.dev les ajoute (comparaison du nom anglais et de la page wiki).
+  - Source : `Category:Event_content` ∩ `Category:Quests` − `Category:Historical_content` (`src/api/eventQuests.ts`) ; 2 requêtes de liste (continuation) + 1 requête de wikitext, cache 7 jours. Tâches synthétiques `wiki-<slug>` (`source: "wiki"`), objectifs `wiki-<slug>-<n>` (puces de « Objectives », sous-puces rattachées à l'objectif), marchand et map lus dans l'infobox, niveau non renseigné. Étiquette « Événement · wiki » dans la liste et la fiche.
+  - Audit : tarkov.dev gardé en entier (504/500/463 quêtes conservées, 0 retirée) ; 16 quêtes d'événement uniquement sur le wiki ; 295 pages historiques et ~92 autres pages uniquement sur le wiki (Arena, retirées, Prestige) : non ajoutées.
 
 ---
 

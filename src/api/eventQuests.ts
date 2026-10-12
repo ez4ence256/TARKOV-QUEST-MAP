@@ -1,0 +1,168 @@
+// Quêtes d'événement présentes sur le wiki mais pas (encore) dans tarkov.dev.
+// Tout passe par src/api/wiki.ts (file à 1 requête par seconde, cache de 7 jours). Requêtes :
+//  - la liste : « Category:Event_content » (articles) avec, pour chaque page, ses catégories
+//    « Quests » / « Historical content » : 1 requête, +1 si l'API continue la liste ;
+//  - le wikitext de toutes les pages retenues : 1 requête (50 titres au plus par lot).
+// Ce qui est gardé en cache : les quêtes lues (objectifs en texte brut), pas le wikitext.
+// Les objectifs viennent du wiki : aucune position sur la carte n'est inventée.
+
+import type { GameMap, TarkovData, Task, Trader } from "../types";
+import { baseQuestName } from "../lib/questWiki";
+import { cleanInline, findSection, parseBlocks, parseInfobox, splitSections } from "../lib/wikiText";
+import { pageUrlFor, readCache, wikiRequest, wikiTitleFromLink, writeCache } from "./wiki";
+
+/** Une quête d'événement lue sur le wiki (indépendante de la langue et des données tarkov.dev). */
+export interface EventEntry {
+  title: string;
+  givenBy: string | null;
+  locations: string[];
+  objectives: string[];
+}
+
+interface EventCache {
+  entries: EventEntry[];
+  fetchedAt: number;
+}
+
+const CACHE_KEY = "events:v1";
+const BATCH = 50;
+const MAX_CONTINUATIONS = 5;
+
+/** Lecture du wikitext d'une page : infobox (marchand, lieux) + puces de « Objectives ». Null sans objectif ni infobox. */
+export function parseEventQuest(title: string, wikitext: string): EventEntry | null {
+  const infobox = parseInfobox(wikitext);
+  const { sections } = splitSections(wikitext);
+  const blocks = parseBlocks(findSection(sections, "Objectives")?.body ?? "", title);
+  const objectives: string[] = [];
+  for (const b of blocks) {
+    if (b.type === "paragraph") objectives.push(b.text);
+    if (b.type !== "list") continue;
+    // une sous-puce détaille l'objectif au-dessus : elle s'y ajoute au lieu de devenir une case à cocher
+    for (const item of b.items) {
+      if (item.depth > 1 && objectives.length > 0) objectives[objectives.length - 1] += `; ${item.text}`;
+      else objectives.push(item.text);
+    }
+  }
+  if (objectives.length === 0 && !infobox["given by"]) return null;
+  return {
+    title,
+    givenBy: cleanInline(infobox["given by"] ?? "") || null,
+    locations: cleanInline(infobox.location ?? "")
+      .split(/[\n,]/)
+      .map((l) => l.trim())
+      .filter(Boolean),
+    objectives,
+  };
+}
+
+/** [A-Za-z0-9_-] seulement, stable : sert d'identifiant (validé par le serveur des rooms : [A-Za-z0-9_\-:.]{1,100}). */
+export const eventSlug = (title: string) => title.replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "quest";
+
+const norm = (s: string) => s.toLowerCase().replace(/^the\s+/, "").replace(/[^a-z0-9]+/g, " ").trim();
+
+/**
+ * Tâches de l'app pour les quêtes du wiki, sans celles que tarkov.dev a déjà (nom anglais ou page wiki identique).
+ * Une quête que tarkov.dev ajoute plus tard disparaît donc d'elle-même.
+ */
+export function buildEventTasks(entries: EventEntry[], data: Pick<TarkovData, "tasks" | "maps" | "traders">): Task[] {
+  const known = new Set(data.tasks.map((t) => norm(baseQuestName(t.nameEn))));
+  const knownPages = new Set(data.tasks.map((t) => wikiTitleFromLink(t.wikiLink)?.toLowerCase()).filter(Boolean));
+  const trader = (name: string | null): Trader | undefined => {
+    const n = name ? norm(name) : "";
+    return n ? data.traders.find((t) => norm(t.normalizedName) === n || norm(t.name) === n) : undefined;
+  };
+  const mapOf = (name: string): GameMap | undefined => data.maps.find((m) => [m.nameEn, m.name, m.normalizedName].some((x) => x && norm(x) === norm(name)));
+
+  return entries
+    .filter((e) => !known.has(norm(e.title)) && !knownPages.has(e.title.toLowerCase()))
+    .map((e): Task => {
+      const slug = eventSlug(e.title);
+      const mapIds = [...new Set(e.locations.map((l) => mapOf(l)?.id).filter((id): id is string => Boolean(id)))];
+      const texts = e.objectives.length > 0 ? e.objectives : [e.title];
+      return {
+        id: `wiki-${slug}`,
+        name: e.title,
+        nameEn: e.title,
+        normalizedName: slug.toLowerCase(),
+        traderId: trader(e.givenBy)?.id ?? "",
+        mapId: mapIds[0] ?? null,
+        minPlayerLevel: null,
+        kappaRequired: false,
+        wikiLink: pageUrlFor(e.title),
+        source: "wiki",
+        objectives: texts.map((description, i) => ({
+          id: `wiki-${slug}-${i + 1}`,
+          type: "wiki",
+          description,
+          optional: false,
+          mapIds,
+          locations: [],
+        })),
+      };
+    });
+}
+
+/** Pages d'événement classées « Quests », hors « Historical content » (1 requête, +1 si l'API continue). */
+async function listEventPages(): Promise<string[]> {
+  const pages = new Map<number, { title: string; cats: Set<string> }>();
+  let cont: Record<string, string> = {};
+  for (let i = 0; i < MAX_CONTINUATIONS; i++) {
+    const json = await wikiRequest({
+      action: "query",
+      generator: "categorymembers",
+      gcmtitle: "Category:Event_content",
+      gcmnamespace: "0",
+      gcmlimit: "500",
+      prop: "categories",
+      cllimit: "max",
+      clcategories: "Category:Quests|Category:Historical_content",
+      ...cont,
+    });
+    const query = (json.query ?? {}) as { pages?: { pageid: number; title: string; redirect?: boolean; categories?: { title: string }[] }[] };
+    for (const p of query.pages ?? []) {
+      const e = pages.get(p.pageid) ?? { title: p.title, cats: new Set<string>() };
+      for (const c of p.categories ?? []) e.cats.add(c.title.replace(/^Category:/, "").replace(/_/g, " ").toLowerCase());
+      pages.set(p.pageid, e);
+    }
+    if (!json.continue) {
+      return [...pages.values()].filter((p) => p.cats.has("quests") && !p.cats.has("historical content")).map((p) => p.title);
+    }
+    cont = json.continue as Record<string, string>;
+  }
+  throw new Error("wiki: liste des quêtes d'événement trop longue");
+}
+
+async function fetchEventEntries(): Promise<EventEntry[]> {
+  const titles = await listEventPages();
+  const entries: EventEntry[] = [];
+  for (let i = 0; i < titles.length; i += BATCH) {
+    const json = await wikiRequest({
+      action: "query",
+      prop: "revisions",
+      rvprop: "content",
+      rvslots: "main",
+      titles: titles.slice(i, i + BATCH).join("|"),
+    });
+    const pages = ((json.query ?? {}) as { pages?: { title: string; revisions?: { slots?: { main?: { content?: string } } }[] }[] }).pages ?? [];
+    for (const p of pages) {
+      const content = p.revisions?.[0]?.slots?.main?.content;
+      const entry = content && !/^\s*#redirect/i.test(content) ? parseEventQuest(p.title, content) : null;
+      if (entry) entries.push(entry);
+    }
+  }
+  entries.sort((a, b) => a.title.localeCompare(b.title, "en"));
+  writeCache(CACHE_KEY, { entries, fetchedAt: Date.now() } satisfies EventCache);
+  return entries;
+}
+
+let inFlight: Promise<EventEntry[]> | null = null;
+
+/** Quêtes d'événement du wiki : cache 7 jours, sinon 2 à 3 requêtes. */
+export function loadEventEntries(): Promise<EventEntry[]> {
+  const cached = readCache<EventCache>(CACHE_KEY);
+  if (cached) return Promise.resolve(cached.entries);
+  inFlight ??= fetchEventEntries().finally(() => {
+    inFlight = null;
+  });
+  return inFlight;
+}

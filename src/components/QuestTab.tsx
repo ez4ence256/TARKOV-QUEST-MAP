@@ -531,10 +531,11 @@ export function QuestTab(p: Props) {
         {traderName(task.traderId)}
         {task.minPlayerLevel ? tr(` · niveau ${task.minPlayerLevel}`, ` · level ${task.minPlayerLevel}`) : ""}
         {task.kappaRequired ? " · Kappa" : ""}
+        {task.source === "wiki" ? ` · ${tr("Événement · wiki", "Event · wiki")}` : ""}
         {task.nameEn !== task.name ? ` · EN${tr(" : ", ": ")}${task.nameEn}` : ""}
       </div>
 
-      <div className="subhead">{tr("Objectifs à cocher (tarkov.dev)", "Objectives to check off (tarkov.dev)")}</div>
+      <div className="subhead">{task.source === "wiki" ? tr("Objectifs à cocher (wiki)", "Objectives to check off (wiki)") : tr("Objectifs à cocher (tarkov.dev)", "Objectives to check off (tarkov.dev)")}</div>
       <ul className="objectives">
         {task.objectives.map((o) => {
           const isDone = Boolean(p.done[o.id]);

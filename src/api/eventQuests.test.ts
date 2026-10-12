@@ -1,0 +1,112 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
+import type { GameMap, Task, Trader } from "../types";
+import { buildEventTasks, eventSlug, loadEventEntries, parseEventQuest } from "./eventQuests";
+
+// Extrait réel (réduit) de la page « All-Inclusive Support » du wiki
+const ALL_INCLUSIVE = `{{Event content}}
+{{Infobox quest
+|image         =All-Inclusive Support Banner.png
+|location      =[[Lighthouse]]
+|given by      =[[Prapor]]
+|previous      =[[Number Temporarily Unavailable]]
+|leads to      =[[A Familiar Face...]]<br/>[[Lose the Tail]]
+|reqkappa      =<font color="green">No</font>
+}}
+
+'''{{PAGENAME}}''' is a [[Quests|Quest]] in ''[[Escape from Tarkov]]''.
+
+==Dialogue==
+{{quote|No, you gotta hear this!}}
+
+==Objectives==
+* Eliminate any 15 targets on [[Lighthouse]]
+* Launch a red signal flare at the abandoned mountain lake cabin on [[Lighthouse]]
+** Use the [[RSP-30 reactive signal cartridge (Red)|red flare]]
+* Use the transit from [[Lighthouse]] to [[Reserve]]
+
+==Rewards==
+* +20,000 [[EXP]]
+`;
+
+const trader = (id: string, normalizedName: string): Trader => ({ id, name: normalizedName, normalizedName, imageLink: null });
+const map = (id: string, nameEn: string): GameMap => ({ id, name: nameEn, nameEn, normalizedName: nameEn.toLowerCase() });
+const dev = (nameEn: string): Task => ({
+  id: `td-${nameEn}`, name: nameEn, nameEn, normalizedName: nameEn.toLowerCase(), traderId: "t1", mapId: null,
+  minPlayerLevel: 1, kappaRequired: false, wikiLink: null, objectives: [],
+});
+const ctx = { traders: [trader("t1", "prapor")], maps: [map("m1", "Lighthouse")] };
+
+describe("parseEventQuest", () => {
+  it("lit marchand, lieu et objectifs (sous-puce ajoutée à l'objectif)", () => {
+    expect(parseEventQuest("All-Inclusive Support", ALL_INCLUSIVE)).toEqual({
+      title: "All-Inclusive Support",
+      givenBy: "Prapor",
+      locations: ["Lighthouse"],
+      objectives: [
+        "Eliminate any 15 targets on Lighthouse",
+        "Launch a red signal flare at the abandoned mountain lake cabin on Lighthouse; Use the red flare",
+        "Use the transit from Lighthouse to Reserve",
+      ],
+    });
+  });
+  it("page sans infobox ni objectif : ignorée", () => expect(parseEventQuest("X", "#REDIRECT [[Y]]")).toBeNull());
+});
+
+describe("buildEventTasks", () => {
+  const entries = [parseEventQuest("All-Inclusive Support", ALL_INCLUSIVE)!];
+
+  it("tâche synthétique : marchand, map, objectifs sans position", () => {
+    const [t] = buildEventTasks(entries, { ...ctx, tasks: [] });
+    expect(t).toMatchObject({ id: "wiki-All-Inclusive-Support", source: "wiki", traderId: "t1", mapId: "m1", kappaRequired: false });
+    expect(t.wikiLink).toBe("https://escapefromtarkov.fandom.com/wiki/All-Inclusive_Support");
+    expect(t.objectives.map((o) => o.id)).toEqual(["wiki-All-Inclusive-Support-1", "wiki-All-Inclusive-Support-2", "wiki-All-Inclusive-Support-3"]);
+    expect(t.objectives.every((o) => o.locations.length === 0 && o.mapIds[0] === "m1")).toBe(true);
+  });
+
+  it("retirée quand tarkov.dev a la quête (nom, même avec suffixe PVP ZONE)", () => {
+    expect(buildEventTasks(entries, { ...ctx, tasks: [dev("All Inclusive Support [PVP ZONE]")] })).toEqual([]);
+  });
+
+  it("ids valides pour les rooms", () => {
+    const re = /^[A-Za-z0-9_\-:.]{1,100}$/;
+    const t = buildEventTasks([{ title: "A Familiar Face...", givenBy: null, locations: [], objectives: ["x"] }], { ...ctx, tasks: [] })[0];
+    expect(eventSlug("A Familiar Face...")).toBe("A-Familiar-Face");
+    expect([t.id, ...t.objectives.map((o) => o.id)].every((id) => re.test(id))).toBe(true);
+    expect(t.traderId).toBe("");
+  });
+});
+
+describe("loadEventEntries", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    localStorage.clear();
+  });
+
+  it("liste (avec continuation) + un lot de wikitext, puis cache", async () => {
+    let n = 0;
+    const fetchMock = vi.fn(async (url: string) => {
+      const u = new URL(url);
+      if (u.searchParams.get("generator")) {
+        n++;
+        return new Response(
+          JSON.stringify(
+            n === 1
+              ? { continue: { clcontinue: "1|Quests" }, query: { pages: [{ pageid: 1, title: "All-Inclusive Support" }, { pageid: 2, title: "Old One" }] } }
+              : { query: { pages: [{ pageid: 1, title: "All-Inclusive Support", categories: [{ title: "Category:Quests" }] }, { pageid: 2, title: "Old One", categories: [{ title: "Category:Quests" }, { title: "Category:Historical content" }] }] } },
+          ),
+        );
+      }
+      expect(u.searchParams.get("titles")).toBe("All-Inclusive Support");
+      return new Response(JSON.stringify({ query: { pages: [{ title: "All-Inclusive Support", revisions: [{ slots: { main: { content: ALL_INCLUSIVE } } }] }] } }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    vi.useFakeTimers();
+    const p = loadEventEntries();
+    await vi.runAllTimersAsync();
+    expect((await p).map((e) => e.title)).toEqual(["All-Inclusive Support"]);
+    vi.useRealTimers();
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    await loadEventEntries();
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+});
