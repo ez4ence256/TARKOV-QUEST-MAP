@@ -14,7 +14,7 @@
 // Exception : Icebreaker (un bateau, où "souterrain" n'a pas de sens) garde tous
 // ses ponts dans le sélecteur.
 
-import type { MapCalibration, MapLayer } from "./calibration";
+import type { MapCalibration, MapLayer, RawBounds } from "./calibration";
 import { isInBounds } from "./crs";
 import { tr } from "../lib/i18n";
 
@@ -59,6 +59,26 @@ export function isOnLevel(p: PointHeight, calibration: MapCalibration | undefine
   }
   if (level !== null) return Boolean(pointIsOnLayer(p, calibration.layers[level]));
   return Boolean(pointIsOnLayer(p, mainLayer(calibration)));
+}
+
+/** Marge (m) retirée aux zones d'étages : ZB-1011 est à 3,5 m du bord de la zone « pump 2nd » mais n'est pas dessous. */
+const ABOVE_MARGIN = 5;
+const inside = (b: RawBounds, p: { x: number; z: number }) => {
+  const [x0, x1] = [Math.min(b[0][0], b[1][0]) + ABOVE_MARGIN, Math.max(b[0][0], b[1][0]) - ABOVE_MARGIN];
+  const [z0, z1] = [Math.min(b[0][1], b[1][1]) + ABOVE_MARGIN, Math.max(b[0][1], b[1][1]) - ABOVE_MARGIN];
+  return p.x >= x0 && p.x <= x1 && p.z >= z0 && p.z <= z1;
+};
+
+/**
+ * Une sortie souterraine est-elle une simple entrée de cave visible depuis le niveau principal ?
+ * Oui sur une map de plein air (fond SVG) quand aucun étage supérieur délimité ne la recouvre.
+ * shortcut: la zone d'un étage n'est pas comparée en hauteur, seulement en x/z ; à affiner si une cave passe sous un toit plat.
+ */
+export function isCellarEntrance(p: { x: number; z: number }, calibration: MapCalibration | undefined): boolean {
+  if (!calibration?.svgLayer) return false;
+  return !calibration.layers.some(
+    (l) => !isUnderground(calibration, l) && l.extents.some((e) => e.bounds?.some((b) => inside(b, p))),
+  );
 }
 
 /** Maps dont tous les étages restent dans le sélecteur (clé de maps.json). */
@@ -118,10 +138,18 @@ export function extentOf(p: PointHeight, layer: MapLayer): [number, number] | nu
 
 /** Numéro court d'un étage pour l'icône ("2", "3"…), ou "↑" si le nom n'en contient pas. */
 export function levelBadge(calibration: MapCalibration, level: number): string {
+  if (MALL_MAIN(calibration, level)) return ""; // rez-de-chaussée du mall : pas de numéro
   const name = calibration.layers[level]?.name ?? "";
   if (/^second\b/i.test(name)) return "2";
   return name.match(/\d+/)?.[0] ?? "↑";
 }
+
+/**
+ * Interchange : le mall est surélevé (~28 m). maps.json appelle "2nd Floor" son rez-de-chaussée
+ * (tranche 25-34 m limitée au mall) et "3rd Floor" son vrai 2e étage : on corrige les noms.
+ */
+const MALL_MAIN = (c: MapCalibration, level: number) => c.key === "interchange" && c.layers[level]?.name === "2nd Floor";
+const MALL_UPPER = (c: MapCalibration, level: number) => c.key === "interchange" && c.layers[level]?.name === "3rd Floor";
 
 // [français, anglais] : résolu à l'appel (pas à l'import) pour suivre la langue choisie
 const LEVEL_NAMES: Record<string, [string, string]> = {
@@ -138,6 +166,8 @@ const LEVEL_NAMES: Record<string, [string, string]> = {
 
 export function levelName(calibration: MapCalibration | undefined, level: Level): string {
   if (level === null || !calibration) return calibration?.mainLevelName ?? tr("Niveau principal", "Main level");
+  if (MALL_MAIN(calibration, level)) return tr("Niveau principal du centre commercial", "Mall main level");
+  if (MALL_UPPER(calibration, level)) return tr("2e étage du centre commercial", "Mall 2nd floor");
   const name = calibration.layers[level]?.name ?? "";
   const names = LEVEL_NAMES[name];
   return names ? tr(names[0], names[1]) : name;

@@ -9,6 +9,7 @@ import {
   levelName,
   levelOf,
   selectableLevels,
+  isCellarEntrance,
   upperLevelOf,
 } from "./levels";
 
@@ -59,6 +60,22 @@ describe("étages", () => {
   it("un point sans hauteur est visible à tous les niveaux", () => {
     expect(isOnLevel({ x: 200, z: 150 }, customs, null)).toBe(true);
     expect(isOnLevel({ x: 200, z: 150 }, customs, 0)).toBe(true);
+  });
+});
+
+describe("Interchange : le mall est surélevé", () => {
+  const interchange = BUNDLED_CALIBRATION["interchange"];
+  it("un point du rez-de-chaussée du mall (28 m) n'est pas dit « 2e étage »", () => {
+    const mall = { x: 0, z: 0, y: 28.2 };
+    expect(levelName(interchange, levelOf(mall, interchange))).toBe("Niveau principal du centre commercial");
+    expect(levelBadge(interchange, upperLevelOf(mall, interchange)!)).toBe(""); // pas de numéro
+    expect(levelName(interchange, levelOf({ x: 0, z: 0, y: 37 }, interchange))).toBe("2e étage du centre commercial");
+  });
+  it("hors du mall, à la même hauteur : niveau principal (les zones x/z comptent)", () => {
+    expect(levelOf({ x: 300, z: 300, y: 28.2 }, interchange)).toBeNull();
+  });
+  it("pas d'entrée de cave sur Labs (map sans fond de plein air)", () => {
+    expect(isCellarEntrance({ x: 0, z: 0 }, BUNDLED_CALIBRATION["the-lab"])).toBe(false);
   });
 });
 

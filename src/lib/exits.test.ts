@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { MapExit } from "../types";
 import { BUNDLED_CALIBRATION } from "../map/calibration";
 import { isInBounds } from "../map/crs";
-import { displayLevelOf, levelName, upperLevelOf } from "../map/levels";
+import { displayLevelOf, isCellarEntrance, levelName, upperLevelOf } from "../map/levels";
 import { exitIconKind, factionLabel, factionsOf, isCoopName, exitsNearMap, mergeExits, visibleExits } from "./exits";
 import { escapeHtml } from "../map/exitIcons";
 
@@ -123,6 +123,8 @@ describe("placement de sorties réelles (calibrage et étages)", () => {
     const level = displayLevelOf(pos(boiler), customs);
     expect(level).not.toBeNull();
     expect(levelName(customs, level)).toBe("Sous-sol");
+    // sous un bâtiment à étages (zone « boiler ») : pas d'entrée de cave, jamais sur le niveau principal
+    expect(isCellarEntrance(boiler.position, customs)).toBe(false);
     // une sortie en surface reste sur le niveau principal
     expect(displayLevelOf(pos(exit("Crossroads", -336.33, 2.19, -86.39, { top: 5.06, bottom: -0.68 })), customs)).toBeNull();
   });
@@ -154,7 +156,10 @@ describe("cas rapportés (données tarkov.dev d'octobre 2026)", () => {
     expect(merged[0].factions).toEqual(["pmc", "scav"]);
     const customs = BUNDLED_CALIBRATION["customs"];
     const p = { ...merged[0].position, top: merged[0].top, bottom: merged[0].bottom };
-    expect(levelName(customs, displayLevelOf(p, customs))).toBe("Sous-sol"); // pas sur le niveau principal
+    expect(levelName(customs, displayLevelOf(p, customs))).toBe("Sous-sol");
+    // simple entrée de cave, rien au-dessus : aussi sur le niveau principal (avec le badge « sous-sol »)
+    expect(isCellarEntrance(p, customs)).toBe(true);
+    expect(isCellarEntrance({ x: 625.57, z: -127.71 }, customs)).toBe(true);
   });
 
   it("Point zéro : « Barrage ONU » et « Bunker scav » (à plus d'une largeur de map) sont écartés, Pinewood au bord reste", () => {

@@ -22,6 +22,8 @@ interface ObjectivePopupProps {
   onQuest?: () => void;
   /** Étage du point, sur les maps qui en ont. */
   levelLabel?: string;
+  /** D'où vient l'étage quand il est écrit dans le texte. */
+  levelSource?: string;
   /** Présent quand le point est sur un autre étage que celui affiché. */
   onShowLevel?: () => void;
   onNote: (note: string) => void;
@@ -50,6 +52,7 @@ export function ObjectivePopup(p: ObjectivePopupProps) {
       {p.levelLabel && (
         <div className="popup-level">
           {tr("Étage : ", "Floor: ")}<strong>{p.levelLabel}</strong>
+          {p.levelSource && <span className="muted"> ({p.levelSource})</span>}
           {p.onShowLevel && (
             <button className="btn btn-ghost btn-small" onClick={p.onShowLevel}>
               {tr("Afficher cet étage", "Show this floor")}

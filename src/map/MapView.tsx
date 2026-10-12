@@ -10,6 +10,7 @@ import { markerIcon } from "./icons";
 import { BaseLayer, type BaseStatus } from "./BaseLayer";
 import { ExitsLayer } from "./ExitsLayer";
 import type { ExitPhotosTarget } from "../components/PhotosTab";
+import { floorFromText } from "../lib/floorText";
 import {
   displayLevelOf,
   extentOf,
@@ -272,6 +273,7 @@ function MapViewInner(props: MapViewProps) {
           const shownOn = displayLevelOf(pt, calibration);
           const offLevel = shownOn !== level;
           const upper = upperLevelOf(pt, calibration);
+          const textFloor = manual ? null : floorFromText(objective.description);
           return (
             <MarkerWithOutline
               key={pt.key}
@@ -281,7 +283,7 @@ function MapViewInner(props: MapViewProps) {
               icon={markerIcon(categoryOf(objective.type), color, {
                 faded: done,
                 offLevel,
-                badge: upper !== null && calibration ? levelBadge(calibration, upper) : undefined,
+                badge: upper !== null && calibration ? levelBadge(calibration, upper) || undefined : undefined,
               })}
               offLevel={offLevel}
               tooltip={upper !== null && calibration ? <UpperLevelTooltip point={pt} calibration={calibration} level={upper} /> : null}
@@ -302,7 +304,8 @@ function MapViewInner(props: MapViewProps) {
                 spawn={pt.spawn}
                 onPhotos={task.wikiLink ? () => props.onPhotos(task.id) : undefined}
                 onQuest={() => props.onQuest(task.id)}
-                levelLabel={layers.length > 0 && !manual ? levelName(calibration, pointLevel) : undefined}
+                levelLabel={textFloor ?? (layers.length > 0 && !manual ? levelName(calibration, pointLevel) : undefined)}
+                levelSource={textFloor ? tr("d'après la description", "from the description") : undefined}
                 onShowLevel={offLevel ? () => setLevel(shownOn) : undefined}
                 onNote={(note) => dispatch({ type: "setNote", key: pt.key, note })}
                 onDone={(value) => dispatch({ type: "setDone", objectiveId: objective.id, done: value })}
