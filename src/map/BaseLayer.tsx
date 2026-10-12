@@ -7,6 +7,7 @@ import { useMap } from "react-leaflet";
 import type { MapCalibration, MapLayer, RawBounds } from "./calibration";
 import { toLatLngBounds } from "./crs";
 import { mainExtraSvgLayers } from "./levels";
+import { svgMatrixFor } from "./basement";
 import { tr } from "../lib/i18n";
 
 const svgCache = new Map<string, Promise<string>>();
@@ -39,6 +40,30 @@ function buildSvgElement(svgText: string, layer: string | undefined, extra: stri
     if (!keep) (child as SVGGElement).style.display = "none";
   }
   return document.importNode(svg, true);
+}
+
+/**
+ * Plan image (parking d'Interchange) : un <image> affine dans un SVG dont le repère est en mètres,
+ * u = x1 - x, v = z - z1 (la rotation de 180° d'Interchange), posé sur les bornes de la carte.
+ */
+function imageOverlay(level: MapLayer, calibration: MapCalibration, pane: string) {
+  const image = level.image!;
+  const [[x1, z1], [x2, z2]] = calibration.svgBounds ?? calibration.bounds;
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", `0 0 ${Math.abs(x1 - x2)} ${Math.abs(z2 - z1)}`);
+  const el = document.createElementNS(ns, "image");
+  el.setAttribute("href", image.url);
+  el.setAttribute("width", String(image.width));
+  el.setAttribute("height", String(image.height));
+  el.setAttribute("transform", `matrix(${svgMatrixFor({ x: x1, z: z1 }).join(" ")})`);
+  el.setAttribute("opacity", "0.92");
+  svg.appendChild(el);
+  return L.svgOverlay(svg, toLatLngBounds(calibration.svgBounds ?? calibration.bounds), {
+    interactive: false,
+    pane,
+    attribution: image.attribution,
+  });
 }
 
 function GridLayer({ bounds }: { bounds: RawBounds }) {
@@ -162,7 +187,9 @@ export function BaseLayer({
     map.getPane(BASE_PANE)!.classList.add("is-dimmed");
     let overlay: L.Layer | null = null;
     let cancelled = false;
-    if (svgUrl && level.svgLayer) {
+    if (level.image) {
+      overlay = imageOverlay(level, calibration, LEVEL_PANE).addTo(map);
+    } else if (svgUrl && level.svgLayer) {
       fetchSvg(svgUrl)
         .then((text) => {
           if (!cancelled) overlay = svgOverlay(text, level.svgLayer, calibration, LEVEL_PANE).addTo(map);

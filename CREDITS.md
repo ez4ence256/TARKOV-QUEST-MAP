@@ -94,6 +94,15 @@ SOFTWARE.
 
 ---
 
+## Plan du parking d'Interchange : re3mr.com et wiki Escape from Tarkov
+
+- **Source :** panneau « PARKING » de l'affiche [`File:Interchange Interactive Map Base.webp`](https://escapefromtarkov.fandom.com/wiki/File:Interchange_Interactive_Map_Base.webp), « Map made by re3mr.com in cooperation with the Escape from Tarkov Wiki ».
+- **Licence :** Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (indiquée sur l'affiche). Fichier **recadré** (panneau seul, fond noir rendu transparent) et réduit : `public/maps/interchange-parking.webp`. Même licence pour ce dérivé ; usage non commercial, ne le réutilisez pas ailleurs sans respecter ces conditions.
+- Il est posé sur le centre commercial grâce à un recalage approximatif (voir `src/map/basement.ts`). Le plan Minibus du wiki (`File:InterchangeMinibusLocations.jpg`) n'a servi qu'à ce recalage ; il n'est pas inclus.
+- Le crédit s'affiche aussi sur la carte quand le niveau « Sous-sol » est choisi.
+
+---
+
 ## Données des quêtes : API JSON de tarkov.dev
 
 - **Source :** https://json.tarkov.dev/ (endpoints `<mode>/tasks`, `<mode>/maps`, `<mode>/traders` et leurs traductions `_fr` / `_en`)

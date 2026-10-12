@@ -78,7 +78,7 @@ describe("Interchange : le mall est surélevé", () => {
   });
   it("sélecteur : principal + 2e étage du mall (Douanes inchangé) ; le rez-de-chaussée du mall est dessiné sur le principal", () => {
     const names = (c: typeof customs) => selectableLevels(c).map((l) => levelName(c, l));
-    expect(names(interchange)).toEqual(["Niveau principal", "2e étage du centre commercial"]);
+    expect(names(interchange)).toEqual(["Niveau principal", "2e étage du centre commercial", "Sous-sol (parking)"]);
     expect(names(customs)).toEqual(["Niveau principal", "Sous-sol"]);
     expect(mainExtraSvgLayers(interchange)).toEqual(["First_Floor"]);
     expect(mainExtraSvgLayers(customs)).toEqual([]);
@@ -112,11 +112,11 @@ describe("étages supérieurs et souterrains", () => {
     expect(selectableNames("ground-zero")).toEqual(["Garage"]);
     expect(selectableNames("the-lab")).toEqual(["Technical"]);
     expect(selectableNames("reserve")).toEqual(["Bunkers"]);
-    expect(selectableNames("interchange")).toEqual(["3rd Floor"]); // seul cas d'étage supérieur dans le sélecteur (+ mall dessiné sur le principal)
+    expect(selectableNames("interchange")).toEqual(["3rd Floor", "Parking basement"]); // seul cas d'étage supérieur dans le sélecteur (+ mall dessiné sur le principal)
   });
 
   it("la règle par hauteur s'accorde avec les noms des étages (hors Icebreaker)", () => {
-    const undergroundName = /underground|garage|tunnel|technical|bunker/i;
+    const undergroundName = /underground|garage|tunnel|technical|bunker|basement/i;
     for (const [key, c] of Object.entries(BUNDLED_CALIBRATION)) {
       if (c.key === "icebreaker") continue;
       for (const layer of c.layers) {

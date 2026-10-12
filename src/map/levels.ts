@@ -17,6 +17,7 @@
 import type { MapCalibration, MapLayer, RawBounds } from "./calibration";
 import { isInBounds } from "./crs";
 import { tr } from "../lib/i18n";
+import { BASEMENT_LAYER_NAME } from "./basement";
 
 /** Hauteur d'un point : y, ou haut/bas de la zone quand l'API les donne. */
 export interface PointHeight {
@@ -188,6 +189,7 @@ export function levelName(calibration: MapCalibration | undefined, level: Level)
   if (level === null || !calibration) return calibration?.mainLevelName ?? tr("Niveau principal", "Main level");
   if (MALL_MAIN(calibration, level)) return tr("Niveau principal du centre commercial", "Mall main level");
   if (MALL_UPPER(calibration, level)) return tr("2e étage du centre commercial", "Mall 2nd floor");
+  if (calibration.layers[level]?.name === BASEMENT_LAYER_NAME) return tr("Sous-sol (parking)", "Basement (parking)");
   const name = calibration.layers[level]?.name ?? "";
   const names = LEVEL_NAMES[name];
   return names ? tr(names[0], names[1]) : name;

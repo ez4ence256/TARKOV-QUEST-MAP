@@ -7,6 +7,7 @@
 
 import bundledMaps from "../data/tarkov-dev-maps.json";
 import { tr } from "../lib/i18n";
+import { withBasement, type LayerImage } from "./basement";
 
 export const CALIBRATION_URL =
   "https://raw.githubusercontent.com/the-hideout/tarkov-dev/main/src/data/maps.json";
@@ -37,6 +38,8 @@ export interface MapLayer {
   tilePath?: string;
   /** Tranches de hauteur (y du jeu) de l'étage, éventuellement limitées à des zones. */
   extents: { height: [number, number]; bounds?: RawBounds[] }[];
+  /** Plan image posé sur l'étage (Interchange : parking), à la place d'un groupe SVG ou de tuiles. */
+  image?: LayerImage;
 }
 
 export interface MapCalibration {
@@ -146,13 +149,18 @@ export function parseCalibration(groups: unknown): CalibrationTable {
       calibration.mainLevelName = dup.name;
       calibration.layers = calibration.layers.filter((l) => l !== dup);
     }
-    table[group.normalizedName] = calibration;
+    const withLevels = withBasement(calibration);
+    table[group.normalizedName] = withLevels;
     for (const alt of Array.isArray(m.altMaps) ? m.altMaps : []) {
-      if (typeof alt === "string") table[alt] = calibration;
+      if (typeof alt === "string") table[alt] = withLevels;
     }
   }
   return table;
 }
+
+/** Le cache local peut dater d'avant le calque Sous-sol : on le (re)met. */
+const withBasements = (table: CalibrationTable): CalibrationTable =>
+  Object.fromEntries(Object.entries(table).map(([k, c]) => [k, withBasement(c)]));
 
 export const BUNDLED_CALIBRATION = parseCalibration(bundledMaps);
 
@@ -167,7 +175,7 @@ export async function loadCalibration(): Promise<CalibrationTable> {
   try {
     const cached = JSON.parse(localStorage.getItem(CACHE_KEY) ?? "null");
     if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
-      return { ...BUNDLED_CALIBRATION, ...cached.table };
+      return withBasements({ ...BUNDLED_CALIBRATION, ...cached.table });
     }
   } catch {
     /* cache illisible : on l'ignore */
@@ -182,7 +190,7 @@ export async function loadCalibration(): Promise<CalibrationTable> {
     } catch {
       /* stockage plein : pas grave */
     }
-    return { ...BUNDLED_CALIBRATION, ...table };
+    return withBasements({ ...BUNDLED_CALIBRATION, ...table });
   } catch (error) {
     console.warn(tr("Calibrage en ligne indisponible, copie embarquée utilisée", "Online calibration unavailable, using bundled copy"), error);
     return BUNDLED_CALIBRATION;
