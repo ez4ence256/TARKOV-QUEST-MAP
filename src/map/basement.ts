@@ -15,6 +15,7 @@
 // Résidus de l'étage 1 : RMS 4,30 m, max 7,65 m (coins du mall : 2,3 à 3,7 m).
 
 import type { MapLayer, RawBounds } from "./calibration";
+import { tr } from "../lib/i18n";
 
 export const PARKING_IMAGE = {
   file: "maps/interchange-parking.webp",
@@ -24,9 +25,13 @@ export const PARKING_IMAGE = {
   panelToMinibus: { sx: 0.249375, sy: 0.28275, tx: 310, ty: 125, scale: 2 },
   /** Pixel du plan Minibus -> jeu : x = a*px + b*py + c ; z = d*px + e*py + f. */
   minibusToGame: [-0.768909, 0.000259, 357.1283, -0.003799, 0.713884, -411.3841] as Affine,
-  attribution:
-    'Plan du parking : <a href="https://escapefromtarkov.fandom.com/wiki/File:Interchange_Interactive_Map_Base.webp" target="_blank" rel="noreferrer">wiki Escape from Tarkov, re3mr.com</a> (CC BY-NC-SA 4.0, recadré)',
 };
+
+/** Crédit du plan, dans la langue affichée (calculé au rendu, pas à l'import). */
+export const parkingAttribution = () =>
+  tr("Plan du parking : ", "Parking plan: ") +
+  '<a href="https://escapefromtarkov.fandom.com/wiki/File:Interchange_Interactive_Map_Base.webp" target="_blank" rel="noreferrer">wiki Escape from Tarkov, re3mr.com</a>' +
+  tr(" (CC BY-NC-SA 4.0, recadré)", " (CC BY-NC-SA 4.0, cropped)");
 
 export type Affine = [number, number, number, number, number, number];
 
@@ -61,7 +66,6 @@ export interface LayerImage {
   url: string;
   width: number;
   height: number;
-  attribution: string;
 }
 
 /** Ajoute le calque « Sous-sol » à Interchange (sans effet ailleurs, ni s'il y est déjà). */
@@ -74,7 +78,6 @@ export function withBasement<T extends { key: string; layers: MapLayer[] }>(cali
       url: `${import.meta.env.BASE_URL}${PARKING_IMAGE.file}`,
       width: PARKING_IMAGE.width,
       height: PARKING_IMAGE.height,
-      attribution: PARKING_IMAGE.attribution,
     },
   };
   return { ...calibration, layers: [...calibration.layers, layer] };

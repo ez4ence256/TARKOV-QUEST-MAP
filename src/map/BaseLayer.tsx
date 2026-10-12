@@ -7,7 +7,7 @@ import { useMap } from "react-leaflet";
 import type { MapCalibration, MapLayer, RawBounds } from "./calibration";
 import { toLatLngBounds } from "./crs";
 import { mainExtraSvgLayers } from "./levels";
-import { svgMatrixFor } from "./basement";
+import { parkingAttribution, svgMatrixFor } from "./basement";
 import { tr } from "../lib/i18n";
 
 const svgCache = new Map<string, Promise<string>>();
@@ -62,7 +62,7 @@ function imageOverlay(level: MapLayer, calibration: MapCalibration, pane: string
   return L.svgOverlay(svg, toLatLngBounds(calibration.svgBounds ?? calibration.bounds), {
     interactive: false,
     pane,
-    attribution: image.attribution,
+    attribution: parkingAttribution(), // seul calque image : le plan du parking d'Interchange
   });
 }
 
