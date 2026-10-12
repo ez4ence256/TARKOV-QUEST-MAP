@@ -4,7 +4,7 @@
 // l'affiche « Interchange Interactive Map Base.webp » (re3mr.com avec le wiki Escape from Tarkov,
 // CC BY-NC-SA 4.0) : sections A à D **et** garages Idea, Goshan et Oli, dessinés à leur place dans la
 // même image. Recadré (origine 5380,1400 de l'affiche), icônes et lettres surimposées effacées (patch
-// voisin recopié), fond noir transparent, réduit de moitié : public/maps/interchange-parking.webp, 822x1350.
+// voisin recopié), fond noir transparent, pleine résolution : public/maps/interchange-parking.webp, 1645x2700.
 // Un SVG redessiné a été essayé puis abandonné (rendu jugé mauvais). La carte de Lorathor (v0.8.2, 2020)
 // montre un parking plus plein (tout le mall) : en cas d'écart on suit l'affiche re3mr, plus récente.
 // Contrôles de position hors recalage : la rampe de surface de (-191, -61 .. -48) tombe sur la flèche
@@ -27,10 +27,10 @@ import { tr } from "../lib/i18n";
 
 export const PARKING_IMAGE = {
   file: "maps/interchange-parking.webp",
-  width: 822,
-  height: 1350,
-  /** Pixel de l'image réduite -> pixel du panneau recadré (facteur 2), puis plan Minibus (x*sx+tx, y*sy+ty). */
-  panelToMinibus: { sx: 0.249375, sy: 0.28275, tx: 310, ty: 125, scale: 2 },
+  width: 1645,
+  height: 2700,
+  /** Pixel de l'image -> pixel du panneau recadré (facteur 1 : pleine résolution ; 2 quand elle était réduite de moitié), puis plan Minibus (x*sx+tx, y*sy+ty). */
+  panelToMinibus: { sx: 0.249375, sy: 0.28275, tx: 310, ty: 125, scale: 1 },
   /** Pixel du plan Minibus -> jeu : x = a*px + b*py + c ; z = d*px + e*py + f. */
   minibusToGame: [-0.768909, 0.000259, 357.1283, -0.003799, 0.713884, -411.3841] as Affine,
 };

@@ -30,6 +30,17 @@ describe("plan du parking d'Interchange", () => {
     expect(svgMatrixFor({ x: 598, z: -442 })[0]).toBeGreaterThan(0);
   });
 
+  it("l'image pleine résolution tombe au même endroit que la version réduite de moitié (b3044b9)", () => {
+    const [a, b, c, d, e, f] = parkingToGame();
+    const at = (u: number, v: number) => [a * u + b * v + c, d * u + e * v + f];
+    const [x0, z0] = at(0, 0);
+    const [x1, z1] = at(PARKING_IMAGE.width, PARKING_IMAGE.height);
+    expect(x0).toBeCloseTo(118.8, 1);
+    expect(z0).toBeCloseTo(-323.33, 1);
+    expect(Math.abs(x1 - -196.23)).toBeLessThan(0.3); // 822 px x 2 = 1644 ; 1 px de plus = 0,15 m
+    expect(Math.abs(z1 - 220.11)).toBeLessThan(0.1);
+  });
+
   it("ajoute « Sous-sol » en dernier au sélecteur d'Interchange, et seulement là", () => {
     expect(basement).toBeGreaterThan(-1);
     const levels = selectableLevels(interchange);
