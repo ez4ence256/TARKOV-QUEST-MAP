@@ -7,7 +7,7 @@ import { useMap } from "react-leaflet";
 import type { MapCalibration, MapLayer, RawBounds } from "./calibration";
 import { toLatLngBounds } from "./crs";
 import { mainExtraSvgLayers } from "./levels";
-import { parkingAttribution, svgMatrixFor } from "./basement";
+import { mainFloorLayer, mallPlansAttribution, svgMatrixFor } from "./basement";
 import { tr } from "../lib/i18n";
 
 const svgCache = new Map<string, Promise<string>>();
@@ -43,7 +43,7 @@ function buildSvgElement(svgText: string, layer: string | undefined, extra: stri
 }
 
 /**
- * Plan image (parking d'Interchange) : un <image> affine dans un SVG dont le repère est en mètres,
+ * Plan image (mall et parking d'Interchange) : un <image> affine dans un SVG dont le repère est en mètres,
  * u = x1 - x, v = z - z1 (la rotation de 180° d'Interchange), posé sur les bornes de la carte.
  */
 function imageOverlay(level: MapLayer, calibration: MapCalibration, pane: string) {
@@ -56,13 +56,13 @@ function imageOverlay(level: MapLayer, calibration: MapCalibration, pane: string
   el.setAttribute("href", image.url);
   el.setAttribute("width", String(image.width));
   el.setAttribute("height", String(image.height));
-  el.setAttribute("transform", `matrix(${svgMatrixFor({ x: x1, z: z1 }).join(" ")})`);
+  el.setAttribute("transform", `matrix(${svgMatrixFor({ x: x1, z: z1 }, image.affine).join(" ")})`);
   el.setAttribute("opacity", "0.92");
   svg.appendChild(el);
   return L.svgOverlay(svg, toLatLngBounds(calibration.svgBounds ?? calibration.bounds), {
     interactive: false,
     pane,
-    attribution: parkingAttribution(), // seul calque image : le plan du parking d'Interchange
+    attribution: mallPlansAttribution(), // calques image : plans du mall et du parking d'Interchange
   });
 }
 
@@ -180,6 +180,18 @@ export function BaseLayer({
       overlay?.remove();
     };
   }, [map, svgUrl, tilePath, calibration, onStatus]);
+
+  // plan du rez-de-chaussée du mall, par-dessus le fond (Interchange, niveau principal seulement)
+  const onMain = level === null;
+  useEffect(() => {
+    if (!calibration || !onMain) return;
+    const floor = mainFloorLayer(calibration);
+    if (!floor) return;
+    const overlay = imageOverlay(floor, calibration, LEVEL_PANE).addTo(map);
+    return () => {
+      overlay.remove();
+    };
+  }, [map, calibration, onMain]);
 
   // étage choisi : groupe du même SVG si la map en a un, sinon tuiles de l'étage
   useEffect(() => {

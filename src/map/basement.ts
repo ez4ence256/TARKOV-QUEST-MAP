@@ -35,13 +35,30 @@ export const PARKING_IMAGE = {
   minibusToGame: [-0.768909, 0.000259, 357.1283, -0.003799, 0.713884, -411.3841] as Affine,
 };
 
-/** Crédit du plan, dans la langue affichée (calculé au rendu, pas à l'import). */
-export const parkingAttribution = () =>
-  tr("Plan du parking : ", "Parking plan: ") +
+/**
+ * Plans de l'intérieur du mall : panneaux FIRST FLOOR et SECOND FLOOR de la même affiche, recalés
+ * directement sur les groupes First_Floor / Second_Floor du SVG tarkov.dev (même échelle que le parking,
+ * 0,194 m par pixel). Recalage : affine par moindres carrés sur des « patchs » du contour du mall
+ * (écart de forme mesuré en cases de 1 m le long des murs) ; coordonnées du jeu = SVG + bornes maps.json.
+ *  - rez-de-chaussée (calque « 2nd Floor » de maps.json) : 76 patchs, 6 écartés (> 2,5 x RMS) ;
+ *    RMS 1,24 m, max 6,71 m (avec les 76 : RMS 2,81 m, max 9,67 m) ;
+ *  - 2e étage (calque « 3rd Floor ») : 22 patchs, RMS 0,76 m, max 1,49 m.
+ * `affine` : pixel de l'image -> jeu, x = a*u + b*v + c ; z = d*u + e*v + f.
+ */
+export const MALL_PLANS = {
+  first: { file: "maps/interchange-mall-first.webp", width: 1540, height: 2654, affine: [-0.193915, 0.000037, 100.389877, 0.000083, 0.194768, -310.827794] as Affine },
+  second: { file: "maps/interchange-mall-second.webp", width: 860, height: 1284, affine: [-0.193793, 0.000329, 104.601146, -0.000014, 0.19541, -180.274797] as Affine },
+};
+/** Calques de maps.json d'Interchange qui reçoivent un plan : rez-de-chaussée du mall (niveau principal) et 2e étage. */
+const MALL_FLOOR_LAYERS: Record<string, keyof typeof MALL_PLANS> = { "2nd Floor": "first", "3rd Floor": "second" };
+
+/** Crédit des plans, dans la langue affichée (calculé au rendu, pas à l'import). */
+export const mallPlansAttribution = () =>
+  tr("Plans du mall et du parking : ", "Mall and parking plans: ") +
   '<a href="https://escapefromtarkov.fandom.com/wiki/File:Interchange_Interactive_Map_Base.webp" target="_blank" rel="noreferrer">' +
   tr("wiki Escape from Tarkov, re3mr.com", "Escape from Tarkov wiki, re3mr.com") +
   "</a>" +
-  tr(" (CC BY-NC-SA 4.0, recadré, icônes retirées)", " (CC BY-NC-SA 4.0, cropped, icons removed)");
+  tr(" (CC BY-NC-SA 4.0, recadrés, icônes retirées)", " (CC BY-NC-SA 4.0, cropped, icons removed)");
 
 export type Affine = [number, number, number, number, number, number];
 
@@ -75,8 +92,8 @@ export function parkingToGame(): Affine {
 }
 
 /** Matrice SVG (a b c d e f) de l'image dans un repère u = x1 - x, v = z - z1 (Interchange : rotation 180, bornes [[x1,z1],…]). */
-export function svgMatrixFor(origin: { x: number; z: number }): [number, number, number, number, number, number] {
-  const [a, b, c, d, e, f] = parkingToGame();
+export function svgMatrixFor(origin: { x: number; z: number }, affine: Affine = parkingToGame()): Affine {
+  const [a, b, c, d, e, f] = affine;
   return [-a, d, -b, e, origin.x - c, f - origin.z];
 }
 
@@ -84,7 +101,13 @@ export interface LayerImage {
   url: string;
   width: number;
   height: number;
+  /** Pixel de l'image -> jeu. */
+  affine: Affine;
 }
+
+/** Plan posé sur le rez-de-chaussée du mall (niveau principal d'Interchange), s'il y en a un. */
+export const mainFloorLayer = (calibration: { layers: MapLayer[] } | undefined) =>
+  calibration?.layers.find((l) => l.image && MALL_FLOOR_LAYERS[l.name] === "first");
 
 /** Ajoute le calque « Sous-sol » à Interchange (sans effet ailleurs ; remplace une version en cache). */
 export function withBasement<T extends { key: string; layers: MapLayer[] }>(calibration: T): T {
@@ -96,10 +119,19 @@ export function withBasement<T extends { key: string; layers: MapLayer[] }>(cali
       url: `${import.meta.env.BASE_URL}${PARKING_IMAGE.file}`,
       width: PARKING_IMAGE.width,
       height: PARKING_IMAGE.height,
+      affine: parkingToGame(),
     },
   };
-  // remplace une version déjà en cache (ancienne image) plutôt que de la garder
-  return { ...calibration, layers: [...calibration.layers.filter((l) => l.name !== BASEMENT_LAYER_NAME), layer] };
+  // plans du mall sur les calques « 2nd Floor » / « 3rd Floor » ; une version en cache est remplacée
+  const layers = calibration.layers
+    .filter((l) => l.name !== BASEMENT_LAYER_NAME)
+    .map((l) => {
+      const plan = MALL_FLOOR_LAYERS[l.name];
+      if (!plan) return l;
+      const p = MALL_PLANS[plan];
+      return { ...l, image: { url: `${import.meta.env.BASE_URL}${p.file}`, width: p.width, height: p.height, affine: p.affine } };
+    });
+  return { ...calibration, layers: [...layers, layer] };
 }
 
 /** Points de contrôle du plan Minibus : [nom, x jeu, z jeu, px, py]. Coordonnées du jeu : SVG tarkov.dev + bornes maps.json. */

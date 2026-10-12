@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { withBasement, BASEMENT_FOOTPRINT, BASEMENT_LAYER_NAME, CONTROL_POINTS, parkingToGame, svgMatrixFor, PARKING_IMAGE } from "./basement";
+import { mainFloorLayer, withBasement, BASEMENT_FOOTPRINT, BASEMENT_LAYER_NAME, CONTROL_POINTS, parkingToGame, svgMatrixFor, PARKING_IMAGE } from "./basement";
 import { BUNDLED_CALIBRATION } from "./calibration";
 import { levelName, levelOf, selectableLevels, isShownOnLevel } from "./levels";
 
@@ -30,6 +30,29 @@ describe("plan du parking d'Interchange", () => {
     expect(svgMatrixFor({ x: 598, z: -442 })[0]).toBeGreaterThan(0);
   });
 
+  it("plans du mall : posés sur le calque du bon étage et à l'emprise du mall", () => {
+    const first = interchange.layers.find((l) => l.name === "2nd Floor")!.image!;
+    const second = interchange.layers.find((l) => l.name === "3rd Floor")!.image!;
+    expect(first.url).toMatch(/interchange-mall-first\.webp$/);
+    expect(second.url).toMatch(/interchange-mall-second\.webp$/);
+    for (const [img, xMax, zMax] of [[first, 110, 235], [second, 110, 90]] as const) {
+      const [a, b, c, d, e, f] = img.affine;
+      const x1 = a * img.width + b * img.height + c;
+      const z1 = d * img.width + e * img.height + f;
+      expect(c).toBeLessThan(xMax);
+      expect(x1).toBeLessThan(c);
+      expect(z1).toBeLessThan(zMax + 80);
+      expect(f).toBeGreaterThan(-340);
+      // 0,194 m par pixel : la largeur de l'image donne l'étendue en x
+      expect(Math.abs(a * img.width)).toBeGreaterThan(150);
+    }
+    // 1er étage : coin haut-gauche et bas-droit mesurés à l'export (0,1 m)
+    expect(first.affine[2]).toBeCloseTo(100.39, 1);
+    expect(first.affine[5]).toBeCloseTo(-310.83, 1);
+    expect(mainFloorLayer(interchange)?.name).toBe("2nd Floor");
+    expect(mainFloorLayer(BUNDLED_CALIBRATION["customs"])).toBeUndefined();
+  });
+
   it("l'image pleine résolution tombe au même endroit que la version réduite de moitié (b3044b9)", () => {
     const [a, b, c, d, e, f] = parkingToGame();
     const at = (u: number, v: number) => [a * u + b * v + c, d * u + e * v + f];
@@ -51,7 +74,7 @@ describe("plan du parking d'Interchange", () => {
   });
 
   it("remplace un calque Sous-sol resté dans le cache au lieu de le dupliquer", () => {
-    const stale = { ...interchange, layers: interchange.layers.map((l) => (l.name === BASEMENT_LAYER_NAME ? { ...l, image: { url: "old.webp", width: 1, height: 1 } } : l)) };
+    const stale = { ...interchange, layers: interchange.layers.map((l) => (l.name === BASEMENT_LAYER_NAME ? { ...l, image: { url: "old.webp", width: 1, height: 1, affine: [1, 0, 0, 0, 1, 0] as [number, number, number, number, number, number] } } : l)) };
     const fresh = withBasement(stale);
     expect(fresh.layers.filter((l) => l.name === BASEMENT_LAYER_NAME)).toHaveLength(1);
     expect(fresh.layers.find((l) => l.name === BASEMENT_LAYER_NAME)?.image?.url).toMatch(/interchange-parking\.webp$/);

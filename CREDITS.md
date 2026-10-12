@@ -94,12 +94,12 @@ SOFTWARE.
 
 ---
 
-## Plan du parking d'Interchange : re3mr.com et wiki Escape from Tarkov
+## Plans du mall et du parking d'Interchange : re3mr.com et wiki Escape from Tarkov
 
-- **Source :** panneau « PARKING » (sections A à D, garages Idea, Goshan et Oli) de l'affiche [`File:Interchange Interactive Map Base.webp`](https://escapefromtarkov.fandom.com/wiki/File:Interchange_Interactive_Map_Base.webp), « Map made by re3mr.com in cooperation with the Escape from Tarkov Wiki ».
-- **Licence :** Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (indiquée sur l'affiche). Fichier **recadré** (panneau seul, fond noir rendu transparent, **icônes et lettres retirées**, réduit de moitié) : `public/maps/interchange-parking.webp`. Même licence pour ce dérivé ; usage non commercial, ne le réutilisez pas ailleurs sans respecter ces conditions.
-- Le plan Minibus du wiki (`File:InterchangeMinibusLocations.jpg`) et la carte de Lorathor (v0.8.2) n'ont servi qu'au recalage et à la comparaison ; ils ne sont pas inclus. Le plan est posé sur le centre commercial par un recalage approximatif (voir `src/map/basement.ts`).
-- Le crédit s'affiche aussi sur la carte quand le niveau « Sous-sol » est choisi.
+- **Source :** panneaux « PARKING » (sections A à D, garages Idea, Goshan et Oli), « FIRST FLOOR » et « SECOND FLOOR » de l'affiche [`File:Interchange Interactive Map Base.webp`](https://escapefromtarkov.fandom.com/wiki/File:Interchange_Interactive_Map_Base.webp), « Map made by re3mr.com in cooperation with the Escape from Tarkov Wiki ».
+- **Licence :** Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (indiquée sur l'affiche). Fichiers **recadrés** (un panneau chacun, fond noir rendu transparent, **icônes, lettres et textes retirés**, limités à l'intérieur du mall pour les deux étages) : `public/maps/interchange-parking.webp`, `interchange-mall-first.webp`, `interchange-mall-second.webp`. Même licence pour ces dérivés ; usage non commercial, ne les réutilisez pas ailleurs sans respecter ces conditions.
+- Le plan Minibus du wiki (`File:InterchangeMinibusLocations.jpg`) n'a servi qu'au recalage du parking ; il n'est pas inclus. Les deux étages du mall sont recalés sur les groupes First_Floor et Second_Floor du SVG de tarkov-dev-svg-maps (voir `src/map/basement.ts`).
+- Le crédit s'affiche aussi sur la carte quand un de ces plans est visible.
 
 ---
 
