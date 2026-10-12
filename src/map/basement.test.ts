@@ -43,7 +43,7 @@ describe("plan du parking d'Interchange", () => {
     const stale = { ...interchange, layers: interchange.layers.map((l) => (l.name === BASEMENT_LAYER_NAME ? { ...l, image: { url: "old.webp", width: 1, height: 1 } } : l)) };
     const fresh = withBasement(stale);
     expect(fresh.layers.filter((l) => l.name === BASEMENT_LAYER_NAME)).toHaveLength(1);
-    expect(fresh.layers.find((l) => l.name === BASEMENT_LAYER_NAME)?.image?.url).toMatch(/interchange-parking\.svg$/);
+    expect(fresh.layers.find((l) => l.name === BASEMENT_LAYER_NAME)?.image?.url).toMatch(/interchange-parking\.webp$/);
   });
 
   it("classe les points : sous le sol du mall et dans l'emprise = Sous-sol", () => {

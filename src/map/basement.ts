@@ -1,11 +1,12 @@
-// Sous-sol (parking) d'Interchange : plan redessiné posé sur l'emprise du centre commercial.
+// Sous-sol (parking) d'Interchange : plan du wiki posé sur l'emprise du centre commercial.
 //
-// tarkov.dev n'a aucun calque souterrain pour Interchange. On redessine en SVG
-// (public/maps/interchange-parking.svg, cadre 822x1350) le contour du panneau « PARKING » de l'affiche
-// « Interchange Interactive Map Base.webp » (re3mr.com avec le wiki Escape from Tarkov, CC BY-NC-SA 4.0) :
-// sections A à D **et** garages Idea, Goshan et Oli, dessinés à leur place dans la même image. Contour en
-// cases de 1,2 m simplifiées + flèches des escaliers ; ni texte, ni butin, ni icônes. La carte de Lorathor
-// (v0.8.2, 2020) montre un parking plus plein (tout le mall) : en cas d'écart on suit l'affiche re3mr, plus récente.
+// tarkov.dev n'a aucun calque souterrain pour Interchange. On utilise le panneau « PARKING » entier de
+// l'affiche « Interchange Interactive Map Base.webp » (re3mr.com avec le wiki Escape from Tarkov,
+// CC BY-NC-SA 4.0) : sections A à D **et** garages Idea, Goshan et Oli, dessinés à leur place dans la
+// même image. Recadré (origine 5380,1400 de l'affiche), icônes et lettres surimposées effacées (patch
+// voisin recopié), fond noir transparent, réduit de moitié : public/maps/interchange-parking.webp, 822x1350.
+// Un SVG redessiné a été essayé puis abandonné (rendu jugé mauvais). La carte de Lorathor (v0.8.2, 2020)
+// montre un parking plus plein (tout le mall) : en cas d'écart on suit l'affiche re3mr, plus récente.
 // Contrôles de position hors recalage : la rampe de surface de (-191, -61 .. -48) tombe sur la flèche
 // « montée » du bord est du garage Goshan (-183, -52) ; la sortie coop « basement » (-97, -73)
 // tombe sur le couloir qui relie les deux parkings. Les rampes est (x -191 .. -159) vers les
@@ -25,7 +26,7 @@ import type { MapLayer, RawBounds } from "./calibration";
 import { tr } from "../lib/i18n";
 
 export const PARKING_IMAGE = {
-  file: "maps/interchange-parking.svg",
+  file: "maps/interchange-parking.webp",
   width: 822,
   height: 1350,
   /** Pixel de l'image réduite -> pixel du panneau recadré (facteur 2), puis plan Minibus (x*sx+tx, y*sy+ty). */
@@ -36,11 +37,11 @@ export const PARKING_IMAGE = {
 
 /** Crédit du plan, dans la langue affichée (calculé au rendu, pas à l'import). */
 export const parkingAttribution = () =>
-  tr("Plan du parking redessiné d'après le ", "Parking plan redrawn from the ") +
+  tr("Plan du parking : ", "Parking plan: ") +
   '<a href="https://escapefromtarkov.fandom.com/wiki/File:Interchange_Interactive_Map_Base.webp" target="_blank" rel="noreferrer">' +
-  tr("wiki Escape from Tarkov (affiche re3mr, CC BY-NC-SA 4.0)", "Escape from Tarkov wiki (re3mr poster, CC BY-NC-SA 4.0)") +
+  tr("wiki Escape from Tarkov, re3mr.com", "Escape from Tarkov wiki, re3mr.com") +
   "</a>" +
-  tr(" et la carte de Lorathor", " and Lorathor's map");
+  tr(" (CC BY-NC-SA 4.0, recadré, icônes retirées)", " (CC BY-NC-SA 4.0, cropped, icons removed)");
 
 export type Affine = [number, number, number, number, number, number];
 
