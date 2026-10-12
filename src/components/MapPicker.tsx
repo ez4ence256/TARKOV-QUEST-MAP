@@ -8,10 +8,13 @@ interface Props {
   currentId: string;
   counts: Map<string, number>;
   onPick: (mapId: string) => void;
+  /** Filtre : ajoute une première carte "Toutes les maps" (id "") ; absent = sélecteur de la barre du haut. */
+  allLabel?: string;
+  label?: string;
 }
 
 /** Sélecteur de map : bouton + grille de cartes (image du wiki, nom en surimpression). */
-export function MapPicker({ maps, currentId, counts, onPick }: Props) {
+export function MapPicker({ maps, currentId, counts, onPick, allLabel, label }: Props) {
   const [open, setOpen] = useState(false);
   const [images, setImages] = useState<MapImages | null>(null);
   const root = useRef<HTMLDivElement>(null);
@@ -51,24 +54,37 @@ export function MapPicker({ maps, currentId, counts, onPick }: Props) {
 
   const credit = tr("Images des maps : wiki Escape from Tarkov", "Map images: Escape from Tarkov wiki");
   return (
-    <div className="map-picker" ref={root} onKeyDown={onKey}>
+    <div className={`map-picker${allLabel ? " in-panel" : ""}`} ref={root} onKeyDown={onKey}>
       <button
         ref={button}
         className="input map-picker-btn"
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={tr("Map affichée", "Displayed map")}
+        aria-label={label ?? tr("Map affichée", "Displayed map")}
         disabled={maps.length === 0}
         onClick={() => setOpen((o) => !o)}
         title={credit}
       >
         {current && imageOf(current) && <img className="map-thumb" src={imageOf(current)} alt="" width={36} height={22} />}
-        <span className="map-picker-name">{current?.name ?? "…"}</span>
+        <span className="map-picker-name">{current?.name ?? allLabel ?? "…"}</span>
         <span className="map-picker-count">{current && counts.get(current.id) ? `(${counts.get(current.id)})` : ""}</span>
         <span aria-hidden="true">▾</span>
       </button>
       {open && (
         <div className="map-picker-list" role="listbox" aria-label={tr("Choisir une map", "Choose a map")} title={credit}>
+          {allLabel && (
+            <button
+              role="option"
+              aria-selected={currentId === ""}
+              className={`map-card map-card-all${currentId === "" ? " selected" : ""}`}
+              onClick={() => {
+                onPick("");
+                close();
+              }}
+            >
+              <span className="map-card-name">{allLabel}</span>
+            </button>
+          )}
           {maps.map((m) => (
             <button
               key={m.id}

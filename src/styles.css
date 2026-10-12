@@ -335,6 +335,15 @@ button:focus-visible {
   cursor: pointer;
   color: #fff;
 }
+.map-card-all .map-card-name {
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem;
+  background: none;
+  text-align: center;
+}
 .map-card.selected,
 .map-card:focus-visible {
   border-color: #e0b040;
@@ -365,6 +374,21 @@ button:focus-visible {
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.75);
   font-size: 0.75rem;
+}
+/* filtre de l'onglet Quêtes : liste sous le bouton, sur toute la largeur du panneau */
+.filter-row {
+  position: relative;
+}
+.map-picker.in-panel {
+  position: static;
+  margin-left: 0;
+  max-width: none;
+}
+.map-picker.in-panel .map-picker-list {
+  left: 0;
+  right: 0;
+  width: auto;
+  max-height: 60vh;
 }
 .scav-check {
   display: flex;

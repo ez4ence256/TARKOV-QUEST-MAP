@@ -11,6 +11,7 @@ import { taskProgress } from "../lib/points";
 import { getLang, tr } from "../lib/i18n";
 import { filterQuests, filterStory, mergeRows, pinSelected, STORY_TRADER, type Row, type StoryResult } from "../lib/questFilter";
 import { storyIdOf } from "../lib/story";
+import { MapPicker } from "./MapPicker";
 
 interface Props {
   tasks: Task[];
@@ -171,17 +172,17 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onCl
               </option>
             ))}
           </select>
-          <select className="input" value={mapFilter} onChange={(e) => {
-              setMapFilter(e.target.value);
-              if (e.target.value) onShowMap(e.target.value);
-            }} aria-label={tr("Filtrer par map", "Filter by map")}>
-            <option value="">{tr("Toutes les maps", "All maps")}</option>
-            {maps.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
-            ))}
-          </select>
+          <MapPicker
+            maps={maps}
+            currentId={mapFilter}
+            counts={new Map()}
+            allLabel={tr("Toutes les maps", "All maps")}
+            label={tr("Filtrer par map", "Filter by map")}
+            onPick={(id) => {
+              setMapFilter(id);
+              if (id) onShowMap(id);
+            }}
+          />
         </div>
         <label className="check">
           <input type="checkbox" checked={hideCompleted} onChange={(e) => setHideCompleted(e.target.checked)} />
