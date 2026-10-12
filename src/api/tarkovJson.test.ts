@@ -3,6 +3,7 @@
 // (jobs/update-quests.mjs, update-maps.mjs, update-traders.mjs).
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { API_BASE, fetchTarkovData, iconUrl } from "./tarkovJson";
+import { filterQuests } from "../lib/questFilter";
 
 const FACTORY = "55f2d3fd4bdc2d5f408b4567";
 const NIGHT_FACTORY = "59fc81d786f774390775787e";
@@ -272,6 +273,28 @@ describe("fetchTarkovData", () => {
     const data = await fetchTarkovData("regular", "fr");
     expect(data.itemNames?.key1).toBe("Clé 306");
     expect(data.itemIcons).toEqual({ qi1: "qi1-icon.webp" });
+  });
+
+  it("garde toutes les quêtes du fichier (factions BEAR/USEC, noms à tiret) et les rend trouvables", async () => {
+    // Audit 0.7.4 : 504 / 500 / 463 quêtes lues = 504 / 500 / 463 gardées, aucune perte côté app.
+    const tasks = {
+      b: { id: "b", name: "b name", trader: "tr1", factionName: "BEAR" },
+      u: { id: "u", name: "u name", trader: "tr1", factionName: "USEC" },
+      h: { id: "h", name: "h name", trader: "tr1", factionName: "Any" },
+    };
+    const names = { "b name": "Peace Seekers", "u name": "All-Inclusive Support", "h name": "Rien" };
+    const base = mockFetch();
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      const key = url.replace(API_BASE, "");
+      if (key === "regular/tasks") return new Response(JSON.stringify({ data: { tasks } }));
+      if (key === "regular/tasks_en") return new Response(JSON.stringify({ data: names }));
+      return base(url);
+    }));
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const data = await fetchTarkovData("regular", "en");
+    expect(data.tasks.map((t) => t.id).sort()).toEqual(["b", "h", "u"]);
+    const f = { query: "all inclusive support", traderId: "", mapId: "", hideCompleted: false };
+    expect(filterQuests(data.tasks, f, {}).map((r) => r.task.id)).toEqual(["u"]);
   });
 
   it("échoue clairement si l'API ne répond pas", async () => {
