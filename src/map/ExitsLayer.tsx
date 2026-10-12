@@ -8,7 +8,7 @@ import { Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import type { GameMap, MapExit } from "../types";
 import type { MapCalibration } from "./calibration";
 import { gameToLatLng } from "./crs";
-import { displayLevelOf, isCellarEntrance, levelBadge, levelName, upperLevelOf, type Level } from "./levels";
+import { displayLevelOf, isCellarEntrance, isShownOnLevel, levelBadge, levelName, upperLevelOf, type Level } from "./levels";
 import { exitIcon } from "./exitIcons";
 import { EXIT_KIND_LABELS, factionLabel } from "../lib/exits";
 import { tr } from "../lib/i18n";
@@ -72,8 +72,9 @@ export function ExitsLayer(props: {
         const shownOn = displayLevelOf(p, calibration);
         // sortie souterraine : sur son étage, et sur le niveau principal s'il n'y a aucun étage au-dessus (simple entrée de cave)
         const cellar = shownOn !== null && level === null && isCellarEntrance(p, calibration);
-        if (shownOn !== null && shownOn !== level && !cellar) return null;
-        const offLevel = shownOn !== level && !cellar;
+        const onLevel = isShownOnLevel(p, calibration, level);
+        if (shownOn !== null && !onLevel && !cellar) return null;
+        const offLevel = !onLevel && !cellar;
         const upper = upperLevelOf(p, calibration);
         const floor = upper !== null || shownOn !== null ? levelName(calibration, upper ?? shownOn) : null;
         return (

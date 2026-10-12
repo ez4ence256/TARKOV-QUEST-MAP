@@ -6,6 +6,7 @@ import L from "leaflet";
 import { useMap } from "react-leaflet";
 import type { MapCalibration, MapLayer, RawBounds } from "./calibration";
 import { toLatLngBounds } from "./crs";
+import { mainExtraSvgLayers } from "./levels";
 import { tr } from "../lib/i18n";
 
 const svgCache = new Map<string, Promise<string>>();
@@ -26,7 +27,7 @@ function fetchSvg(url: string) {
  * Prépare l'élément SVG comme le fait tarkov.dev : seul le niveau principal
  * (svgLayer) et les groupes marqués data-keep-with-group restent visibles.
  */
-function buildSvgElement(svgText: string, layer: string | undefined): SVGSVGElement {
+function buildSvgElement(svgText: string, layer: string | undefined, extra: string[] = []): SVGSVGElement {
   const doc = new DOMParser().parseFromString(svgText, "image/svg+xml");
   const svg = doc.documentElement as unknown as SVGSVGElement;
   if (svg.nodeName !== "svg") throw new Error("SVG invalide");
@@ -34,7 +35,7 @@ function buildSvgElement(svgText: string, layer: string | undefined): SVGSVGElem
   svg.removeAttribute("height");
   for (const child of Array.from(svg.children)) {
     if (child.nodeName !== "g" || !child.id || !layer) continue;
-    const keep = child.id === layer || (child as SVGGElement).dataset.keepWithGroup === layer;
+    const keep = child.id === layer || extra.includes(child.id) || (child as SVGGElement).dataset.keepWithGroup === layer;
     if (!keep) (child as SVGGElement).style.display = "none";
   }
   return document.importNode(svg, true);
@@ -94,8 +95,8 @@ function tileLayer(url: string, calibration: MapCalibration, pane: string, attri
 }
 
 /** Une image SVG (fond ou étage) : le fichier est partagé, seul le groupe affiché change. */
-function svgOverlay(text: string, layer: string | undefined, calibration: MapCalibration, pane: string) {
-  const el = buildSvgElement(text, layer);
+function svgOverlay(text: string, layer: string | undefined, calibration: MapCalibration, pane: string, extra: string[] = []) {
+  const el = buildSvgElement(text, layer, extra);
   const bounds = toLatLngBounds(calibration.svgBounds ?? calibration.bounds);
   return L.svgOverlay(el, bounds, { interactive: false, className: "tqp-svg-map", pane });
 }
@@ -139,7 +140,7 @@ export function BaseLayer({
     fetchSvg(svgUrl!)
       .then((text) => {
         if (cancelled) return;
-        overlay = svgOverlay(text, calibration.svgLayer, calibration, BASE_PANE).addTo(map);
+        overlay = svgOverlay(text, calibration.svgLayer, calibration, BASE_PANE, mainExtraSvgLayers(calibration)).addTo(map);
         onStatus("svg");
       })
       .catch((error) => {

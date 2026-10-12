@@ -13,6 +13,7 @@ import type { ExitPhotosTarget } from "../components/PhotosTab";
 import { floorFromText } from "../lib/floorText";
 import {
   displayLevelOf,
+  isShownOnLevel,
   extentOf,
   levelBadge,
   levelName,
@@ -192,7 +193,7 @@ function MapViewInner(props: MapViewProps) {
     [props.map, props.showScavExits, calibration],
   );
   const layers = calibration?.layers ?? [];
-  // niveaux du sélecteur : principal + souterrains (les étages supérieurs sont sur la carte de base)
+  // niveaux du sélecteur : principal + souterrains (les autres étages supérieurs sont sur la carte de base)
   const pickerLevels = useMemo(() => selectableLevels(calibration), [calibration]);
   const markers = useMemo(() => ({ current: new Map<string, L.Marker>() }), []);
 
@@ -218,9 +219,11 @@ function MapViewInner(props: MapViewProps) {
       if (mode.done[pt.objectiveId ?? ""]) continue;
       const l = displayLevelOf(pt, calibration);
       counts.set(l, (counts.get(l) ?? 0) + 1);
+      const u = upperLevelOf(pt, calibration);
+      if (u !== null && pickerLevels.includes(u)) counts.set(u, (counts.get(u) ?? 0) + 1); // étage supérieur du sélecteur
     }
     return counts;
-  }, [points, mode.done, calibration]);
+  }, [points, mode.done, calibration, pickerLevels]);
 
   const registerMarker = (key: string) => (m: L.Marker | null) => {
     if (m) markers.current.set(key, m);
@@ -271,7 +274,7 @@ function MapViewInner(props: MapViewProps) {
           const manual = pt.kind === "manual";
           const pointLevel = levelOf(pt, calibration);
           const shownOn = displayLevelOf(pt, calibration);
-          const offLevel = shownOn !== level;
+          const offLevel = !isShownOnLevel(pt, calibration, level);
           const upper = upperLevelOf(pt, calibration);
           const textFloor = manual ? null : floorFromText(objective.description);
           return (

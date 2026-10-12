@@ -103,10 +103,30 @@ export function isSelectable(calibration: MapCalibration, index: number): boolea
   return SELECTOR_ONLY_MAPS.has(calibration.key) || isUnderground(calibration, layer);
 }
 
-/** Niveaux proposés dans le sélecteur : principal + étages sélectionnables. */
+/** Étages supérieurs qu'on peut aussi choisir dans le sélecteur (noms maps.json). Interchange seulement : son mall occupe un étage très large. */
+const SELECTABLE_UPPER: Record<string, string[]> = { interchange: ["3rd Floor"] };
+/** Étages supérieurs dessinés d'office sur le niveau principal (noms maps.json) : le rez-de-chaussée du mall, pour se repérer dedans. */
+const DRAWN_ON_MAIN: Record<string, string[]> = { interchange: ["2nd Floor"] };
+
+/** Groupes SVG à dessiner en plus avec le niveau principal. */
+export function mainExtraSvgLayers(calibration: MapCalibration): string[] {
+  const names = DRAWN_ON_MAIN[calibration.key] ?? [];
+  return calibration.layers.flatMap((l) => (names.includes(l.name) && l.svgLayer ? [l.svgLayer] : []));
+}
+
+/** Niveaux proposés dans le sélecteur : principal + souterrains + étages supérieurs de SELECTABLE_UPPER. */
 export function selectableLevels(calibration: MapCalibration | undefined): Level[] {
   if (!calibration) return [null];
-  return [null, ...calibration.layers.map((_, i) => i).filter((i) => isSelectable(calibration, i))];
+  const upper = SELECTABLE_UPPER[calibration.key] ?? [];
+  return [
+    null,
+    ...calibration.layers.map((_, i) => i).filter((i) => isSelectable(calibration, i) || upper.includes(calibration.layers[i].name)),
+  ];
+}
+
+/** Le point s'affiche-t-il en pleine opacité sur le niveau choisi ? (le niveau principal montre aussi les étages supérieurs) */
+export function isShownOnLevel(p: PointHeight, calibration: MapCalibration | undefined, level: Level): boolean {
+  return level === null ? displayLevelOf(p, calibration) === null : levelOf(p, calibration) === level;
 }
 
 /** Niveau "naturel" d'un point : le premier où il apparaît, principal en priorité. */

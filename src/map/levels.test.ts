@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { BUNDLED_CALIBRATION } from "./calibration";
 import {
   displayLevelOf,
+  isShownOnLevel,
+  mainExtraSvgLayers,
   extentOf,
   isOnLevel,
   isUnderground,
@@ -74,6 +76,21 @@ describe("Interchange : le mall est surélevé", () => {
   it("hors du mall, à la même hauteur : niveau principal (les zones x/z comptent)", () => {
     expect(levelOf({ x: 300, z: 300, y: 28.2 }, interchange)).toBeNull();
   });
+  it("sélecteur : principal + 2e étage du mall (Douanes inchangé) ; le rez-de-chaussée du mall est dessiné sur le principal", () => {
+    const names = (c: typeof customs) => selectableLevels(c).map((l) => levelName(c, l));
+    expect(names(interchange)).toEqual(["Niveau principal", "2e étage du centre commercial"]);
+    expect(names(customs)).toEqual(["Niveau principal", "Sous-sol"]);
+    expect(mainExtraSvgLayers(interchange)).toEqual(["First_Floor"]);
+    expect(mainExtraSvgLayers(customs)).toEqual([]);
+  });
+  it("un point du rez-de-chaussée du mall reste sur le niveau principal, pas sur le 2e étage du mall", () => {
+    const mall = { x: 0, z: 0, y: 28.2 };
+    const upper = selectableLevels(interchange)[1] as number;
+    expect(isShownOnLevel(mall, interchange, null)).toBe(true);
+    expect(isShownOnLevel(mall, interchange, upper)).toBe(false);
+    expect(isShownOnLevel({ x: 0, z: 0, y: 37 }, interchange, upper)).toBe(true);
+    expect(isShownOnLevel({ x: 0, z: 0, y: 37 }, interchange, null)).toBe(true); // le principal montre tout
+  });
   it("pas d'entrée de cave sur Labs (map sans fond de plein air)", () => {
     expect(isCellarEntrance({ x: 0, z: 0 }, BUNDLED_CALIBRATION["the-lab"])).toBe(false);
   });
@@ -95,7 +112,7 @@ describe("étages supérieurs et souterrains", () => {
     expect(selectableNames("ground-zero")).toEqual(["Garage"]);
     expect(selectableNames("the-lab")).toEqual(["Technical"]);
     expect(selectableNames("reserve")).toEqual(["Bunkers"]);
-    expect(selectableNames("interchange")).toEqual([]);
+    expect(selectableNames("interchange")).toEqual(["3rd Floor"]); // seul cas d'étage supérieur dans le sélecteur (+ mall dessiné sur le principal)
   });
 
   it("la règle par hauteur s'accorde avec les noms des étages (hors Icebreaker)", () => {
