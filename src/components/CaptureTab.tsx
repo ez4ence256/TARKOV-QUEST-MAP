@@ -2,7 +2,7 @@
 // Ctrl+V (géré par App), bouton « Choisir une image » ou glisser-déposer. L'OCR tourne dans
 // le navigateur (lib/ocr.ts) ; le rapprochement avec les noms est strict (lib/ocrMatch.ts).
 // Rien n'est jamais ajouté sans passer par l'écran de vérification.
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import type { Task } from "../types";
 import { matchOcrLines, type OcrMatch, type OcrMatchResult } from "../lib/ocrMatch";
 import type { OcrProgress } from "../lib/ocr";
@@ -41,6 +41,7 @@ export function CaptureTab({ tasks, pasted, onApply }: Props) {
   const [message, setMessage] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
   const tasksById = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
 
   const handleImage = async (blob: Blob) => {
@@ -68,6 +69,11 @@ export function CaptureTab({ tasks, pasted, onApply }: Props) {
         ),
       });
     }
+  };
+  const onPick = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) void handleImage(file);
+    e.target.value = "";
   };
 
   // image collée ailleurs dans l'app (Ctrl+V)
@@ -136,17 +142,12 @@ export function CaptureTab({ tasks, pasted, onApply }: Props) {
         <button className="btn btn-primary btn-small" onClick={() => fileRef.current?.click()}>
           {tr("Choisir une image", "Choose an image")}
         </button>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*"
-          hidden
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) void handleImage(file);
-            e.target.value = "";
-          }}
-        />
+        <input ref={fileRef} type="file" accept="image/*" hidden onChange={onPick} />
+        {/* téléphone seulement (CSS) : ouvre directement l'appareil photo */}
+        <button className="btn btn-primary btn-small mobile-only" onClick={() => cameraRef.current?.click()}>
+          📷 {tr("Prendre une photo", "Take a photo")}
+        </button>
+        <input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden onChange={onPick} />
         <span className="muted small">{tr("ou glissez-déposez l'image ici.", "or drag and drop the image here.")}</span>
       </div>
       <p className="muted small">

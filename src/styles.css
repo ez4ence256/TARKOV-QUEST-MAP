@@ -1710,3 +1710,13 @@ kbd {
   border: 1px solid var(--line);
   background: var(--bg-3);
 }
+
+/* boutons réservés au téléphone (ex. prendre une photo dans l'onglet Capture) */
+.mobile-only {
+  display: none !important;
+}
+@media (max-width: 800px), (pointer: coarse) {
+  .mobile-only {
+    display: inline-flex !important;
+  }
+}
