@@ -77,6 +77,36 @@ function Photo({ photo, itemNames }: { photo: WikiPhoto; itemNames: Record<strin
   );
 }
 
+type Item = ResolvedStory["steps"][number];
+
+/** Une case de la fiche (condition ou étape) : titre, texte et photos. `n` : numéro affiché (aucun pour une condition). */
+function StoryRow({ item, n, index, done, current, itemNames, onChange }: { item: Item; n?: number; index: number; done: boolean; current: boolean; itemNames: Record<string, string>; onChange: (done: boolean) => void }) {
+  return (
+    <li id={`story-step-${index}`} className={`story-step ${done ? "is-done" : ""} ${current ? "is-current" : ""}`} aria-current={current ? "step" : undefined}>
+      <label className="story-step-head">
+        <input type="checkbox" checked={done} onChange={(e) => onChange(e.target.checked)} aria-label={done ? tr("Marquer comme non fait", "Mark as not done") : tr("Marquer comme fait", "Mark as done")} />
+        <span className="story-step-title">
+          {n !== undefined && <span className="story-step-n">{n}.</span>} {fillItems(item.title, itemNames)}
+          {item.branch && <span className="tag">{tr(`Fin ${item.branch}`, `${item.branch} ending`)}</span>}
+          {current && <span className="tag tag-current">{tr("en cours", "current")}</span>}
+        </span>
+      </label>
+      {(item.blocks.length > 0 || (item.photos?.length ?? 0) > 0) && (
+        <div className="story-step-body">
+          <WikiBlocks blocks={item.blocks} itemNames={itemNames} />
+          {(item.photos?.length ?? 0) > 0 && (
+            <div className="story-photos">
+              {item.photos!.map((p) => (
+                <Photo key={p.file} photo={p} itemNames={itemNames} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </li>
+  );
+}
+
 const languageNote = (reason: string) =>
   reason === "missing"
     ? tr("Pas de page française pour ce chapitre sur le wiki : texte anglais.", "No French page for this chapter on the wiki: English text.")
@@ -96,7 +126,7 @@ interface ViewProps {
   onRetryChapters: () => void;
 }
 
-/** Fiche d'un chapitre : objectifs, puis toutes les étapes dans l'ordre, la première non cochée en évidence. */
+/** Fiche d'un chapitre : conditions de déblocage, objectifs, puis toutes les étapes dans l'ordre, la première case non cochée en évidence. */
 export function StoryChapterView({ chapterId, itemNames, chapters, done, onSetStep, onReset, onRetryChapters }: ViewProps) {
   const wantFr = getLang() === "fr";
   const page = useStoryPage(chapterId, chapters, wantFr);
@@ -104,7 +134,8 @@ export function StoryChapterView({ chapterId, itemNames, chapters, done, onSetSt
   const name = chapterName(chapters.chapters, chapterId);
   const enPageUrl = pageUrlFor(chapterId);
 
-  const keys = page.status === "ready" ? page.resolved.steps.map((s) => s.key) : [];
+  // conditions d'abord, puis étapes : même liste pour le décompte et la case « en cours »
+  const keys = page.status === "ready" ? [...page.resolved.requirements, ...page.resolved.steps].map((s) => s.key) : [];
   const ticked = stepsDone(chapterId, keys, done);
   const current = currentStepIndex(chapterId, keys, done);
 
@@ -113,7 +144,7 @@ export function StoryChapterView({ chapterId, itemNames, chapters, done, onSetSt
       <div className="quest-tab-head">
         <h2 className="quest-tab-title">{name}</h2>
         {page.status === "ready" && (
-          <span className={`progress-badge ${keys.length > 0 && ticked === keys.length ? "is-complete" : ""}`} title={tr("Étapes faites / étapes", "Steps done / steps")}>
+          <span className={`progress-badge ${keys.length > 0 && ticked === keys.length ? "is-complete" : ""}`} title={tr("Conditions et étapes faites / total", "Requirements and steps done / total")}>
             {ticked}/{keys.length}
           </span>
         )}
@@ -197,6 +228,18 @@ function Chapter({
         </p>
       )}
 
+      {resolved.requirements.length > 0 && (
+        <section className="story-unlock" aria-label={tr("Pour débloquer ce chapitre", "To unlock this chapter")}>
+          <div className="subhead">{tr(`Pour débloquer ce chapitre (${resolved.requirements.length})`, `To unlock this chapter (${resolved.requirements.length})`)}</div>
+          <p className="muted small">{tr("À faire avant les étapes ci-dessous ; comptées dans la progression.", "Do these before the steps below; they count in the progress.")}</p>
+          <ol className="story-steps story-reqs">
+            {resolved.requirements.map((req, i) => (
+              <StoryRow key={req.key} item={req} index={i} done={Boolean(done[storyStepId(chapterId, req.key)])} current={i === current} itemNames={itemNames} onChange={(v) => onSetStep(req.key, v)} />
+            ))}
+          </ol>
+        </section>
+      )}
+
       {resolved.objectives.length > 0 && (
         <details className="quest-section" open>
           <summary>{tr("Objectifs du chapitre", "Chapter objectives")}</summary>
@@ -228,36 +271,9 @@ function Chapter({
 
       <ol className="story-steps">
         {resolved.steps.map((step, i) => {
-          const isDone = Boolean(done[storyStepId(chapterId, step.key)]);
-          const isCurrent = i === current;
+          const index = resolved.requirements.length + i;
           return (
-            <li key={step.key} id={`story-step-${i}`} className={`story-step ${isDone ? "is-done" : ""} ${isCurrent ? "is-current" : ""}`} aria-current={isCurrent ? "step" : undefined}>
-              <label className="story-step-head">
-                <input
-                  type="checkbox"
-                  checked={isDone}
-                  onChange={(e) => onSetStep(step.key, e.target.checked)}
-                  aria-label={isDone ? tr("Marquer comme non fait", "Mark as not done") : tr("Marquer comme fait", "Mark as done")}
-                />
-                <span className="story-step-title">
-                  <span className="story-step-n">{i + 1}.</span> {fillItems(step.title, itemNames)}
-                  {step.branch && <span className="tag">{tr(`Fin ${step.branch}`, `${step.branch} ending`)}</span>}
-                  {isCurrent && <span className="tag tag-current">{tr("en cours", "current")}</span>}
-                </span>
-              </label>
-              {(step.blocks.length > 0 || (step.photos?.length ?? 0) > 0) && (
-                <div className="story-step-body">
-                  <WikiBlocks blocks={step.blocks} itemNames={itemNames} />
-                  {(step.photos?.length ?? 0) > 0 && (
-                    <div className="story-photos">
-                      {step.photos!.map((p) => (
-                        <Photo key={p.file} photo={p} itemNames={itemNames} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </li>
+            <StoryRow key={step.key} item={step} n={i + 1} index={index} done={Boolean(done[storyStepId(chapterId, step.key)])} current={index === current} itemNames={itemNames} onChange={(v) => onSetStep(step.key, v)} />
           );
         })}
       </ol>
@@ -281,7 +297,7 @@ export function StoryCard({
 }) {
   // seule la page anglaise sert au décompte (les clés de progression viennent d'elle)
   const page = useStoryPage(chapterId, chapters, false);
-  const keys = page.status === "ready" ? page.resolved.steps.map((s) => s.key) : [];
+  const keys = page.status === "ready" ? [...page.resolved.requirements, ...page.resolved.steps].map((s) => s.key) : [];
   const name = chapterName(chapters.chapters, chapterId);
   return (
     <section className="task-card story-card">
@@ -297,7 +313,7 @@ export function StoryCard({
           </div>
         </div>
         {page.status === "ready" ? (
-          <span className={`progress-badge ${keys.length > 0 && stepsDone(chapterId, keys, done) === keys.length ? "is-complete" : ""}`} title={tr("Étapes faites / étapes", "Steps done / steps")}>
+          <span className={`progress-badge ${keys.length > 0 && stepsDone(chapterId, keys, done) === keys.length ? "is-complete" : ""}`} title={tr("Conditions et étapes faites / total", "Requirements and steps done / total")}>
             {stepsDone(chapterId, keys, done)}/{keys.length}
           </span>
         ) : (

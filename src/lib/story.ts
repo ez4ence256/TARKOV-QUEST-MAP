@@ -82,6 +82,8 @@ export interface StoryStep {
 }
 
 export interface StoryPage {
+  /** Conditions pour débloquer le chapitre (section Requirements / Prérequis), une case chacune. */
+  requirements: StoryStep[];
   objectives: WikiBlock[];
   steps: StoryStep[];
 }
@@ -116,6 +118,54 @@ const labelHeadings = (text: string) =>
     .join("\n");
 
 const SECTION_OBJECTIVES = ["Objectives", "Objectifs"];
+// FR : « Prérequis » (5 pages), « Conditions » (Boreas)
+const SECTION_REQUIREMENTS = ["Requirements", "Prérequis", "Conditions", "Exigences"];
+
+/**
+ * Section Requirements -> une condition par case : une puce seule, ou une phrase suivie de puces
+ * (« Visitez l'un des lieux suivants : » + les lieux, qui restent dans le texte de la case).
+ * Les galeries sont rattachées au texte qui les précède. Le Labyrinthe : « Localisez le transit… ».
+ */
+export function parseRequirements(body: string, pageTitle: string): StoryStep[] {
+  const galleries: string[] = [];
+  const lines = markItems(body)
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/<gallery[\s\S]*?<\/gallery>/gi, (g) => `\n@@gallery${galleries.push(g) - 1}\n`)
+    .replace(/<\/?li[^>]*>/gi, "")
+    .split("\n");
+  type Token = { bullet: boolean; text: string; sub: string[]; gallery: string[] };
+  const tokens: Token[] = [];
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) continue;
+    const gallery = line.match(/^@@gallery(\d+)$/);
+    const bullet = line.match(/^\*(?![*#])\s*(.*)$/);
+    const last = tokens[tokens.length - 1];
+    if (gallery) last?.gallery.push(galleries[Number(gallery[1])]);
+    else if (bullet) tokens.push({ bullet: true, text: bullet[1], sub: [], gallery: [] });
+    else if (/^[*#]/.test(line) && last) last.sub.push(line);
+    else tokens.push({ bullet: false, text: line, sub: [], gallery: [] });
+  }
+  const steps: StoryStep[] = [];
+  const add = (head: Token, list: Token[]) => {
+    const title = cleanInline(head.text, pageTitle);
+    if (!title) return;
+    const listText = list.flatMap((t) => [`* ${t.text}`, ...t.sub]).join("\n");
+    steps.push({
+      title,
+      blocks: parseBlocks([head.sub.join("\n"), listText].filter(Boolean).join("\n"), pageTitle),
+      files: parseGalleries([...head.gallery, ...list.flatMap((t) => t.gallery)].join("\n")),
+    });
+  };
+  for (let i = 0; i < tokens.length; i++) {
+    const head = tokens[i];
+    const list: Token[] = [];
+    // une phrase suivie de puces = une seule case ; une puce seule = une case
+    while (!head.bullet && tokens[i + 1]?.bullet) list.push(tokens[++i]);
+    add(head, list);
+  }
+  return steps;
+}
 
 function splitSteps(guide: string, pageTitle: string): StoryStep[] {
   const steps: StoryStep[] = [];
@@ -189,7 +239,9 @@ export function parseStoryPage(wikitext: string, pageTitle: string, templates: R
       .filter((name) => templates[name] !== undefined)
       .map((name) => ({ ending: endingOf(name), steps: splitSteps(labelHeadings(templates[name]), pageTitle) })),
   );
+  const requirementsBody = SECTION_REQUIREMENTS.map((n) => findSection(sections, n)).find(Boolean)?.body ?? "";
   return {
+    requirements: parseRequirements(requirementsBody, pageTitle),
     objectives: parseBlocks(labelHeadings(objectivesBody), pageTitle),
     steps: [...fromTemplates, ...own],
   };
@@ -221,6 +273,9 @@ export function stepKeys(steps: Pick<StoryStep, "title" | "branch">[]): string[]
   });
 }
 
+/** Clés des conditions : rang dans la page anglaise (`req#0`…), sans lien avec les clés des étapes. */
+export const requirementKeys = (n: number) => Array.from({ length: n }, (_, i) => `req#${i}`);
+
 /** Identifiant enregistré d'une étape cochée : chapitre (titre anglais) + clé. */
 export const storyStepId = (chapter: string, key: string) => `${chapter}::${key}`;
 
@@ -248,6 +303,8 @@ export type StoryLangChoice =
 
 export interface ResolvedStory {
   choice: StoryLangChoice;
+  /** Conditions affichées (français seulement si la page française en a autant que l'anglaise). */
+  requirements: (StoryStep & { key: string })[];
   objectives: WikiBlock[];
   /** Étapes affichées, dans l'ordre anglais : `key` sert à la progression. */
   steps: (StoryStep & { key: string })[];
@@ -299,8 +356,11 @@ function orderLooksWrong(en: StoryStep[], fr: StoryStep[]): boolean {
  */
 export function resolveStory(en: StoryPage, fr: StoryPage | null | undefined, wantFr: boolean): ResolvedStory {
   const keys = stepKeys(en.steps);
+  const reqKeys = requirementKeys(en.requirements.length);
+  const enReqs = en.requirements.map((s, i) => ({ ...s, key: reqKeys[i] }));
   const english = (reason: Extract<StoryLangChoice, { lang: "en" }>["reason"]): ResolvedStory => ({
     choice: { lang: "en", reason },
+    requirements: enReqs,
     objectives: en.objectives,
     steps: en.steps.map((s, i) => ({ ...s, key: keys[i] })),
   });
@@ -308,14 +368,13 @@ export function resolveStory(en: StoryPage, fr: StoryPage | null | undefined, wa
   if (!fr) return english("missing");
   if (fr.steps.length !== en.steps.length) return english("count");
   if (orderLooksWrong(en.steps, fr.steps)) return english("order");
+  // photos françaises si toutes sont résolues, sinon celles de l'anglais (jamais d'image cassée)
+  const photosOf = (s: StoryStep, e: StoryStep) => (s.files.length > 0 && (s.photos ?? []).length === s.files.length ? s.photos! : (e.photos ?? []));
+  const frReqs = fr.requirements.length === en.requirements.length;
   return {
     choice: { lang: "fr", reason: "ok" },
+    requirements: frReqs ? fr.requirements.map((s, i) => ({ ...s, photos: photosOf(s, en.requirements[i]), key: reqKeys[i] })) : enReqs,
     objectives: fr.objectives.length > 0 ? fr.objectives : en.objectives,
-    steps: fr.steps.map((s, i) => {
-      // photos françaises si toutes sont résolues, sinon celles de l'anglais (jamais d'image cassée)
-      const own = s.photos ?? [];
-      const photos = s.files.length > 0 && own.length === s.files.length ? own : (en.steps[i].photos ?? []);
-      return { ...s, branch: en.steps[i].branch, photos, key: keys[i] };
-    }),
+    steps: fr.steps.map((s, i) => ({ ...s, branch: en.steps[i].branch, photos: photosOf(s, en.steps[i]), key: keys[i] })),
   };
 }

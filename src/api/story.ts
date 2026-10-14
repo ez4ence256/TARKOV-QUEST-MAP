@@ -129,19 +129,17 @@ async function fetchTemplates(names: string[], lang: WikiLang): Promise<Record<s
 // vient de `files`, la page du fichier se déduit du nom.
 const CDN = "https://static.wikia.nocookie.net/escapefromtarkov_gamepedia/images/";
 type StoredStep = Omit<StoryStep, "photos"> & { photos?: [string, string, string][] };
-type StoredPage = Omit<StoryPageData, "steps"> & { steps: StoredStep[] };
+type StoredPage = Omit<StoryPageData, "steps" | "requirements"> & { steps: StoredStep[]; requirements: StoredStep[] };
 
 const compactUrl = (u: string) => (u.startsWith(CDN) ? u.slice(CDN.length) : u);
 const expandUrl = (u: string) => (u.startsWith("http") ? u : CDN + u);
 
-const compactPage = (page: StoryPageData): StoredPage => ({
-  ...page,
-  steps: page.steps.map((s) => ({ ...s, photos: s.photos?.map((p): [string, string, string] => [p.file, compactUrl(p.thumbUrl), compactUrl(p.fullUrl)]) })),
-});
+const compactStep = (s: StoryStep): StoredStep => ({ ...s, photos: s.photos?.map((p): [string, string, string] => [p.file, compactUrl(p.thumbUrl), compactUrl(p.fullUrl)]) });
 
-const expandPage = (page: StoredPage): StoryPageData => ({
-  ...page,
-  steps: page.steps.map((s) => ({
+const compactPage = (page: StoryPageData): StoredPage => ({ ...page, steps: page.steps.map(compactStep), requirements: page.requirements.map(compactStep) });
+
+const expandPage = (page: StoredPage): StoryPageData => {
+  const expand = (s: StoredStep): StoryStep => ({
     ...s,
     photos: s.photos?.map(([file, thumb, full]) => ({
       file,
@@ -150,8 +148,9 @@ const expandPage = (page: StoredPage): StoryPageData => ({
       fullUrl: expandUrl(full),
       pageUrl: pageUrlFor(`File:${file}`, page.lang).replace("File%3A", "File:"),
     })),
-  })),
-});
+  });
+  return { ...page, steps: page.steps.map(expand), requirements: page.requirements.map(expand) };
+};
 
 const pageInFlight = new Map<string, Promise<StoryPageData>>();
 
@@ -159,7 +158,8 @@ const pageInFlight = new Map<string, Promise<StoryPageData>>();
 export function loadStoryPage(title: string, lang: WikiLang): Promise<StoryPageData> {
   const key = `${lang}:${title}`;
   const cached = readCache<StoredPage>(`story:${key}`);
-  if (cached) {
+  // sans `requirements` : chapitre mis en cache avant l'ajout des conditions, relu une fois sur le wiki
+  if (cached && Array.isArray(cached.requirements)) {
     try {
       return Promise.resolve(expandPage(cached));
     } catch {
@@ -184,9 +184,9 @@ async function fetchStoryPage(title: string, lang: WikiLang): Promise<StoryPageD
     const templateNames = storyTemplateNames(wikitext);
     const templates = templateNames.length > 0 ? await fetchTemplates(templateNames, lang) : {};
     const page = parseStoryPage(wikitext, finalTitle, templates);
-    const files = page.steps.flatMap((s) => s.files.map((f) => f.file));
+    const files = [...page.requirements, ...page.steps].flatMap((s) => s.files.map((f) => f.file));
     const info = files.length > 0 ? await fetchImageInfo(files, lang) : new Map();
-    const steps = page.steps.map((step) => ({
+    const withPhotos = (step: StoryStep): StoryStep => ({
       ...step,
       photos: step.files.flatMap((f) => {
         const image = info.get(fileTitle(f.file))?.imageinfo?.[0];
@@ -194,11 +194,11 @@ async function fetchStoryPage(title: string, lang: WikiLang): Promise<StoryPageD
         if (!image?.url || !image.descriptionurl) return [];
         return [{ file: f.file, caption: f.caption, thumbUrl: image.thumburl ?? image.url, fullUrl: image.url, pageUrl: image.descriptionurl }];
       }),
-    }));
-    data = { ...page, steps, title: finalTitle, lang, pageUrl: pageUrlFor(finalTitle, lang), exists: true, fetchedAt: Date.now() };
+    });
+    data = { ...page, steps: page.steps.map(withPhotos), requirements: page.requirements.map(withPhotos), title: finalTitle, lang, pageUrl: pageUrlFor(finalTitle, lang), exists: true, fetchedAt: Date.now() };
   } catch (error) {
     if ((error as { code?: string }).code !== "missingtitle") throw error;
-    data = { objectives: [], steps: [], title, lang, pageUrl: pageUrlFor(title, lang), exists: false, fetchedAt: Date.now() };
+    data = { requirements: [], objectives: [], steps: [], title, lang, pageUrl: pageUrlFor(title, lang), exists: false, fetchedAt: Date.now() };
   }
   writeCache(`story:${lang}:${title}`, compactPage(data));
   return data;

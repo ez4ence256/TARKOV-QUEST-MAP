@@ -8,7 +8,9 @@ import {
   fillItems,
   isStoryId,
   parseChapterList,
+  parseRequirements,
   parseStoryPage,
+  requirementKeys,
   resolveStory,
   stepKeys,
   stepsDone,
@@ -780,5 +782,100 @@ describe("progression et identifiants", () => {
     expect(isStoryId("story:The Ticket")).toBe(true);
     expect(isStoryId("5ac346cf86f7741d63233a02")).toBe(false);
     expect(chapterOf("story:The Ticket")).toBe("The Ticket");
+  });
+});
+
+// Section Requirements / Prérequis / Conditions : extraits réels (octobre 2026), galeries raccourcies
+const GAL = (...lines: string[]) => `<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">\n${lines.join("\n")}\n</gallery></li>`;
+const REQ_LABYRINTH_EN = `==Requirements==
+* Locate the [[The Labyrinth]] transit on [[Shoreline]]. The transit is located in the basement of the health resort west wing and requires the [[Knossos LLC facility key]].
+${GAL("File:Vitamins1 Shoreline outdoor map.png|Health resort west wing location marked on map", "File:The Labyrinth Transit.png|The transit")}
+
+`;
+const REQ_LABYRINTH_FR = `== Prérequis ==
+* Localisez le transit du [[Le labyrinthe|labyrinthe]] sur le [[Littoral]]. Le transit se situe dans le sous-sol de la station thermale, dans l'aile ouest, et nécessite la {{679b9716597ba2ed120c3d3f}}.
+${GAL("Fichier:Vitamins1 Shoreline outdoor map.png|Emplacement de l'aile ouest de la station thermale indiquée sur la carte", "Fichier:The Labyrinth Transit.png|Le transit")}
+
+`;
+const REQ_BATYA_FR = `Rendez-vous dans l'un des lieux suivants :
+* Le matelas situé sous l'inscription « жопа » au deuxième étage de la forteresse sur [[Douanes]].
+${GAL("Fichier:ZB-013 Building.png|La forteresse", "Fichier:Batya Customs Activation Location.png|Le matelas")}
+* Les bâtiments de la station radar Reine Blanche, sur la [[Base militaire]]
+${GAL("Fichier:Reserve Showcase 4.png|La station radar")}
+* Des matelas posés sur le gros rocher au camp USEC, dans les [[Bois]].
+
+`;
+
+describe("conditions pour débloquer un chapitre (Requirements)", () => {
+  const en = parseStoryPage(REQ_LABYRINTH_EN + LABYRINTH_EN, "The Labyrinth (story chapter)");
+  const fr = parseStoryPage(REQ_LABYRINTH_FR + LABYRINTH_FR, "Le labyrinthe (chapitre de l'histoire)");
+
+  it("Le labyrinthe : le transit et la clé sont une condition, avec ses photos, sans wikitext", () => {
+    expect(en.requirements).toHaveLength(1);
+    expect(en.requirements[0].title).toBe(
+      "Locate the The Labyrinth transit on Shoreline. The transit is located in the basement of the health resort west wing and requires the Knossos LLC facility key.",
+    );
+    expect(en.requirements[0].files.map((f) => f.file)).toEqual(["Vitamins1 Shoreline outdoor map.png", "The Labyrinth Transit.png"]);
+    expect(JSON.stringify(en.requirements)).not.toMatch(/\[\[|\{\{|<li|<gallery/);
+  });
+
+  it("les étapes et les objectifs ne changent pas : mêmes clés de progression qu'avant", () => {
+    const before = parseStoryPage(LABYRINTH_EN, "The Labyrinth (story chapter)");
+    expect(stepKeys(en.steps)).toEqual(stepKeys(before.steps));
+    expect(en.steps).toEqual(before.steps);
+    expect(en.objectives).toEqual(before.objectives);
+    expect(before.requirements).toEqual([]);
+    expect(requirementKeys(2)).toEqual(["req#0", "req#1"]);
+  });
+
+  it("page française (« Prérequis ») : objet {{identifiant}} gardé comme repère, puis nom tarkov.dev", () => {
+    expect(fr.requirements).toHaveLength(1);
+    expect(fr.requirements[0].title).toContain("⟦item:679b9716597ba2ed120c3d3f⟧");
+    expect(fillItems(fr.requirements[0].title, { "679b9716597ba2ed120c3d3f": "Clé Knossos" })).toContain("nécessite la Clé Knossos.");
+  });
+
+  it("phrase suivie de puces : une seule case, les lieux dans le texte, toutes les photos", () => {
+    const [req] = parseRequirements(REQ_BATYA_FR, "Batya");
+    expect(req.title).toBe("Rendez-vous dans l'un des lieux suivants :");
+    expect(req.blocks).toHaveLength(1);
+    const list = req.blocks[0];
+    expect(list.type === "list" && list.items.map((i) => i.text)).toEqual([
+      "Le matelas situé sous l'inscription « жопа » au deuxième étage de la forteresse sur Douanes.",
+      "Les bâtiments de la station radar Reine Blanche, sur la Base militaire",
+      "Des matelas posés sur le gros rocher au camp USEC, dans les Bois.",
+    ]);
+    expect(req.files.map((f) => f.file)).toEqual(["ZB-013 Building.png", "Batya Customs Activation Location.png", "Reserve Showcase 4.png"]);
+  });
+
+  it("section « Conditions » (Boreas) et page sans condition", () => {
+    const boreas = parseStoryPage("==Conditions==\nObtenir une [[Paradigm Shipping poster]] ou consulter le signal de détresse.\n\n==Objectifs==\n* Un\n==Guide==\n===A===\nx", "Boreas");
+    expect(boreas.requirements.map((r) => r.title)).toEqual(["Obtenir une Paradigm Shipping poster ou consulter le signal de détresse."]);
+    expect(parseStoryPage("==Guide==\n===A===\nx", "Tour").requirements).toEqual([]);
+  });
+
+  it("langue : français seulement si autant de conditions que l'anglais, sinon anglais", () => {
+    expect(resolveStory(en, fr, true).requirements[0].title).toContain("Localisez le transit");
+    const noReqFr = parseStoryPage(LABYRINTH_FR, "Le labyrinthe (chapitre de l'histoire)");
+    const r = resolveStory(en, noReqFr, true);
+    expect(r.requirements[0].title).toContain("Locate the The Labyrinth transit");
+    expect(r.choice).toEqual({ lang: "fr", reason: "ok" }); // les étapes restent en français
+    expect(r.requirements.map((x) => x.key)).toEqual(["req#0"]);
+    expect(resolveStory(en, fr, false).requirements[0].title).toContain("Locate the");
+  });
+
+  it("progression : la case « en cours » commence aux conditions, puis passe aux étapes ; clés des étapes inchangées", () => {
+    const r = resolveStory(en, fr, true);
+    const keys = [...r.requirements, ...r.steps].map((x) => x.key);
+    const id = "The Labyrinth (story chapter)";
+    expect(keys[0]).toBe("req#0");
+    expect(keys.slice(1)).toEqual(stepKeys(en.steps));
+    expect(currentStepIndex(id, keys, {})).toBe(0);
+    const done = { [storyStepId(id, "req#0")]: true as const };
+    expect(currentStepIndex(id, keys, done)).toBe(1);
+    expect(stepsDone(id, keys, done)).toBe(1);
+    // une étape cochée avant l'ajout des conditions reste cochée
+    const old = { [storyStepId(id, stepKeys(en.steps)[0])]: true as const };
+    expect(stepsDone(id, keys, old)).toBe(1);
+    expect(currentStepIndex(id, keys, old)).toBe(0);
   });
 });

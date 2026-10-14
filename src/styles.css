@@ -1643,6 +1643,16 @@ kbd {
   flex-direction: column;
   gap: 0.5rem;
 }
+/* conditions de déblocage : bloc distinct, au-dessus des objectifs et des étapes */
+.story-unlock {
+  margin: 0.6rem 0;
+  padding: 0.5rem 0.6rem;
+  border: 1px dashed var(--accent);
+  border-radius: var(--radius);
+}
+.story-unlock > .subhead {
+  margin-top: 0;
+}
 .story-step {
   padding: 0.45rem 0.55rem;
   border: 1px solid var(--line);

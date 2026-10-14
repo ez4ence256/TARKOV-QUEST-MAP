@@ -122,6 +122,30 @@ describe("un chapitre", () => {
     expect(stored).toContain("Accept the offer");
   });
 
+  it("conditions : photos dans la même requête d'images ; un chapitre en cache sans conditions est relu une fois", async () => {
+    const page = "==Requirements==\n* Find the key.\n<li><gallery>\nFile:Key.png|The key\n</gallery></li>\n\n==Guide==\n===Go===\nGo.\n<gallery>\nFile:Go.png|Go\n</gallery>\n";
+    const img = (f: string) => ({ title: `File:${f}`, imageinfo: [{ url: `https://img/${f}`, thumburl: `https://img/t/${f}`, descriptionurl: `https://wiki/File:${f}` }] });
+    const fetchMock = vi.fn(async (url: string) =>
+      new Response(JSON.stringify(new URL(url).searchParams.get("action") === "parse" ? { parse: { title: "Boreas", wikitext: page } } : { query: { pages: [img("Key.png"), img("Go.png")] } })),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const first = await loadStoryPage("Boreas", "en");
+    expect(fetchMock).toHaveBeenCalledTimes(2); // page + une seule requête d'images pour conditions et étapes
+    expect(first.requirements.map((r) => [r.title, r.photos?.map((p) => p.file)])).toEqual([["Find the key.", ["Key.png"]]]);
+    expect((await loadStoryPage("Boreas", "en")).requirements[0].photos?.[0].caption).toBe("The key");
+    expect(fetchMock).toHaveBeenCalledTimes(2); // relu depuis le cache
+
+    // entrée écrite par l'ancienne version (sans `requirements`) : relue sur le wiki, une fois
+    const k = Object.keys(localStorage).find((x) => x.includes("story:en:Boreas"))!;
+    const old = JSON.parse(localStorage.getItem(k)!);
+    delete old.requirements;
+    localStorage.setItem(k, JSON.stringify(old));
+    expect((await loadStoryPage("Boreas", "en")).requirements).toHaveLength(1);
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+    await loadStoryPage("Boreas", "en");
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+  });
+
   it("page française : les modèles sont demandés au wiki français (absents : étapes de la page seulement)", async () => {
     const fetchMock = vi.fn(async (url: string) => {
       const p = new URL(url).searchParams;
