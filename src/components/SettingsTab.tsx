@@ -14,6 +14,8 @@ interface Props {
   dataSource: string;
   showDone: boolean;
   onShowDone: (v: boolean) => void;
+  oneAtATime: boolean;
+  onOneAtATime: (v: boolean) => void;
   onChangeMode: () => void;
   onRefresh: () => void;
   onExport: () => void;
@@ -86,6 +88,10 @@ export function SettingsTab(p: Props) {
         <label className="check">
           <input type="checkbox" checked={p.showDone} onChange={(e) => p.onShowDone(e.target.checked)} />
           {tr("Afficher les objectifs faits (grisés) sur la carte", "Show completed objectives (greyed out) on the map")}
+        </label>
+        <label className="check">
+          <input type="checkbox" checked={p.oneAtATime} onChange={(e) => p.onOneAtATime(e.target.checked)} />
+          {tr("Afficher un objectif à la fois", "Show one objective at a time")}
         </label>
         <ul className="legend">
           {LEGEND.map((id) => (

@@ -298,6 +298,7 @@ Signalé : « Le labyrinthe » montrait « Speak to Jaeger… » alors que le wi
 - **PVP ZONE** : le wiki de la quête normale est affiché, avec un bandeau.
 - **Aucune traduction maison**, et **rien d'inventé**.
 - **tarkov.dev est la référence** ; les contradictions avec le wiki sont signalées sans être tranchées.
+- **Un objectif à la fois** (réglage, activé par défaut) : par quête, seul le premier objectif non fait (obligatoire avant optionnel) est sur la carte ; cocher affiche le suivant. Sélectionner une quête sans point sur la map affichée bascule sur sa map.
 - **Find in raid** : seulement quand une source le dit.
 - **Sécurité** : aucun HTML du wiki inséré ; les noms affichés dans les marqueurs sont échappés.
 - **Réinitialisation** : seulement `done` du mode actuel, avec confirmation.

@@ -7,7 +7,7 @@ import { BUNDLED_CALIBRATION, loadCalibration } from "./map/calibration";
 import { MapView, type Placing } from "./map/MapView";
 import { exportState, getLastMode, useAppState, type CustomPoint } from "./state/store";
 import { QUEST_COLORS } from "./lib/objectiveTypes";
-import { buildObjectivePoints, manualPointKey, taskMapIds } from "./lib/points";
+import { buildObjectivePoints, manualPointKey, shownObjectives, taskMapIds } from "./lib/points";
 import { ModePicker } from "./components/ModePicker";
 import { QuestList } from "./components/QuestList";
 import { SelectedQuests } from "./components/SelectedQuests";
@@ -153,23 +153,23 @@ export default function App() {
     return byId(mode.mapId) ?? byId(fromSelection) ?? maps.find((m) => m.normalizedName === "customs") ?? maps[0];
   }, [maps, mode.mapId, selectedTasks]);
 
+  const oneAtATime = state.oneAtATime !== false;
   const points = useMemo(
-    () => (currentMap ? buildObjectivePoints(selectedTasks, mode, currentMap.id, state.showDone) : []),
-    [selectedTasks, mode, currentMap, state.showDone],
+    () => (currentMap ? buildObjectivePoints(selectedTasks, mode, currentMap.id, state.showDone, oneAtATime) : []),
+    [selectedTasks, mode, currentMap, state.showDone, oneAtATime],
   );
 
   // Nombre de points restants par map (affiché dans le sélecteur de map)
   const pointsPerMap = useMemo(() => {
     const counts = new Map<string, number>();
     for (const t of selectedTasks)
-      for (const o of t.objectives) {
-        if (mode.done[o.id]) continue;
+      for (const o of shownObjectives(t, mode.done, false, oneAtATime)) {
         for (const l of o.locations) counts.set(l.mapId, (counts.get(l.mapId) ?? 0) + 1);
         const manual = mode.manual[o.id];
         if (o.locations.length === 0 && manual) counts.set(manual.mapId, (counts.get(manual.mapId) ?? 0) + 1);
       }
     return counts;
-  }, [selectedTasks, mode.done, mode.manual]);
+  }, [selectedTasks, mode.done, mode.manual, oneAtATime]);
 
   const customPoints = useMemo(
     () => mode.customPoints.filter((p) => p.mapId === currentMap?.id),
@@ -213,6 +213,19 @@ export default function App() {
     return () => window.removeEventListener("paste", onPaste);
   }, []);
 
+  // Sélection d'une quête : si rien d'elle n'est sur la map affichée mais qu'il y en a ailleurs, on y va.
+  const [mapNotice, setMapNotice] = useState<string | null>(null);
+  const toggleTask = (taskId: string) => {
+    dispatch({ type: "toggleTask", taskId });
+    const task = tasksById.get(taskId);
+    if (!task || mode.selected.some((s) => s.taskId === taskId) || !currentMap) return;
+    const shown = { objectives: shownObjectives(task, mode.done, false, oneAtATime) };
+    const target = dominantMap([shown], 0);
+    if (!target || target === currentMap.id || shown.objectives.some((o) => o.locations.some((l) => l.mapId === currentMap.id))) return;
+    dispatch({ type: "setMap", mapId: target });
+    const name = maps.find((m) => m.id === target)?.name ?? "";
+    setMapNotice(tr(`Map affichée : ${name} (les points de « ${task.name} » s'y trouvent).`, `Displayed map: ${name} (the points of "${task.name}" are there).`));
+  };
   const showMap = (mapId: string) => {
     dispatch({ type: "setMap", mapId });
     if (isMobile()) setPanelOpen(false);
@@ -311,6 +324,15 @@ export default function App() {
         </select>
       </header>
 
+      {mapNotice && (
+        <div className="alert" role="status">
+          {mapNotice}{" "}
+          <button className="link" onClick={() => setMapNotice(null)}>
+            OK
+          </button>
+        </div>
+      )}
+
       {room.notice && (
         <div className="alert" role="status">
           {room.notice}{" "}
@@ -382,7 +404,7 @@ export default function App() {
               traders={data.traders}
               maps={maps}
               mode={mode}
-              onToggle={(taskId) => dispatch({ type: "toggleTask", taskId })}
+              onToggle={toggleTask}
               onPhotos={showPhotos}
               onClearSelection={() => dispatch({ type: "clearSelection" })}
               onShowMap={(mapId) => dispatch({ type: "setMap", mapId })}
@@ -484,6 +506,8 @@ export default function App() {
               dataSource={sourceLabel}
               showDone={state.showDone}
               onShowDone={(value) => dispatch({ type: "setShowDone", value })}
+              oneAtATime={oneAtATime}
+              onOneAtATime={(value) => dispatch({ type: "setOneAtATime", value })}
               onChangeMode={() => dispatch({ type: "setGameMode", mode: null })}
               onRefresh={() => setReloadToken((n) => n + 1)}
               onExport={() => exportState(state)}

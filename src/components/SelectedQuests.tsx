@@ -2,7 +2,7 @@
 import type { GameMap, Objective, Task, Trader } from "../types";
 import type { Action, ModeState } from "../state/store";
 import { ICON_LABELS, QUEST_COLORS, categoryOf } from "../lib/objectiveTypes";
-import { hasApiPosition, manualPointKey, objectiveMapCounts, objectivePointKey, taskProgress } from "../lib/points";
+import { currentObjective, hasApiPosition, manualPointKey, objectiveMapCounts, objectivePointKey, taskProgress } from "../lib/points";
 import { getLang, tr } from "../lib/i18n";
 import { Icon } from "./Icon";
 import { StoryCard, useStoryChapters } from "./StoryView";
@@ -107,6 +107,7 @@ export function SelectedQuests(props: Props) {
         const unpositioned = task.objectives.filter((o) => !hasApiPosition(o));
         const qColor = QUEST_COLORS[color];
 
+        const current = currentObjective(task, mode.done);
         const renderObjective = (o: Objective) => {
           const done = Boolean(mode.done[o.id]);
           const cat = categoryOf(o.type);
@@ -132,6 +133,7 @@ export function SelectedQuests(props: Props) {
                   </span>
                   {o.description || <em className="muted">{tr("(sans description)", "(no description)")}</em>}
                   {o.optional && <span className="tag">{tr("optionnel", "optional")}</span>}
+                  {o === current && <span className="tag">▶ {tr("en cours", "current")}</span>}
                 </div>
                 {!hasApiPosition(o) && LOOT_TYPES.has(o.type) && (
                   <div className="objective-note">{tr("L'API ne donne pas d'emplacement pour cet objet.", "The API gives no location for this item.")}</div>
@@ -226,6 +228,11 @@ export function SelectedQuests(props: Props) {
               <span style={{ width: `${progress.total ? (progress.done / progress.total) * 100 : 0}%` }} />
             </div>
 
+            {positioned.length === 0 && (
+              <div className="objective-note">
+                {tr("Aucune position connue pour cette quête : rien à afficher sur la carte (placez les objectifs à la main).", "No known position for this quest: nothing to show on the map (place objectives by hand).")}
+              </div>
+            )}
             {positioned.length > 0 && <ul className="objectives">{positioned.map(renderObjective)}</ul>}
 
             {unpositioned.length > 0 && (

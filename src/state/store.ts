@@ -63,6 +63,8 @@ export interface AppState {
   version: number;
   gameMode: GameMode | null;
   showDone: boolean;
+  /** Un seul objectif affiché par quête (absent = oui). */
+  oneAtATime?: boolean;
   modes: Partial<Record<GameMode, ModeState>>;
 }
 
@@ -118,6 +120,7 @@ export function sanitizeState(raw: unknown): AppState {
     // le mode est redemandé à chaque ouverture : on ne garde que le dernier choisi comme suggestion
     gameMode: null,
     showDone: r.showDone === true,
+    oneAtATime: r.oneAtATime !== false,
     modes,
   };
 }
@@ -140,6 +143,7 @@ export type Action =
   | { type: "updateCustom"; id: string; patch: Partial<Omit<CustomPoint, "id">> }
   | { type: "removeCustom"; id: string }
   | { type: "setShowDone"; value: boolean }
+  | { type: "setOneAtATime"; value: boolean }
   | { type: "import"; state: AppState }
   /** Remet à "pas fait" les objectifs donnés (une quête), dans le mode courant seulement. */
   | { type: "resetProgress"; objectiveIds: string[] }
@@ -295,6 +299,8 @@ export function reducer(state: AppState, action: Action): AppState {
       }));
     case "setShowDone":
       return { ...state, showDone: action.value };
+    case "setOneAtATime":
+      return { ...state, oneAtATime: action.value };
     case "import":
       return { ...action.state, gameMode: state.gameMode };
     case "resetProgress":

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Task } from "../types";
 import { emptyModeState } from "../state/store";
-import { buildObjectivePoints, manualPointKey, taskProgress } from "./points";
+import { buildObjectivePoints, currentObjective, manualPointKey, taskProgress } from "./points";
 
 const task: Task = {
   id: "t",
@@ -64,5 +64,29 @@ describe("points", () => {
 
   it("calcule la progression sans compter les objectifs optionnels", () => {
     expect(taskProgress(task, { a: 1, d: 1 })).toEqual({ done: 1, total: 3 });
+  });
+});
+
+describe("un objectif à la fois", () => {
+  const ids = (done: Record<string, number>, map: string, oneAtATime = true, showDone = false) =>
+    buildObjectivePoints([task], { ...emptyModeState(), done }, map, showDone, oneAtATime).map((p) => p.objectiveId);
+
+  it("montre seulement le premier objectif non fait, et le suivant dès qu'il est coché", () => {
+    expect(ids({}, "m1")).toEqual(["a"]);
+    expect(ids({}, "m2")).toEqual([]);
+    expect(ids({ a: 1 }, "m1")).toEqual([]);
+    expect(ids({ a: 1 }, "m2")).toEqual(["b"]);
+  });
+
+  it("préfère un objectif obligatoire restant à un optionnel", () => {
+    const t: Task = { ...task, objectives: [task.objectives[3], task.objectives[0]] };
+    expect(currentObjective(t, {})?.id).toBe("a");
+    expect(currentObjective(t, { a: 1 })?.id).toBe("d");
+    expect(currentObjective(t, { a: 1, d: 1 })).toBeUndefined();
+  });
+
+  it("les objectifs faits suivent « afficher les faits », réglage désactivé = tout", () => {
+    expect(ids({ a: 1 }, "m1", true, true)).toEqual(["a"]);
+    expect(ids({}, "m2", false)).toEqual(["b"]);
   });
 });

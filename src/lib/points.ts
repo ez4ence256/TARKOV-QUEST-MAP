@@ -33,17 +33,34 @@ export function taskMapIds(task: Task): Set<string> {
   return ids;
 }
 
+/** Objectif en cours : le premier non fait et obligatoire, sinon le premier optionnel non fait. */
+export function currentObjective(task: Task, done: Record<string, number>): Objective | undefined {
+  const todo = task.objectives.filter((o) => !done[o.id]);
+  return todo.find((o) => !o.optional) ?? todo[0];
+}
+
+/** Objectifs d'une quête à montrer sur la carte (les faits suivent `showDone`). */
+export function shownObjectives(
+  task: Task,
+  done: Record<string, number>,
+  showDone: boolean,
+  oneAtATime: boolean,
+): Objective[] {
+  const current = oneAtATime ? currentObjective(task, done) : undefined;
+  return task.objectives.filter((o) => (done[o.id] ? showDone : !oneAtATime || o === current));
+}
+
 /** Points des quêtes sélectionnées + points placés à la main, pour une map. */
 export function buildObjectivePoints(
   tasks: Task[],
   mode: ModeState,
   mapId: string,
   showDone: boolean,
+  oneAtATime = false,
 ): MapPoint[] {
   const points: MapPoint[] = [];
   for (const task of tasks) {
-    for (const o of task.objectives) {
-      if (!showDone && mode.done[o.id]) continue;
+    for (const o of shownObjectives(task, mode.done, showDone, oneAtATime)) {
       // emplacements possibles d'un objet de quête, numérotés sur toutes les maps
       const spawns = o.locations.filter((l) => l.possible);
       for (const loc of o.locations) {
