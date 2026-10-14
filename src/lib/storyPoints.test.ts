@@ -5,7 +5,9 @@ import { chaptersWithPositions, currentStoryItem, currentStoryPoints, pointsOnMa
 
 // Accidental Witness : wikitext réel de la page anglaise (octobre 2026)
 const CHAPTER = "Accidental Witness";
-const page = parseStoryPage(wikitext, CHAPTER);
+const page = parseStoryPage(wikitext.replace(/
+/g, "
+"), CHAPTER);
 const keys = [...requirementKeys(page.requirements.length), ...stepKeys(page.steps)];
 const items: StoryItem[] = [...page.requirements, ...page.steps].map((s, i) => ({ key: keys[i], title: s.title, text: stepText(s) }));
 const done = (...ks: string[]) => Object.fromEntries(ks.map((k) => [storyStepId(CHAPTER, k), true as const]));
