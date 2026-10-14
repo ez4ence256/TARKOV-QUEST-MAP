@@ -12,7 +12,7 @@
 
 import { parseGalleries, type WikiPhoto } from "../api/wiki";
 import { tr } from "./i18n";
-import { cleanInline, findSection, parseBlocks, splitSections, type WikiBlock } from "./wikiText";
+import { cleanInline, findSection, parseBlocks, parseInfobox, splitSections, wikiLinkTargets, type WikiBlock } from "./wikiText";
 
 // --- Liste des chapitres ---
 
@@ -84,6 +84,8 @@ export interface StoryStep {
 export interface StoryPage {
   /** Conditions pour débloquer le chapitre (section Requirements / Prérequis), une case chacune. */
   requirements: StoryStep[];
+  /** Chapitre précédent d'après l'infobox (« previous »), seulement sans section Requirements ; null sinon. */
+  previous: string | null;
   objectives: WikiBlock[];
   steps: StoryStep[];
 }
@@ -148,7 +150,8 @@ export function parseRequirements(body: string, pageTitle: string): StoryStep[] 
   }
   const steps: StoryStep[] = [];
   const add = (head: Token, list: Token[]) => {
-    const title = cleanInline(head.text, pageTitle);
+    // « the [[The Labyrinth]] transit » s'écrit « the The Labyrinth » : l'article en double est retiré
+    const title = cleanInline(head.text, pageTitle).replace(/\bthe The\b/g, "the");
     if (!title) return;
     const listText = list.flatMap((t) => [`* ${t.text}`, ...t.sub]).join("\n");
     steps.push({
@@ -240,8 +243,12 @@ export function parseStoryPage(wikitext: string, pageTitle: string, templates: R
       .map((name) => ({ ending: endingOf(name), steps: splitSteps(labelHeadings(templates[name]), pageTitle) })),
   );
   const requirementsBody = SECTION_REQUIREMENTS.map((n) => findSection(sections, n)).find(Boolean)?.body ?? "";
+  const requirements = parseRequirements(requirementsBody, pageTitle);
+  const previousRaw = requirements.length === 0 ? parseInfobox(wikitext).previous : undefined;
+  const previous = previousRaw ? (wikiLinkTargets(previousRaw)[0] ?? cleanInline(previousRaw, pageTitle)) || null : null;
   return {
-    requirements: parseRequirements(requirementsBody, pageTitle),
+    requirements,
+    previous,
     objectives: parseBlocks(labelHeadings(objectivesBody), pageTitle),
     steps: [...fromTemplates, ...own],
   };
@@ -354,10 +361,15 @@ function orderLooksWrong(en: StoryStep[], fr: StoryStep[]): boolean {
  * Si une inversion ne change ni nombres ni photos, elle n'est pas vue. Sinon la progression, enregistrée sous les titres
  * anglais, serait cochée sur la mauvaise étape : on garde l'anglais.
  */
-export function resolveStory(en: StoryPage, fr: StoryPage | null | undefined, wantFr: boolean): ResolvedStory {
+export function resolveStory(en: StoryPage, fr: StoryPage | null | undefined, wantFr: boolean, nameOf: (chapterId: string) => string = (id) => id): ResolvedStory {
   const keys = stepKeys(en.steps);
-  const reqKeys = requirementKeys(en.requirements.length);
-  const enReqs = en.requirements.map((s, i) => ({ ...s, key: reqKeys[i] }));
+  // sans section Requirements, le chapitre précédent de l'infobox est la condition (nom dans la langue courante)
+  const base: StoryStep[] =
+    en.requirements.length === 0 && en.previous
+      ? [{ title: tr(`Terminer le chapitre ${nameOf(en.previous)}`, `Complete the ${nameOf(en.previous)} chapter`), blocks: [], files: [] }]
+      : en.requirements;
+  const reqKeys = requirementKeys(base.length);
+  const enReqs = base.map((s, i) => ({ ...s, key: reqKeys[i] }));
   const english = (reason: Extract<StoryLangChoice, { lang: "en" }>["reason"]): ResolvedStory => ({
     choice: { lang: "en", reason },
     requirements: enReqs,
@@ -370,7 +382,7 @@ export function resolveStory(en: StoryPage, fr: StoryPage | null | undefined, wa
   if (orderLooksWrong(en.steps, fr.steps)) return english("order");
   // photos françaises si toutes sont résolues, sinon celles de l'anglais (jamais d'image cassée)
   const photosOf = (s: StoryStep, e: StoryStep) => (s.files.length > 0 && (s.photos ?? []).length === s.files.length ? s.photos! : (e.photos ?? []));
-  const frReqs = fr.requirements.length === en.requirements.length;
+  const frReqs = en.requirements.length > 0 && fr.requirements.length === en.requirements.length;
   return {
     choice: { lang: "fr", reason: "ok" },
     requirements: frReqs ? fr.requirements.map((s, i) => ({ ...s, photos: photosOf(s, en.requirements[i]), key: reqKeys[i] })) : enReqs,

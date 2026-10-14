@@ -813,7 +813,7 @@ describe("conditions pour débloquer un chapitre (Requirements)", () => {
   it("Le labyrinthe : le transit et la clé sont une condition, avec ses photos, sans wikitext", () => {
     expect(en.requirements).toHaveLength(1);
     expect(en.requirements[0].title).toBe(
-      "Locate the The Labyrinth transit on Shoreline. The transit is located in the basement of the health resort west wing and requires the Knossos LLC facility key.",
+      "Locate the Labyrinth transit on Shoreline. The transit is located in the basement of the health resort west wing and requires the Knossos LLC facility key.",
     );
     expect(en.requirements[0].files.map((f) => f.file)).toEqual(["Vitamins1 Shoreline outdoor map.png", "The Labyrinth Transit.png"]);
     expect(JSON.stringify(en.requirements)).not.toMatch(/\[\[|\{\{|<li|<gallery/);
@@ -857,7 +857,7 @@ describe("conditions pour débloquer un chapitre (Requirements)", () => {
     expect(resolveStory(en, fr, true).requirements[0].title).toContain("Localisez le transit");
     const noReqFr = parseStoryPage(LABYRINTH_FR, "Le labyrinthe (chapitre de l'histoire)");
     const r = resolveStory(en, noReqFr, true);
-    expect(r.requirements[0].title).toContain("Locate the The Labyrinth transit");
+    expect(r.requirements[0].title).toContain("Locate the Labyrinth transit");
     expect(r.choice).toEqual({ lang: "fr", reason: "ok" }); // les étapes restent en français
     expect(r.requirements.map((x) => x.key)).toEqual(["req#0"]);
     expect(resolveStory(en, fr, false).requirements[0].title).toContain("Locate the");
@@ -877,5 +877,27 @@ describe("conditions pour débloquer un chapitre (Requirements)", () => {
     const old = { [storyStepId(id, stepKeys(en.steps)[0])]: true as const };
     expect(stepsDone(id, keys, old)).toBe(1);
     expect(currentStepIndex(id, keys, old)).toBe(0);
+  });
+});
+
+describe("condition tirée de l'infobox (previous)", () => {
+  const ticket = (extra = "") => parseStoryPage(`{{Infobox quest\n|previous     =[[Falling Skies]]\n}}\n${extra}==Objectives==\n* Talk\n==Guide==\n===Escape===\nGo.`, "The Ticket");
+  const names: Record<string, string> = { "Falling Skies": "Tombé du ciel" };
+
+  it("sans section Requirements : « Terminer / Complete le chapitre », clé req#0, nom de la langue courante", () => {
+    const page = ticket();
+    expect(page).toMatchObject({ previous: "Falling Skies", requirements: [] });
+    const r = resolveStory(page, null, false, (id) => names[id] ?? id);
+    expect(r.requirements.map((x) => [x.key, x.title])).toEqual([["req#0", expect.stringMatching(/^(Terminer le chapitre|Complete the) Tombé du ciel( chapter)?$/)]]);
+    expect(resolveStory(page, null, false).requirements[0].title).toMatch(/Falling Skies/); // nom inconnu : titre anglais
+    // une page FR sans conditions ne remplace pas cette condition
+    expect(resolveStory(page, ticket(), true).requirements).toHaveLength(1);
+  });
+
+  it("avec une section Requirements : pas de doublon ; sans infobox : rien", () => {
+    const page = ticket("==Requirements==\n* Do it.\n\n");
+    expect(page.previous).toBeNull();
+    expect(resolveStory(page, null, false).requirements.map((x) => x.title)).toEqual(["Do it."]);
+    expect(parseStoryPage("==Guide==\n===A===\nx", "Tour")).toMatchObject({ previous: null, requirements: [] });
   });
 });

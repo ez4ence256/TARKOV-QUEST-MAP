@@ -57,7 +57,7 @@ export function useStoryPage(id: string, chapters: ChaptersState, wantFr: boolea
       const en = await loadStoryPage(id, "en");
       const fr = frTitle ? await loadStoryPage(frTitle, "fr").catch(() => null) : null;
       const frUsable = fr && fr.exists ? fr : null;
-      const resolved = resolveStory(en, frUsable, wantFr);
+      const resolved = resolveStory(en, frUsable, wantFr, (c) => chapterName(chapters.chapters, c));
       const used = resolved.choice.lang === "fr" && frUsable ? frUsable : en;
       if (!cancelled) setState({ status: "ready", en, resolved, url: used.pageUrl, title: used.title });
     })().catch((error: Error) => !cancelled && setState({ status: "error", error: error.message }));

@@ -159,7 +159,7 @@ export function loadStoryPage(title: string, lang: WikiLang): Promise<StoryPageD
   const key = `${lang}:${title}`;
   const cached = readCache<StoredPage>(`story:${key}`);
   // sans `requirements` : chapitre mis en cache avant l'ajout des conditions, relu une fois sur le wiki
-  if (cached && Array.isArray(cached.requirements)) {
+  if (cached && Array.isArray(cached.requirements) && cached.previous !== undefined) {
     try {
       return Promise.resolve(expandPage(cached));
     } catch {
@@ -198,7 +198,7 @@ async function fetchStoryPage(title: string, lang: WikiLang): Promise<StoryPageD
     data = { ...page, steps: page.steps.map(withPhotos), requirements: page.requirements.map(withPhotos), title: finalTitle, lang, pageUrl: pageUrlFor(finalTitle, lang), exists: true, fetchedAt: Date.now() };
   } catch (error) {
     if ((error as { code?: string }).code !== "missingtitle") throw error;
-    data = { requirements: [], objectives: [], steps: [], title, lang, pageUrl: pageUrlFor(title, lang), exists: false, fetchedAt: Date.now() };
+    data = { requirements: [], previous: null, objectives: [], steps: [], title, lang, pageUrl: pageUrlFor(title, lang), exists: false, fetchedAt: Date.now() };
   }
   writeCache(`story:${lang}:${title}`, compactPage(data));
   return data;
