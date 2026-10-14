@@ -1419,6 +1419,18 @@ kbd {
   opacity: 0.45;
   filter: grayscale(1);
 }
+.tqp-pin.is-story {
+  border-radius: 4px;
+  transform: rotate(45deg);
+  border-width: 3px;
+  background: #1d2a38;
+}
+.tqp-pin.is-story svg {
+  transform: rotate(-45deg);
+}
+.tqp-pin.is-story:hover {
+  transform: rotate(45deg) scale(1.15);
+}
 .tqp-pin.is-custom {
   border-radius: 6px;
   border-style: dashed;

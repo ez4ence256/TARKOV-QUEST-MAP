@@ -322,6 +322,9 @@ const fileKey = (f: string) => f.replace(/_/g, " ").trim().toLowerCase();
 const blockText = (b: WikiBlock): string =>
   b.type === "list" ? b.items.map((i) => i.text).join(" ") : b.type === "table" ? [b.title ?? "", ...b.headers, ...b.rows.flat()].join(" ") : b.text;
 
+/** Titre et texte d'une étape en une chaîne (étage cité, recherche). */
+export const stepText = (step: StoryStep) => [step.title, ...step.blocks.map(blockText)].join(" ");
+
 /** Nombres du titre et du texte d'une étape (les séparateurs de milliers retirés) : identiques d'une langue à l'autre. */
 function numbersOf(step: StoryStep): string[] {
   const text = [step.title, ...step.blocks.map(blockText)].join(" ").replace(ITEM_MARK, " ").replace(/(\d)[,.   ](?=\d{3}(?!\d))/g, "$1");

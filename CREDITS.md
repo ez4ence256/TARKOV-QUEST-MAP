@@ -94,6 +94,10 @@ SOFTWARE.
 
 ---
 
+## Positions de la Main story : cartes du wiki Escape from Tarkov
+
+- `src/data/story-positions.json` : positions relevées sur les photos/cartes du wiki Escape from Tarkov (Fandom) des chapitres de l'histoire (pour l'instant Accidental Witness) : cartes de Customs (re3mr.com), de Streets of Tarkov et de Shoreline (/u/JINDOUZ). Seules les coordonnées relevées sont gardées, aucune image n'est copiée ni affichée ; le fichier source de chaque position est noté dans le JSON.
+
 ## Plans du mall et du parking d'Interchange : re3mr.com et wiki Escape from Tarkov
 
 - **Source :** panneaux « PARKING » (sections A à D, garages Idea, Goshan et Oli), « FIRST FLOOR » et « SECOND FLOOR » de l'affiche [`File:Interchange Interactive Map Base.webp`](https://escapefromtarkov.fandom.com/wiki/File:Interchange_Interactive_Map_Base.webp), « Map made by re3mr.com in cooperation with the Escape from Tarkov Wiki ».

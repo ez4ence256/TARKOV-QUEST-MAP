@@ -7,9 +7,9 @@ const cache = new Map<string, L.DivIcon>();
 export function markerIcon(
   icon: IconId,
   color: string,
-  opts: { faded?: boolean; custom?: boolean; offLevel?: boolean; badge?: string } = {},
+  opts: { faded?: boolean; custom?: boolean; offLevel?: boolean; badge?: string; story?: boolean } = {},
 ) {
-  const key = `${icon}|${color}|${opts.faded ? 1 : 0}|${opts.custom ? 1 : 0}|${opts.offLevel ? 1 : 0}|${opts.badge ?? ""}`;
+  const key = `${icon}|${color}|${opts.faded ? 1 : 0}|${opts.custom ? 1 : 0}|${opts.offLevel ? 1 : 0}|${opts.badge ?? ""}|${opts.story ? 1 : 0}`;
   let divIcon = cache.get(key);
   if (!divIcon) {
     const classes = [
@@ -17,6 +17,7 @@ export function markerIcon(
       opts.faded ? "is-faded" : "",
       opts.custom ? "is-custom" : "",
       opts.offLevel ? "is-off-level" : "",
+      opts.story ? "is-story" : "",
     ].join(" ");
     divIcon = L.divIcon({
       className: "tqp-marker",

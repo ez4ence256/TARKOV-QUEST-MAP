@@ -9,6 +9,8 @@ import { gameToLatLng, getCRS, latLngToGame, toLatLngBounds } from "./crs";
 import { markerIcon } from "./icons";
 import { BaseLayer, type BaseStatus } from "./BaseLayer";
 import { ExitsLayer } from "./ExitsLayer";
+import { StoryLayer } from "./StoryLayer";
+import type { StoryMapPoint } from "../lib/storyPoints";
 import type { ExitPhotosTarget } from "../components/PhotosTab";
 import { floorFromText } from "../lib/floorText";
 import {
@@ -56,6 +58,11 @@ interface MapViewProps {
   focus: { key: string; n: number } | null;
   /** Case « Extracts Scav » de la barre du haut. */
   showScavExits: boolean;
+  /** Case en cours des chapitres Main story sélectionnés, sur cette map. */
+  storyPoints: StoryMapPoint[];
+  storyName: (chapter: string) => string;
+  onStoryDone: (chapter: string, stepKey: string) => void;
+  onStoryOpen: (chapter: string) => void;
 }
 
 /** Emprise par défaut quand une map n'a pas de calibrage : celle des points, sinon un carré. */
@@ -263,6 +270,8 @@ function MapViewInner(props: MapViewProps) {
         <ClosePopupsWhenPlacing placing={props.placing} />
         <MapEvents placing={props.placing} onPlace={props.onPlace} onMove={setCursor} />
         <FocusPoint focus={props.focus} points={allFocusable} markers={markers} onLevel={showLevelOf} />
+
+        <StoryLayer points={props.storyPoints} nameOf={props.storyName} onDone={props.onStoryDone} onOpen={props.onStoryOpen} />
 
         {points.map((pt) => {
           const task = pt.taskId ? props.tasksById.get(pt.taskId) : undefined;

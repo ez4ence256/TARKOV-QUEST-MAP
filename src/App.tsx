@@ -21,7 +21,9 @@ import { dominantMap } from "./lib/ocrMatch";
 import { PanelResizer } from "./components/PanelResizer";
 import { getLang, setLang as applyLang, tr, type Lang } from "./lib/i18n";
 import { clampPanelWidth, readPanelWidth } from "./lib/panelWidth";
-import { storyIdOf } from "./lib/story";
+import { storyIdOf, storyStepId } from "./lib/story";
+import { chaptersWithPositions, currentStoryPoints, pointsOnMap } from "./lib/storyPoints";
+import { chapterName, useStoryItems } from "./components/StoryView";
 import { useRoom } from "./api/room";
 import { buildEventTasks, loadEventEntries, type EventEntry } from "./api/eventQuests";
 import { RoomControl } from "./components/RoomControl";
@@ -48,6 +50,8 @@ type LoadState =
   | { status: "ready"; data: TarkovData; source: "cache" | "network" | "stale"; error?: string }
   | { status: "error"; data: null; error: string };
 
+const NO_NAMES: Record<string, string> = {};
+const NO_DONE: Record<string, true> = {};
 const isMobile = () => window.matchMedia("(max-width: 800px)").matches;
 const newId = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -170,6 +174,51 @@ export default function App() {
       }
     return counts;
   }, [selectedTasks, mode.done, mode.manual, oneAtATime]);
+
+  // Main story : case en cours des chapitres choisis qui ont une position relevée sur le wiki
+  const storyIds = useMemo(() => (mode.story?.selected ?? []).filter((c) => chaptersWithPositions().includes(c)), [mode.story?.selected]);
+  const { items: storyItems, chapters: storyChapters } = useStoryItems(storyIds, data?.itemNames ?? NO_NAMES);
+  const storyDone = mode.story?.done ?? NO_DONE;
+  const storyPointsAll = useMemo(() => storyIds.flatMap((c) => currentStoryPoints(c, storyItems[c] ?? [], storyDone)), [storyIds, storyItems, storyDone]);
+  const storyPoints = useMemo(() => pointsOnMap(storyPointsAll, currentMap?.normalizedName), [storyPointsAll, currentMap]);
+  // la case en cours de la Main story compte aussi dans le sélecteur de map
+  const mapCounts = useMemo(() => {
+    const counts = new Map(pointsPerMap);
+    for (const p of storyPointsAll) {
+      const id = maps.find((m) => m.normalizedName === p.map)?.id;
+      if (id) counts.set(id, (counts.get(id) ?? 0) + 1);
+    }
+    return counts;
+  }, [pointsPerMap, storyPointsAll, maps]);
+  const storyName = useCallback((chapter: string) => chapterName(storyChapters, chapter), [storyChapters]);
+  const setStoryStep = (chapter: string, stepKey: string, value: boolean) => dispatch({ type: "setStoryStep", chapter, stepKey, done: value });
+
+  // chapitre qui vient d'être choisi ou dont une case vient d'être cochée : si sa case en cours est sur une autre map, on y va
+  const pendingStory = useRef(new Set<string>());
+  const prevStory = useRef<{ mode: string | null; selected: string[]; done: Record<string, true> } | null>(null);
+  useEffect(() => {
+    const cur = { mode: gameMode, selected: mode.story?.selected ?? [], done: storyDone };
+    const prev = prevStory.current;
+    prevStory.current = cur;
+    if (!prev || prev.mode !== cur.mode) return; // premier rendu ou changement de mode : rien à suivre
+    const count = (done: Record<string, true>, c: string) => Object.keys(done).filter((k) => k.startsWith(storyStepId(c, ""))).length;
+    for (const c of cur.selected)
+      if (chaptersWithPositions().includes(c) && (!prev.selected.includes(c) || count(prev.done, c) !== count(cur.done, c))) pendingStory.current.add(c);
+  }, [gameMode, mode.story?.selected, storyDone]);
+  useEffect(() => {
+    if (pendingStory.current.size === 0 || !currentMap) return;
+    for (const c of [...pendingStory.current]) {
+      if (!storyIds.includes(c)) pendingStory.current.delete(c);
+      else if (storyItems[c]) {
+        pendingStory.current.delete(c);
+        const mine = storyPointsAll.filter((p) => p.chapter === c);
+        const target = mine.length > 0 && !mine.some((p) => p.map === currentMap.normalizedName) ? maps.find((m) => m.normalizedName === mine[0].map) : undefined;
+        if (!target) continue;
+        dispatch({ type: "setMap", mapId: target.id });
+        setMapNotice(tr(`Map affichée : ${target.name} (le point de « ${storyName(c)} » s'y trouve).`, `Displayed map: ${target.name} (the point of "${storyName(c)}" is there).`));
+      }
+    }
+  }, [storyIds, storyItems, storyPointsAll, currentMap, maps, storyName]);
 
   const customPoints = useMemo(
     () => mode.customPoints.filter((p) => p.mapId === currentMap?.id),
@@ -305,7 +354,7 @@ export default function App() {
         <div className="brand">
           Quest Planner <span className="mode-badge">{modeLabel}</span>
         </div>
-        <MapPicker maps={maps} currentId={currentMap?.id ?? ""} counts={pointsPerMap} onPick={showMap} />
+        <MapPicker maps={maps} currentId={currentMap?.id ?? ""} counts={mapCounts} onPick={showMap} />
         <RoomControl room={room} />
         <label className="scav-check">
           <input type="checkbox" checked={showScavExits} onChange={(e) => changeScavExits(e.target.checked)} />
@@ -442,7 +491,7 @@ export default function App() {
               taskId={tabTaskId}
               onTaskChange={setTabTaskId}
               storyDone={mode.story?.done ?? {}}
-              onStoryStep={(chapter, stepKey, value) => dispatch({ type: "setStoryStep", chapter, stepKey, done: value })}
+              onStoryStep={setStoryStep}
               onStoryReset={(chapter) => dispatch({ type: "resetStory", chapter })}
               done={mode.done}
               onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })}
@@ -549,6 +598,10 @@ export default function App() {
               onPlace={onPlace}
               focus={focus}
               showScavExits={showScavExits}
+              storyPoints={storyPoints}
+              storyName={storyName}
+              onStoryDone={(chapter, stepKey) => setStoryStep(chapter, stepKey, true)}
+              onStoryOpen={(chapter) => showQuest(storyIdOf(chapter))}
               onPhotos={showPhotos}
               onExit={showExitPhotos}
               onQuest={showQuest}

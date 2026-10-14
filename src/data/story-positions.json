@@ -1,0 +1,86 @@
+{
+  "Accidental Witness::req#0": {
+    "map": "customs",
+    "positions": [
+      {
+        "x": 214.1,
+        "z": 173.4
+      }
+    ],
+    "source": "Accidental Witness Map.png",
+    "method": "homographie de l'affiche Customs (re3mr, vue 3D) : arêtes en ECC, recalage local sur les bâtiments des dortoirs ; contrôle : sortie Factory Shacks sur son icône ; centre du cercle ou du cadre rouge",
+    "errorM": 12
+  },
+  "Accidental Witness::figure out where kozlov lived read the note on kozlov s door#0": {
+    "map": "customs",
+    "positions": [
+      {
+        "x": 230.2,
+        "z": 140.3
+      }
+    ],
+    "source": "Customs 2 Story Dorms Map.png",
+    "method": "homographie de l'affiche Customs (re3mr, vue 3D) : arêtes en ECC, recalage local sur les bâtiments des dortoirs ; contrôle : sortie Factory Shacks sur son icône ; centre du cercle ou du cadre rouge (cadre autour du bâtiment)",
+    "errorM": 28
+  },
+  "Accidental Witness::access skier s accomplice s apartment#0": {
+    "map": "streets-of-tarkov",
+    "positions": [
+      {
+        "x": 103.7,
+        "z": 134.3
+      }
+    ],
+    "source": "Zmeevsky3Apt8Map.png",
+    "method": "similitude par points SIFT sur le SVG de Streets (résidu 0,2 m) ; centre du cadre rouge autour du bâtiment",
+    "errorM": 8
+  },
+  "Accidental Witness::locate anastasia s apartment#0": {
+    "map": "streets-of-tarkov",
+    "positions": [
+      {
+        "x": 226.5,
+        "z": 228.2
+      }
+    ],
+    "source": "AccidentalWitnessAnastasiaBuildingMap.png",
+    "method": "similitude par points SIFT sur le SVG de Streets (résidu 0,2 m) ; centre du carré rouge autour du bâtiment",
+    "errorM": 8
+  },
+  "Accidental Witness::locate courier pasha search the ambush spot#0": {
+    "map": "customs",
+    "positions": [
+      {
+        "x": 266.2,
+        "z": 131.7
+      }
+    ],
+    "source": "AccidentalWitnessPashaMap.png",
+    "method": "homographie de l'affiche Customs (re3mr, vue 3D) : arêtes en ECC, recalage local sur les bâtiments des dortoirs ; contrôle : sortie Factory Shacks sur son icône ; centre du cercle ou du cadre rouge",
+    "errorM": 13
+  },
+  "Accidental Witness::locate and investigate reshala s stash#0": {
+    "map": "customs",
+    "positions": [
+      {
+        "x": 80.7,
+        "z": -105.3
+      }
+    ],
+    "source": "ReshalasBunkhouseKeyMap.png",
+    "method": "homographie de l'affiche Customs (re3mr, vue 3D) : arêtes en ECC, recalage local sur les bâtiments des dortoirs ; contrôle : sortie Factory Shacks sur son icône ; centre du cercle ou du cadre rouge",
+    "errorM": 14
+  },
+  "Accidental Witness::locate kozlov s hideout and obtain his evidence#0": {
+    "map": "shoreline",
+    "positions": [
+      {
+        "x": 292.2,
+        "z": 118.3
+      }
+    ],
+    "source": "AccidentalWitnessKozlovsHideoutMap.png",
+    "method": "similitude par appariement des bâtiments avec le SVG de Shoreline (19 paires, résidu 0,9 m) ; centre du carré rouge autour de la maison",
+    "errorM": 9
+  }
+}

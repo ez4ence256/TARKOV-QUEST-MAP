@@ -5,7 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import { loadStoryChapters, loadStoryPage, type StoryPageData } from "../api/story";
 import { pageUrlFor, type WikiPhoto } from "../api/wiki";
 import { getLang, tr } from "../lib/i18n";
-import { currentStepIndex, fillItems, resolveStory, stepsDone, storyStepId, type ResolvedStory, type StoryChapter } from "../lib/story";
+import { currentStepIndex, fillItems, resolveStory, stepsDone, stepText, storyStepId, type ResolvedStory, type StoryChapter } from "../lib/story";
+import type { StoryItem } from "../lib/storyPoints";
 import { ConfirmButton } from "./ConfirmButton";
 import { WikiBlocks } from "./WikiBlocks";
 
@@ -40,6 +41,45 @@ type PageState =
   /** url / title : page dont vient le texte affiché (française ou anglaise). */
   | { status: "ready"; en: StoryPageData; resolved: ResolvedStory; url: string; title: string };
 
+/** Chapitre lu dans la langue demandée (page anglaise + française si elle existe), avec le texte retenu. */
+async function resolveChapter(id: string, chapters: ChaptersState, wantFr: boolean) {
+  const frTitle = (wantFr && chapters.chapters?.find((c) => c.id === id)?.frTitle) || null;
+  const en = await loadStoryPage(id, "en");
+  const fr = frTitle ? await loadStoryPage(frTitle, "fr").catch(() => null) : null;
+  const frUsable = fr && fr.exists ? fr : null;
+  const resolved = resolveStory(en, frUsable, wantFr, (c) => chapterName(chapters.chapters, c));
+  const used = resolved.choice.lang === "fr" && frUsable ? frUsable : en;
+  return { en, resolved, url: used.pageUrl, title: used.title };
+}
+
+/**
+ * Cases (conditions puis étapes, titre et texte dans la langue de l'interface) de chapitres, pour la
+ * carte : seulement les chapitres demandés, la page étant déjà en cache quand elle a été ouverte.
+ */
+export function useStoryItems(ids: string[], itemNames: Record<string, string>): { items: Record<string, StoryItem[]>; chapters: StoryChapter[] | null } {
+  const wantFr = getLang() === "fr";
+  const chapters = useStoryChapters(ids.length > 0);
+  const [items, setItems] = useState<Record<string, StoryItem[]>>({});
+  const waiting = wantFr && (chapters.status === "loading" || chapters.status === "idle");
+  const idsKey = ids.join("|");
+  useEffect(() => {
+    if (waiting) return;
+    let cancelled = false;
+    for (const id of ids) {
+      resolveChapter(id, chapters, wantFr)
+        .then(({ resolved }) => {
+          const list = [...resolved.requirements, ...resolved.steps].map((s) => ({ key: s.key, title: fillItems(s.title, itemNames), text: stepText(s) }));
+          if (!cancelled) setItems((prev) => ({ ...prev, [id]: list }));
+        })
+        .catch(() => undefined); // wiki injoignable : pas de point, la fiche du chapitre montre l'erreur
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [idsKey, wantFr, waiting, itemNames]);
+  return { items, chapters: chapters.chapters };
+}
+
 /**
  * Chapitre ouvert : la page anglaise, plus la française en mode français quand la liste dit
  * qu'elle existe (la progression est toujours enregistrée sous les titres anglais).
@@ -53,14 +93,9 @@ export function useStoryPage(id: string, chapters: ChaptersState, wantFr: boolea
     if (waiting) return;
     let cancelled = false;
     setState({ status: "loading" });
-    (async () => {
-      const en = await loadStoryPage(id, "en");
-      const fr = frTitle ? await loadStoryPage(frTitle, "fr").catch(() => null) : null;
-      const frUsable = fr && fr.exists ? fr : null;
-      const resolved = resolveStory(en, frUsable, wantFr, (c) => chapterName(chapters.chapters, c));
-      const used = resolved.choice.lang === "fr" && frUsable ? frUsable : en;
-      if (!cancelled) setState({ status: "ready", en, resolved, url: used.pageUrl, title: used.title });
-    })().catch((error: Error) => !cancelled && setState({ status: "error", error: error.message }));
+    resolveChapter(id, chapters, wantFr)
+      .then((ready) => !cancelled && setState({ status: "ready", ...ready }))
+      .catch((error: Error) => !cancelled && setState({ status: "error", error: error.message }));
     return () => {
       cancelled = true;
     };
