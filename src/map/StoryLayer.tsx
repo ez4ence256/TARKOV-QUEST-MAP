@@ -29,7 +29,7 @@ export function StoryLayer(props: {
               <p className="popup-desc">{p.stepTitle}</p>
               {p.count > 1 && (
                 <div className="popup-spawn">
-                  {tr("Position possible", "Possible position")} <strong>{p.index}</strong> {tr("sur", "of")} {p.count}
+                  {tr("Position", "Position")} <strong>{p.index}</strong> {tr("sur", "of")} {p.count}
                 </div>
               )}
               <div className="popup-spawn">{tr("Position relevée sur la carte du wiki", "Position read from the wiki map")}</div>

@@ -82,5 +82,117 @@
     "source": "AccidentalWitnessKozlovsHideoutMap.png",
     "method": "similitude par appariement des bâtiments avec le SVG de Shoreline (19 paires, résidu 0,9 m) ; centre du carré rouge autour de la maison",
     "errorM": 9
+  },
+  "The Labyrinth (story chapter)::req#0": {
+    "map": "shoreline",
+    "positions": [
+      {
+        "x": -195.4,
+        "z": -77.9
+      }
+    ],
+    "source": "The Labyrinth Transit Map.png",
+    "method": "plan du sous-sol de l'aile ouest : similitude ECC sur le calque souterrain du SVG de Littoral (IoU 0,93) ; centre du carré rouge de la pièce du transit ; la zone du transit de tarkov.dev est dans le couloir juste au nord (5 m), l'affiche extérieure (Vitamins1) encadre le même endroit",
+    "errorM": 5
+  },
+  "The Labyrinth (story chapter)::access the underground facility#0": {
+    "map": "shoreline",
+    "positions": [
+      {
+        "x": -195.4,
+        "z": -77.9
+      }
+    ],
+    "source": "The Labyrinth Transit Map.png",
+    "method": "plan du sous-sol de l'aile ouest : similitude ECC sur le calque souterrain du SVG de Littoral (IoU 0,93) ; centre du carré rouge de la pièce du transit ; la zone du transit de tarkov.dev est dans le couloir juste au nord (5 m), l'affiche extérieure (Vitamins1) encadre le même endroit",
+    "errorM": 5
+  },
+  "The Labyrinth (story chapter)::locate the traces of the bear squad#0": {
+    "map": "the-labyrinth",
+    "positions": [
+      {
+        "x": -13.8,
+        "z": -22.3
+      }
+    ],
+    "source": "Leshy's orders location map.png",
+    "method": "similitude (ECC sur les masques de sol) entre l'affiche re3mr du Labyrinthe et les tuiles de la map de l'appli (même échelle 0,99 sur les 5 affiches) ; contrôle : sorties « The Way Up » et « Ariadne » de tarkov.dev sur leurs icônes, résidu < 1 m ; centre du carré rouge",
+    "errorM": 3
+  },
+  "The Labyrinth (story chapter)::investigate the bear squad regroup spot at item 1156#0": {
+    "map": "the-labyrinth",
+    "positions": [
+      {
+        "x": -7.4,
+        "z": 29.3
+      }
+    ],
+    "source": "Labryrinth missile area map.png",
+    "method": "similitude (ECC sur les masques de sol) entre l'affiche re3mr du Labyrinthe et les tuiles de la map de l'appli (même échelle 0,99 sur les 5 affiches) ; contrôle : sorties « The Way Up » et « Ariadne » de tarkov.dev sur leurs icônes, résidu < 1 m ; centre du cadre jaune (zone, non rouge)",
+    "errorM": 9
+  },
+  "The Labyrinth (story chapter)::locate the squad leader gather more information about the squad#0": {
+    "map": "the-labyrinth",
+    "positions": [
+      {
+        "x": 20.7,
+        "z": 6.7
+      }
+    ],
+    "source": "Labryrinth torture room map.png",
+    "method": "similitude (ECC sur les masques de sol) entre l'affiche re3mr du Labyrinthe et les tuiles de la map de l'appli (même échelle 0,99 sur les 5 affiches) ; contrôle : sorties « The Way Up » et « Ariadne » de tarkov.dev sur leurs icônes, résidu < 1 m ; centre du cadre rouge de la pièce",
+    "errorM": 4
+  },
+  "The Labyrinth (story chapter)::investigate the 5 lab staff bodies#0": {
+    "map": "the-labyrinth",
+    "positions": [
+      {
+        "x": -6.7,
+        "z": 30.6
+      },
+      {
+        "x": -13.7,
+        "z": 51.5
+      },
+      {
+        "x": 12.0,
+        "z": 32.8
+      },
+      {
+        "x": 9.7,
+        "z": 4.7
+      },
+      {
+        "x": -5.5,
+        "z": 10.0
+      }
+    ],
+    "source": "The Labyrinth Scientist locations map.png",
+    "method": "similitude (ECC sur les masques de sol) entre l'affiche re3mr du Labyrinthe et les tuiles de la map de l'appli (même échelle 0,99 sur les 5 affiches) ; contrôle : sorties « The Way Up » et « Ariadne » de tarkov.dev sur leurs icônes, résidu < 1 m ; centres des 5 repères orange numérotés (le n°4 est dans le bureau d'observation, recoupé avec l'autre affiche à 0,4 m)",
+    "errorM": 4
+  },
+  "The Labyrinth (story chapter)::access the locked office#0": {
+    "map": "the-labyrinth",
+    "positions": [
+      {
+        "x": 10.1,
+        "z": 4.7
+      }
+    ],
+    "source": "Observation room Map.png",
+    "method": "similitude (ECC sur les masques de sol) entre l'affiche re3mr du Labyrinthe et les tuiles de la map de l'appli (même échelle 0,99 sur les 5 affiches) ; contrôle : sorties « The Way Up » et « Ariadne » de tarkov.dev sur leurs icônes, résidu < 1 m ; centre du cadre rouge du bureau d'observation",
+    "errorM": 4
+  },
+  "The Labyrinth (story chapter)::obtain and read the labyrinth facility research report#0": {
+    "map": "shoreline",
+    "positions": [
+      {
+        "x": -276.1,
+        "z": 466.3
+      }
+    ],
+    "source": "Labyrinth facility research report location map.png",
+    "method": "similitude par appariement des bâtiments (12 paires, résidu 0,8 m) avec le SVG de Littoral ; centre de l'anneau de l'épingle rouge ; contrôle approximatif : les icônes d'extraction du wiki sont décalées de 10 à 15 m",
+    "errorM": 12
   }
 }
