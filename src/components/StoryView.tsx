@@ -67,8 +67,8 @@ export function useStoryItems(ids: string[], itemNames: Record<string, string>):
     let cancelled = false;
     for (const id of ids) {
       resolveChapter(id, chapters, wantFr)
-        .then(({ resolved }) => {
-          const list = [...resolved.requirements, ...resolved.steps].map((s) => ({ key: s.key, title: fillItems(s.title, itemNames), text: stepText(s) }));
+        .then(({ resolved, url, title }) => {
+          const list = [...resolved.requirements, ...resolved.steps].map((s) => ({ key: s.key, title: fillItems(s.title, itemNames), text: stepText(s), photos: (s.photos ?? []).map((p) => ({ ...p, caption: fillItems(p.caption, itemNames) })), pageUrl: url, pageTitle: title }));
           if (!cancelled) setItems((prev) => ({ ...prev, [id]: list }));
         })
         .catch(() => undefined); // wiki injoignable : pas de point, la fiche du chapitre montre l'erreur

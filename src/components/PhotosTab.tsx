@@ -16,6 +16,14 @@ export interface ExitPhotosTarget {
   kind: keyof typeof EXIT_KIND_LABELS;
 }
 
+/** Case en cours de la Main story, cliquée dans la bulle d'un point de la carte. */
+export interface StoryPhotosTarget {
+  title: string;
+  photos: WikiPhoto[];
+  pageUrl?: string;
+  pageTitle?: string;
+}
+
 interface Props {
   tasks: Task[];
   /** Quêtes sélectionnées (proposées dans la liste). */
@@ -25,6 +33,8 @@ interface Props {
   onTaskChange: (taskId: string) => void;
   /** Sortie cliquée sur la carte : ses photos remplacent celles de la quête. */
   exit?: ExitPhotosTarget | null;
+  /** Case de la Main story : ses photos remplacent celles de la quête. */
+  story?: StoryPhotosTarget | null;
 }
 
 type PhotosState =
@@ -73,6 +83,26 @@ function PhotoList({ photos }: { photos: WikiPhoto[] }) {
 type ExitState = { status: "loading" } | { status: "ready"; page: ExitPhotosPage } | { status: "error" };
 
 /** Photos d'une sortie (page de sa map sur le wiki, en cache). Sans photo ou en erreur : lien vers la page. */
+function StoryPhotosView({ story }: { story: StoryPhotosTarget }) {
+  return (
+    <>
+      <p>
+        <strong>{story.title}</strong>
+      </p>
+      {story.photos.length === 0 ? <p className="muted">{tr("Pas de photo pour cette étape", "No photo for this step")}</p> : <PhotoList photos={story.photos} />}
+      {story.pageUrl && (
+        <p className="muted small">
+          {tr("Photos : ", "Photos: ")}
+          <a href={story.pageUrl} target="_blank" rel="noreferrer">
+            {story.pageTitle ?? tr("wiki Escape from Tarkov", "Escape from Tarkov wiki")}
+          </a>{" "}
+          (CC BY-NC-SA)
+        </p>
+      )}
+    </>
+  );
+}
+
 function ExitPhotosView({ exit }: { exit: ExitPhotosTarget }) {
   const [state, setState] = useState<ExitState>({ status: "loading" });
   useEffect(() => {
@@ -115,16 +145,16 @@ function ExitPhotosView({ exit }: { exit: ExitPhotosTarget }) {
   );
 }
 
-export function PhotosTab({ tasks, selectedIds, taskId, onTaskChange, exit }: Props) {
+export function PhotosTab({ tasks, selectedIds, taskId, onTaskChange, exit, story }: Props) {
   const tasksById = new Map(tasks.map((t) => [t.id, t]));
   // quêtes proposées : la sélection, plus la quête demandée si elle n'en fait pas partie
   const optionIds = [...new Set([...(taskId ? [taskId] : []), ...selectedIds])].filter(
     (id) => tasksById.get(id)?.wikiLink,
   );
   const current = (taskId && tasksById.get(taskId)) || (optionIds[0] ? tasksById.get(optionIds[0]) : undefined);
-  const photos = useQuestPhotos(exit ? null : (current?.wikiLink ?? null));
+  const photos = useQuestPhotos(exit || story ? null : (current?.wikiLink ?? null));
 
-  if (!current && !exit) {
+  if (!current && !exit && !story) {
     return (
       <div className="tab-body empty">
         <p>{tr("Sélectionnez une quête, ou utilisez le bouton 📷 d'une quête dans la liste.", "Select a quest, or use the 📷 button of a quest in the list.")}</p>
@@ -136,18 +166,19 @@ export function PhotosTab({ tasks, selectedIds, taskId, onTaskChange, exit }: Pr
     <div className="tab-body">
       <select
         className="input"
-        value={exit ? "" : current!.id}
+        value={exit || story ? "" : current!.id}
         onChange={(e) => e.target.value && onTaskChange(e.target.value)}
         aria-label={tr("Quête dont afficher les photos", "Quest to show photos for")}
       >
-        {exit && <option value="">{tr("Sortie : ", "Exit: ")}{exit.name}</option>}
+        {story && <option value="">{story.title}</option>}
+        {!story && exit && <option value="">{tr("Sortie : ", "Exit: ")}{exit.name}</option>}
         {optionIds.map((id) => (
           <option key={id} value={id}>
             {tasksById.get(id)!.name}
           </option>
         ))}
       </select>
-      {exit ? <ExitPhotosView exit={exit} /> : <QuestPhotos current={current!} photos={photos} />}
+      {story ? <StoryPhotosView story={story} /> : exit ? <ExitPhotosView exit={exit} /> : <QuestPhotos current={current!} photos={photos} />}
     </div>
   );
 }

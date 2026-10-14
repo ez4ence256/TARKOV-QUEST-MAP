@@ -63,6 +63,7 @@ interface MapViewProps {
   storyName: (chapter: string) => string;
   onStoryDone: (chapter: string, stepKey: string) => void;
   onStoryOpen: (chapter: string) => void;
+  onStoryPhotos: (chapter: string, stepKey: string) => void;
 }
 
 /** Emprise par défaut quand une map n'a pas de calibrage : celle des points, sinon un carré. */
@@ -271,7 +272,7 @@ function MapViewInner(props: MapViewProps) {
         <MapEvents placing={props.placing} onPlace={props.onPlace} onMove={setCursor} />
         <FocusPoint focus={props.focus} points={allFocusable} markers={markers} onLevel={showLevelOf} />
 
-        <StoryLayer points={props.storyPoints} nameOf={props.storyName} onDone={props.onStoryDone} onOpen={props.onStoryOpen} />
+        <StoryLayer points={props.storyPoints} nameOf={props.storyName} onDone={props.onStoryDone} onOpen={props.onStoryOpen} onPhotos={props.onStoryPhotos} />
 
         {points.map((pt) => {
           const task = pt.taskId ? props.tasksById.get(pt.taskId) : undefined;

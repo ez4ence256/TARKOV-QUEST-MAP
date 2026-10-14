@@ -4,6 +4,7 @@
 
 import positionsJson from "../data/story-positions.json";
 import { floorFromText } from "./floorText";
+import type { WikiPhoto } from "../api/wiki";
 import { tr } from "./i18n";
 import { storyStepId } from "./story";
 
@@ -31,6 +32,10 @@ export interface StoryItem {
   title: string;
   /** Texte de la case (titre + paragraphes), pour l'étage. */
   text: string;
+  /** Photos du wiki de la case (légendes déjà dans la langue affichée) et page dont elles viennent. */
+  photos?: WikiPhoto[];
+  pageUrl?: string;
+  pageTitle?: string;
 }
 
 export interface StoryMapPoint {

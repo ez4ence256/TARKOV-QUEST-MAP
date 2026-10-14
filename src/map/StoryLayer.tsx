@@ -13,6 +13,7 @@ export function StoryLayer(props: {
   nameOf: (chapter: string) => string;
   onDone: (chapter: string, stepKey: string) => void;
   onOpen: (chapter: string) => void;
+  onPhotos: (chapter: string, stepKey: string) => void;
 }) {
   return (
     <>
@@ -44,6 +45,9 @@ export function StoryLayer(props: {
                 </button>
                 <button className="btn btn-ghost" onClick={() => props.onOpen(p.chapter)}>
                   {tr("📜 Chapitre", "📜 Chapter")}
+                </button>
+                <button className="btn btn-ghost" onClick={() => props.onPhotos(p.chapter, p.stepKey)}>
+                  {tr("📷 Photos", "📷 Photos")}
                 </button>
               </div>
             </div>

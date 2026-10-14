@@ -13,7 +13,7 @@ import { QuestList } from "./components/QuestList";
 import { SelectedQuests } from "./components/SelectedQuests";
 import { CustomPointsTab } from "./components/CustomPointsTab";
 import { SettingsTab } from "./components/SettingsTab";
-import { PhotosTab, type ExitPhotosTarget } from "./components/PhotosTab";
+import { PhotosTab, type ExitPhotosTarget, type StoryPhotosTarget } from "./components/PhotosTab";
 import { ResetProgressSection } from "./components/ResetProgressSection";
 import { QuestTab } from "./components/QuestTab";
 import { CaptureTab } from "./components/CaptureTab";
@@ -92,6 +92,7 @@ export default function App() {
   const [tabTaskId, setTabTaskId] = useState<string | null>(null);
   // sortie cliquée sur la carte : l'onglet Photos montre la sienne plutôt que celles d'une quête
   const [photoExit, setPhotoExit] = useState<ExitPhotosTarget | null>(null);
+  const [photoStory, setPhotoStory] = useState<StoryPhotosTarget | null>(null);
   const [panelOpen, setPanelOpen] = useState(() => !isMobile());
   /** Largeur du panneau sur ordinateur (poignée de redimensionnement, enregistrée). */
   const [panelWidth, setPanelWidth] = useState(() => readPanelWidth(window.innerWidth));
@@ -228,15 +229,27 @@ export default function App() {
   // ouvre l'onglet Quête ou Photos sur une quête (boutons de la liste, du panneau ou d'une popup)
   const showTaskTab = useCallback((taskId: string, which: "quest" | "photos") => {
     setTabTaskId(taskId);
-    if (which === "photos") setPhotoExit(null);
+    if (which === "photos") {
+      setPhotoExit(null);
+      setPhotoStory(null);
+    }
     setTab(which);
     setPanelOpen(true);
   }, []);
   const showExitPhotos = useCallback((target: ExitPhotosTarget) => {
     setPhotoExit(target);
+    setPhotoStory(null);
     setTab("photos");
     setPanelOpen(true);
   }, []);
+  // photos de la case en cours d'un chapitre (bulle d'un point de la Main story)
+  const showStoryPhotos = (chapter: string, stepKey: string) => {
+    const item = storyItems[chapter]?.find((i) => i.key === stepKey);
+    setPhotoStory({ title: `${storyName(chapter)} - ${item?.title ?? stepKey}`, photos: item?.photos ?? [], pageUrl: item?.pageUrl, pageTitle: item?.pageTitle });
+    setPhotoExit(null);
+    setTab("photos");
+    setPanelOpen(true);
+  };
   const showPhotos = useCallback((taskId: string) => showTaskTab(taskId, "photos"), [showTaskTab]);
   const showQuest = useCallback((taskId: string) => showTaskTab(taskId, "quest"), [showTaskTab]);
 
@@ -537,6 +550,7 @@ export default function App() {
                 setTabTaskId(id);
               }}
               exit={photoExit}
+              story={photoStory}
             />
           )}
           {data && tab === "custom" && (
@@ -602,6 +616,7 @@ export default function App() {
               storyName={storyName}
               onStoryDone={(chapter, stepKey) => setStoryStep(chapter, stepKey, true)}
               onStoryOpen={(chapter) => showQuest(storyIdOf(chapter))}
+              onStoryPhotos={showStoryPhotos}
               onPhotos={showPhotos}
               onExit={showExitPhotos}
               onQuest={showQuest}
