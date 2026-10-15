@@ -1,7 +1,7 @@
 // Affiche des blocs de texte du wiki (voir lib/wikiText.ts) avec des éléments React :
 // tout est du texte échappé, aucun HTML du wiki n'est inséré dans la page.
 import type { ReactNode } from "react";
-import type { WikiBlock } from "../lib/wikiText";
+import type { LinkRef, WikiBlock } from "../lib/wikiText";
 import { tr } from "../lib/i18n";
 import { fillItems, ITEM_MARK } from "../lib/story";
 import { cellDisplay, itemColumn, rowOffset } from "../lib/itemIcons";
@@ -36,9 +36,27 @@ export function WikiBlocks({ blocks, itemNames, itemIcons }: { blocks: WikiBlock
   const t = (s: string) => (itemNames ? fillItems(s, itemNames) : s);
   // noms d'objets des tableaux (colonne « Item name ») et repères {{id}} du texte : une image chacun
   const tableNames = blocks.flatMap((b) => (b.type === "table" ? b.rows.map((r) => r[itemColumn(b.headers) + rowOffset(b.headers, r)] ?? "") : []));
-  const iconOf = useItemIcons(tableNames, itemNames, itemIcons);
+  const linkTargets = blocks.flatMap((b) => (b.type === "table" ? [] : b.type === "list" ? b.items.flatMap((i) => i.links ?? []) : (b.links ?? [])).map((l) => l.target));
+  const iconOf = useItemIcons([...tableNames, ...linkTargets], itemNames, itemIcons);
   /** Texte avec, avant chaque nom d'objet repéré ({{id}} du wiki français), son image. */
-  const rich = (s: string): ReactNode => {
+  const rich = (s: string, links?: LinkRef[]): ReactNode => {
+    if (links?.length) {
+      // lien vers un objet (texte anglais) : petite image avant le texte du lien, retrouvé dans l'ordre
+      const parts: ReactNode[] = [];
+      let pos = 0;
+      for (const l of links) {
+        const at = s.indexOf(l.text, pos);
+        const src = at < 0 ? undefined : iconOf(l.target);
+        if (!src) continue;
+        parts.push(richMarks(s.slice(pos, at)), <ItemThumb key={at} src={src} name={l.text} title={l.target} size={22} />);
+        pos = at;
+      }
+      parts.push(richMarks(s.slice(pos)));
+      return parts;
+    }
+    return richMarks(s);
+  };
+  const richMarks = (s: string): ReactNode => {
     if (!itemNames || !s.includes("⟦item:")) return t(s);
     const out: ReactNode[] = [];
     let last = 0;
@@ -58,19 +76,19 @@ export function WikiBlocks({ blocks, itemNames, itemIcons }: { blocks: WikiBlock
           case "heading":
             return (
               <div key={i} className={`wiki-heading wiki-heading-${Math.min(b.level, 4)}`}>
-                {t(b.text)}
+                {rich(b.text, b.links)}
               </div>
             );
           case "paragraph":
             return (
               <p key={i} className="wiki-paragraph">
-                {rich(b.text)}
+                {rich(b.text, b.links)}
               </p>
             );
           case "quote":
             return (
               <blockquote key={i} className="wiki-quote">
-                {t(b.text)}
+                {rich(b.text, b.links)}
               </blockquote>
             );
           case "list":
@@ -78,7 +96,7 @@ export function WikiBlocks({ blocks, itemNames, itemIcons }: { blocks: WikiBlock
               <ul key={i} className="wiki-list">
                 {b.items.map((item, j) => (
                   <li key={j} style={{ marginLeft: `${(item.depth - 1) * 1.1}em` }}>
-                    {rich(item.text)}
+                    {rich(item.text, item.links)}
                   </li>
                 ))}
               </ul>

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { batchTitles } from "../api/wiki";
+import { batchTitles, isItemPage } from "../api/wiki";
 import { cellDisplay, itemColumn, itemIdOf, nameIndex, normItemName, rowOffset } from "./itemIcons";
+import { linkRefs } from "./wikiText";
 
 const ID = "5a0000000000000000000001";
 
@@ -37,5 +38,25 @@ describe("lots de titres du wiki", () => {
     const titles = Array.from({ length: 120 }, (_, i) => `T${i}`);
     expect(batchTitles(titles).map((b) => b.length)).toEqual([50, 50, 20]);
     expect(batchTitles([])).toEqual([]);
+  });
+});
+
+describe("liens du wikitext et filtre objet / non-objet", () => {
+  it("garde cible et texte, ignore fichiers, catégories et autres langues", () => {
+    const raw = "Take [[Dorm room 110 key|the key]] to [[Customs]] [[File:A.png|x]] [[fr:Clé]] [[Hideout#Stash|stash]] [[Note_for_Kozlov]]";
+    expect(linkRefs(raw).links).toEqual([
+      { target: "Dorm room 110 key", text: "the key" },
+      { target: "Customs", text: "Customs" },
+      { target: "Hideout", text: "stash" },
+      { target: "Note for Kozlov", text: "Note_for_Kozlov" },
+    ]);
+    expect(linkRefs("sans lien")).toEqual({});
+  });
+  it("écarte marchands, maps, boss et quêtes, garde clés, notes et valeurs", () => {
+    expect(isItemPage(["Keys"])).toBe(true);
+    expect(isItemPage(["Seasonal changes", "Valuables"])).toBe(true);
+    expect(isItemPage(["Quest items"])).toBe(true);
+    expect(isItemPage([])).toBe(true);
+    for (const c of ["Locations", "Traders", "Bosses", "Quests", "Category:Factions"]) expect(isItemPage(["Notes", c])).toBe(false);
   });
 });

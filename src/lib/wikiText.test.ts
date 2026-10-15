@@ -179,6 +179,10 @@ describe("lecture du wikitext", () => {
     expect(blocks[1]).toEqual({
       type: "paragraph",
       text: "The Secure Folder 0060 can be found on Shoreline, in room 306 of the west wing at the Resort, located on a windowsill.",
+      links: [
+        { target: "Secure Folder 0060", text: "Secure Folder 0060" },
+        { target: "Shoreline", text: "Shoreline" },
+      ],
     });
     expect(parseBlocks(EASY_MONEY_2_GUIDE).map((b) => b.type)).toEqual(["table"]);
     const equipment = parseBlocks(findSection(splitSections(SIGNAL_3).sections, "Initial Equipment")!.body);

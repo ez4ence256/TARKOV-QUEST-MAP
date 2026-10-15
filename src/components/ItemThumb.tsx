@@ -3,11 +3,11 @@ import { useEffect, useMemo, useState } from "react";
 import { loadItemThumbs } from "../api/wiki";
 import { iconSrc, itemIdOf, nameIndex } from "../lib/itemIcons";
 
-export function ItemThumb({ src, name }: { src?: string; name: string }) {
+export function ItemThumb({ src, name, size = 32, title }: { src?: string; name: string; size?: number; title?: string }) {
   const [failed, setFailed] = useState(false);
   useEffect(() => setFailed(false), [src]);
   if (!src || failed) return null;
-  return <img className="item-icon" src={src} alt={name} width={32} height={32} loading="lazy" referrerPolicy="no-referrer" onError={() => setFailed(true)} />;
+  return <img className="item-icon" src={src} alt={name} title={title} width={size} height={size} style={{ width: size, height: size }} loading="lazy" referrerPolicy="no-referrer" onError={() => setFailed(true)} />;
 }
 
 const wikiTitle = (cell: string) => cell.replace(/⟦item:[0-9a-f]{24}⟧/g, "").trim();

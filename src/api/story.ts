@@ -129,14 +129,15 @@ async function fetchTemplates(names: string[], lang: WikiLang): Promise<Record<s
 // vient de `files`, la page du fichier se déduit du nom.
 const CDN = "https://static.wikia.nocookie.net/escapefromtarkov_gamepedia/images/";
 type StoredStep = Omit<StoryStep, "photos"> & { photos?: [string, string, string][] };
-type StoredPage = Omit<StoryPageData, "steps" | "requirements"> & { steps: StoredStep[]; requirements: StoredStep[] };
+/** linked : blocs lus avec les liens (`links`) ; une entrée plus ancienne est relue sur le wiki. */
+type StoredPage = Omit<StoryPageData, "steps" | "requirements"> & { steps: StoredStep[]; requirements: StoredStep[]; linked?: true };
 
 const compactUrl = (u: string) => (u.startsWith(CDN) ? u.slice(CDN.length) : u);
 const expandUrl = (u: string) => (u.startsWith("http") ? u : CDN + u);
 
 const compactStep = (s: StoryStep): StoredStep => ({ ...s, photos: s.photos?.map((p): [string, string, string] => [p.file, compactUrl(p.thumbUrl), compactUrl(p.fullUrl)]) });
 
-const compactPage = (page: StoryPageData): StoredPage => ({ ...page, steps: page.steps.map(compactStep), requirements: page.requirements.map(compactStep) });
+const compactPage = (page: StoryPageData): StoredPage => ({ ...page, steps: page.steps.map(compactStep), requirements: page.requirements.map(compactStep), linked: true });
 
 const expandPage = (page: StoredPage): StoryPageData => {
   const expand = (s: StoredStep): StoryStep => ({
@@ -159,7 +160,7 @@ export function loadStoryPage(title: string, lang: WikiLang): Promise<StoryPageD
   const key = `${lang}:${title}`;
   const cached = readCache<StoredPage>(`story:${key}`);
   // sans `requirements` : chapitre mis en cache avant l'ajout des conditions, relu une fois sur le wiki
-  if (cached && Array.isArray(cached.requirements) && cached.previous !== undefined) {
+  if (cached && Array.isArray(cached.requirements) && cached.previous !== undefined && cached.linked) {
     try {
       return Promise.resolve(expandPage(cached));
     } catch {

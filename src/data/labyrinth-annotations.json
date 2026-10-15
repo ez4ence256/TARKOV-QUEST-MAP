@@ -1,0 +1,814 @@
+{
+ "source": "The Labyrinth Map by re3mr.png et Observation room Map.png (wiki Escape from Tarkov) ; affiche v0.6B de l'utilisateur pour la 6e victime",
+ "credit": "re3mr.com (CC BY-NC-SA 4.0), avec le wiki Escape from Tarkov",
+ "precisionM": 1.5,
+ "chambers": [
+  {
+   "n": 1,
+   "name": {
+    "fr": "Piscine toxique",
+    "en": "Toxic Pool"
+   },
+   "x": -33.3,
+   "z": 73.7,
+   "steps": {
+    "fr": "Trouvez la clé 1 ; ouvrez la porte ; appuyez sur le bouton du mur (l'interrupteur vide la piscine toxique).",
+    "en": "Find key 1; unlock the door; press the button on the wall (the switch drains the toxic pool)."
+   }
+  },
+  {
+   "n": 2,
+   "name": {
+    "fr": "Vapeur",
+    "en": "Steam Hazard"
+   },
+   "x": 7.7,
+   "z": -28.2,
+   "steps": {
+    "fr": "Trouvez la clé 2 ; ouvrez la porte ; trouvez le volant de vanne (étage supérieur) et posez-le sur le tuyau près de l'apparition ; tournez-le pour couper la vapeur.",
+    "en": "Find key 2; unlock the door; find the valve handwheel (upper floor) and apply it to the pipe near the spawn; turn it to disable the steam."
+   }
+  },
+  {
+   "n": 3,
+   "name": {
+    "fr": "Feu",
+    "en": "Fire Hazard"
+   },
+   "x": -49.0,
+   "z": -3.6,
+   "steps": {
+    "fr": "Trouvez la clé 3 ; ouvrez la porte ; trouvez le chalumeau et utilisez-le sur la porte près de l'apparition ; appuyez sur le bouton de l'armoire électrique pour couper le feu.",
+    "en": "Find key 3; unlock the door; find the gas torch and use it on the door near the spawn; press the button at the electrical cabinet to disable the fire."
+   }
+  },
+  {
+   "n": 4,
+   "name": {
+    "fr": "Piège à fusil",
+    "en": "Shotgun Trap"
+   },
+   "x": 18.4,
+   "z": 52.8,
+   "steps": {
+    "fr": "Trouvez la clé 4 ; ouvrez la porte ; rampez jusqu'à l'autre pièce ; tirez le levier ; défoncez la porte à coups de pied (l'interrupteur coupe le piège à fusil).",
+    "en": "Find key 4; unlock the door; crawl to the other room; pull the lever; kick the door (the switch disables the shotgun trap)."
+   }
+  },
+  {
+   "n": 5,
+   "name": {
+    "fr": "Flaque toxique",
+    "en": "Toxic Puddle"
+   },
+   "x": 46.5,
+   "z": 23.4,
+   "steps": {
+    "fr": "Trouvez le chalumeau ; utilisez-le sur la grande porte métallique ; tirez le levier (un interrupteur abaisse le pont de la flaque).",
+    "en": "Find the gas torch; use it on the big metal door; pull the lever (a switch lowers the puddle bridge)."
+   }
+  }
+ ],
+ "markers": [
+  {
+   "type": "corpse-key",
+   "color": "red",
+   "n": 1,
+   "x": -6.6,
+   "z": 14.9,
+   "label": {
+    "fr": "Sur le tracteur",
+    "en": "On the tractor"
+   }
+  },
+  {
+   "type": "corpse-key",
+   "color": "red",
+   "n": 2,
+   "x": 3.8,
+   "z": 29.3,
+   "label": {
+    "fr": "Sur une bouteille de gaz",
+    "en": "On a gas cylinder"
+   }
+  },
+  {
+   "type": "corpse-key",
+   "color": "red",
+   "n": 3,
+   "x": -1.7,
+   "z": 5.1,
+   "label": {
+    "fr": "Sur un carton avec des bougies",
+    "en": "On a carton with candles"
+   }
+  },
+  {
+   "type": "corpse-key",
+   "color": "red",
+   "n": 4,
+   "x": -17.3,
+   "z": 47.8,
+   "label": {
+    "fr": "Sur un carton",
+    "en": "On a carton"
+   }
+  },
+  {
+   "type": "corpse-key",
+   "color": "red",
+   "n": 5,
+   "x": 5.3,
+   "z": 41.3,
+   "label": {
+    "fr": "Sur un carton avec des bougies",
+    "en": "On a carton with candles"
+   }
+  },
+  {
+   "type": "corpse-key",
+   "color": "red",
+   "n": 6,
+   "x": 1.4,
+   "z": 55.9,
+   "label": {
+    "fr": "Sur un carton",
+    "en": "On a carton"
+   }
+  },
+  {
+   "type": "scientist",
+   "color": "purple",
+   "n": 1,
+   "x": -5.0,
+   "z": 10.3,
+   "label": {
+    "fr": "À mi-corps dans les barbelés",
+    "en": "Halfway into the barbed wire"
+   }
+  },
+  {
+   "type": "scientist",
+   "color": "purple",
+   "n": 2,
+   "x": -6.8,
+   "z": 30.3,
+   "label": {
+    "fr": "Près de la bombe",
+    "en": "Near the bomb"
+   }
+  },
+  {
+   "type": "scientist",
+   "color": "purple",
+   "n": 3,
+   "x": 11.9,
+   "z": 32.5,
+   "label": {
+    "fr": "Sous un morceau de contreplaqué",
+    "en": "Under a piece of plywood"
+   }
+  },
+  {
+   "type": "scientist",
+   "color": "purple",
+   "n": 4,
+   "x": -14.1,
+   "z": 51.9,
+   "label": {
+    "fr": "Sous des sacs poubelle",
+    "en": "Under some garbage bags"
+   }
+  },
+  {
+   "type": "scientist",
+   "color": "purple",
+   "n": 5,
+   "x": -0.1,
+   "z": -0.6,
+   "label": {
+    "fr": "Près d'un baril renversé",
+    "en": "Near a tipped-over barrel"
+   }
+  },
+  {
+   "type": "scientist",
+   "color": "purple",
+   "n": 6,
+   "x": 9.5,
+   "z": 5.4,
+   "label": {
+    "fr": "Dans la salle d'observation",
+    "en": "In the observation room"
+   },
+   "approx": true
+  },
+  {
+   "type": "key-spawn",
+   "color": "black",
+   "n": 1,
+   "chamber": 1,
+   "x": -43.2,
+   "z": 65.2,
+   "label": {
+    "fr": "Sur la pelle",
+    "en": "On the shovel"
+   }
+  },
+  {
+   "type": "key-spawn",
+   "color": "black",
+   "n": 2,
+   "chamber": 1,
+   "x": -45.0,
+   "z": 60.5,
+   "label": {
+    "fr": "Sur l'échelle, 2e barreau en partant du haut",
+    "en": "On the ladder, 2nd step from the top"
+   }
+  },
+  {
+   "type": "key-spawn",
+   "color": "black",
+   "n": 3,
+   "chamber": 1,
+   "x": -33.5,
+   "z": 70.6,
+   "label": {
+    "fr": "Derrière la chaudière de gauche",
+    "en": "Behind the left boiler"
+   }
+  },
+  {
+   "type": "key-spawn",
+   "color": "black",
+   "n": 4,
+   "chamber": 1,
+   "x": -23.2,
+   "z": 65.4,
+   "label": {
+    "fr": "Sur la bouteille de gaz bleue",
+    "en": "On the blue gas cylinder"
+   }
+  },
+  {
+   "type": "key-spawn",
+   "color": "black",
+   "n": 5,
+   "chamber": 1,
+   "x": -24.5,
+   "z": 64.1,
+   "label": {
+    "fr": "Au bout du tuyau du milieu",
+    "en": "On the far end of the middle pipe"
+   }
+  },
+  {
+   "type": "key-spawn",
+   "color": "black",
+   "n": 6,
+   "chamber": 1,
+   "x": -34.3,
+   "z": 59.6,
+   "label": {
+    "fr": "Au bout du tuyau du milieu",
+    "en": "On the far end of the middle pipe"
+   }
+  },
+  {
+   "type": "key-spawn",
+   "color": "black",
+   "n": 1,
+   "chamber": 2,
+   "x": 9.2,
+   "z": -31.0,
+   "label": {
+    "fr": "Sur une barre de métal dans les gravats",
+    "en": "On a metal bar in rubble"
+   }
+  },
+  {
+   "type": "key-spawn",
+   "color": "black",
+   "n": 2,
+   "chamber": 2,
+   "x": 4.5,
+   "z": -35.7,
+   "label": {
+    "fr": "Sur une caisse en bois rouge",
+    "en": "On a red wooden box"
+   }
+  },
+  {
+   "type": "key-spawn",
+   "color": "black",
+   "n": 3,
+   "chamber": 2,
+   "x": -0.9,
+   "z": -31.0,
+   "label": {
+    "fr": "Dans le seau",
+    "en": "In the bucket"
+   }
+  },
+  {
+   "type": "key-spawn",
+   "color": "black",
+   "n": 4,
+   "chamber": 2,
+   "x": -2.2,
+   "z": -35.7,
+   "label": {
+    "fr": "Sur le carton",
+    "en": "On the carton"
+   }
+  },
+  {
+   "type": "key-spawn",
+   "color": "black",
+   "n": 1,
+   "chamber": 3,
+   "x": -51.2,
+   "z": -12.7,
+   "label": {
+    "fr": "Dans la main du PMC mort",
+    "en": "In the hand of the dead PMC"
+   }
+  },
+  {
+   "type": "key-spawn",
+   "color": "black",
+   "n": 2,
+   "chamber": 3,
+   "x": -45.4,
+   "z": -14.7,
+   "label": {
+    "fr": "Près des bougies, à la poutre en bois",
+    "en": "Next to the candles at the wooden beam"
+   }
+  },
+  {
+   "type": "key-spawn",
+   "color": "black",
+   "n": 3,
+   "chamber": 3,
+   "x": -31.1,
+   "z": -15.9,
+   "label": {
+    "fr": "Dans la bouteille devant la porte",
+    "en": "In the bottle in front of the door"
+   }
+  },
+  {
+   "type": "key-spawn",
+   "color": "black",
+   "n": 4,
+   "chamber": 3,
+   "x": -30.8,
+   "z": -14.4,
+   "label": {
+    "fr": "Dans le sac poubelle près de la porte du fond",
+    "en": "In the trash bag next to the far door"
+   }
+  },
+  {
+   "type": "key-spawn",
+   "color": "black",
+   "n": 1,
+   "chamber": 4,
+   "x": 22.0,
+   "z": 59.1,
+   "label": {
+    "fr": "Dans la bouteille debout, au sol",
+    "en": "In the standing bottle on the ground"
+   }
+  },
+  {
+   "type": "key-spawn",
+   "color": "black",
+   "n": 2,
+   "chamber": 4,
+   "x": 22.4,
+   "z": 58.3,
+   "label": {
+    "fr": "Dans la bouteille renversée, au sol",
+    "en": "In the fallen over bottle on the ground"
+   }
+  },
+  {
+   "type": "key-spawn",
+   "color": "black",
+   "n": 3,
+   "chamber": 4,
+   "x": 24.2,
+   "z": 58.8,
+   "label": {
+    "fr": "Sur la balance",
+    "en": "On the scale"
+   }
+  },
+  {
+   "type": "key-spawn",
+   "color": "black",
+   "n": 4,
+   "chamber": 4,
+   "x": 23.1,
+   "z": 62.7,
+   "label": {
+    "fr": "Sur les palettes",
+    "en": "On the pallets"
+   }
+  },
+  {
+   "type": "key-spawn",
+   "color": "black",
+   "n": 5,
+   "chamber": 4,
+   "x": 20.0,
+   "z": 60.9,
+   "label": {
+    "fr": "Au sol près de l'encadrement de porte",
+    "en": "On the ground next to the door frame"
+   }
+  },
+  {
+   "type": "key-spawn",
+   "color": "black",
+   "n": 6,
+   "chamber": 4,
+   "x": 19.1,
+   "z": 62.4,
+   "label": {
+    "fr": "Sur le baril près de l'encadrement de porte",
+    "en": "On the barrel next to the door frame"
+   }
+  },
+  {
+   "type": "torch-spawn",
+   "color": "white",
+   "n": 1,
+   "chamber": 3,
+   "x": -28.4,
+   "z": -14.6,
+   "label": {
+    "fr": "Dans le seau près de la porte",
+    "en": "In the bucket by the door"
+   }
+  },
+  {
+   "type": "torch-spawn",
+   "color": "white",
+   "n": 2,
+   "chamber": 3,
+   "x": -29.6,
+   "z": -19.8,
+   "label": {
+    "fr": "Derrière la grille de l'escalier",
+    "en": "Behind the grate door in the staircase"
+   }
+  },
+  {
+   "type": "torch-spawn",
+   "color": "white",
+   "n": 3,
+   "chamber": 3,
+   "x": -32.9,
+   "z": -18.4,
+   "label": {
+    "fr": "Entre les caisses en bois",
+    "en": "Between the wooden crates"
+   }
+  },
+  {
+   "type": "torch-spawn",
+   "color": "white",
+   "n": 4,
+   "chamber": 3,
+   "x": -34.3,
+   "z": -17.2,
+   "label": {
+    "fr": "Près d'une poutre en bois",
+    "en": "Next to a wooden beam"
+   }
+  },
+  {
+   "type": "torch-spawn",
+   "color": "white",
+   "n": 5,
+   "chamber": 3,
+   "x": -41.8,
+   "z": -18.4,
+   "label": {
+    "fr": "Derrière la balance",
+    "en": "Behind the scale"
+   }
+  },
+  {
+   "type": "torch-spawn",
+   "color": "white",
+   "n": 1,
+   "chamber": 5,
+   "x": 37.9,
+   "z": 44.8,
+   "label": {
+    "fr": "Au sol, dans les gravats du coin",
+    "en": "On the ground in the corner rubble"
+   }
+  },
+  {
+   "type": "torch-spawn",
+   "color": "white",
+   "n": 2,
+   "chamber": 5,
+   "x": 38.6,
+   "z": 46.9,
+   "label": {
+    "fr": "Près de la poutre en bois",
+    "en": "Next to the wooden beam"
+   }
+  },
+  {
+   "type": "torch-spawn",
+   "color": "white",
+   "n": 3,
+   "chamber": 5,
+   "x": 31.5,
+   "z": 46.6,
+   "label": {
+    "fr": "Entre les barils, sur les palettes",
+    "en": "Between the barrels, on the pallets"
+   }
+  },
+  {
+   "type": "torch-spawn",
+   "color": "white",
+   "n": 4,
+   "chamber": 5,
+   "x": 29.8,
+   "z": 48.2,
+   "label": {
+    "fr": "Au sol, dans les gravats",
+    "en": "On the ground in the rubble"
+   }
+  },
+  {
+   "type": "torch-spawn",
+   "color": "white",
+   "n": 5,
+   "chamber": 5,
+   "x": 33.7,
+   "z": 56.8,
+   "label": {
+    "fr": "Dans le seau de peinture",
+    "en": "Inside the paint bucket"
+   }
+  },
+  {
+   "type": "figurine",
+   "color": "green",
+   "n": 1,
+   "chamber": 1,
+   "x": -43.7,
+   "z": 71.9,
+   "label": {
+    "fr": "Sur le boîtier électrique",
+    "en": "On the power box"
+   },
+   "figurine": "Pointy Guy"
+  },
+  {
+   "type": "figurine",
+   "color": "green",
+   "n": 2,
+   "chamber": 1,
+   "x": -25.5,
+   "z": 64.2,
+   "label": {
+    "fr": "Sur le tuyau du haut",
+    "en": "On the top pipe"
+   },
+   "figurine": "Pointy Guy"
+  },
+  {
+   "type": "figurine",
+   "color": "green",
+   "n": 3,
+   "chamber": 1,
+   "x": -43.7,
+   "z": 59.5,
+   "label": {
+    "fr": "Sur le boîtier électrique",
+    "en": "On the power box"
+   },
+   "figurine": "Pointy Guy"
+  },
+  {
+   "type": "figurine",
+   "color": "green",
+   "n": 3,
+   "chamber": 2,
+   "x": 0.6,
+   "z": -31.0,
+   "label": {
+    "fr": "Sur le tuyau courbe du bas, au-dessus des tubes à gaz",
+    "en": "On the lower curved pipe, above the gas tubes"
+   },
+   "figurine": "Nailhead"
+  },
+  {
+   "type": "figurine",
+   "color": "green",
+   "n": 1,
+   "chamber": 3,
+   "x": -26.7,
+   "z": -19.8,
+   "label": {
+    "fr": "Sur une caisse en bois",
+    "en": "On top of a wooden crate"
+   },
+   "figurine": "Xenoalien"
+  },
+  {
+   "type": "figurine",
+   "color": "green",
+   "n": 2,
+   "chamber": 3,
+   "x": -35.5,
+   "z": -17.2,
+   "label": {
+    "fr": "Près des bougies, à l'une des poutres",
+    "en": "Next to the candles at one of the wooden beams"
+   },
+   "figurine": "Xenoalien"
+  },
+  {
+   "type": "figurine",
+   "color": "green",
+   "n": 3,
+   "chamber": 3,
+   "x": -43.4,
+   "z": -7.6,
+   "label": {
+    "fr": "Sur la table",
+    "en": "On the table"
+   },
+   "figurine": "Xenoalien"
+  },
+  {
+   "type": "figurine",
+   "color": "green",
+   "n": 1,
+   "chamber": 4,
+   "x": 24.4,
+   "z": 64.4,
+   "label": {
+    "fr": "Sur la pièce métallique près des bougies",
+    "en": "In the metal part next to the candles"
+   },
+   "figurine": "Count Bloodsucker"
+  },
+  {
+   "type": "figurine",
+   "color": "green",
+   "n": 2,
+   "chamber": 4,
+   "x": 24.4,
+   "z": 68.7,
+   "label": {
+    "fr": "Devant le trou dans le mur",
+    "en": "In front of the hole in the wall"
+   },
+   "figurine": "Count Bloodsucker"
+  },
+  {
+   "type": "figurine",
+   "color": "green",
+   "n": 3,
+   "chamber": 4,
+   "x": 30.0,
+   "z": 60.8,
+   "label": {
+    "fr": "Dans le seau suspendu",
+    "en": "In the hanging bucket"
+   },
+   "figurine": "Count Bloodsucker"
+  },
+  {
+   "type": "figurine",
+   "color": "green",
+   "n": 1,
+   "chamber": 5,
+   "x": 30.1,
+   "z": 40.8,
+   "label": {
+    "fr": "Dans la flaque toxique",
+    "en": "In the toxic puddle"
+   },
+   "figurine": "Petya Crooker"
+  },
+  {
+   "type": "figurine",
+   "color": "green",
+   "n": 2,
+   "chamber": 5,
+   "x": 29.9,
+   "z": 47.0,
+   "label": {
+    "fr": "Sur le baril bleu",
+    "en": "On top of the blue barrel"
+   },
+   "figurine": "Petya Crooker"
+  },
+  {
+   "type": "figurine",
+   "color": "green",
+   "n": 3,
+   "chamber": 5,
+   "x": 32.6,
+   "z": 56.9,
+   "label": {
+    "fr": "Dans le pot de peinture près des gravats",
+    "en": "In the paint can near the rubble"
+   },
+   "figurine": "Petya Crooker"
+  }
+ ],
+ "rooms": [
+  {
+   "id": "corpse-room",
+   "name": {
+    "fr": "Salle des cadavres",
+    "en": "Corpse Room"
+   },
+   "polygon": [
+    {
+     "x": 6.0,
+     "z": -16.7
+    },
+    {
+     "x": 6.0,
+     "z": -11.2
+    },
+    {
+     "x": 12.4,
+     "z": -11.2
+    },
+    {
+     "x": 12.3,
+     "z": -16.7
+    }
+   ],
+   "lock": {
+    "x": 8.8,
+    "z": -10.9
+   },
+   "keyItemId": "679bab714e9ca6b3d80586b4",
+   "key": {
+    "fr": "Clé de la salle des cadavres",
+    "en": "Corpse room key"
+   },
+   "how": {
+    "fr": "Clé : 6 apparitions possibles (points rouges sur la carte).",
+    "en": "Key: 6 possible spawns (red dots on the map)."
+   }
+  },
+  {
+   "id": "observation-room",
+   "name": {
+    "fr": "Salle d'observation (bureau verrouillé)",
+    "en": "Observation room (locked office)"
+   },
+   "polygon": [
+    {
+     "x": 6.2,
+     "z": 1.2
+    },
+    {
+     "x": 6.2,
+     "z": 6.7
+    },
+    {
+     "x": 12.7,
+     "z": 6.7
+    },
+    {
+     "x": 12.7,
+     "z": 1.2
+    }
+   ],
+   "lock": {
+    "x": 9.0,
+    "z": 7.5
+   },
+   "keyItemId": "679baace4e9ca6b3d80586b2",
+   "key": {
+    "fr": "Clé de la salle d'observation",
+    "en": "Observation room key"
+   },
+   "how": {
+    "fr": "Clé : sur les cadavres de scientifiques (points violets), dans leurs mains ou à proximité.",
+    "en": "Key: on the scientist corpses (purple dots), in their hands or nearby."
+   }
+  }
+ ]
+}

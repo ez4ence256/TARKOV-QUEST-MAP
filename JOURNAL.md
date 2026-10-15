@@ -260,6 +260,8 @@ Signalé : « Le labyrinthe » montrait « Speak to Jaeger… » alors que le wi
 
 - **Images d'objets dans les tableaux du wiki** (octobre 2026) : « Objectifs du chapitre » replié par défaut ; colonne « Item name » (et repères `{{id}}` du texte français) avec une image 32 px : tarkov.dev si le nom ou l'id est connu, sinon vignette de la page du wiki (`pageimages`, une requête groupée ≤ 50 titres par page, cache 7 jours), sinon le nom seul ; « Find in raid : N/A » affiché « — ». Non couvert : liens d'objets dans le texte anglais (les liens sont retirés au nettoyage). `src/lib/itemIcons.ts`, `ItemThumb.tsx`.
 
+- **Images d'objets dans le texte du wiki** (octobre 2026) : `parseBlocks` garde les liens `[[Cible|texte]]` dans `links` (blocs et puces) ; au rendu, icône 22 px avant le texte du lien si la cible est un objet tarkov.dev (nom normalisé) ou une page du wiki avec vignette hors catégories Locations / Traders / Bosses / Quests… (`isItemPage`, même lot `pageimages|categories` ≤ 50 titres, cache `thumbs2:`). Mesuré : Accidental Witness 25 cibles -> 12 objets avec icône, 8 non-objets (Customs, Skier, Reshala, EXP…) écartés, 0 faux positif ; Chumming 5 cibles, 0 faux positif. Cache des chapitres relu une fois (`linked`).
+
 ## Étude 3D (session 5, en attente de validation)
 
 **L'image de référence n'a pas été reçue.** La comparaison est faite sans elle.

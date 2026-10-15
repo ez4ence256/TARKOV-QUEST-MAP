@@ -438,6 +438,12 @@ async function fetchExitPhotos(mapTitle: string): Promise<ExitPhotosPage> {
 
 // --- Vignettes des objets (repli quand tarkov.dev n'a pas l'image) ---
 
+/** Catégories du wiki qui ne sont jamais des objets (relevées sur les pages liées par les quêtes). */
+const NON_ITEM_CATEGORIES = /^Category:(Locations|Traders|Bosses|Factions|Game modes|Quests|Characters|Maps|Events|Hideout|Game mechanics|Hideout modules|Player|Skills|Achievements|Dialogue|Trader quests|Story)$/i;
+
+/** Vrai si aucune des catégories de la page n'écarte un objet (un critère simple : pas de liste blanche d'objets). */
+export const isItemPage = (categories: string[]) => !categories.some((c) => NON_ITEM_CATEGORIES.test(c.startsWith("Category:") ? c : `Category:${c}`));
+
 /** Découpe en lots (le wiki accepte 50 titres par requête). */
 export function batchTitles(titles: string[], size = 50): string[][] {
   const out: string[][] = [];
@@ -446,16 +452,17 @@ export function batchTitles(titles: string[], size = 50): string[][] {
 }
 
 async function fetchThumbBatch(titles: string[]): Promise<Record<string, string>> {
-  const key = `thumbs:${titles.join("|")}`;
+  const key = `thumbs2:${titles.join("|")}`;
   const cached = readCache<{ fetchedAt: number; map: Record<string, string> }>(key);
   if (cached) return cached.map;
-  const json = await wikiRequest({ action: "query", prop: "pageimages", piprop: "thumbnail", pithumbsize: "64", redirects: "1", titles: titles.join("|") });
+  const json = await wikiRequest({ action: "query", prop: "pageimages|categories", piprop: "thumbnail", pithumbsize: "64", cllimit: "max", clshow: "!hidden", redirects: "1", titles: titles.join("|") });
   const q = (json.query ?? {}) as {
     normalized?: { from: string; to: string }[];
     redirects?: { from: string; to: string }[];
-    pages?: { title: string; thumbnail?: { source: string } }[];
+    pages?: { title: string; thumbnail?: { source: string }; categories?: { title: string }[] }[];
   };
-  const byTitle = new Map((q.pages ?? []).map((p) => [p.title, p.thumbnail?.source]));
+  // seules les pages qui ressemblent à un objet gardent leur vignette (pas les marchands, maps, quêtes…)
+  const byTitle = new Map((q.pages ?? []).map((p) => [p.title, isItemPage((p.categories ?? []).map((c) => c.title)) ? p.thumbnail?.source : undefined]));
   const next = new Map([...(q.normalized ?? []), ...(q.redirects ?? [])].map((r) => [r.from, r.to]));
   const map: Record<string, string> = {};
   for (const t of titles) {

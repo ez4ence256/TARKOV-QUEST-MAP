@@ -10,6 +10,8 @@ import { markerIcon } from "./icons";
 import { BaseLayer, type BaseStatus } from "./BaseLayer";
 import { ExitsLayer } from "./ExitsLayer";
 import { StoryLayer } from "./StoryLayer";
+import { LabyrinthLayer } from "./LabyrinthLayer";
+import { labyrinthFor } from "../lib/labyrinth";
 import type { StoryMapPoint } from "../lib/storyPoints";
 import type { ExitPhotosTarget } from "../components/PhotosTab";
 import { floorFromText } from "../lib/floorText";
@@ -31,6 +33,7 @@ import { tr, getLang } from "../lib/i18n";
 import { exitsNearMap, visibleExits } from "../lib/exits";
 
 const SHOW_EXITS_KEY = "tqp:showExits";
+const SHOW_LAB_KEY = "tqp:showLabyrinth";
 
 export type Placing = { kind: "manual"; objectiveId: string; label: string } | { kind: "custom" } | null;
 
@@ -188,6 +191,24 @@ function MapViewInner(props: MapViewProps) {
       return true;
     }
   });
+  // infos du Labyrinthe (map « the-labyrinth » seulement), affichées par défaut
+  const labyrinth = labyrinthFor(props.map.normalizedName);
+  const [showLab, setShowLab] = useState(() => {
+    try {
+      return localStorage.getItem(SHOW_LAB_KEY) !== "0";
+    } catch {
+      return true;
+    }
+  });
+  const toggleLab = () =>
+    setShowLab((v) => {
+      try {
+        localStorage.setItem(SHOW_LAB_KEY, v ? "0" : "1");
+      } catch {
+        /* préférence non retenue */
+      }
+      return !v;
+    });
   const toggleExits = () =>
     setShowExits((v) => {
       try {
@@ -272,6 +293,7 @@ function MapViewInner(props: MapViewProps) {
         <MapEvents placing={props.placing} onPlace={props.onPlace} onMove={setCursor} />
         <FocusPoint focus={props.focus} points={allFocusable} markers={markers} onLevel={showLevelOf} />
 
+        {labyrinth && showLab && <LabyrinthLayer data={labyrinth} />}
         <StoryLayer points={props.storyPoints} nameOf={props.storyName} onDone={props.onStoryDone} onOpen={props.onStoryOpen} onPhotos={props.onStoryPhotos} />
 
         {points.map((pt) => {
@@ -359,6 +381,17 @@ function MapViewInner(props: MapViewProps) {
           title={showExits ? tr("Masquer les sorties et transits", "Hide exits and transits") : tr("Afficher les sorties et transits", "Show exits and transits")}
         >
           <span className="exit-swatch" aria-hidden="true" /> {tr("Sorties", "Exits")}
+        </button>
+      )}
+      {labyrinth && (
+        <button
+          className={`map-toggle lab-toggle ${showLab ? "is-on" : ""}`}
+          style={{ top: exits.length > 0 ? 120 : 84 }}
+          aria-pressed={showLab}
+          onClick={toggleLab}
+          title={showLab ? tr("Masquer les infos du Labyrinthe", "Hide the Labyrinth info") : tr("Afficher les infos du Labyrinthe", "Show the Labyrinth info")}
+        >
+          <span className="exit-swatch" aria-hidden="true" /> {tr("Infos du Labyrinthe", "Labyrinth info")}
         </button>
       )}
       {pickerLevels.length > 1 && (

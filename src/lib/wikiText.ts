@@ -11,12 +11,18 @@
 // Tout est converti en texte brut et en blocs simples : aucun HTML du wiki n'est
 // jamais inséré tel quel dans la page.
 
+/** Lien interne du wiki dans un texte : page visée et texte affiché (pour mettre l'image d'un objet devant). */
+export interface LinkRef {
+  target: string;
+  text: string;
+}
+
 /** Bloc de texte affichable (rendu par React, donc échappé). */
 export type WikiBlock =
-  | { type: "heading"; level: number; text: string }
-  | { type: "paragraph"; text: string }
-  | { type: "list"; items: { depth: number; text: string }[] }
-  | { type: "quote"; text: string }
+  | { type: "heading"; level: number; text: string; links?: LinkRef[] }
+  | { type: "paragraph"; text: string; links?: LinkRef[] }
+  | { type: "list"; items: { depth: number; text: string; links?: LinkRef[] }[] }
+  | { type: "quote"; text: string; links?: LinkRef[] }
   | { type: "table"; title: string | null; headers: string[]; rows: string[][] };
 
 export interface WikiSection {
@@ -86,6 +92,19 @@ export function wikiLinkTargets(text: string): string[] {
     targets.push(target.split("#")[0].replace(/_/g, " ").trim());
   }
   return targets.filter(Boolean);
+}
+
+/** Liens [[Cible|texte]] / [[Cible]] d'un wikitext, dans l'ordre (le champ `links` n'existe que s'il y en a). */
+export function linkRefs(raw: string, pageTitle = ""): { links?: LinkRef[] } {
+  const links: LinkRef[] = [];
+  for (const m of raw.matchAll(/\[\[([^\]|]+)(?:\|([^\]]*))?\]\]/g)) {
+    const target = m[1].trim();
+    if (/^(file|image|fichier|category|catégorie|[a-z]{2}(-[a-z]{2})?):/i.test(target) || target.startsWith(":")) continue;
+    const text = cleanInline(m[2] ?? target.split("#")[0], pageTitle);
+    const page = target.split("#")[0].replace(/_/g, " ").trim();
+    if (page && text) links.push({ target: page, text });
+  }
+  return links.length ? { links } : {};
 }
 
 /** Wikitext d'une ligne -> texte brut. */
@@ -198,7 +217,7 @@ export function parseBlocks(body: string, pageTitle = ""): WikiBlock[] {
   let paragraph: string[] = [];
   const flush = () => {
     const t = cleanInline(paragraph.join("\n"), pageTitle);
-    if (t) blocks.push({ type: "paragraph", text: t });
+    if (t) blocks.push({ type: "paragraph", text: t, ...linkRefs(paragraph.join("\n"), pageTitle) });
     paragraph = [];
   };
   for (let i = 0; i < lines.length; i++) {
@@ -218,14 +237,14 @@ export function parseBlocks(body: string, pageTitle = ""): WikiBlock[] {
     const heading = trimmed.match(/^(={2,6})\s*(.+?)\s*\1$/);
     if (heading) {
       flush();
-      blocks.push({ type: "heading", level: heading[1].length, text: cleanInline(heading[2], pageTitle) });
+      blocks.push({ type: "heading", level: heading[1].length, text: cleanInline(heading[2], pageTitle), ...linkRefs(heading[2], pageTitle) });
       continue;
     }
     const quote = trimmed.match(/^\{\{\s*quote\s*\|([\s\S]*)\}\}$/i);
     if (quote) {
       flush();
       const t = cleanInline(quote[1], pageTitle);
-      if (t) blocks.push({ type: "quote", text: t });
+      if (t) blocks.push({ type: "quote", text: t, ...linkRefs(quote[1], pageTitle) });
       continue;
     }
     const item = trimmed.match(/^([*#]+)\s*(.*)$/);
@@ -234,7 +253,7 @@ export function parseBlocks(body: string, pageTitle = ""): WikiBlock[] {
       const t = cleanInline(item[2], pageTitle);
       if (!t) continue;
       const last = blocks[blocks.length - 1];
-      const entry = { depth: item[1].length, text: t };
+      const entry = { depth: item[1].length, text: t, ...linkRefs(item[2], pageTitle) };
       if (last?.type === "list") last.items.push(entry);
       else blocks.push({ type: "list", items: [entry] });
       continue;

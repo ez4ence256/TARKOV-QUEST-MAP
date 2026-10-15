@@ -625,7 +625,7 @@ describe("The Ticket (EN)", () => {
     const headings = objectives.flatMap((b) => (b.type === "heading" ? [b.text] : []));
     expect(headings).toEqual(["If you accept Mr. Kerman's offer (Savior ending, Debtor ending, Fallen ending)"]);
     const list = objectives.find((b) => b.type === "list");
-    expect(list?.type === "list" && list.items[0]).toEqual({ depth: 1, text: "Obtain Intelligence Center level 1" });
+    expect(list?.type === "list" && list.items[0]).toEqual({ depth: 1, text: "Obtain Intelligence Center level 1", links: [{ target: "Hideout", text: "Intelligence Center" }] });
   });
 
   it("sans les modèles : seules les étapes de la page, dans l'ordre, avec leurs photos", () => {
