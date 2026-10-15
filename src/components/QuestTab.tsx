@@ -26,6 +26,7 @@ import {
 } from "../lib/questWiki";
 import { Icon } from "./Icon";
 import { ConfirmButton } from "./ConfirmButton";
+import { ItemThumb, useItemIcons } from "./ItemThumb";
 import { WikiBlocks } from "./WikiBlocks";
 import { QUEST_SECTIONS, type QuestSectionId } from "../lib/questSections";
 import { getLang, tr } from "../lib/i18n";
@@ -203,6 +204,8 @@ export function QuestTab(p: Props) {
     [wikiState],
   );
 
+  const relatedIcon = useItemIcons(wiki?.relatedItems.map((r) => r.name) ?? [], p.itemNames, p.itemIcons);
+
   const optionLabel = (id: string) => (isStoryId(id) ? `Main story · ${chapterName(chapters.chapters, chapterOf(id))}` : tasksById.get(id)!.name);
   const picker =
     optionIds.length > 1 ? (
@@ -224,6 +227,7 @@ export function QuestTab(p: Props) {
           key={storyId}
           chapterId={storyId}
           itemNames={p.itemNames}
+          itemIcons={p.itemIcons}
           chapters={chapters}
           done={p.storyDone}
           onSetStep={(stepKey, value) => p.onStoryStep(storyId, stepKey, value)}
@@ -296,7 +300,7 @@ export function QuestTab(p: Props) {
       wiki && wiki.objectives.length > 0 ? (
         <div className="wiki-highlight">
           {wikiSource}
-          <WikiBlocks blocks={wiki.objectives} />
+          <WikiBlocks blocks={wiki.objectives} itemNames={p.itemNames} itemIcons={p.itemIcons} />
         </div>
       ) : null,
 
@@ -309,6 +313,7 @@ export function QuestTab(p: Props) {
             <ul className="plain-list pack-list">
               {wiki.relatedItems.map((r, k) => (
                 <li key={k}>
+                  <ItemThumb src={relatedIcon(r.name)} name={r.name} />
                   {r.amount && r.amount !== "1" ? `${r.amount} × ` : ""}
                   {r.name}
                   {r.requirement && <span className="muted small"> · {r.requirement}</span>}
@@ -353,7 +358,7 @@ export function QuestTab(p: Props) {
         {wiki && wiki.guide.length > 0 && (
           <div className="wiki-highlight">
             {wikiSource}
-            <WikiBlocks blocks={wiki.guide} />
+            <WikiBlocks blocks={wiki.guide} itemNames={p.itemNames} itemIcons={p.itemIcons} />
             {task.wikiLink && <GuidePhotos wikiLink={task.wikiLink} />}
           </div>
         )}
@@ -376,7 +381,7 @@ export function QuestTab(p: Props) {
 
     rewards: hasRewards ? (
       <>
-        {wiki && wiki.rewards.length > 0 && <WikiBlocks blocks={wiki.rewards} />}
+        {wiki && wiki.rewards.length > 0 && <WikiBlocks blocks={wiki.rewards} itemNames={p.itemNames} itemIcons={p.itemIcons} />}
         <Warnings items={rewardDiffs} />
         {rewards && rewards.items.length > 0 && (
           <>
@@ -442,7 +447,7 @@ export function QuestTab(p: Props) {
           <>
             <div className="wiki-heading wiki-heading-3">{tr("Selon le wiki (en anglais)", "According to the wiki (in English)")}</div>
             {wiki.loyaltyLevel !== null && <div className="small">LL requirement : {wiki.loyaltyLevel}</div>}
-            {wiki.requirements.length > 0 && <WikiBlocks blocks={wiki.requirements} />}
+            {wiki.requirements.length > 0 && <WikiBlocks blocks={wiki.requirements} itemNames={p.itemNames} itemIcons={p.itemIcons} />}
             {prereq.wikiTasks.length > 0 && (
               <>
                 <div className="muted small">{tr("Quêtes précédentes (previous) :", "Previous quests:")}</div>
@@ -466,7 +471,7 @@ export function QuestTab(p: Props) {
       </>
     ) : null,
 
-    equipment: wiki && wiki.initialEquipment.length > 0 ? <WikiBlocks blocks={wiki.initialEquipment} /> : null,
+    equipment: wiki && wiki.initialEquipment.length > 0 ? <WikiBlocks blocks={wiki.initialEquipment} itemNames={p.itemNames} itemIcons={p.itemIcons} /> : null,
 
     summary: (
       <>

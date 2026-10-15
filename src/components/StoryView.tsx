@@ -115,7 +115,7 @@ function Photo({ photo, itemNames }: { photo: WikiPhoto; itemNames: Record<strin
 type Item = ResolvedStory["steps"][number];
 
 /** Une case de la fiche (condition ou étape) : titre, texte et photos. `n` : numéro affiché (aucun pour une condition). */
-function StoryRow({ item, n, index, done, current, itemNames, onChange }: { item: Item; n?: number; index: number; done: boolean; current: boolean; itemNames: Record<string, string>; onChange: (done: boolean) => void }) {
+function StoryRow({ item, n, index, done, current, itemNames, itemIcons, onChange }: { item: Item; n?: number; index: number; done: boolean; current: boolean; itemNames: Record<string, string>; itemIcons?: Record<string, string>; onChange: (done: boolean) => void }) {
   return (
     <li id={`story-step-${index}`} className={`story-step ${done ? "is-done" : ""} ${current ? "is-current" : ""}`} aria-current={current ? "step" : undefined}>
       <label className="story-step-head">
@@ -128,7 +128,7 @@ function StoryRow({ item, n, index, done, current, itemNames, onChange }: { item
       </label>
       {(item.blocks.length > 0 || (item.photos?.length ?? 0) > 0) && (
         <div className="story-step-body">
-          <WikiBlocks blocks={item.blocks} itemNames={itemNames} />
+          <WikiBlocks blocks={item.blocks} itemNames={itemNames} itemIcons={itemIcons} />
           {(item.photos?.length ?? 0) > 0 && (
             <div className="story-photos">
               {item.photos!.map((p) => (
@@ -154,6 +154,7 @@ interface ViewProps {
   chapterId: string;
   /** Noms des objets (tarkov.dev), pour les {{identifiants}} du texte français. */
   itemNames: Record<string, string>;
+  itemIcons?: Record<string, string>;
   chapters: ChaptersState;
   done: Record<string, true>;
   onSetStep: (stepKey: string, done: boolean) => void;
@@ -162,7 +163,7 @@ interface ViewProps {
 }
 
 /** Fiche d'un chapitre : conditions de déblocage, objectifs, puis toutes les étapes dans l'ordre, la première case non cochée en évidence. */
-export function StoryChapterView({ chapterId, itemNames, chapters, done, onSetStep, onReset, onRetryChapters }: ViewProps) {
+export function StoryChapterView({ chapterId, itemNames, itemIcons, chapters, done, onSetStep, onReset, onRetryChapters }: ViewProps) {
   const wantFr = getLang() === "fr";
   const page = useStoryPage(chapterId, chapters, wantFr);
   const chapter = chapters.chapters?.find((c) => c.id === chapterId);
@@ -217,7 +218,7 @@ export function StoryChapterView({ chapterId, itemNames, chapters, done, onSetSt
           </a>
         </p>
       )}
-      {page.status === "ready" && page.en.exists && <Chapter page={page} chapterId={chapterId} itemNames={itemNames} done={done} ticked={ticked} current={current} wantFr={wantFr} onSetStep={onSetStep} onReset={onReset} />}
+      {page.status === "ready" && page.en.exists && <Chapter page={page} chapterId={chapterId} itemNames={itemNames} itemIcons={itemIcons} done={done} ticked={ticked} current={current} wantFr={wantFr} onSetStep={onSetStep} onReset={onReset} />}
     </>
   );
 }
@@ -226,6 +227,7 @@ function Chapter({
   page,
   chapterId,
   itemNames,
+  itemIcons,
   done,
   ticked,
   current,
@@ -236,6 +238,7 @@ function Chapter({
   page: Extract<PageState, { status: "ready" }>;
   chapterId: string;
   itemNames: Record<string, string>;
+  itemIcons?: Record<string, string>;
   done: Record<string, true>;
   ticked: number;
   current: number;
@@ -269,17 +272,17 @@ function Chapter({
           <p className="muted small">{tr("À faire avant les étapes ci-dessous ; comptées dans la progression.", "Do these before the steps below; they count in the progress.")}</p>
           <ol className="story-steps story-reqs">
             {resolved.requirements.map((req, i) => (
-              <StoryRow key={req.key} item={req} index={i} done={Boolean(done[storyStepId(chapterId, req.key)])} current={i === current} itemNames={itemNames} onChange={(v) => onSetStep(req.key, v)} />
+              <StoryRow key={req.key} item={req} index={i} done={Boolean(done[storyStepId(chapterId, req.key)])} current={i === current} itemNames={itemNames} itemIcons={itemIcons} onChange={(v) => onSetStep(req.key, v)} />
             ))}
           </ol>
         </section>
       )}
 
       {resolved.objectives.length > 0 && (
-        <details className="quest-section" open>
+        <details className="quest-section">
           <summary>{tr("Objectifs du chapitre", "Chapter objectives")}</summary>
           <div className="quest-section-body">
-            <WikiBlocks blocks={resolved.objectives} itemNames={itemNames} />
+            <WikiBlocks blocks={resolved.objectives} itemNames={itemNames} itemIcons={itemIcons} />
           </div>
         </details>
       )}
@@ -308,7 +311,7 @@ function Chapter({
         {resolved.steps.map((step, i) => {
           const index = resolved.requirements.length + i;
           return (
-            <StoryRow key={step.key} item={step} n={i + 1} index={index} done={Boolean(done[storyStepId(chapterId, step.key)])} current={index === current} itemNames={itemNames} onChange={(v) => onSetStep(step.key, v)} />
+            <StoryRow key={step.key} item={step} n={i + 1} index={index} done={Boolean(done[storyStepId(chapterId, step.key)])} current={index === current} itemNames={itemNames} itemIcons={itemIcons} onChange={(v) => onSetStep(step.key, v)} />
           );
         })}
       </ol>

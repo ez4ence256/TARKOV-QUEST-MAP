@@ -435,3 +435,62 @@ async function fetchExitPhotos(mapTitle: string): Promise<ExitPhotosPage> {
   writeCache(`exits:${mapTitle}`, result);
   return result;
 }
+
+// --- Vignettes des objets (repli quand tarkov.dev n'a pas l'image) ---
+
+/** Découpe en lots (le wiki accepte 50 titres par requête). */
+export function batchTitles(titles: string[], size = 50): string[][] {
+  const out: string[][] = [];
+  for (let i = 0; i < titles.length; i += size) out.push(titles.slice(i, i + size));
+  return out;
+}
+
+async function fetchThumbBatch(titles: string[]): Promise<Record<string, string>> {
+  const key = `thumbs:${titles.join("|")}`;
+  const cached = readCache<{ fetchedAt: number; map: Record<string, string> }>(key);
+  if (cached) return cached.map;
+  const json = await wikiRequest({ action: "query", prop: "pageimages", piprop: "thumbnail", pithumbsize: "64", redirects: "1", titles: titles.join("|") });
+  const q = (json.query ?? {}) as {
+    normalized?: { from: string; to: string }[];
+    redirects?: { from: string; to: string }[];
+    pages?: { title: string; thumbnail?: { source: string } }[];
+  };
+  const byTitle = new Map((q.pages ?? []).map((p) => [p.title, p.thumbnail?.source]));
+  const next = new Map([...(q.normalized ?? []), ...(q.redirects ?? [])].map((r) => [r.from, r.to]));
+  const map: Record<string, string> = {};
+  for (const t of titles) {
+    let cur = t;
+    for (let i = 0; i < 2 && next.has(cur); i++) cur = next.get(cur)!;
+    const src = byTitle.get(cur);
+    if (src) map[t] = src;
+  }
+  writeCache(key, { fetchedAt: Date.now(), map });
+  return map;
+}
+
+let thumbTitles = new Set<string>();
+let thumbFlush: Promise<Record<string, string>> | null = null;
+
+/**
+ * Vignettes (64 px) des pages d'objets du wiki. Les demandes faites dans la même fenêtre de 50 ms
+ * (tous les tableaux d'une page) sont regroupées : une requête par lot de 50 titres, pas une par tableau.
+ * Titre -> URL (absent : pas d'image).
+ */
+export function loadItemThumbs(titles: string[]): Promise<Record<string, string>> {
+  titles.forEach((t) => thumbTitles.add(t));
+  thumbFlush ??= new Promise((resolve, reject) => {
+    setTimeout(async () => {
+      const all = [...thumbTitles].sort();
+      thumbTitles = new Set();
+      thumbFlush = null;
+      try {
+        const result: Record<string, string> = {};
+        for (const batch of batchTitles(all)) Object.assign(result, await fetchThumbBatch(batch));
+        resolve(result);
+      } catch (e) {
+        reject(e);
+      }
+    }, 50);
+  });
+  return thumbFlush;
+}

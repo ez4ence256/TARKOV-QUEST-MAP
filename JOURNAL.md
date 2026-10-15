@@ -258,6 +258,8 @@ Signalé : « Le labyrinthe » montrait « Speak to Jaeger… » alors que le wi
 
 ---
 
+- **Images d'objets dans les tableaux du wiki** (octobre 2026) : « Objectifs du chapitre » replié par défaut ; colonne « Item name » (et repères `{{id}}` du texte français) avec une image 32 px : tarkov.dev si le nom ou l'id est connu, sinon vignette de la page du wiki (`pageimages`, une requête groupée ≤ 50 titres par page, cache 7 jours), sinon le nom seul ; « Find in raid : N/A » affiché « — ». Non couvert : liens d'objets dans le texte anglais (les liens sont retirés au nettoyage). `src/lib/itemIcons.ts`, `ItemThumb.tsx`.
+
 ## Étude 3D (session 5, en attente de validation)
 
 **L'image de référence n'a pas été reçue.** La comparaison est faite sans elle.

@@ -104,7 +104,7 @@ function labelEndings(line: string): string {
  * trous (« nécessite la . »). On les garde sous forme de repère sans accolades, remplacé à
  * l'affichage par le nom de l'objet de tarkov.dev (voir fillItems).
  */
-const ITEM_MARK = /⟦item:([0-9a-f]{24})⟧/g;
+export const ITEM_MARK = /⟦item:([0-9a-f]{24})⟧/g;
 const markItems = (text: string) => text.replace(/\{\{([0-9a-f]{24})\}\}/g, "⟦item:$1⟧");
 
 /** Remplace les repères d'objets par leur nom ; « […] » (jamais un trou silencieux) si l'objet est inconnu. */
