@@ -98,6 +98,10 @@ SOFTWARE.
 
 - `src/data/story-positions.json` : positions relevées sur les photos/cartes du wiki Escape from Tarkov (Fandom) des chapitres de l'histoire (pour l'instant Accidental Witness et The Labyrinth) : cartes de Customs et du Labyrinthe (re3mr.com), de Streets of Tarkov et de Shoreline (/u/JINDOUZ). Seules les coordonnées relevées sont gardées, aucune image n'est copiée ni affichée ; le fichier source de chaque position est noté dans le JSON.
 
+## Carte du Labyrinthe : re3mr.com et wiki Escape from Tarkov
+
+- `src/data/labyrinth-annotations.json` : chambres, apparitions de clés, cadavres, salles verrouillées du Labyrinthe, positions relevées sur la carte « Labyrinth » de **re3mr.com** (**CC BY-NC-SA 4.0**, « Map made by re3mr.com with help from the EFT wiki ») : fichiers `The Labyrinth Map by re3mr.png` et `Observation room Map.png` du wiki, et l'affiche v0.6B envoyée par l'utilisateur. Seules les positions sont relevées ; les textes de la carte sont résumés et traduits ; aucune image de la carte n'est copiée. Crédit affiché dans l'attribution de la carte du Labyrinthe : « Carte du Labyrinthe : re3mr.com (CC BY-NC-SA 4.0), avec le wiki EFT ». Image de la clé : icône de tarkov.dev.
+
 ## Plans du mall et du parking d'Interchange : re3mr.com et wiki Escape from Tarkov
 
 - **Source :** panneaux « PARKING » (sections A à D, garages Idea, Goshan et Oli), « FIRST FLOOR » et « SECOND FLOOR » de l'affiche [`File:Interchange Interactive Map Base.webp`](https://escapefromtarkov.fandom.com/wiki/File:Interchange_Interactive_Map_Base.webp), « Map made by re3mr.com in cooperation with the Escape from Tarkov Wiki ».
