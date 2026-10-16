@@ -268,5 +268,171 @@
     "source": "FallingSkiesElektroniksUSBMap.png",
     "method": "similitude (appariement des masques d'eau et de routes, 5 m de résidu) entre la carte JINDOUZ du wiki et notre SVG de Shoreline ; contrôle : extractions de tarkov.dev sur leurs icônes (± 10 m)",
     "errorM": 26
-  }
+  },
+  "Batya::req#0": [
+    {
+      "map": "customs",
+      "positions": [
+        {
+          "x": 188.4,
+          "z": -138.6
+        }
+      ],
+      "source": "EasyMoneyPart1CustomsMap1.png",
+      "method": "homographie par ECC sur les arêtes entre l'affiche 3D de Customs (re3mr) et notre SVG, contrôlée sur des sorties et sur les conteneurs de tarkov.dev ; repère rouge au centre",
+      "errorM": 55
+    },
+    {
+      "map": "shoreline",
+      "positions": [
+        {
+          "x": -155.3,
+          "z": -291.4
+        }
+      ],
+      "source": "SpaTour5BunkerMap.jpg",
+      "method": "similitude (appariement des masques d'eau et de routes, 5 m de résidu) entre la carte JINDOUZ du wiki et notre SVG de Shoreline ; contrôle : extractions de tarkov.dev sur leurs icônes (± 10 m)",
+      "errorM": 27
+    },
+    {
+      "map": "woods",
+      "positions": [
+        {
+          "x": 255.1,
+          "z": -430.5
+        }
+      ],
+      "source": "Batya Woods Activation Map.png",
+      "method": "similitude par ECC sur les masques d'eau entre la carte JINDOUZ du wiki et notre SVG de Woods (cc 0,91) ; contrôle visuel de la superposition (lacs, rivière)",
+      "errorM": 25
+    }
+  ],
+  "Batya::locate the traces of the bear special squad#0": [
+    {
+      "map": "customs",
+      "positions": [
+        {
+          "x": 492.6,
+          "z": 97.0
+        }
+      ],
+      "source": "Hobby Club Customs Stashing Map.png",
+      "method": "homographie par ECC sur les arêtes entre l'affiche 3D de Customs (re3mr) et notre SVG, contrôlée sur des sorties et sur les conteneurs de tarkov.dev ; repère rouge au centre",
+      "errorM": 23
+    },
+    {
+      "map": "lighthouse",
+      "positions": [
+        {
+          "x": -30.6,
+          "z": 465.8
+        }
+      ],
+      "source": "Bogatyrs patch Lighthouse map.png",
+      "method": "similitude par ECC sur les masques d'eau entre la carte du wiki et notre SVG de Lighthouse (cc 0,87-0,89), précision moindre",
+      "errorM": 38
+    }
+  ],
+  "Batya::locate the ryabina outpost#0": {
+    "map": "woods",
+    "positions": [
+      {
+        "x": 38.2,
+        "z": -334.4
+      }
+    ],
+    "source": "Ryabina outpost location.png",
+    "method": "similitude par ECC sur les masques d'eau entre la carte JINDOUZ du wiki et notre SVG de Woods (cc 0,91) ; contrôle visuel de la superposition (lacs, rivière)",
+    "errorM": 22
+  },
+  "Batya::locate the carousel outpost#0": {
+    "map": "interchange",
+    "positions": [
+      {
+        "x": 75.5,
+        "z": -325.1
+      },
+      {
+        "x": 75.5,
+        "z": -291.6
+      }
+    ],
+    "source": "Carousel outpost.jpg",
+    "method": "plan du centre commercial (src/map/basement.ts) recalé par points SIFT sur l'image du wiki (échelle 0,5 exacte)",
+    "errorM": 25
+  },
+  "Batya::locate the ambush spot#0": {
+    "map": "woods",
+    "positions": [
+      {
+        "x": -429.6,
+        "z": -49.0
+      }
+    ],
+    "source": "Batya Woods Ambush Spot Map.png",
+    "method": "similitude par ECC sur les masques d'eau entre la carte JINDOUZ du wiki et notre SVG de Woods (cc 0,91) ; contrôle visuel de la superposition (lacs, rivière)",
+    "errorM": 26
+  },
+  "Batya::gain access to lightkeeper#0": {
+    "map": "lighthouse",
+    "positions": [
+      {
+        "x": 467.0,
+        "z": 472.3
+      }
+    ],
+    "source": "LightkeeperMap.png",
+    "method": "similitude par ECC sur les masques d'eau entre la carte du wiki et notre SVG de Lighthouse (cc 0,87-0,89), précision moindre",
+    "errorM": 47
+  },
+  "Batya::locate the traces of the traitors#0": {
+    "map": "lighthouse",
+    "positions": [
+      {
+        "x": -30.6,
+        "z": 465.8
+      }
+    ],
+    "source": "Bogatyrs patch Lighthouse map.png",
+    "method": "similitude par ECC sur les masques d'eau entre la carte du wiki et notre SVG de Lighthouse (cc 0,87-0,89), précision moindre",
+    "errorM": 38
+  },
+  "Batya::figure out how the cultists are connected to the general#0": [
+    {
+      "map": "shoreline",
+      "positions": [
+        {
+          "x": 214.9,
+          "z": 423.4
+        }
+      ],
+      "source": "WetJob2IslandMap.png",
+      "method": "similitude (appariement des masques d'eau et de routes, 5 m de résidu) entre la carte JINDOUZ du wiki et notre SVG de Shoreline ; contrôle : extractions de tarkov.dev sur leurs icônes (± 10 m)",
+      "errorM": 58
+    },
+    {
+      "map": "woods",
+      "positions": [
+        {
+          "x": 200.2,
+          "z": 8.9
+        }
+      ],
+      "source": "WoodsSouthernMarkedCircleMap.png",
+      "method": "similitude par ECC sur les masques d'eau entre la carte JINDOUZ du wiki et notre SVG de Woods (cc 0,91) ; contrôle visuel de la superposition (lacs, rivière)",
+      "errorM": 21
+    },
+    {
+      "map": "customs",
+      "positions": [
+        {
+          "x": 182.1,
+          "z": 148.8
+        }
+      ],
+      "source": "TheCultPart2DormsMap.png",
+      "method": "homographie par ECC sur les arêtes entre l'affiche 3D de Customs (re3mr) et notre SVG, contrôlée sur des sorties et sur les conteneurs de tarkov.dev ; repère rouge au centre",
+      "errorM": 59
+    }
+  ]
 }

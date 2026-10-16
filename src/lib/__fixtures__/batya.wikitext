@@ -1,0 +1,583 @@
+{{Infobox quest
+|image        =Batya Banner.png
+|icon         =Batya Icon.png
+|icon size    =
+|location     =
+|given by     =
+|reward       =
+|reputation   =
+|quest number =
+|previous     =
+|leads to     =
+|related      =
+|related2     =
+|reqkappa     =
+}}
+
+'''{{PAGENAME}}''' is a [[Story chapters|story chapter]] in ''[[Escape from Tarkov]]''.
+
+==Description==
+{{quote|Turns out BEAR didn't send just regular squads into Tarkov, there were real SOF guys here. I'd like to know more about those units and what exactly they were doing.}}
+
+==Requirements==
+Visit one of the following locations:
+* Mattress below the "жопа" writing on the second floor of the Scav base on [[Customs]]
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:EasyMoneyPart1CustomsMap1.png|Scav base location marked on map
+File:ZB-013 Building.png|The Scav base
+File:Batya Customs Activation Location.png|The wanted mattress
+</gallery></li>
+* Radome on top of the white queen radar station building on [[Reserve]]
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:RadarStationGuide.jpg|Radar station marked on map
+File:Reserve Showcase 4.png|The radar station
+</gallery></li>
+* Bunker north of the health resort on [[Shoreline]]
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:SpaTour5BunkerMap.jpg|Bunker location marked on map
+File:The bunker by rock passage.png|The wanted bunker
+</gallery></li>
+* Mattresses on top of the big rock at the USEC camp on [[Woods]]
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Batya Woods Activation Map.png|Rock location marked on map
+File:Batya Woods Activation Location.png|The wanted mattresses
+</gallery></li>
+
+==Objectives==
+* Locate the [[Bogatyrs patch|traces]] of the BEAR special squad
+** (''Optional'') Locate and obtain the [[Bogatyrs patch|Bogatyr squad patch]]
+* Learn more about the Bogatyr squad from the traders
+* Locate the Ryabina outpost
+* Find more [[Hostage evacuation report from Voevoda|information]] about the Bogatyr squad
+** (''Optional'') Locate and obtain a [[Strelets' amulet|keepsake]] of one of the Bogatyrs
+* Locate the Carousel outpost
+* Find the Bogatyr squad's [[Strelets' note|personal notes]]
+* [[Strelets' note|Learn more]] about Strelets
+* [[Taran's personnel file|Learn more]] about Taran
+** (''Optional'') Locate and obtain a [[Taran's postcard|personal item]] of one of the Bogatyrs
+* [[Voevoda's personnel file|Learn more]] about Voevoda
+* Find [[Voevoda's thoughts audio tape|Voevoda's personal belongings]]
+** (''Optional'') Locate and obtain the [[Voevoda's audio recorder (quest item)|squad commander's recorder]]
+* Locate the Gnezdo outpost
+* [[First piece of code note|Search]] the Gnezdo outpost
+* [[BEAR note from the outpost behind Ultra|Figure out]] what happened to the Bogatyr squad
+* [[Map with triangulated signal|Figure out]] where the Bogatyr squad got ambushed
+* [[Bogatyr squad operations report|Learn more]] about the Bogatyr squad's activities
+* [[Moreman's personnel file|Learn more]] about the Bogatyr squad's members
+* Locate the ambush spot
+* Obtain more information about the Bogatyr squad
+* [[Second piece of code note|Inspect]] Moreman's body
+** (''Optional'') Locate and obtain [[Moreman's phone]]
+** (''Optional'') Locate and obtain a [[Moreman's dogtag|dogtag]] of one of the Bogatyrs
+* Retrieve more information about the ambush from [[Moreman's phone]]
+* Obtain [[Hideout#Modules|Intelligence Center]] level 3
+* Contact the Bogatyr squad
+* Gain access to [[Lightkeeper]]
+* Stay on good terms with [[Lightkeeper]]
+* Bring all the Bogatyr squad's items to [[Lightkeeper]]
+* Wait for Voevoda to reach out
+* Reach the [[Light Machine Guns|Light Machine Guns skill]] level 5
+* Reach the [[Assault Rifles|Assault Rifles skill]] level 10
+* Reach the [[Stress Resistance|Stress Resistance skill]] level 10
+* Reach the [[Strength|Strength skill]] level 15
+* Eliminate any 15 targets without dying
+* Eliminate 4 PMC operatives without dying
+* Contact Voevoda
+* Locate the [[Note mentioning Prapor|traces]] of the traitors
+** (''Optional'') Investigate the command bunker on [[Reserve]]
+** (''Optional'') Investigate the BEAR camp on [[Lighthouse]]
+** (''Optional'') Investigate the BEAR camp east of the Ultra mall on [[Interchange]]
+* Interrogate [[Prapor]]
+* Figure out how the cultists are connected to the General
+* Talk to [[Lightkeeper]]
+* Wait for [[Lightkeeper]] to prepare the [[Agent network deployment report|documents]] on The Unheard
+
+==Guide==
+===Locate the traces of the BEAR special squad===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Bogatyrs patch icon.png|link=Bogatyrs patch]]
+|[[Bogatyrs patch]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+To fulfill this objective, you have to pick up and read the [[Bogatyrs patch]] from [[Customs]], [[Woods]], [[Reserve]] or [[Lighthouse]].
+
+====Customs====
+On a couch inside the cabin located on top of the hill southwest of the new gas station.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Hobby Club Customs Stashing Map.png|Cabin location marked on map
+File:Hobby Club Customs Stashing Location.png|The wanted cabin
+File:Bogatyrs patch Customs spawn.png|The patch on the couch
+</gallery></li>
+
+====Woods====
+On the ground next to the BRDM from the cargo convoy.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Bogatyrs patch Woods map.jpg|Convoy location marked on map
+File:Bogatyrs patch Woods BRDM.png|The BRDM
+File:Bogatyrs patch Woods spawn.png|The patch next to the BRDM
+</gallery></li>
+
+====Reserve====
+On a package on the upper roof of the airspace control center marked with white king.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Airspace Control Center Map.jpg|White king airspace control center marked on map
+File:Bogatyrs patch Reserve spawn.png|The patch on the package
+</gallery></li>
+
+====Lighthouse====
+On a sleeping bag in the BEAR camp.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Bogatyrs patch Lighthouse map.png|BEAR camp location marked on map
+File:Bogatyrs patch Lighthouse BEAR camp.png|The camp
+File:Bogatyrs patch Lighthouse spawn.png|The patch on the sleeping bag
+</gallery></li>
+
+===Learn more about the Bogatyr squad from the traders===
+Visit [[Jaeger]] in the menu through the trader screen and ask him about the BEAR patch.
+
+===Locate the Ryabina outpost===
+The Ryabina outpost is located north of the sawmill on [[Woods]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Ryabina outpost location.png|Location marked on map
+File:Batya Ryabina Camp Note 1.png|The outpost
+</gallery></li>
+
+===Find more information about the Bogatyr squad===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Strelets' amulet icon.png|link=Strelets' amulet]]
+|[[Strelets' amulet]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Hostage evacuation report from Voevoda icon.png|link=Hostage evacuation report from Voevoda]]
+|[[Hostage evacuation report from Voevoda]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+To fulfill this objective, you have to pick up and read a note as well as pick up a quest item from the camp. [[Strelets' amulet]] should be transferred to the off-raid quest inventory to not lose it in subsequent raids. It will be needed later.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Batya Ryabina Camp Note 2.png|[[Hostage evacuation report from Voevoda]] on a pallet next to a bottle in the camp
+File:Strelets Amulet 1.png|Sniper nest next to the camp
+File:Strelets Amulet 2.png|[[Strelets' amulet]] on a green crate at the sniper nest
+</gallery></li>
+
+===Locate the Carousel outpost===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Taran's personal file icon.png|link=Taran's personnel file]]
+|[[Taran's personnel file]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Voevoda's personal file icon.png|link=Voevoda's personnel file]]
+|[[Voevoda's personnel file]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Strelets' personal file icon.png|link=Strelets' personnel file]]
+|[[Strelets' personnel file]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Strelets' note icon.png|link=Strelets' note]]
+|[[Strelets' note]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Taran's postcard icon.png|link=Taran's postcard]]
+|[[Taran's postcard]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Voevoda's audio recorder (quest item) icon.png|link=Voevoda's audio recorder (quest item)]]
+|[[Voevoda's audio recorder (quest item)|Voevoda's audio recorder]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Voevoda's thoughts audio tape icon.png|link=Voevoda's thoughts audio tape]]
+|[[Voevoda's thoughts audio tape]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+The Carousel outpost is located opposite the IDEA store checkout area inside the ULTRA shopping mall on [[Interchange]]. From the outpost, you have to pick up two quest items, pick up and read 4 notes as well as pick up an audio tape. [[Taran's postcard]] and [[Voevoda's audio recorder (quest item)|Voevoda's audio recorder]] should be transferred to the off-raid quest inventory to not lose them in subsequent raids. They will be needed later.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Carousel outpost.jpg|Location marked on map
+File:Carousel outpost.png|The outpost
+File:Batya Carousel Outpost Taran's postcard.png|[[Taran's postcard]] on the floor next to the beds
+File:Batya Carousel Outpost Taran's personal file.png|[[Taran's personnel file]] between the beds
+File:Batya Carousel Outpost Voevoda's audio recorder.png|[[Voevoda's audio recorder (quest item)|Voevoda's audio recorder]] on the table with the radio system
+File:Batya Carousel Outpost Voevoda's thoughts audio tape.png|[[Voevoda's thoughts audio tape]] on the table with the radio system
+File:Batya Carousel Outpost Voevoda's personal file.png|[[Voevoda's personnel file]] on a desk on the second floor
+File:Batya Carousel Outpost Strelets' personal file.png|[[Strelets' personnel file]] on an armchair on the second floor
+File:Batya Carousel Outpost Strelets' note.png|[[Strelets' note]] next to bottles near the armchair on the second floor
+</gallery></li>
+
+===Locate the Gnezdo outpost===
+The Gnezdo outpost is located east of the ULTRA shopping mall on [[Interchange]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Gnezdo outpost Map.jpg|Location marked on map
+File:Gnezdo outpost.png|The outpost
+</gallery></li>
+
+===Search the Gnezdo outpost===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Moreman's personal file icon.png|link=Moreman's personnel file]]
+|[[Moreman's personnel file]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Bogatyr squad operations report icon.png|link=Bogatyr squad operations report]]
+|[[Bogatyr squad operations report]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Map with triangulated signal icon.png|link=Map with triangulated signal]]
+|[[Map with triangulated signal]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:BEAR note from the outpost behind Ultra icon.png|link=BEAR note from the outpost behind Ultra]]
+|[[BEAR note from the outpost behind Ultra]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:First piece of code note icon.png|link=First piece of code note]]
+|[[First piece of code note]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Audio tape with report icon.png|link=Audio tape with report]]
+|[[Audio tape with report]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+To fulfill this objective, you have to pick up and read 5 notes as well as pick up an audio tape from the outpost.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Gnezdo - Audio tape with report.png|[[Audio tape with report]] on the table with the radio system in the tent
+File:Gnezdo - Moreman's personal file.png|[[Moreman's personnel file]] on one of the beds in the tent
+File:Gnezdo - Map with triangulated signal.png|[[Map with triangulated signal]] in the sleeping bag under the rock
+File:Gnezdo - Bogatyr squad operations report.png|[[Bogatyr squad operations report]] next to the guitar under the rock
+File:Gnezdo - First piece of code note.png|[[First piece of code note]] on the pallet with the green cloth
+File:Gnezdo - BEAR note from the outpost behind Ultra.png|[[BEAR note from the outpost behind Ultra]] on the blue chair next to the firebarrel
+</gallery></li>
+
+===Locate the ambush spot===
+The ambush spot, specifically Moreman's grave is located near the ZB-016 extraction in the east of [[Woods]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Batya Woods Ambush Spot Map.png|Grave location marked on map
+File:Batya Woods Ambush Spot.png|The grave
+</gallery></li>
+
+===Obtain more information about the Bogatyr squad===
+To fulfill this objective, you have to pick up and read a note as well as pick up two quest items from the grave. [[Moreman's dogtag]] should be transferred to the off-raid quest inventory to not lose it in subsequent raids. It will be needed later.
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Second piece of code note icon.png|link=Second piece of code note]]
+|[[Second piece of code note]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Moreman's phone icon.png|link=Moreman's phone]]
+|[[Moreman's phone]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Moreman's dogtag icon.png|link=Moreman's dogtag]]
+|[[Moreman's dogtag]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Second piece of code note Spawn.png|[[Second piece of code note]] in one of the boots
+File:Moreman's phone Spawn.png|[[Moreman's phone]] on the ground next to the cross
+File:Moreman's dogtag Spawn.png|[[Moreman's dogtag]] on the sleeping bag next to the cross
+</gallery></li>
+
+===Retrieve more information about the ambush from Moreman's phone===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+![[File:Moreman's audio tape 1 icon.png|link=Moreman's audio tape 1]]
+|[[Moreman's audio tape 1|Moreman's audio tape #1]]
+|1
+|Required
+!N/A
+|Has to be crafted in the [[Hideout]] (Workbench lv. 1).
+|-
+![[File:Moreman's audio tape 2 icon.png|link=Moreman's audio tape 2]]
+|[[Moreman's audio tape 2|Moreman's audio tape #2]]
+|1
+|Required
+!N/A
+|Has to be crafted in the [[Hideout]] (Workbench lv. 1).
+|}
+Craft [[Moreman's audio tape 1|Moreman's audio tape #1]] and [[Moreman's audio tape 2|Moreman's audio tape #2]] at the Workbench level 1 in the [[Hideout]] and listen to them. Electricity is required during the entire process, otherwise it will be interrupted.
+
+===Obtain Intelligence Center level 3===
+Upgrade the Intelligence Center to level 3 in the [[Hideout]].
+
+===Contact the Bogatyr squad===
+Contact Voevoda through the radio system at the Intelligence Center in the [[Hideout]]. First enter the frequency "35.70", as hinted at from the [[First piece of code note]] and [[Second piece of code note]]. Next enter the code "27.893.2000" as hinted at from [[Strelets' note]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Batya Contact Voevoda via Intel Center 3 1.png|The radio system
+File:Batya Contact Voevoda via Intel Center 3 2.png|Enter frequency "35.70"
+File:Batya Contact Voevoda via Intel Center 3 3.png|Enter code "27.893.2000"
+</gallery></li>
+
+===Gain access to [[Lightkeeper]]===
+Lightkeeper can be found on the [[Lighthouse]] location. He is located in a locked area on the 3rd floor of the lighthouse building at the peninsula territory.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:LightkeeperMap.png|Lighthouse location marked on map
+File:Lightkeeper Area Door.png|Locked area door
+</gallery></li>
+The bridge that leads to the lighthouse is guarded by [[Zryachiy]] and full of [[Map of Tarkov#Claymores|Claymores]]. To safely pass the bridge and speak to Lightkeeper, an <font color="green">encoded</font> [[Digital secure DSP radio transmitter]] is required. It deactivates the claymores and has Zryachiy not shoot you. The questline to obtain one starts with the quest [[To the Light - Trust but Verify]].
+
+Harming Zryachiy, one of his followers, or a Lightkeeper acquainted PMC in the lighthouse premises will <font color="red">decode</font> your [[Digital secure DSP radio transmitter]] if you have it equipped ('''Attention:''' Unequipping it does not prevent this in '''local''' [[Game_modes#PvE_and_PvE_Co-op_game_mode|PvE game mode]] raids). PMC's that are acquainted with Lightkeeper can kill unacquainted intruders without penalty.
+
+===Bring all the Bogatyr squad's items to [[Lightkeeper]]===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Taran's postcard icon.png|link=Taran's postcard]]
+|[[Taran's postcard]]
+|1
+|Handover item
+!<font color="red">Yes</font>
+|-
+![[File:Voevoda's audio recorder (quest item) icon.png|link=Voevoda's audio recorder (quest item)]]
+|[[Voevoda's audio recorder (quest item)|Voevoda's audio recorder]]
+|1
+|Handover item
+!<font color="red">Yes</font>
+|-
+![[File:Strelets' amulet icon.png|link=Strelets' amulet]]
+|[[Strelets' amulet]]
+|1
+|Handover item
+!<font color="red">Yes</font>
+|-
+![[File:Moreman's dogtag icon.png|link=Moreman's dogtag]]
+|[[Moreman's dogtag]]
+|1
+|Handover item
+!<font color="red">Yes</font>
+|-
+![[File:Bogatyrs patch icon.png|link=Bogatyrs patch]]
+|[[Bogatyrs patch]]
+|1
+|Handover item
+!<font color="red">Yes</font>
+|}
+Transfer [[Taran's postcard]], [[Voevoda's audio recorder (quest item)|Voevoda's audio recorder]], [[Strelets' amulet]], [[Moreman's dogtag]] and the [[Bogatyrs patch]] to the in-raid quest inventory and hand them over to [[Lightkeeper]].
+
+===Wait for Voevoda to reach out===
+Wait 6-12 hours for Voevoda to reach out, then contact him through the radio system at the Intelligence Center [[Hideout]]. Enter frequency "35.70" and the code "27.893.2000" again.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Batya Contact Voevoda via Intel Center 3 1.png|The radio system
+File:Batya Contact Voevoda via Intel Center 3 2.png|Enter frequency "35.70"
+File:Batya Contact Voevoda via Intel Center 3 3.png|Enter code "27.893.2000"
+</gallery></li>
+
+===Complete Voevoda's tasks===
+* Reach the [[Light Machine Guns|Light Machine Guns skill]] level 5
+* Reach the [[Assault Rifles|Assault Rifles skill]] level 10
+* Reach the [[Stress Resistance|Stress Resistance skill]] level 10
+* Reach the [[Strength|Strength skill]] level 15
+* Eliminate any 15 targets without dying
+* Eliminate 4 PMC operatives without dying
+
+===Contact Voevoda===
+Contact Voevoda through the radio system at the Intelligence Center in the [[Hideout]]. Enter frequency "35.70" and the code "27.893.2000" again.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Batya Contact Voevoda via Intel Center 3 1.png|The radio system
+File:Batya Contact Voevoda via Intel Center 3 2.png|Enter frequency "35.70"
+File:Batya Contact Voevoda via Intel Center 3 3.png|Enter code "27.893.2000"
+</gallery></li>
+
+===Locate the traces of the traitors===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Note mentioning Prapor icon.png|link=Note mentioning Prapor]]
+|[[Note mentioning Prapor]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+The [[Note mentioning Prapor]] to pick up and read to fulfill this objective can be found at the BEAR camp on [[Lighthouse]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Bogatyrs patch Lighthouse map.png|BEAR camp location marked on map
+File:Bogatyrs patch Lighthouse BEAR camp.png|The camp
+File:Note mentioning prapor.png|Note on the table with the radio system
+</gallery></li>
+
+===Interrogate [[Prapor]]===
+Visit [[Prapor]] in the menu through the trader screen.
+
+===Figure out how the cultists are connected to the General===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Voevoda's photo with a cultist mark icon.png|link=Voevoda's photo with a cultist mark]]
+|[[Voevoda's photo with a cultist mark]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Note mentioning General icon.png|link=Note mentioning General]]
+|[[Note mentioning General]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Marked-key-Icon.png|link=Dorm room 314 marked key]]
+|[[Dorm room 314 marked key]]
+|1
+|Required<font color="red"><big>'''<nowiki>*</nowiki>'''</big></font>
+!N/A
+|}
+<big><font color="red">'''<nowiki>*</nowiki>'''</font></big>Not all spawn locations for the quest item require this key. It is not entirely needed to complete the objective.
+
+
+To fulfill this objective, you have to pick up and read 2 notes from [[Shoreline]] and either [[Woods]] or [[Customs]].
+
+====Voevoda's photo with a cultist mark - Shoreline====
+In the house on the island.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:WetJob2IslandMap.png|Island location marked on map
+File:Voevoda's photo with a cultist mark Spawn.png|The photo on the floor
+</gallery></li>
+
+====Note mentioning General====
+=====Woods=====
+At the marked circle in the woods west of the sawmill near the checkpoint.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:WoodsSouthernMarkedCircleMap.png|Location marked on map
+File:Cultists ritual place.png|The marked circle
+File:Note mentioning General Woods Spawn.png|The note next to the candles
+</gallery></li>
+
+=====Customs=====
+In the marked room on the third floor of the three-story dorms building. A [[Dorm room 314 marked key]] is required to enter it.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:TheCultPart2DormsMap.png|Room location marked on map
+File:Marked Room Door.png|Door to the room
+File:Dorm 314 general note.png|The note on the wall
+</gallery></li>
+
+===Talk to [[Lightkeeper]]===
+Visit [[Lightkeeper]] on [[Lighthouse]].
+
+===Wait for [[Lightkeeper]] to prepare the documents on The Unheard===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Agent network deployment report icon.png|link=Agent network deployment report]]
+|[[Agent network deployment report]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+In a new raid, return to [[Lightkeeper]]'s area on [[Lighthouse]] and pick up and read the [[Agent network deployment report]]. The objective will be completed after 6 hours.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+Lighthouse agent network documents.png|The report on a red wooden box
+</gallery></li>
+
+====Rewards====
+* +144,000 [[EXP]]
+* [[Voevoda's audio recorder]]
+* Unlocks achievement [[Achievements#Achievements|This Is All (Not) Coincidence]]
+
+{{Navbox story chapters}}
+[[Category:Story chapters]]
+
+[[ru:Батя]]
