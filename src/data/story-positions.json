@@ -155,7 +155,7 @@
         "z": 51.5
       },
       {
-        "x": 12.0,
+        "x": 12,
         "z": 32.8
       },
       {
@@ -164,7 +164,7 @@
       },
       {
         "x": -5.5,
-        "z": 10.0
+        "z": 10
       }
     ],
     "source": "The Labyrinth Scientist locations map.png",
@@ -317,7 +317,7 @@
       "positions": [
         {
           "x": 492.6,
-          "z": 97.0
+          "z": 97
         }
       ],
       "source": "Hobby Club Customs Stashing Map.png",
@@ -370,7 +370,7 @@
     "positions": [
       {
         "x": -429.6,
-        "z": -49.0
+        "z": -49
       }
     ],
     "source": "Batya Woods Ambush Spot Map.png",
@@ -486,7 +486,7 @@
       "map": "the-lab",
       "positions": [
         {
-          "x": -146.0,
+          "x": -146,
           "z": -398.8
         }
       ],
@@ -504,7 +504,7 @@
     "positions": [
       {
         "x": -5.7,
-        "z": -17.0
+        "z": -17
       }
     ],
     "source": "The Unheard Transport Log Map.jpg",
@@ -754,7 +754,7 @@
       "map": "streets-of-tarkov",
       "positions": [
         {
-          "x": -133.0,
+          "x": -133,
           "z": 271.4
         }
       ],
@@ -779,7 +779,7 @@
       "positions": [
         {
           "x": 187.7,
-          "z": -214.0
+          "z": -214
         }
       ],
       "source": "RB-VO lock location.png",
@@ -877,7 +877,7 @@
       "positions": [
         {
           "x": -639.8,
-          "z": -197.0
+          "z": -197
         }
       ],
       "source": "Shoreline Smuggler Base Map.png",
@@ -935,18 +935,6 @@
     "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
     "errorM": 45
   },
-  "The Ticket::savior launch a yellow signal flare in front of ultra s main entrance on interchange#0": {
-    "map": "interchange",
-    "positions": [
-      {
-        "x": 197.0,
-        "z": -58.3
-      }
-    ],
-    "source": "TheTicketULTRAFlareYellowMap.jpg",
-    "method": "zone encadrée en rouge sur l'image satellite de l'Échangeur, recalée par SIFT sur l'image des repères (écart ≤ 12 m) ; le cadre est la zone entière devant l'entrée (≈ 540 m de long), pas un point",
-    "errorM": 285
-  },
   "The Ticket::savior obtain the experimental signal jammer#0": [
     {
       "map": "the-lab",
@@ -968,7 +956,7 @@
       "map": "the-lab",
       "positions": [
         {
-          "x": -206.0,
+          "x": -206,
           "z": -298.9
         }
       ],
@@ -1009,18 +997,6 @@
     "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
     "errorM": 45
   },
-  "The Ticket::debtor launch a yellow signal flare in front of ultra s main entrance on interchange#0": {
-    "map": "interchange",
-    "positions": [
-      {
-        "x": 197.0,
-        "z": -58.3
-      }
-    ],
-    "source": "TheTicketULTRAFlareYellowMap.jpg",
-    "method": "zone encadrée en rouge sur l'image satellite de l'Échangeur, recalée par SIFT sur l'image des repères (écart ≤ 12 m) ; le cadre est la zone entière devant l'entrée (≈ 540 m de long), pas un point",
-    "errorM": 285
-  },
   "The Ticket::debtor obtain the experimental signal jammer#0": [
     {
       "map": "the-lab",
@@ -1042,7 +1018,7 @@
       "map": "the-lab",
       "positions": [
         {
-          "x": -206.0,
+          "x": -206,
           "z": -298.9
         }
       ],
@@ -1083,18 +1059,6 @@
     "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
     "errorM": 45
   },
-  "The Ticket::survivor launch a yellow signal flare in front of ultra s main entrance on interchange#0": {
-    "map": "interchange",
-    "positions": [
-      {
-        "x": 197.0,
-        "z": -58.3
-      }
-    ],
-    "source": "TheTicketULTRAFlareYellowMap.jpg",
-    "method": "zone encadrée en rouge sur l'image satellite de l'Échangeur, recalée par SIFT sur l'image des repères (écart ≤ 12 m) ; le cadre est la zone entière devant l'entrée (≈ 540 m de long), pas un point",
-    "errorM": 285
-  },
   "The Ticket::survivor obtain the experimental signal jammer#0": [
     {
       "map": "the-lab",
@@ -1116,7 +1080,7 @@
       "map": "the-lab",
       "positions": [
         {
-          "x": -206.0,
+          "x": -206,
           "z": -298.9
         }
       ],
@@ -1157,18 +1121,6 @@
     "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
     "errorM": 45
   },
-  "The Ticket::fallen launch a yellow signal flare in front of ultra s main entrance on interchange#0": {
-    "map": "interchange",
-    "positions": [
-      {
-        "x": 197.0,
-        "z": -58.3
-      }
-    ],
-    "source": "TheTicketULTRAFlareYellowMap.jpg",
-    "method": "zone encadrée en rouge sur l'image satellite de l'Échangeur, recalée par SIFT sur l'image des repères (écart ≤ 12 m) ; le cadre est la zone entière devant l'entrée (≈ 540 m de long), pas un point",
-    "errorM": 285
-  },
   "The Ticket::fallen obtain the experimental signal jammer#0": [
     {
       "map": "the-lab",
@@ -1190,7 +1142,7 @@
       "map": "the-lab",
       "positions": [
         {
-          "x": -206.0,
+          "x": -206,
           "z": -298.9
         }
       ],
@@ -1223,7 +1175,7 @@
     "map": "streets-of-tarkov",
     "positions": [
       {
-        "x": 224.0,
+        "x": 224,
         "z": 69.5
       }
     ],
@@ -1247,7 +1199,7 @@
     "map": "streets-of-tarkov",
     "positions": [
       {
-        "x": 224.0,
+        "x": 224,
         "z": 69.5
       }
     ],
@@ -1271,7 +1223,7 @@
     "map": "streets-of-tarkov",
     "positions": [
       {
-        "x": 224.0,
+        "x": 224,
         "z": 69.5
       }
     ],
@@ -1320,7 +1272,7 @@
       "map": "the-lab",
       "positions": [
         {
-          "x": -126.0,
+          "x": -126,
           "z": -386.7
         }
       ],
@@ -1353,7 +1305,7 @@
       "positions": [
         {
           "x": -247.1,
-          "z": -320.0
+          "z": -320
         }
       ],
       "source": "TheTicketFolderWithEvidence(Reports)Map.png",
@@ -1369,7 +1321,7 @@
       "positions": [
         {
           "x": -179.8,
-          "z": -365.0
+          "z": -365
         }
       ],
       "source": "TheTicketFolderWithEvidence(Staff)Map.png",
@@ -1465,7 +1417,7 @@
       "positions": [
         {
           "x": -126.7,
-          "z": -278.0
+          "z": -278
         }
       ],
       "source": "TheTicketFolderWithEvidence(Finances)Map.png",
@@ -1592,7 +1544,7 @@
       "map": "streets-of-tarkov",
       "positions": [
         {
-          "x": -133.0,
+          "x": -133,
           "z": 271.4
         }
       ],
@@ -1617,7 +1569,7 @@
       "positions": [
         {
           "x": 187.7,
-          "z": -214.0
+          "z": -214
         }
       ],
       "source": "RB-VO lock location.png",
@@ -1653,7 +1605,7 @@
     "map": "terminal",
     "positions": [
       {
-        "x": 189.0,
+        "x": 189,
         "z": -244.4
       }
     ],
@@ -1858,7 +1810,7 @@
           "z": 51.5
         },
         {
-          "x": 12.0,
+          "x": 12,
           "z": 32.8
         },
         {
@@ -1867,7 +1819,7 @@
         },
         {
           "x": -5.5,
-          "z": 10.0
+          "z": 10
         }
       ],
       "source": "The Labyrinth Scientist locations map.png",
@@ -1891,7 +1843,7 @@
       "positions": [
         {
           "x": -5.7,
-          "z": -17.0
+          "z": -17
         }
       ],
       "source": "The Unheard Transport Log Map.jpg",
@@ -1982,7 +1934,7 @@
       "map": "the-lab",
       "positions": [
         {
-          "x": -146.0,
+          "x": -146,
           "z": -398.8
         }
       ],
@@ -2023,7 +1975,7 @@
       "positions": [
         {
           "x": -342.7,
-          "z": -54.0
+          "z": -54
         }
       ],
       "source": "Gnezdo outpost Map.jpg",
