@@ -34,7 +34,7 @@ const storedIcon = (url: string) => (url.startsWith(ICON_BASE) ? url.slice(ICON_
 type Dict = Record<string, unknown>;
 type Translations = Record<string, string>;
 
-async function fetchJson(path: string, signal?: AbortSignal): Promise<Dict> {
+export async function fetchJson(path: string, signal?: AbortSignal): Promise<Dict> {
   const res = await fetch(API_BASE + path, {
     cache: "no-cache",
     headers: { Accept: "application/json" },
@@ -45,7 +45,7 @@ async function fetchJson(path: string, signal?: AbortSignal): Promise<Dict> {
 }
 
 /** Charge les traductions d'un endpoint ; renvoie {} si la langue n'existe pas. */
-async function fetchTranslations(path: string, lang: string, signal?: AbortSignal) {
+export async function fetchTranslations(path: string, lang: string, signal?: AbortSignal) {
   try {
     const json = await fetchJson(`${path}_${lang}`, signal);
     return (json.data ?? {}) as Translations;
@@ -60,7 +60,7 @@ async function fetchTranslations(path: string, lang: string, signal?: AbortSigna
  * Charge un endpoint et renvoie ses données + deux fonctions de traduction :
  * t (langue demandée, repli anglais) et tEn (anglais seul, pour la recherche bilingue).
  */
-async function fetchEndpoint(path: string, lang: string, signal?: AbortSignal) {
+export async function fetchEndpoint(path: string, lang: string, signal?: AbortSignal) {
   const [main, primary, fallback] = await Promise.all([
     fetchJson(path, signal),
     fetchTranslations(path, lang, signal),
@@ -164,6 +164,10 @@ function readObjectiveExtras(obj: Dict): Partial<Objective> {
   if (questItem) extras.questItemId = questItem;
   const keys = asArray(obj.requiredKeys).map(refIds).filter((group) => group.length > 0);
   if (keys.length > 0) extras.requiredKeyIds = keys;
+  const use = refIds(obj.useAny);
+  if (use.length > 0) extras.useItemIds = use;
+  const build = [...refIds([obj.item]), ...refIds(obj.containsAll)];
+  if (obj.type === "buildWeapon" && build.length > 0) extras.buildItemIds = build;
   const marker = refId(obj.markerItem);
   if (marker) extras.markerItemId = marker;
   return extras;
@@ -342,6 +346,8 @@ export function referencedItemIds(tasks: Task[]): Set<string> {
   for (const task of tasks) {
     for (const o of task.objectives) {
       o.itemIds?.forEach((id) => ids.add(id));
+      o.useItemIds?.forEach((id) => ids.add(id));
+      o.buildItemIds?.forEach((id) => ids.add(id));
       o.requiredKeyIds?.flat().forEach((id) => ids.add(id));
       if (o.markerItemId) ids.add(o.markerItemId);
     }

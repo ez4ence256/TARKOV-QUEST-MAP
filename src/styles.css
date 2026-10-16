@@ -1815,3 +1815,131 @@ kbd {
   align-items: center;
   gap: 0.5rem;
 }
+
+/* --- Item finder --- */
+.item-finder-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex: none;
+  white-space: nowrap;
+}
+.finder-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: calc(var(--topbar-h) + 8px) 8px 8px;
+  background: rgba(0, 0, 0, 0.55);
+}
+.finder {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: min(560px, 100%);
+  max-height: 100%;
+  padding: 0.75rem;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+.finder-head,
+.finder-selected {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.finder-search {
+  flex: 1;
+  min-width: 0;
+}
+.finder-check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+.finder-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+.finder-body h3 {
+  margin: 0.75rem 0 0.25rem;
+  font-size: 0.95em;
+}
+.finder-count {
+  margin: 0 0 0.25rem;
+}
+.finder-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.finder-item,
+.finder-quest {
+  display: flex;
+  width: 100%;
+  gap: 0.5rem;
+  padding: 0.3rem 0.4rem;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+.finder-item {
+  align-items: center;
+}
+.finder-quest {
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.finder-item:hover,
+.finder-quest:hover {
+  background: var(--bg-3);
+}
+.finder-roles {
+  color: var(--accent-2);
+  font-size: 0.9em;
+}
+.finder-thumb {
+  flex: none;
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+}
+.finder-thumb.big {
+  width: 48px;
+  height: 48px;
+}
+.finder-hideout {
+  padding: 0.3rem 0.4rem;
+  border-bottom: 1px solid var(--line);
+}
+@media (max-width: 800px) {
+  .item-finder-label {
+    display: none;
+  }
+}
+.finder-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
+.finder-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+.finder-thumb.small {
+  width: 20px;
+  height: 20px;
+}

@@ -321,6 +321,7 @@ Signalé : « Le labyrinthe » montrait « Speak to Jaeger… » alors que le wi
 
 ## Décisions prises (à ne pas remettre en cause sans raison)
 
+- **Item finder (barre du haut, après le badge de mode)** : bouton 🔍 qui ouvre un dialogue (recherche FR/EN tolérante, 100 résultats + « Afficher plus ») sur tous les objets du jeu ; l'objet choisi est cherché dans les quêtes (rendre/trouver/poser/vendre/utiliser/clé/récompense), et au choix dans le hideout, les barters et les crafts (cases `tqp:finderHideout/Barters/Crafts`, cochées par défaut). Tout en mémoire, rien dans localStorage. Sources (PvE, compressé) : `items_<langue>` ~477 Ko + `items_en` ~433 Ko (le fichier de 17 Mo n'est pas lu ; objet = clé `<id> ShortName`), `hideout` 8 Ko + traductions ~11 Ko, `barters` 29 Ko, `crafts` 13 Ko ; hideout/barters/crafts chargés seulement quand un objet est choisi. `useAny` (useItem) et `buildWeapon` ajoutés au parseur de quêtes (champs `useItemIds`, `buildItemIds`, visibles après le prochain rafraîchissement du cache).
 - **Icebreaker** garde tous ses ponts dans le sélecteur.
 - **Photos du wiki** (pas de captures perso), par quête et non par point ; usage personnel et non commercial.
 - **PVP ZONE** : le wiki de la quête normale est affiché, avec un bandeau.

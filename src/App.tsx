@@ -28,6 +28,7 @@ import { useRoom } from "./api/room";
 import { buildEventTasks, loadEventEntries, type EventEntry } from "./api/eventQuests";
 import { RoomControl } from "./components/RoomControl";
 import { MapPicker } from "./components/MapPicker";
+import { ItemFinder } from "./components/ItemFinder";
 
 type Tab = "selection" | "quests" | "capture" | "quest" | "photos" | "custom" | "settings";
 
@@ -367,6 +368,7 @@ export default function App() {
         <div className="brand">
           Quest Planner <span className="mode-badge">{modeLabel}</span>
         </div>
+        <ItemFinder gameMode={gameMode} lang={lang} tasks={tasks} traders={data?.traders ?? []} maps={maps} itemNames={data?.itemNames ?? NO_NAMES} itemIcons={data?.itemIcons ?? NO_NAMES} onShowQuest={showQuest} />
         <MapPicker maps={maps} currentId={currentMap?.id ?? ""} counts={mapCounts} onPick={showMap} />
         <RoomControl room={room} />
         <label className="scav-check">

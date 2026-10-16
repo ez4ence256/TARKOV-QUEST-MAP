@@ -71,6 +71,10 @@ export interface Objective {
   questItemId?: string;
   /** Clés requises : chaque groupe est une liste d'alternatives (une seule suffit). */
   requiredKeyIds?: string[][];
+  /** Objets à utiliser, au choix (useItem : fusées, injecteurs…). */
+  useItemIds?: string[];
+  /** Arme à monter et pièces exigées (buildWeapon). */
+  buildItemIds?: string[];
   /** Marqueur à poser (objectifs "mark"). */
   markerItemId?: string;
 }
