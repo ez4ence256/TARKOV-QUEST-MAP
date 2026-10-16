@@ -3,8 +3,11 @@
 //  - noms : fichiers de traductions items_<langue> et items_en (~0,45 Mo chacun compressés) ; le fichier
 //    principal des objets (17 Mo) n'est pas lu. Un objet = une clé « <id> ShortName » (les catégories n'en ont pas).
 //  - hideout : fichier principal (~8 Ko compressé) + traductions.
+//  - signatures d'images (recherche par image) : src/data/item-images.bin (1,4 Mo), au premier collage d'une image.
 import type { GameMode } from "../types";
 import { fetchEndpoint, fetchJson, fetchTranslations } from "./tarkovJson";
+import itemImagesUrl from "../data/item-images.bin?url";
+import { parseImageIndex, type ImageIndex } from "../lib/itemImage";
 import { buildBarterIndex, buildCraftIndex, buildHideoutIndex, type Exchange, type HideoutUse } from "../lib/itemUsage";
 
 export interface ListedItem {
@@ -27,6 +30,19 @@ export function parseItemList(primary: Record<string, string>, english: Record<s
     out.push({ id, name, alts: [...new Set(alts)] });
   }
   return out.sort((a, b) => a.name.localeCompare(b.name, lang));
+}
+
+let images: Promise<ImageIndex> | null = null;
+/** Signatures d'images des objets (npm run sync:items). */
+export function loadItemImages(): Promise<ImageIndex> {
+  if (!images) {
+    images = fetch(itemImagesUrl).then((r) => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.arrayBuffer().then(parseImageIndex);
+    });
+    images.catch(() => (images = null));
+  }
+  return images;
 }
 
 const items = new Map<string, Promise<ListedItem[]>>();

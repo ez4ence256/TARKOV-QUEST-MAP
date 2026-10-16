@@ -6,14 +6,29 @@ import { tr } from "../lib/i18n";
 import { scoreName } from "../lib/search";
 import { RECOGNIZED_MIN, matchItemLines } from "../lib/ocrMatch";
 import { iconSrc } from "../lib/itemIcons";
+import { matchImage, type Rgba } from "../lib/itemImage";
 import { buildUsageIndex, durationLabel, useLabel, type Exchange, type QuestUse } from "../lib/itemUsage";
-import { loadExchanges, loadHideout, loadItemList, type HideoutInfo, type ListedItem } from "../api/itemList";
+import { loadExchanges, loadHideout, loadItemImages, loadItemList, type HideoutInfo, type ListedItem } from "../api/itemList";
 import { ItemThumb } from "./ItemThumb";
 
 const PAGE = 100;
 
 /** Lecture d'une capture collée (Ctrl+V) : null = recherche normale. */
-type OcrState = { step: "reading"; progress: number | null } | { step: "done"; items: ListedItem[] } | { step: "error" };
+type OcrState = { step: "reading"; progress: number | null } | { step: "done"; items: ListedItem[]; byText: number; byImage: number } | { step: "error" };
+
+/** Image collée -> pixels, réduite à 400 px au plus (une capture plein écran serait longue à parcourir). */
+async function blobPixels(blob: Blob): Promise<Rgba> {
+  const bitmap = await createImageBitmap(blob);
+  const scale = Math.min(1, 400 / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("canvas");
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  return ctx.getImageData(0, 0, canvas.width, canvas.height);
+}
 
 /** Données téléchargées à la demande quand un objet est choisi (gardées en mémoire par api/itemList). */
 function useLazy<T>(wanted: boolean, load: () => Promise<T>, deps: unknown[]): { data: T | null; error: boolean } {
@@ -122,18 +137,20 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
     const id = ++run.current;
     if (!all) return setOcr({ step: "error" });
     setOcr({ step: "reading", progress: null });
-    try {
-      const { readImageLines } = await import("../lib/ocr");
-      const lines = await readImageLines(blob, (p) => id === run.current && setOcr({ step: "reading", progress: p.progress }));
-      if (id !== run.current) return;
-      const matches = matchItemLines(lines.map((l) => l.text), all);
-      const sure = matches.filter((m) => m.score >= RECOGNIZED_MIN);
-      setQuery("");
-      setSelected(sure.length === 1 ? sure[0].item : null);
-      setOcr({ step: "done", items: matches.map((m) => m.item) });
-    } catch {
-      if (id === run.current) setOcr({ step: "error" });
-    }
+    // texte (OCR) et image en même temps ; l'un peut échouer sans l'autre
+    const [text, image] = await Promise.allSettled([
+      import("../lib/ocr").then(({ readImageLines }) => readImageLines(blob, (p) => id === run.current && setOcr({ step: "reading", progress: p.progress }))),
+      Promise.all([loadItemImages(), blobPixels(blob)]).then(([index, pixels]) => matchImage(pixels, index)),
+    ]);
+    if (id !== run.current) return;
+    if (text.status === "rejected" && image.status === "rejected") return setOcr({ step: "error" });
+    const byText = text.status === "fulfilled" ? matchItemLines(text.value.map((l) => l.text), all) : [];
+    const byImage = image.status === "fulfilled" ? image.value.map((m) => byId.get(m.id)).filter((i): i is ListedItem => Boolean(i)) : [];
+    const sure = byText.filter((m) => m.score >= RECOGNIZED_MIN);
+    const items = [...new Set([...byText.map((m) => m.item), ...byImage])];
+    setQuery("");
+    setSelected(sure.length === 1 ? sure[0].item : null);
+    setOcr({ step: "done", items, byText: byText.length, byImage: items.length - byText.length });
   };
 
   const q = useDeferredValue(query);
@@ -192,7 +209,10 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                       ? tr("Liste des objets pas encore chargée.", "Item list not loaded yet.")
                       : tr("Lecture impossible. La première utilisation demande une connexion (données de langue).", "Could not read the image. The first use needs a connection (language data).")
                     : ocr.items.length
-                      ? tr(`Capture : ${ocr.items.length} objet(s) reconnu(s)`, `Screenshot: ${ocr.items.length} item(s) recognized`)
+                      ? tr(
+                          `Capture : ${ocr.byText} objet(s) lu(s) dans le texte, ${ocr.byImage} ressemblance(s) par l'image`,
+                          `Screenshot: ${ocr.byText} item(s) read from the text, ${ocr.byImage} look-alike(s) from the image`,
+                        )
                       : tr("Aucun objet reconnu dans la capture.", "No item recognized in the screenshot.")}
               </span>
               {ocr.step !== "reading" && (
