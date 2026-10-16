@@ -230,7 +230,11 @@
       ],
       "source": "LabsServerRoomMap.png",
       "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
-      "errorM": 28
+      "errorM": 28,
+      "floor": {
+        "fr": "Niveau 1 (Labs)",
+        "en": "First level (Labs)"
+      }
     }
   ],
   "Falling Skies::retrieve the flash drive from one of the g wagon suvs#0": {
@@ -433,6 +437,156 @@
       "source": "TheCultPart2DormsMap.png",
       "method": "homographie par ECC sur les arêtes entre l'affiche 3D de Customs (re3mr) et notre SVG, contrôlée sur des sorties et sur les conteneurs de tarkov.dev ; repère rouge au centre",
       "errorM": 59
+    }
+  ],
+  "The Unheard::req#0": [
+    {
+      "map": "streets-of-tarkov",
+      "positions": [
+        {
+          "x": 54.4,
+          "z": -61.1
+        }
+      ],
+      "source": "BeyondMeat2.png",
+      "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Streets (résidu ≈ 0,3 m) ; contrôle : transit « The Lab » de tarkov.dev à 3 m de son repère",
+      "errorM": 20
+    },
+    {
+      "map": "streets-of-tarkov",
+      "positions": [
+        {
+          "x": -38.3,
+          "z": -113.4
+        }
+      ],
+      "source": "BeyondMeat2.png",
+      "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Streets (résidu ≈ 0,3 m) ; contrôle : transit « The Lab » de tarkov.dev à 3 m de son repère",
+      "errorM": 14
+    }
+  ],
+  "The Unheard::learn more about terragroup s activities learn more about the fuel mentioned in the note#0": [
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -155.1,
+          "z": -370.4
+        }
+      ],
+      "source": "The Unheard Changes and Fax Map.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki (version mono-niveau, même dessin) et les tuiles de la map Labs ; contrôle : porte du hangar de tarkov.dev à 3 m",
+      "errorM": 12,
+      "floor": {
+        "fr": "Niveau 1 (Labs)",
+        "en": "First level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -146.0,
+          "z": -398.8
+        }
+      ],
+      "source": "The Unheard Changes and Fax Map.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 17,
+      "floor": {
+        "fr": "Niveau 2 (Labs)",
+        "en": "Second level (Labs)"
+      }
+    }
+  ],
+  "The Unheard::find more information about the special catalyst shipment#0": {
+    "map": "factory",
+    "positions": [
+      {
+        "x": -5.7,
+        "z": -17.0
+      }
+    ],
+    "source": "The Unheard Transport Log Map.jpg",
+    "method": "similitude par ECC sur la silhouette (cc 0,95) entre l'affiche re3mr du wiki et notre SVG de Factory ; contrôle : les extractions Gate 3, Gate 0 et Gate M de tarkov.dev sur leurs icônes (tunnels : décalage mesuré sur l'icône de la porte du bunker caméra, ± 6 m)",
+    "errorM": 7
+  },
+  "The Unheard::locate rzhevsky s service vehicle and obtain his personal belongings#0": {
+    "map": "streets-of-tarkov",
+    "positions": [
+      {
+        "x": 19.4,
+        "z": 356.3
+      }
+    ],
+    "source": "Rzhevsky's Service Vehicle on map.png",
+    "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Streets (résidu ≈ 0,3 m) ; contrôle : transit « The Lab » de tarkov.dev à 3 m de son repère",
+    "errorM": 9
+  },
+  "The Unheard::locate and obtain the documents on the blue ice fuel catalyst research find as much information as possible about the plans of the unheard#0": {
+    "map": "factory",
+    "positions": [
+      {
+        "x": -23.9,
+        "z": 41.6
+      }
+    ],
+    "source": "TerraGroup storage room keycard map.png",
+    "method": "similitude par ECC sur la silhouette (cc 0,95) entre l'affiche re3mr du wiki et notre SVG de Factory ; contrôle : les extractions Gate 3, Gate 0 et Gate M de tarkov.dev sur leurs icônes (tunnels : décalage mesuré sur l'icône de la porte du bunker caméra, ± 6 m)",
+    "errorM": 10,
+    "floor": {
+      "fr": "Tunnels",
+      "en": "Tunnels"
+    }
+  },
+  "The Unheard::search for any mention of a p in the lab learn more about a p s role and activities#0": [
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -206.4,
+          "z": -299.7
+        }
+      ],
+      "source": "APsWhiteboardAndTapes.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 14,
+      "floor": {
+        "fr": "Niveau 1 (Labs)",
+        "en": "First level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -147.3,
+          "z": -399.5
+        }
+      ],
+      "source": "APsWhiteboardAndTapes.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 15,
+      "floor": {
+        "fr": "Niveau 2 (Labs)",
+        "en": "Second level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -255.5,
+          "z": -358.5
+        }
+      ],
+      "source": "APsWhiteboardAndTapes.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 15,
+      "floor": {
+        "fr": "Niveau 2 (Labs)",
+        "en": "Second level (Labs)"
+      }
     }
   ]
 }

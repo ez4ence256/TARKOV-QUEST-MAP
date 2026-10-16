@@ -128,6 +128,15 @@ describe("The Labyrinth", () => {
   });
 });
 
+describe("étage connu d'après le plan", () => {
+  it("un point de Labs au 2e niveau porte son étage", () => {
+    const key = Object.keys(STORY_POSITIONS).find((k) => k.startsWith("The Unheard::search for any mention"))!;
+    const entries = [STORY_POSITIONS[key]].flat();
+    expect(entries.some((e) => e.floor?.en === "Second level (Labs)")).toBe(true);
+    expect(entries.every((e) => e.map === "the-lab")).toBe(true);
+  });
+});
+
 describe("filtrage par map", () => {
   it("garde les points de la map affichée", () => {
     const customs = currentStoryPoints(CHAPTER, items, {});

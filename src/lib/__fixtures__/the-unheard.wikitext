@@ -1,0 +1,468 @@
+{{Infobox quest
+|image        =The Unheard Banner.png
+|icon         =The Unheard Icon.png
+|icon size    =
+|location     =
+|given by     =
+|reward       =
+|reputation   =
+|quest number =
+|previous     =
+|leads to     =
+|related      =
+|related2     =
+|reqkappa     =
+}}
+
+'''{{PAGENAME}}''' is a [[Story chapters|story chapter]] in ''[[Escape from Tarkov]]''.
+
+==Description==
+{{quote|I came across a strange note on a TerraGroup sheet. It mentions the will of The Unheard and some fuel needed for "purification". TerraGroup's definitely involved in this, and I should gather more information about The Unheard.}}
+
+==Requirements==
+Pick up and read [[Note with ramblings about the Purification]] from one of the following locations:
+* In the surveillance room inside the TerraGroup security post building on [[Streets of Tarkov]]
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BeyondMeat2.png|Building location marked on map
+File:TerraGroup security post Building.png|The building entrance
+File:TerraGroup security armory Way 1.png|Way to the surveillance room 1
+File:TerraGroup security armory Way 2.png|Way to the surveillance room 2
+File:The Unheard Activation Location 1.png|The note on the desk
+</gallery></li>
+* In the TerraGroup office on [[Streets of Tarkov]]
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BeyondMeat2.png|Office location marked on map
+File:Beyond the Red Meat 2 31.png|Way to the office
+File:The Unheard Activation Location 2.png|The note on a cabinet next to the meeting room door
+</gallery></li>
+* In office no. 4 on the second floor of the TerraGroup main building on [[Ground Zero|Ground Zero (Level 21+)]]. [[TerraGroup science office key]] required.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Saving the Mole Map.png|TerraGroup building location marked on map
+File:Ground Zero TerraGroup Building.png|The TerraGroup building
+File:Scientist's Office.png|Door to the office
+File:The Unheard Activation Location 3.png|Note on the desk with turned on screens
+</gallery></li>
+
+==Objectives==
+* [[Note with ramblings about the Purification|Learn more]] about The Unheard
+* Learn more about [[Document on changes in enterprise interactions|TerraGroup's activities]]
+* Learn more about [[Cargo transport fax|the "fuel"]] mentioned in the note
+* Find more [[Transport log with notes|information]] about the special catalyst shipment
+* Locate Rzhevsky's service vehicle and obtain his [[Hard drive from Rzhevsky's car|personal belongings]]
+* Retrieve the data from the [[Hard drive from Rzhevsky's car|hard drive in Rzhevsky's car]]
+* Read the [[Hard drive printout|transcript]] of Rzhevsky's conversation
+* Locate and obtain the [[Fuel catalyst test report|documents]] on the Blue Ice fuel catalyst research
+* Find as much [[Burnt document|information]] as possible about the plans of The Unheard
+* Learn more about [[A.P. meeting audio tape Part 1|A.P.'s activities]]
+* Learn more about [[A.P. meeting audio tape Part 2|A.P.'s role]]
+* Search for any mention of A.P. in [[The Lab]]
+* Locate A.P.'s room in the Health Resort
+** (''Optional'') [[Guard post note|Find out]] which room A.P. was assigned to
+* Obtain A.P.'s [[TerraGroup corporate apartment key|personal belongings]]
+* Obtain A.P.'s [[Sliderkey flash drive marked with A.P.|data storage device]]
+* Decrypt the [[Sliderkey flash drive marked with A.P.|flash drive]] from A.P.'s room
+* Ask [[Mechanic]] for help
+* Hand over 5,000,000 [[Roubles]] to [[Mechanic]]
+* Hand over the [[Decrypted Sliderkey flash drive marked with A.P.|A.P. flash drive]] to [[Mechanic]]
+* Wait for the news from Elektronik
+* Integrate the tech files from [[Decrypted Sliderkey flash drive marked with A.P.|A.P.'s flash drive]] into a [[Reprogrammed keycard for A.P.'s apartment lock (Green)|TerraGroup keycard]]
+* Access [[TerraGroup corporate apartment key|A.P.'s corporate apartment]]
+* Investigate [[TerraGroup corporate apartment key|A.P.'s apartment]]
+* Access the [[Reprogrammed keycard for A.P.'s apartment lock (Green)|hidden room]] in A.P.'s apartment
+* Study the [[Order from TerraGroup Worldwide headquarters|TerraGroup documentation]] in A.P.'s office
+* [[Copy of report for TG Worldwide|Study]] the role of the Blue Ice catalyst in The Unheard's protocol
+* Learn more about [[Document mentioning a protocol|The Unheard's protocol]]
+* [[Document mentioning the Warden|Figure out]] how The Unheard are connected to Tarkov
+
+==Guide==
+===Learn more about The Unheard===
+See [[The Unheard#Requirements|requirements]].
+
+===Learn more about TerraGroup's activities/Learn more about the "fuel" mentioned in the note===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Document on changes in enterprise interactions icon.png|link=Document on changes in enterprise interactions]]
+|[[Document on changes in enterprise interactions]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Cargo transport fax icon.png|link=Cargo transport fax]]
+|[[Cargo transport fax]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+To fulfill these objectives, you have to pick up and read 2 notes from [[The Lab]]. The [[Document on changes in enterprise interactions]] can be found in the laboratory next to the dome on the first floor, and the [[Cargo transport fax]] can be found in office O23 on the second floor.
+
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:The Unheard Changes and Fax Map.png|Locations marked on map
+File:The Unheard Changes Lab.png|The laboratory
+File:The Unheard Changes.png|The document in the laboratory next to the screen
+File:The Unheard Fax.png|The fax in the office on the lowboard next to the safe
+</gallery></li>
+
+===Find more information about the special catalyst shipment===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Transport log with notes icon.png|link=Transport log with notes]]
+|[[Transport log with notes]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+The [[Transport log with notes]] to pick up and read can be found on [[Factory]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:The Unheard Transport Log Map.jpg|Location marked on map
+File:Location of unheard log.png|The log on a yellow barrel next to the hole in the floor
+</gallery></li>
+
+===Locate Rzhevsky's service vehicle and obtain his personal belongings===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Hard drive from Rzhevsky's car icon.png|link=Hard drive from Rzhevsky's car]]
+|[[Hard drive from Rzhevsky's car]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+The wanted car can be found near the LexOs car dealership on [[Streets of Tarkov]]. The [[Hard drive from Rzhevsky's car]] is located on the center console in the car.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Rzhevsky's Service Vehicle on map.png|Location marked on map
+File:Rzhevsky's Service Vehicle.png|The wanted car
+File:HDD in Rzhevsky's Service Vehicle.png|The hard drive
+</gallery></li>
+
+===Retrieve the data from the hard drive in Rzhevsky's car/Read the transcript of Rzhevsky's conversation===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+![[File:Hard drive printout icon.png|link=Hard drive printout]]
+|[[Hard drive printout]]
+|1
+|Required
+!N/A
+|Has to be crafted in the [[Hideout]] (Intelligence center lv. 1).
+|}
+Craft the [[Hard drive printout]] at the Intelligence Center level 1 in the [[Hideout]] and read it from the off-raid quest inventory. Electricity is required during the entire process, otherwise it will be interrupted.
+
+===Locate and obtain the documents on the Blue Ice fuel catalyst research/Find as much information as possible about the plans of The Unheard===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:TerraGroup storage room keycard icon.png|link=TerraGroup storage room keycard]]
+|[[TerraGroup storage room keycard]]
+|1
+|Required
+!N/A
+|-
+![[File:Fuel catalyst test report icon.png|link=Fuel catalyst test report]]
+|[[Fuel catalyst test report]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Burnt document icon.png|link=Burnt document]]
+|[[Burnt document]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+The [[Fuel catalyst test report]] and the [[Burnt document]] to pick up and read can be found in the TerraGroup storage room on [[Factory]], which is located in the underground tunnels right next to the "Camera Bunker Door" Scav extraction. A [[TerraGroup storage room keycard]] is required to enter it. Both have multiple spawns throughout the room. 
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:TerraGroup storage room keycard map.png|Room location marked on map
+File:TerraGroup storage room keycard door.png|Door to the room
+File:The Unheard Fuel catalyst test report Spawn 2.png|Test report spawn 1 on the bookshelf next to the door
+File:The Unheard Fuel catalyst test report Spawn 1.png|Test report spawn 2 on the safe next to the table
+File:The Unheard Burnt document Spawn 1.png|Burnt document spawn 1 on the table
+File:The Unheard Burnt document Spawn 2.png|Burnt document spawn 2 on the right metal shelf
+</gallery></li>
+
+===Search for any mention of A.P. in The Lab/Learn more about A.P.'s role and activities===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:A.P. meeting audio tape Part 1 icon.png|link=A.P. meeting audio tape Part 1]]
+|[[A.P. meeting audio tape Part 1]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:A.P. meeting audio tape Part 2 icon.png|link=A.P. meeting audio tape Part 2]]
+|[[A.P. meeting audio tape Part 2]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+To fulfill this objective, you have to locate 1 of 2 whiteboards and pick up and listen to 2 audio tapes located in [[The Lab]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:APsWhiteboardAndTapes.png|Locations marked on map
+File:The Unheard AP Whiteboard 1.png|Whiteboard 1 in office O23
+File:The Unheard AP Whiteboard 2.png|Whiteboard 2 in the admin office R22
+File:Location of first tapeunheardlabs.png|Tape #1 in the lecture room on the stairs
+File:Location of second tapetheunheardlabs.png|Tape #2 in the lecture room on one of the desks next to a laptop
+</gallery></li>
+
+===Locate A.P.'s room in the Health Resort/Obtain A.P.'s data storage device and his personal belongings===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Sliderkey flash drive marked with A.P. icon.png|link=Sliderkey flash drive marked with A.P.]]
+|[[Sliderkey flash drive marked with A.P.]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:TerraGroup corporate apartment key icon.png|link=TerraGroup corporate apartment key]]
+|[[TerraGroup corporate apartment key]]
+|1
+|Required
+!<font color="green">No</font>
+|-
+![[File:Guard post note icon.png|link=Guard post note]]
+|[[Guard post note]]
+|1
+|Optional
+!<font color="red">Yes</font>
+|-
+![[File:Fragment of an unknown document icon.png|link=Fragment of an unknown document]]
+|[[Fragment of an unknown document]]
+|1
+|Optional
+!<font color="red">Yes</font>
+|}
+A.P.'s room is east wing room 305 at the health resort on [[Shoreline]]. The [[Sliderkey flash drive marked with A.P.]] is stuck into the laptop on the table. A.P.'s belongings in the form of [[TerraGroup corporate apartment key]] can be found on the right nightstand. The optional [[Fragment of an unknown document]] can be found on the left nightstand.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:HealthResortEastWing.jpg|Health resort east wing location marked on map
+File:Sliderkey flash drive marked with A.P. spawn.png|Flash drive at the laptop
+File:TerraGroup Corporate Apartment Key Spawn.png|Key on the right nightstand
+File:Fragment of an unknown document spawn.png|Document fragment on the left nightstand
+</gallery></li>
+
+The optional [[Guard post note]] to locate the room can be found on the first floor of the health resort west wing, on the desk next to the security room at the southern entrance.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Guard post note spawn.png
+</gallery></li>
+
+===Decrypt the flash drive from A.P.'s room===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+![[File:Decrypted Sliderkey flash drive marked with A.P. icon.png|link=Decrypted Sliderkey flash drive marked with A.P.]]
+|[[Decrypted Sliderkey flash drive marked with A.P.]]
+|1
+|Required
+!N/A
+|Has to be crafted in the [[Hideout]] (Intelligence center lv. 1).
+|}
+Craft the [[Decrypted Sliderkey flash drive marked with A.P.]] at the Intelligence Center level 1 in the [[Hideout]]. Electricity is required during the entire process, otherwise it will be interrupted.
+
+===Ask [[Mechanic]] for help===
+Visit [[Mechanic]] in the menu through the trader screen and ask him about the flash drive. He will say that he cannot help, but that Elektronik can if you hand over 5,000,000 [[Roubles]].
+
+===Hand over 5,000,000 [[Roubles]] and the A.P. flash drive to [[Mechanic]]===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:roublesicon.png|link=Roubles]]
+|[[Roubles]]
+|5,000,000
+|Handover item
+!<font color="green">No</font>
+|-
+![[File:Decrypted Sliderkey flash drive marked with A.P. icon.png|link=Decrypted Sliderkey flash drive marked with A.P.]]
+|[[Decrypted Sliderkey flash drive marked with A.P.]]
+|1
+|Handover item
+!N/A
+|}
+Hand 5,000,000 [[Roubles]] and the [[Decrypted Sliderkey flash drive marked with A.P.]] over to [[Mechanic]] through the trader screen.
+
+===Wait for the news from Elektronik===
+If you haven't had contact with Mr. Kerman before: Wait 6-12 hours then visit [[Mechanic]] in the menu through the trader screen.
+
+If you had contact with Mr. Kerman before: Wait 1 and half a hour for Mr. Kerman to contact you and speak to him.
+
+===Integrate the files from A.P.'s flash drive into a keycard and access the hidden room in his apartment===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+![[File:TerraGroup corporate apartment key icon.png|link=TerraGroup corporate apartment key]]
+|[[TerraGroup corporate apartment key]]
+|1
+|Required
+!N/A
+|Unlocks A.P.'s apartment in the Cardinal apartment complex on [[Streets of Tarkov]].
+|-
+![[File:Reprogrammed keycard for A.P.'s apartment lock (Green) icon.png|link=Reprogrammed keycard for A.P.'s apartment lock (Green)]]
+|[[Reprogrammed keycard for A.P.'s apartment lock (Green)]]
+|1
+|Required
+!N/A
+|Unlocks the hidden room in A.P.'s apartment.
+Has to be crafted in the [[Hideout]] (Intelligence center lv. 1).
+|}
+You first have to craft the [[Reprogrammed keycard for A.P.'s apartment lock (Green)]] at the Intelligence Center level 1 in the [[Hideout]]. The [[Reprogrammed keycard for A.P.'s apartment lock (Blue)|blue]] and [[Reprogrammed keycard for A.P.'s apartment lock (Red)|red]] ones are false leads.
+
+A.P.'s apartment is apartment 1 on the second floor of the Cardinal apartment complex on [[Streets of Tarkov]]. A [[TerraGroup corporate apartment key]] is required to enter it. Once inside the apartment, you have to go down the hallway to find the hidden room opened with the crafted keycard. In the room are 4 notes to pick up and read.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Cardinal apartment complex Map.jpg|Cardinal apartment complex location marked on map
+File:Cardinal apartment complex.png|The Cardinal apartment complex
+File:TerraGroup corporate apartment key door.png|Door to apartment 1
+File:TerraGroup corporate apartment key inside 4.png|Door to the hidden room
+</gallery></li>
+
+====Study the TerraGroup documentation in A.P.'s office====
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Order from TerraGroup Worldwide headquarters icon.png|link=Order from TerraGroup Worldwide headquarters]]
+|[[Order from TerraGroup Worldwide headquarters]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Order from TerraGroup Worldwide headquarters spawn.png|On the floor next to the packages
+</gallery></li>
+
+====Study the role of the Blue Ice catalyst in The Unheard's protocol====
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Copy of report for TG Worldwide icon.png|link=Copy of report for TG Worldwide]]
+|[[Copy of report for TG Worldwide]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Copy of report for TG Worldwide spawn.png|On the left end of the desk
+</gallery></li>
+
+====Learn more about The Unheard's protocol====
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Document mentioning a protocol icon.png|link=Document mentioning a protocol]]
+|[[Document mentioning a protocol]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Document mentioning a protocol spawn.png|On the pile of documents
+</gallery></li>
+
+====Figure out how The Unheard are connected to Tarkov====
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Document mentioning the Warden icon.png|link=Document mentioning the Warden]]
+|[[Document mentioning the Warden]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Document mentioning the Warden spawn.png|On the right end of the desk
+</gallery></li>
+
+====Rewards====
+* +128,000 [[EXP]]
+* Unlocks achievement [[Achievements#Achievements|Trail of Breadcrumbs]]
+
+{{Navbox story chapters}}
+[[Category:Story chapters]]
+
+[[ru:Неизвестные]]

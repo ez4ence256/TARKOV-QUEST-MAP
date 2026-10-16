@@ -5,7 +5,7 @@
 import positionsJson from "../data/story-positions.json";
 import { floorFromText } from "./floorText";
 import type { WikiPhoto } from "../api/wiki";
-import { tr } from "./i18n";
+import { getLang, tr } from "./i18n";
 import { storyStepId } from "./story";
 
 export interface StoryPosition {
@@ -15,6 +15,8 @@ export interface StoryPosition {
   /** Fichier du wiki d'où vient la position. */
   source: string;
   method: string;
+  /** Étage connu d'après le plan du wiki (Labs, tunnels d'Usine…), sinon celui du texte de la case. */
+  floor?: { fr: string; en: string };
   /** Précision estimée, en mètres. */
   errorM: number;
 }
@@ -72,7 +74,7 @@ export function currentStoryPoints(
   const item = currentStoryItem(chapter, items, done);
   const found = item && positions[storyStepId(chapter, item.key)];
   if (!item || !found) return [];
-  const floor = floorFromText(item.text);
+  const textFloor = floorFromText(item.text);
   return [found].flat().flatMap((entry, e) => entry.positions.map((p, i) => ({
     id: `story:${chapter}:${item.key}#${e}.${i}`,
     chapter,
@@ -85,7 +87,7 @@ export function currentStoryPoints(
     count: entry.positions.length,
     errorM: entry.errorM,
     source: entry.source,
-    floor,
+    floor: entry.floor ? (getLang() === "en" ? entry.floor.en : entry.floor.fr) : textFloor,
   })));
 }
 
