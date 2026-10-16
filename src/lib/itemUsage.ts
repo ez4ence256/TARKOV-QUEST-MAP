@@ -98,6 +98,8 @@ export interface Exchange {
   duration?: number;
   /** Les objets de l'autre côté : ce qu'on obtient (side « in ») ou ce qu'il faut donner (side « out »). */
   others: { id: string; count: number }[];
+  /** Side « in » : les autres objets à donner avec celui-ci. */
+  with?: { id: string; count: number }[];
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- JSON brut de l'API, lu prudemment */
@@ -118,7 +120,7 @@ function buildExchangeIndex(raw: unknown, kind: "barter" | "craft"): Map<string,
     const sourceId = (kind === "barter" ? idOf(x?.trader) : idOf(x?.station)) ?? "";
     if (!sourceId || out.length === 0) continue;
     const base = { sourceId, level: Number(kind === "barter" ? x.minTraderLevel : x.level) || 1, ...(kind === "craft" ? { duration: Number(x.duration) || 0 } : {}) };
-    for (const r of inn) push(r.id, { ...base, side: "in", count: r.count, fir: r.fir, others: out.map((o) => ({ id: o.id, count: o.count })) });
+    for (const r of inn) push(r.id, { ...base, side: "in", count: r.count, fir: r.fir, others: out.map((o) => ({ id: o.id, count: o.count })), with: inn.filter((x) => x !== r).map((x) => ({ id: x.id, count: x.count })) });
     for (const o of out) push(o.id, { ...base, side: "out", count: o.count, fir: false, others: inn.map((r) => ({ id: r.id, count: r.count })) });
   }
   return index;

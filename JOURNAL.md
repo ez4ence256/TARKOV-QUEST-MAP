@@ -11,7 +11,7 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | Élément | État |
 |---|---|
 | Branche | **`main`** seule (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**, branche par défaut). |
-| Version affichée | **0.7.23** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
+| Version affichée | **0.8.0** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
 | Derniers commits | `245ee03` Version 0.7.23 · `3a59955` Main story : ponts de l'Icebreaker pour Boreas · `2593e19` Icebreaker : calibrage corrigé · `45beb1b` positions > 100 m retirées (0.7.22) · `7acab9f` positions de The Ticket · `5447eef` bouton du panneau en icône seule sur téléphone (0.7.21) · `69ddc95` Item finder · `d81736d` infos du Labyrinthe sur la map |
 | Travail non commité | Seulement `.claude/` (non suivi, volontairement hors du dépôt : chemin propre à cette machine) |
 | Tests | **290/290** au vert (`npx vitest run`), 29 fichiers (voir « Tests ») |
@@ -317,6 +317,9 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
 - **Tests** (+24) : `src/lib/roomSync.test.ts` (différences, validation, fusion/remplacement, opérations distantes) et `server/rooms.test.ts` (serveur réel sur un port libre : deux clients SSE, validation, 413, plafond de rooms, PUT, MIME, 404 sans cache, traversée de chemin).
 
 ---
+
+### Session 9
+- **Item finder redessiné** (0.8.0, `src/components/ItemFinder.tsx`) : fenêtre plus large à hauteur fixe ; liste en **grille de vignettes** (image 56 px + nom) ; fiche de l'objet avec grande image et **onglets avec compteurs** (Quêtes / Hideout / Barters / Crafts) à la place des trois cases à cocher (hideout, barters et crafts chargés ensemble au choix d'un objet, gardés en mémoire) ; quêtes en cartes (portrait du marchand, map, pastilles de rôle, FIR en vert) ; barters et crafts en **recettes** « ingrédients → résultat », groupées « Utilisé dans » / « Obtenu via ». `Exchange.with` (`itemUsage.ts`) garde désormais les autres ingrédients d'un échange où l'objet entre. Vérifié dans le navigateur (bureau et téléphone 375 px).
 
 ## Étude 3D (session 5, en attente de validation)
 

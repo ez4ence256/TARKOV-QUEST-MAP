@@ -1827,6 +1827,11 @@ kbd {
   flex: none;
   white-space: nowrap;
 }
+@media (max-width: 800px) {
+  .item-finder-label {
+    display: none;
+  }
+}
 .finder-backdrop {
   position: fixed;
   inset: 0;
@@ -1837,112 +1842,295 @@ kbd {
   padding: calc(var(--topbar-h) + 8px) 8px 8px;
   background: rgba(0, 0, 0, 0.55);
 }
+/* hauteur fixe : pas de saut entre la liste et la fiche d'un objet */
 .finder {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  width: min(560px, 100%);
-  max-height: 100%;
-  padding: 0.75rem;
+  width: min(760px, 100%);
+  height: min(640px, 100%);
+  padding: 0;
+  overflow: hidden;
   background: var(--bg-2);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
 }
-.finder-head,
-.finder-selected {
+.finder-head {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--line);
 }
-.finder-search {
+.finder-search-wrap {
+  position: relative;
   flex: 1;
   min-width: 0;
 }
-.finder-check {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.9em;
-  cursor: pointer;
+.finder-search-icon {
+  position: absolute;
+  left: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.finder-search {
+  width: 100%;
+  height: 40px;
+  padding-left: 2.4rem;
+  font-size: 1.05em;
 }
 .finder-body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-}
-.finder-body h3 {
-  margin: 0.75rem 0 0.25rem;
-  font-size: 0.95em;
+  padding: 0.75rem;
 }
 .finder-count {
-  margin: 0 0 0.25rem;
+  margin: 0 0 0.5rem;
+  font-size: 0.85em;
 }
-.finder-list {
+
+/* liste : grille de tuiles */
+.finder-grid {
   list-style: none;
   margin: 0;
   padding: 0;
-}
-.finder-item,
-.finder-quest {
-  display: flex;
-  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
   gap: 0.5rem;
-  padding: 0.3rem 0.4rem;
+}
+.finder-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  height: 100%;
+  padding: 0.6rem 0.4rem;
   color: inherit;
-  text-align: left;
-  background: none;
-  border: 0;
-  border-bottom: 1px solid var(--line);
+  text-align: center;
+  font-size: 0.85em;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   cursor: pointer;
 }
-.finder-item {
-  align-items: center;
+.finder-tile:hover,
+.finder-tile:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent) inset;
 }
-.finder-quest {
-  flex-direction: column;
-  gap: 0.1rem;
+.finder-tile-name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
 }
-.finder-item:hover,
-.finder-quest:hover {
-  background: var(--bg-3);
-}
-.finder-roles {
-  color: var(--accent-2);
-  font-size: 0.9em;
-}
-.finder-thumb {
+.finder-icon {
   flex: none;
-  display: inline-block;
-  width: 32px;
-  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: var(--bg);
+  border-radius: 6px;
 }
-.finder-thumb.big {
-  width: 48px;
-  height: 48px;
+.finder-icon.big {
+  width: 72px;
+  height: 72px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
 }
-.finder-hideout {
-  padding: 0.3rem 0.4rem;
+.finder-more {
+  margin-top: 0.75rem;
+  text-align: center;
+}
+
+/* fiche d'un objet */
+.finder-hero {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
   border-bottom: 1px solid var(--line);
 }
-@media (max-width: 800px) {
-  .item-finder-label {
-    display: none;
-  }
+.finder-name {
+  margin: 0;
+  font-size: 1.2em;
+  color: var(--accent-2);
 }
-.finder-checks {
+.finder-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.25rem;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+}
+.finder-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.75rem;
+  color: var(--text);
+  white-space: nowrap;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+.finder-tab.dim {
+  color: var(--muted);
+}
+.finder-tab.active {
+  color: var(--accent-2);
+  border-bottom-color: var(--accent);
+}
+.finder-badge {
+  padding: 0 0.4rem;
+  font-size: 0.8em;
+  background: var(--bg-3);
+  border-radius: 999px;
+}
+.finder-empty {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+.finder-cards {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.finder-card {
+  padding: 0.6rem 0.75rem;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.finder-sub {
+  margin: 0.75rem 0 0.4rem;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.finder-pill {
+  padding: 0.1rem 0.5rem;
+  font-size: 0.8em;
+  color: var(--accent-2);
+  white-space: nowrap;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  opacity: 0.9;
+}
+.finder-pill.fir {
+  color: var(--ok);
+  border-color: var(--ok);
+}
+
+/* quêtes */
+.finder-quest {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.finder-quest:hover,
+.finder-quest:focus-visible {
+  border-color: var(--accent);
+}
+.finder-avatar {
+  width: 36px;
+  height: 36px;
+  overflow: hidden;
+  background: var(--bg);
+  border-radius: 50%;
+}
+.finder-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.finder-quest-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+.finder-quest-meta {
+  font-size: 0.85em;
+}
+.finder-pills {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem 1rem;
+  gap: 0.3rem;
+}
+.finder-chevron {
+  font-size: 1.4em;
+}
+
+/* hideout, barters, crafts */
+.finder-row,
+.finder-recipe-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.finder-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+.finder-recipe-head {
+  margin-bottom: 0.5rem;
+}
+.finder-recipe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+.finder-arrow {
+  margin: 0 0.25rem;
+  color: var(--accent);
 }
 .finder-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  margin-right: 0.5rem;
-  vertical-align: middle;
+  gap: 0.3rem;
+  padding: 0.15rem 0.45rem 0.15rem 0.2rem;
+  font-size: 0.85em;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
 }
-.finder-thumb.small {
-  width: 20px;
-  height: 20px;
+.finder-chip.self {
+  border-color: var(--accent);
+}
+.finder-fir {
+  color: var(--ok);
+}
+
+@media (max-width: 600px) {
+  .finder-backdrop {
+    padding: calc(var(--topbar-h) + 4px) 4px 4px;
+  }
+  .finder {
+    height: 100%;
+  }
+  .finder-grid {
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  }
 }

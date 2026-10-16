@@ -73,7 +73,7 @@ describe("barters et crafts", () => {
     { id: "b", trader: "5a7c2eca46aef81a7ca2145d", minTraderLevel: 2, requiredItems: [{ item: SRC, count: 2, attributes: {} }], offeredItem: { item: OUT, count: 1, attributes: {} } },
   ]);
   it("barter : demandé (in) et obtenu (out)", () => {
-    expect(barters.get(SRC)).toEqual([{ side: "in", sourceId: "5a7c2eca46aef81a7ca2145d", level: 2, count: 2, fir: false, others: [{ id: OUT, count: 1 }] }]);
+    expect(barters.get(SRC)).toEqual([{ side: "in", sourceId: "5a7c2eca46aef81a7ca2145d", level: 2, count: 2, fir: false, others: [{ id: OUT, count: 1 }], with: [] }]);
     expect(barters.get(OUT)).toEqual([{ side: "out", sourceId: "5a7c2eca46aef81a7ca2145d", level: 2, count: 1, fir: false, others: [{ id: SRC, count: 2 }] }]);
   });
   const crafts = buildCraftIndex([
@@ -81,7 +81,7 @@ describe("barters et crafts", () => {
     { id: "bad", requiredItems: [], productItem: { item: OUT } }, // sans station : ignoré
   ]);
   it("craft : ingrédient (in, FIR, durée) et produit (out)", () => {
-    expect(crafts.get(SRC)).toEqual([{ side: "in", sourceId: "5d484fcd654e7668ec2ec322", level: 2, duration: 4350, count: 1, fir: true, others: [{ id: OUT, count: 2 }] }]);
+    expect(crafts.get(SRC)).toEqual([{ side: "in", sourceId: "5d484fcd654e7668ec2ec322", level: 2, duration: 4350, count: 1, fir: true, others: [{ id: OUT, count: 2 }], with: [{ id: CHAIN, count: 3 }] }]);
     expect(crafts.get(OUT)).toHaveLength(1);
     expect(crafts.get(OUT)![0]).toMatchObject({ side: "out", count: 2, others: [{ id: SRC, count: 1 }, { id: CHAIN, count: 3 }] });
   });

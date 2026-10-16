@@ -1,6 +1,6 @@
 // Item finder (barre du haut) : tous les objets du jeu avec leur photo ; l'objet choisi est cherché dans
-// toutes les quêtes (et, au choix, dans le hideout). Données chargées à la première ouverture.
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+// toutes les quêtes, le hideout, les barters et les crafts. Données chargées à la première ouverture.
+import { useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { GameMap, GameMode, Task, Trader } from "../types";
 import { tr } from "../lib/i18n";
 import { scoreName } from "../lib/search";
@@ -10,29 +10,8 @@ import { loadExchanges, loadHideout, loadItemList, type HideoutInfo, type Listed
 import { ItemThumb } from "./ItemThumb";
 
 const PAGE = 100;
-/** Case à cocher retenue dans le navigateur (cochée par défaut). */
-function usePref(key: string): [boolean, (on: boolean) => void] {
-  const [on, setOn] = useState(() => {
-    try {
-      return localStorage.getItem(key) !== "0";
-    } catch {
-      return true;
-    }
-  });
-  return [
-    on,
-    (v) => {
-      setOn(v);
-      try {
-        localStorage.setItem(key, v ? "1" : "0");
-      } catch {
-        /* préférence non retenue */
-      }
-    },
-  ];
-}
 
-/** Données téléchargées à la demande quand la case est cochée et un objet choisi (gardées en mémoire par api/itemList). */
+/** Données téléchargées à la demande quand un objet est choisi (gardées en mémoire par api/itemList). */
 function useLazy<T>(wanted: boolean, load: () => Promise<T>, deps: unknown[]): { data: T | null; error: boolean } {
   const [state, setState] = useState<{ data: T | null; error: boolean }>({ data: null, error: false });
   const has = state.data !== null;
@@ -84,9 +63,6 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   const [query, setQuery] = useState("");
   const [shown, setShown] = useState(PAGE);
   const [selected, setSelected] = useState<ListedItem | null>(null);
-  const [withHideout, setWithHideout] = usePref("tqp:finderHideout");
-  const [withBarters, setWithBarters] = usePref("tqp:finderBarters");
-  const [withCrafts, setWithCrafts] = usePref("tqp:finderCrafts");
   const search = useRef<HTMLInputElement>(null);
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
@@ -99,11 +75,11 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
     };
   }, [gameMode, lang]);
 
-  // téléchargés seulement quand un objet est choisi, case cochée (les crafts ont besoin des noms de stations du hideout)
+  // téléchargés en parallèle quand un objet est choisi (les crafts ont besoin des noms de stations du hideout)
   const picked = Boolean(selected);
-  const hideout = useLazy(picked && (withHideout || withCrafts), () => loadHideout(gameMode, lang), [gameMode, lang]);
-  const barters = useLazy(picked && withBarters, () => loadExchanges(gameMode, "barters"), [gameMode]);
-  const crafts = useLazy(picked && withCrafts, () => loadExchanges(gameMode, "crafts"), [gameMode]);
+  const hideout = useLazy(picked, () => loadHideout(gameMode, lang), [gameMode, lang]);
+  const barters = useLazy(picked, () => loadExchanges(gameMode, "barters"), [gameMode]);
+  const crafts = useLazy(picked, () => loadExchanges(gameMode, "crafts"), [gameMode]);
 
   useEffect(() => {
     search.current?.focus();
@@ -142,35 +118,24 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
     <div className="finder-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className="finder" role="dialog" aria-modal="true" aria-label="Item finder">
         <div className="finder-head">
-          <input
-            ref={search}
-            className="input finder-search"
-            type="search"
-            value={query}
-            placeholder={tr("Nom d'un objet (FR ou EN)…", "Item name (FR or EN)…")}
-            aria-label={tr("Chercher un objet", "Search an item")}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setSelected(null);
-            }}
-          />
+          <div className="finder-search-wrap">
+            <span className="finder-search-icon" aria-hidden="true">🔍</span>
+            <input
+              ref={search}
+              className="input finder-search"
+              type="search"
+              value={query}
+              placeholder={tr("Nom d'un objet (FR ou EN)…", "Item name (FR or EN)…")}
+              aria-label={tr("Chercher un objet", "Search an item")}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setSelected(null);
+              }}
+            />
+          </div>
           <button className="btn btn-small" onClick={onClose} aria-label={tr("Fermer", "Close")}>
             ✕
           </button>
-        </div>
-        <div className="finder-checks">
-          <label className="finder-check">
-            <input type="checkbox" checked={withHideout} onChange={(e) => setWithHideout(e.target.checked)} />
-            {tr("Inclure le hideout", "Include hideout")}
-          </label>
-          <label className="finder-check">
-            <input type="checkbox" checked={withBarters} onChange={(e) => setWithBarters(e.target.checked)} />
-            Barters
-          </label>
-          <label className="finder-check">
-            <input type="checkbox" checked={withCrafts} onChange={(e) => setWithCrafts(e.target.checked)} />
-            Crafts
-          </label>
         </div>
 
         <div className="finder-body">
@@ -180,20 +145,16 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
             <p className="muted" role="status">{tr("Chargement des objets…", "Loading items…")}</p>
           ) : selected ? (
             <Usage
+              key={selected.id}
               item={selected}
               src={iconSrc(selected.id, itemIcons)}
               quests={usage.get(selected.id) ?? []}
               tasksById={tasksById}
               traders={traders}
               maps={maps}
-              hideout={hideout.data}
-              withHideout={withHideout}
-              withBarters={withBarters}
-              withCrafts={withCrafts}
-              barters={barters.data}
-              crafts={crafts.data}
-              loading={((withHideout || withCrafts) && !hideout.data && !hideout.error) || (withBarters && !barters.data && !barters.error) || (withCrafts && !crafts.data && !crafts.error)}
-              failed={((withHideout || withCrafts) && hideout.error) || (withBarters && barters.error) || (withCrafts && crafts.error)}
+              hideout={hideout}
+              barters={barters}
+              crafts={crafts}
               byId={byId}
               itemIcons={itemIcons}
               onBack={() => setSelected(null)}
@@ -207,22 +168,24 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
               <p className="muted finder-count" role="status">
                 {tr(`${results.length} objet(s)`, `${results.length} item(s)`)}
               </p>
-              <ul className="finder-list">
+              <ul className="finder-grid">
                 {results.slice(0, shown).map((item) => (
                   <li key={item.id}>
-                    <button className="finder-item" onClick={() => setSelected(item)}>
-                      <span className="finder-thumb">
-                        <ItemThumb src={iconSrc(item.id, itemIcons)} name="" />
+                    <button className="finder-tile" title={item.name} onClick={() => setSelected(item)}>
+                      <span className="finder-icon">
+                        <ItemThumb src={iconSrc(item.id, itemIcons)} name="" size={56} />
                       </span>
-                      <span>{item.name}</span>
+                      <span className="finder-tile-name">{item.name}</span>
                     </button>
                   </li>
                 ))}
               </ul>
               {results.length > shown && (
-                <button className="btn btn-small" onClick={() => setShown((n) => n + PAGE)}>
-                  {tr("Afficher plus", "Show more")}
-                </button>
+                <div className="finder-more">
+                  <button className="btn btn-small" onClick={() => setShown((n) => n + PAGE)}>
+                    {tr("Afficher plus", "Show more")}
+                  </button>
+                </div>
               )}
             </>
           )}
@@ -232,6 +195,9 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   );
 }
 
+type Tab = "quests" | "hideout" | "barters" | "crafts";
+type Lazy<T> = { data: T | null; error: boolean };
+
 function Usage(p: {
   item: ListedItem;
   src: string;
@@ -239,120 +205,173 @@ function Usage(p: {
   tasksById: Map<string, Task>;
   traders: Trader[];
   maps: GameMap[];
-  hideout: HideoutInfo | null;
-  withHideout: boolean;
-  withBarters: boolean;
-  withCrafts: boolean;
-  barters: Map<string, Exchange[]> | null;
-  crafts: Map<string, Exchange[]> | null;
-  loading: boolean;
-  failed: boolean;
+  hideout: Lazy<HideoutInfo>;
+  barters: Lazy<Map<string, Exchange[]>>;
+  crafts: Lazy<Map<string, Exchange[]>>;
   byId: Map<string, ListedItem>;
   itemIcons: Record<string, string>;
   onBack: () => void;
   onShowQuest: (taskId: string) => void;
 }) {
+  const [tab, setTab] = useState<Tab>("quests");
   const rows = p.quests
     .map((u) => ({ ...u, task: p.tasksById.get(u.taskId) }))
     .filter((r): r is typeof r & { task: Task } => Boolean(r.task))
     .sort((a, b) => a.task.name.localeCompare(b.task.name));
-  const hideoutRows = (p.hideout?.uses.get(p.item.id) ?? [])
-    .map((h) => ({ ...h, name: p.hideout?.stationName[h.stationId] ?? h.stationId }))
+  const hideoutRows = (p.hideout.data?.uses.get(p.item.id) ?? [])
+    .map((h) => ({ ...h, name: p.hideout.data?.stationName[h.stationId] ?? h.stationId }))
     .sort((a, b) => a.name.localeCompare(b.name) || a.level - b.level);
-  return (
-    <div className="finder-usage">
-      <div className="finder-selected">
-        <button className="btn btn-small" onClick={p.onBack}>
-          {tr("← Liste", "← List")}
-        </button>
-        <span className="finder-thumb big">
-          <ItemThumb src={p.src} name="" size={48} />
-        </span>
-        <strong>{p.item.name}</strong>
-      </div>
-      <h3>{tr(`Quêtes (${rows.length})`, `Quests (${rows.length})`)}</h3>
-      {rows.length === 0 && <p className="muted">{tr("Aucune quête ne l'utilise.", "No quest uses it.")}</p>}
-      <ul className="finder-list">
-        {rows.map((r) => {
-          const trader = p.traders.find((t) => t.id === r.task.traderId)?.name;
-          const map = p.maps.find((m) => m.id === r.task.mapId)?.name;
+  const barterRows = p.barters.data?.get(p.item.id) ?? [];
+  const craftRows = p.crafts.data?.get(p.item.id) ?? [];
+
+  // nombre par onglet : null = en chargement, "!" = indisponible (les crafts ont aussi besoin du hideout)
+  const counts: Record<Tab, number | "!" | null> = {
+    quests: rows.length,
+    hideout: p.hideout.error ? "!" : p.hideout.data ? hideoutRows.length : null,
+    barters: p.barters.error ? "!" : p.barters.data ? barterRows.length : null,
+    crafts: p.crafts.error || p.hideout.error ? "!" : p.crafts.data && p.hideout.data ? craftRows.length : null,
+  };
+  const tabs: [Tab, string][] = [
+    ["quests", tr("Quêtes", "Quests")],
+    ["hideout", "Hideout"],
+    ["barters", "Barters"],
+    ["crafts", "Crafts"],
+  ];
+
+  /** Contenu d'un onglet dont les données sont chargées à la demande. */
+  const gate = (t: Tab, body: () => ReactNode) => {
+    const c = counts[t];
+    if (c === null) return <p className="muted finder-empty" role="status">{tr("Chargement…", "Loading…")}</p>;
+    if (c === "!") return <p className="muted finder-empty">{tr("Données indisponibles (réseau ?).", "Data unavailable (network?).")}</p>;
+    return body();
+  };
+  const exchanges = (list: Exchange[], source: (e: Exchange) => string) =>
+    list.length === 0 ? (
+      <p className="muted finder-empty">{tr("Aucun résultat.", "None.")}</p>
+    ) : (
+      <>
+        {(["in", "out"] as const).map((side) => {
+          const part = list.filter((e) => e.side === side);
+          if (part.length === 0) return null;
           return (
-            <li key={r.taskId}>
-              <button className="finder-quest" onClick={() => p.onShowQuest(r.taskId)}>
-                <span>{r.task.name}</span>
-                <span className="muted">{[trader, map].filter(Boolean).join(" · ")}</span>
-                <span className="finder-roles">{r.uses.map(useLabel).join(" · ")}</span>
-              </button>
-            </li>
+            <section key={side}>
+              {part.length < list.length && <h3 className="finder-sub">{side === "in" ? tr("Utilisé dans", "Used in") : tr("Obtenu via", "Obtained from")}</h3>}
+              <ul className="finder-cards">
+                {part.map((e, i) => (
+                  <Recipe key={i} e={e} source={source(e)} item={p.item} byId={p.byId} itemIcons={p.itemIcons} />
+                ))}
+              </ul>
+            </section>
           );
         })}
-      </ul>
-      {p.loading && <p className="muted" role="status">{tr("Chargement…", "Loading…")}</p>}
-      {p.failed && <p className="muted">{tr("Une partie des données est indisponible (réseau ?).", "Some data is unavailable (network?).")}</p>}
-      {p.withHideout && p.hideout && (
-        <>
-          <h3>Hideout ({hideoutRows.length})</h3>
-          {hideoutRows.length === 0 && <p className="muted">{tr("Aucune amélioration du hideout ne l'exige.", "No hideout upgrade needs it.")}</p>}
-          <ul className="finder-list">
-            {hideoutRows.map((h) => (
-              <li key={`${h.stationId}-${h.level}`} className="finder-hideout">
-                {`Hideout — ${h.name} ${tr("niv.", "lvl")} ${h.level} : ×${h.count}${h.fir ? " (FIR)" : ""}`}
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-      {p.withBarters && p.barters && (
-        <ExchangeList title="Barters" rows={p.barters.get(p.item.id) ?? []} text={(e) => barterText(e, p.traders)} byId={p.byId} itemIcons={p.itemIcons} />
-      )}
-      {p.withCrafts && p.crafts && p.hideout && (
-        <ExchangeList title="Crafts" rows={p.crafts.get(p.item.id) ?? []} text={(e) => craftText(e, p.hideout!.stationName)} byId={p.byId} itemIcons={p.itemIcons} />
-      )}
+      </>
+    );
+
+  return (
+    <div className="finder-usage">
+      <div className="finder-hero">
+        <button className="btn btn-small" onClick={p.onBack} aria-label={tr("Retour à la liste", "Back to the list")} title={tr("Retour à la liste", "Back to the list")}>
+          ←
+        </button>
+        <span className="finder-icon big">
+          <ItemThumb src={p.src} name="" size={72} />
+        </span>
+        <h2 className="finder-name">{p.item.name}</h2>
+      </div>
+      <div role="tablist" className="finder-tabs" aria-label={tr("Utilisations", "Uses")}>
+        {tabs.map(([t, label]) => (
+          <button key={t} role="tab" id={`finder-tab-${t}`} aria-selected={tab === t} aria-controls={`finder-panel-${t}`} className={`finder-tab${tab === t ? " active" : ""}${counts[t] === 0 ? " dim" : ""}`} onClick={() => setTab(t)}>
+            {label}
+            <span className="finder-badge">{counts[t] ?? "…"}</span>
+          </button>
+        ))}
+      </div>
+      <div role="tabpanel" id={`finder-panel-${tab}`} aria-labelledby={`finder-tab-${tab}`}>
+        {tab === "quests" &&
+          (rows.length === 0 ? (
+            <p className="muted finder-empty">{tr("Aucune quête ne l'utilise.", "No quest uses it.")}</p>
+          ) : (
+            <ul className="finder-cards">
+              {rows.map((r) => {
+                const trader = p.traders.find((t) => t.id === r.task.traderId);
+                const map = p.maps.find((m) => m.id === r.task.mapId)?.name;
+                return (
+                  <li key={r.taskId}>
+                    <button className="finder-card finder-quest" onClick={() => p.onShowQuest(r.taskId)}>
+                      <span className="finder-avatar">{trader?.imageLink && <img src={trader.imageLink} alt="" width={36} height={36} loading="lazy" referrerPolicy="no-referrer" />}</span>
+                      <span className="finder-quest-main">
+                        <strong>{r.task.name}</strong>
+                        <span className="muted finder-quest-meta">{[trader?.name, map].filter(Boolean).join(" · ")}</span>
+                        <span className="finder-pills">
+                          {r.uses.map((u, i) => (
+                            <span key={i} className={`finder-pill${u.fir ? " fir" : ""}`}>
+                              {useLabel(u)}
+                            </span>
+                          ))}
+                        </span>
+                      </span>
+                      <span className="muted finder-chevron" aria-hidden="true">›</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          ))}
+        {tab === "hideout" &&
+          gate("hideout", () =>
+            hideoutRows.length === 0 ? (
+              <p className="muted finder-empty">{tr("Aucune amélioration du hideout ne l'exige.", "No hideout upgrade needs it.")}</p>
+            ) : (
+              <ul className="finder-cards">
+                {hideoutRows.map((h) => (
+                  <li key={`${h.stationId}-${h.level}`} className="finder-card finder-row">
+                    <strong>{h.name}</strong>
+                    <span className="finder-pill">{`${tr("niv.", "lvl")} ${h.level}`}</span>
+                    <span className="finder-right">
+                      <strong>×{h.count}</strong>
+                      {h.fir && <span className="finder-pill fir">FIR</span>}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ),
+          )}
+        {tab === "barters" && gate("barters", () => exchanges(barterRows, (e) => p.traders.find((t) => t.id === e.sourceId)?.name ?? "?"))}
+        {tab === "crafts" && gate("crafts", () => exchanges(craftRows, (e) => p.hideout.data?.stationName[e.sourceId] ?? "?"))}
+      </div>
     </div>
   );
 }
 
-const barterText = (e: Exchange, traders: Trader[]) => {
-  const who = `${traders.find((t) => t.id === e.sourceId)?.name ?? "?"} ${tr("niv.", "lvl")} ${e.level}`;
-  return e.side === "in"
-    ? { head: `${tr("Échange chez", "Barter with")} ${who} : ×${e.count}${e.fir ? " (FIR)" : ""} →`, tail: "" }
-    : { head: `${tr("Obtenu par échange chez", "Obtained by barter with")} ${who} ${tr("contre", "for")}`, tail: "" };
-};
-const craftText = (e: Exchange, stations: Record<string, string>) => {
-  const where = `Craft — ${stations[e.sourceId] ?? "?"} ${tr("niv.", "lvl")} ${e.level}`;
-  const time = e.duration ? ` (${durationLabel(e.duration)})` : "";
-  return e.side === "in"
-    ? { head: `${where} : ×${e.count}${e.fir ? " (FIR)" : ""} →`, tail: time }
-    : { head: `${tr("Produit par", "Produced by")} ${where} ${tr("avec", "with")}`, tail: time };
-};
-
-function ExchangeList(p: { title: string; rows: Exchange[]; text: (e: Exchange) => { head: string; tail: string }; byId: Map<string, ListedItem>; itemIcons: Record<string, string> }) {
+/** Un barter ou un craft : ingrédients → produits, l'objet cherché en surbrillance. */
+function Recipe(p: { e: Exchange; source: string; item: ListedItem; byId: Map<string, ListedItem>; itemIcons: Record<string, string> }) {
+  const { e } = p;
+  const self = { id: p.item.id, count: e.count, fir: e.fir, self: true };
+  const plain = (l: { id: string; count: number }[]) => l.map((x) => ({ ...x, fir: false, self: false }));
+  const inputs = e.side === "in" ? [self, ...plain(e.with ?? [])] : plain(e.others);
+  const outputs = e.side === "in" ? plain(e.others) : [self];
+  const chip = (c: typeof self, i: number) => (
+    <span key={`${c.id}-${i}`} className={`finder-chip${c.self ? " self" : ""}`}>
+      <ItemThumb src={iconSrc(c.id, p.itemIcons)} name="" size={24} />
+      <span>
+        {p.byId.get(c.id)?.name ?? c.id}
+        {c.count > 1 ? ` ×${c.count}` : ""}
+      </span>
+      {c.fir && <small className="finder-fir">FIR</small>}
+    </span>
+  );
   return (
-    <>
-      <h3>
-        {p.title} ({p.rows.length})
-      </h3>
-      {p.rows.length === 0 && <p className="muted">{tr("Aucun résultat.", "None.")}</p>}
-      <ul className="finder-list">
-        {p.rows.map((e, i) => {
-          const t = p.text(e);
-          return (
-            <li key={i} className="finder-hideout">
-              {t.head}{" "}
-              {e.others.map((o) => (
-                <span key={o.id} className="finder-chip">
-                  <span className="finder-thumb small">
-                    <ItemThumb src={iconSrc(o.id, p.itemIcons)} name="" size={20} />
-                  </span>
-                  {p.byId.get(o.id)?.name ?? o.id}
-                  {o.count > 1 ? ` ×${o.count}` : ""}
-                </span>
-              ))}
-              {t.tail}
-            </li>
-          );
-        })}
-      </ul>
-    </>
+    <li className="finder-card">
+      <div className="finder-recipe-head">
+        <strong>{p.source}</strong>
+        <span className="finder-pill">{`${tr("niv.", "lvl")} ${e.level}`}</span>
+        {e.duration ? <span className="muted finder-right">⏱ {durationLabel(e.duration)}</span> : null}
+      </div>
+      <div className="finder-recipe">
+        {inputs.map(chip)}
+        <span className="finder-arrow" aria-hidden="true">→</span>
+        {outputs.map(chip)}
+      </div>
+    </li>
   );
 }
