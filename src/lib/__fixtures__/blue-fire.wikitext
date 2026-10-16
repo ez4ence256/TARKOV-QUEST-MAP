@@ -1,0 +1,296 @@
+{{Infobox quest
+|image        =Blue Fire Banner.png
+|icon         =Blue Fire Icon.png
+|icon size    =
+|location     =
+|given by     =
+|reward       =
+|reputation   =
+|quest number =
+|previous     =
+|leads to     =
+|related      =
+|related2     =
+|reqkappa     =
+}}
+
+'''{{PAGENAME}}''' is a [[Story chapters|story chapter]] in ''[[Escape from Tarkov]]''.
+
+==Description==
+{{quote|During the raid on the office, some kind of special weapon went off on one of the roofs... I remember a bright blue flash before I blacked out. After that, all the electronics failed. I've never encountered such a powerful EMP weapon before. I need to find out what technology hit the city, and who's behind it.}}
+
+==Requirements==
+Pick up and read [[EMERCOM leaflet]] or [[Note by Item 1156|Note by Item #1156]] from one of the following locations:
+* Inside a green shipping container at the Scav base/EMERCOM camp on [[Woods]]
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Blue Fire Woods Activation Location Map.png|Container marked on map
+File:Blue Fire Woods Activation Location Container.png|The wanted container
+File:Blue Fire Woods Activation Location.png|Leaflet location on the right side of the cabinet
+</gallery></li>
+* On a tent west of the highway in the area near the "Path to River" extraction on [[Interchange]]
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Blue Fire Interchange Activation Location Map 1.jpg|Tent location marked on map
+File:Blue Fire Interchange Activation Location 1.png|Leaflet location on the tent
+</gallery></li>
+* On a tent at the highway on [[Interchange]]
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Blue Fire Interchange Activation Location Map 2.jpg|Tent location marked on map
+File:Blue Fire Interchange Activation Location 2.png|Leaflet location on the tent
+</gallery></li>
+* At the EMERCOM medical unit on the first floor of the ULTRA shopping mall on [[Interchange]]
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Emercom Location.jpg|EMERCOM unit marked on map
+File:Blue Fire Interchange Activation Location 3.png|Leaflet location
+</gallery></li>
+* On a table in the prototype weapon area inside [[The Labyrinth]]
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Labryrinth missile area map.png|Prototype weapon area marked on map
+File:Blue Fire The Labyrinth Activation Location.png|Note location
+</gallery></li>
+
+==Objectives==
+* Talk to [[Mechanic]] about the EMP blast
+** (''Optional'') Gain access to [[Mechanic]]
+* Locate and obtain the [[Unknown device fragment|device fragment]]
+* Hand over the [[Unknown device fragment|device fragment]] to [[Mechanic]]
+* Plant the [[Local network hacking device|hacking device]] in the server room in [[the Lab]]
+* Talk to [[Mechanic]]
+* Keep the [[Unknown device fragment|fragment of Item 1156]] for yourself or hand it over to [[Mechanic]]
+* Find a [[Note mentioning Item 1156|lead on Item 1156]]  
+* [[Rus Post audio tape 11.05 / 003|Investigate]] the Rus Post office
+* Locate the [[Rus Post car key|Rus Post Car]]
+* Obtain the [[Item 1156 specification|blueprint for Item 1156]]
+
+==Guide==
+===Talk to [[Mechanic]] about the EMP blast===
+Visit [[Mechanic]] in the menu through the trader screen and ask him about the EMP blast.
+
+===Locate and obtain the device fragment===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Car dealership closed section key icon.png|link=Car dealership closed section key]]
+|[[Car dealership closed section key]]
+|1
+|Required<font color="red"><big>'''<nowiki>*</nowiki>'''</big></font>
+!N/A
+|-
+![[File:Mysterious marked key icon.png|link=Mysterious room marked key]]
+|[[Mysterious room marked key]]
+|1
+|Required<font color="red"><big>'''<nowiki>*</nowiki>'''</big></font>
+!N/A
+|-
+![[File:Unknown device fragment icon.png|link=Unknown device fragment]]
+|[[Unknown device fragment]]
+|1
+|Handover item
+!<font color="red">Yes</font>
+|}
+<big><font color="red">'''<nowiki>*</nowiki>'''</font></big>Only one of the keys is required to complete the objective.
+
+
+The [[Unknown device fragment]] can either be obtained in the closed section on the second floor of the LexOs car dealership, or in the marked room located inside the Chekannaya 13 apartment building on [[Streets of Tarkov]].
+
+====LexOs car dealership====
+A [[Car dealership closed section key]] is required to enter the closed section. Be aware that the premises of the LexOs car dealership are riddled with [[Claymores]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:CarDealerMap.png|Car dealership marked on map
+File:LexOsClaymoreOverview.png|LexOs complex overview
+File:CarDealer.png|The car dealership
+File:CarDealerClosedSectionDoor.png|Grate door to the closed section
+File:Blue Fire Device Fragment inside LexOS Sect..png|The device in a food container
+</gallery></li>
+
+====Chekannaya 13 apartment building marked room====
+A [[Mysterious room marked key]] is required to enter the room.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Mysterious marked key onmap.png|Room location marked on map
+File:Mysterious key building entrance.png|Entrance to the building through a window from the courtyard
+File:Mysterious key path1.png|Once inside, get in the corridor and move to the second room on the left
+File:Mysterious key path2.png|In the bedroom, go through the hole in the wall
+File:Mysterious key path3.png|After going through the hole, get downstairs and open the door to the left
+File:Mysterious key room door.png|You get in front of the door to unlock
+File:Chek13 MRK img.png|The device in the flower pot
+</gallery></li>
+
+===Hand over the device fragment to [[Mechanic]]===
+Visit [[Mechanic]] in the menu through the trader screen and hand over the device.
+
+===Plant the hacking device in the server room in the Lab===
+{| style="border:1px solid #9a8866; width:100%; margin:1em auto 1em auto; padding:5px; box-shadow: 0 0 15px rgba(65,61,52,1), 0 0 6px rgba(232,190,107,0.8);"
+| style="text-align:center; font-size: 132%;" | If you have already planted the [[Local network hacking device]] in the [[Boreas]] story chapter, this objective auto-completes.
+|}
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+![[File:Local network hacking device icon.png|link=Local network hacking device]]
+|[[Local network hacking device]]
+|1
+|Required
+!N/A
+|Stashed item
+|}
+The [[Local network hacking device]] has to be stashed in the server room on the first floor of [[The Lab]]. [[Mechanic]] provides one via in-game mail and has a barter for more available.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Labs Server Room Plant Location.png|Stashing location marked on map
+File:Labs Server Room Plant Location 2.png|Stashing location next to the office chairs
+</gallery></li>
+
+===Talk to [[Mechanic]]===
+Visit [[Mechanic]] in the menu through the trader screen.
+
+===Keep the fragment of Item 1156 for yourself or hand it over to [[Mechanic]]===
+
+====Decision: Keep the fragment====
+=====Rewards=====
+* Unlocks achievement [[Achievements#Achievements|Better Served]]
+
+====Decision: Hand over the fragment to [[Mechanic]]====
+=====Rewards=====
+* 1,500,000 [[Roubles]]
+
+===Find a lead on Item 1156===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:TerraGroup science office key icon.png|link=TerraGroup science office key]]
+|[[TerraGroup science office key]]
+|1
+|Required<font color="red"><big>'''<nowiki>*</nowiki>'''</big></font>
+!N/A
+|-
+![[File:Note mentioning Item 1156 icon.png|link=Note mentioning Item 1156]]
+|[[Note mentioning Item 1156|Note mentioning Item #1156]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+<big><font color="red">'''<nowiki>*</nowiki>'''</font></big>Not all spawn locations for the item require this key. It is not entirely needed.
+
+
+The [[Note mentioning Item 1156|Note mentioning Item #1156]] to pick up and read can be obtained on [[Ground Zero|Ground Zero (Level 21+)]], [[Lighthouse]] or in [[The Lab]].
+
+====Ground Zero (Level 21+)====
+In office no. 4 on the second floor of the TerraGroup main building. A [[TerraGroup science office key]] is required to enter.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Saving the Mole Map.png|TerraGroup building location marked on map
+File:Ground Zero TerraGroup Building.png|The TerraGroup building
+File:Scientist's Office.png|Door to the office
+File:Blue Fire Note on the Ground Zero.png|The note on the desk in the back right
+</gallery></li>
+
+====Lighthouse====
+In the northern blue chalet, on the first floor in a bookshelf near the central stairs.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BlueChaletMapKTT.png|Chalet location marked on map
+File:BlueFire2.png|The bookshelf with the note
+</gallery></li>
+
+====The Lab====
+On the second floor, in office O22 on a desk.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Blue Fire Office in the laboratory map.png|Office location marked on map
+File:Blue Fire Note in the Lab 01.png|Desk with the note
+File:Blue Fire Note in the Lab 02.png|Note on the desk
+</gallery></li>
+
+===Investigate the Rus Post office===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Audio recorder icon.png|link=Audio recorder]]
+|[[Audio recorder]]
+|1
+|Required
+!N/A
+|-
+![[File:Rus Post audio tape 11.05 - 001 icon.png|link=Rus Post audio tape 11.05 / 001]]
+|[[Rus Post audio tape 11.05 / 001]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Rus Post audio tape 11.05 - 002 icon.png|link=Rus Post audio tape 11.05 / 002]]
+|[[Rus Post audio tape 11.05 / 002]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Rus Post audio tape 11.05 - 003 icon.png|link=Rus Post audio tape 11.05 / 003]]
+|[[Rus Post audio tape 11.05 / 003]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+To fulfill this objective, you have to pick up and listen to 3 audio tapes located in the post office on [[Streets of Tarkov]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:PostOfficeMap.png|Post office marked on map
+File:PostOffice.png|The post office
+File:Rus Post audio tape 1 spawn.png|Tape #1 on the desk with the screen behind the counter
+File:Rus Post audio tape 2 spawn.png|Tape #2 on top of the coffee vending machine next to the storage room
+File:Rus Post audio tape 3 spawn.png|Tape #3 on the desk in the back office accessed through the hallway behind the counter
+</gallery></li>
+
+===Locate the Rus Post Car/Obtain the blueprint for Item 1156===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Rus Post car key icon.png|link=Rus Post car key]]
+|[[Rus Post car key]]
+|1
+|Required
+!N/A
+|-
+![[File:Item 1156 specification icon.png|link=Item 1156 specification]]
+|[[Item 1156 specification|Item #1156 specification]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+The car is located in front of the post office. The [[Item 1156 specification|Item #1156 specification]] to pick up and read can be found in the back of the car. To unlock it, a [[Rus Post car key]] is required. A single key is guaranteed to spawn every raid on the ground next to the back right wheel of the car.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Rus Post car key Location.png|The post car
+File:RusPostCarKeySpawn.png|The key next to the wheel
+File:The Ticket Item 1156 Specification Spawn.png|The blueprint
+</gallery></li>
+
+====Rewards====
+* +112,000 [[EXP]]
+* Unlocks achievement [[Achievements#Achievements|Inferno]]
+
+{{Navbox story chapters}}
+[[Category:Story chapters]]
+
+[[ru:Синий Огонь]]

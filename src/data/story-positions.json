@@ -334,7 +334,7 @@
       ],
       "source": "Bogatyrs patch Lighthouse map.png",
       "method": "similitude par ECC sur les masques d'eau entre la carte du wiki et notre SVG de Lighthouse (cc 0,87-0,89), précision moindre",
-      "errorM": 38
+      "errorM": 45
     }
   ],
   "Batya::locate the ryabina outpost#0": {
@@ -399,7 +399,7 @@
     ],
     "source": "Bogatyrs patch Lighthouse map.png",
     "method": "similitude par ECC sur les masques d'eau entre la carte du wiki et notre SVG de Lighthouse (cc 0,87-0,89), précision moindre",
-    "errorM": 38
+    "errorM": 45
   },
   "Batya::figure out how the cultists are connected to the general#0": [
     {
@@ -588,5 +588,115 @@
         "en": "Second level (Labs)"
       }
     }
-  ]
+  ],
+  "Blue Fire::req#0": [
+    {
+      "map": "woods",
+      "positions": [
+        {
+          "x": -198.7,
+          "z": 217.8
+        }
+      ],
+      "source": "Blue Fire Woods Activation Location Map.png",
+      "method": "similitude par ECC sur les masques d'eau entre la carte JINDOUZ du wiki et notre SVG de Woods (cc 0,91) ; contrôle visuel de la superposition (lacs, rivière)",
+      "errorM": 21
+    },
+    {
+      "map": "the-labyrinth",
+      "positions": [
+        {
+          "x": -7.4,
+          "z": 29.3
+        }
+      ],
+      "source": "Labryrinth missile area map.png",
+      "method": "similitude (ECC sur les masques de sol) entre l'affiche re3mr du Labyrinthe et les tuiles de la map de l'appli (même échelle 0,99 sur les 5 affiches) ; contrôle : sorties « The Way Up » et « Ariadne » de tarkov.dev sur leurs icônes, résidu < 1 m ; centre du cadre jaune (zone, non rouge)",
+      "errorM": 9
+    }
+  ],
+  "Blue Fire::locate and obtain the device fragment#0": [
+    {
+      "map": "streets-of-tarkov",
+      "positions": [
+        {
+          "x": 58.5,
+          "z": 297.7
+        }
+      ],
+      "source": "CarDealerMap.png",
+      "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Streets (résidu ≈ 0,3 m) ; contrôle : transit « The Lab » de tarkov.dev à 3 m de son repère",
+      "errorM": 31
+    },
+    {
+      "map": "streets-of-tarkov",
+      "positions": [
+        {
+          "x": 187.8,
+          "z": 226.8
+        }
+      ],
+      "source": "Mysterious marked key onmap.png",
+      "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Streets (résidu ≈ 0,3 m) ; contrôle : transit « The Lab » de tarkov.dev à 3 m de son repère",
+      "errorM": 6
+    }
+  ],
+  "Blue Fire::plant the hacking device in the server room in the lab#0": {
+    "map": "the-lab",
+    "positions": [
+      {
+        "x": -116.6,
+        "z": -325.5
+      }
+    ],
+    "source": "Labs Server Room Plant Location.png",
+    "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+    "errorM": 7,
+    "floor": {
+      "fr": "Niveau 1 (Labs)",
+      "en": "First level (Labs)"
+    }
+  },
+  "Blue Fire::find a lead on item 1156#0": [
+    {
+      "map": "lighthouse",
+      "positions": [
+        {
+          "x": -142.2,
+          "z": -79.0
+        }
+      ],
+      "source": "BlueChaletMapKTT.png",
+      "method": "similitude par ECC sur les masques d'eau entre la carte du wiki et notre SVG de Lighthouse (cc 0,87-0,89), précision moindre",
+      "errorM": 56
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -185.9,
+          "z": -398.1
+        }
+      ],
+      "source": "Blue Fire Office in the laboratory map.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 17,
+      "floor": {
+        "fr": "Niveau 2 (Labs)",
+        "en": "Second level (Labs)"
+      }
+    }
+  ],
+  "Blue Fire::investigate the rus post office#0": {
+    "map": "streets-of-tarkov",
+    "positions": [
+      {
+        "x": 37.6,
+        "z": 119.3
+      }
+    ],
+    "source": "PostOfficeMap.png",
+    "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Streets (résidu ≈ 0,3 m) ; contrôle : transit « The Lab » de tarkov.dev à 3 m de son repère",
+    "errorM": 17
+  }
 }
