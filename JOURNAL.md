@@ -4,23 +4,23 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 
 ---
 
-## État actuel (16 octobre 2026, fin de session 8)
+## État actuel (16 octobre 2026, session 9)
 
-La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : versions **0.7.0 à 0.7.23** (voir « Session 8 » dans l'historique).
+La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : versions **0.7.0 à 0.7.23** (voir « Session 8 » dans l'historique). La session 9 (item finder) commence à **0.8.0**.
 
 | Élément | État |
 |---|---|
 | Branche | **`main`** seule (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**, branche par défaut). |
 | Version affichée | **0.8.2** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
-| Derniers commits | `245ee03` Version 0.7.23 · `3a59955` Main story : ponts de l'Icebreaker pour Boreas · `2593e19` Icebreaker : calibrage corrigé · `45beb1b` positions > 100 m retirées (0.7.22) · `7acab9f` positions de The Ticket · `5447eef` bouton du panneau en icône seule sur téléphone (0.7.21) · `69ddc95` Item finder · `d81736d` infos du Labyrinthe sur la map |
+| Derniers commits | `3bc65a9` Item finder : recherche par image (0.8.2) · `78f5fb6` Ctrl+V d'une capture dans l'item finder (0.8.1) · `14c4dc9` Item finder redessiné (0.8.0) · `6800a70` journal fin de session 8 · `245ee03` Version 0.7.23 · `3a59955` Main story : ponts de l'Icebreaker pour Boreas · `2593e19` Icebreaker : calibrage corrigé · `45beb1b` positions > 100 m retirées (0.7.22) · `7acab9f` positions de The Ticket · `5447eef` bouton du panneau en icône seule sur téléphone (0.7.21) · `69ddc95` Item finder · `d81736d` infos du Labyrinthe sur la map |
 | Travail non commité | Seulement `.claude/` (non suivi, volontairement hors du dépôt : chemin propre à cette machine) |
-| Tests | **299/299** au vert (`npx vitest run`), 29 fichiers (voir « Tests ») |
+| Tests | **299/299** au vert (`npx vitest run`), 30 fichiers (voir « Tests ») |
 | Compilation | OK (`npm run build`). Avertissement Vite : le fichier principal fait **682 Ko** (198 Ko compressé) > 500 Ko. L'OCR est dans des fichiers séparés chargés à la demande (moteur 3,9 Mo, worker 111 Ko). |
 | **Production** | **https://tarkov.aprilox.fr**, déployée automatiquement à chaque push sur `main` (~1 min) par l'hébergeur, qui lance `npm start` (`server/index.mjs` : `dist/` + API des rooms sur le même port). Fichier absent = 404 sans cache (corrige l'empoisonnement du cache) ; `index.html` en `no-cache`, `/assets/*` en `immutable`. |
 | Vérifié dans le navigateur | Panneau à 400 à 720 px, téléphone, zoom 125 % simulé · sélection épinglée, ordre des sections · sorties (Douanes, Labs) · import d'une **image de synthèse** · rooms entre deux origines (création, jointure, coupure du serveur de 45 s) · Labyrinthe (marqueurs, bascule de map aux étapes) · Icebreaker après correction · voir l'historique pour le détail. |
-| **Poussé sur GitHub** | `main` poussée jusqu'à `245ee03` par URL HTTPS (vérifié avec `git ls-remote`). Le commit de journal de fin de session 8 est à pousser. Voir « Push ». |
+| **Poussé sur GitHub** | `main` poussée jusqu'à `3bc65a9` par URL HTTPS (vérifié avec `git ls-remote`) ; le fichier `item-images-*.bin` est servi en production (200, 1 473 855 octets). Voir « Push ». |
 | **En attente / à valider** | Main story à valider à l'usage ; étude 3D (session 5) ; liste finale des libellés d'onglets (proposition) |
-| **Pas vérifié** | **OCR sur de vraies photos / captures** (surtout les photos de téléphone) ; **points de la Main story pas tous parcourus dans l'app** (Falling Skies, Boreas…) : contrôlés par le recalage et les tests, pas étape par étape ; rendu visuel souvent vérifié par le **DOM seulement** (panneau du navigateur masqué, pas de capture) ; libellés anglais de certaines fonctions (item finder, rooms, Labyrinthe) ; rooms derrière Cloudflare (SSE, tampon) |
+| **Pas vérifié** | **Recherche par image de l'item finder sur de vraies captures du jeu** (seulement sur des images de tarkov.dev déformées) ; **OCR sur de vraies photos / captures** (surtout les photos de téléphone) ; **points de la Main story pas tous parcourus dans l'app** (Falling Skies, Boreas…) : contrôlés par le recalage et les tests, pas étape par étape ; rendu visuel souvent vérifié par le **DOM seulement** (panneau du navigateur masqué, pas de capture) ; libellés anglais de certaines fonctions (item finder, rooms, Labyrinthe) ; rooms derrière Cloudflare (SSE, tampon) |
 
 ### Push
 - Sessions 2 à 4 : jamais poussé. Session 5 : un push réussi à la fin (identifiants GitHub disponibles dans la session).
@@ -54,7 +54,7 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | `69ddc95` | 8 | Item finder (objets du jeu, quêtes, hideout, barters, crafts) |
 | `5447eef` | 8 | Barre du haut : bouton du panneau en icône seule sur téléphone |
 
-### Tests (290, 29 fichiers)
+### Tests (299, 30 fichiers)
 
 | Fichier | Ce qui est couvert |
 |---|---|
