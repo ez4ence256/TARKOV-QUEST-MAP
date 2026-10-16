@@ -1,0 +1,554 @@
+{{Infobox quest
+|image        =They Are Already Here Banner.png
+|icon         =They Are Already Here Icon.png
+|icon size    =
+|location     =
+|given by     =
+|reward       =
+|reputation   =
+|quest number =
+|previous     =
+|leads to     =
+|related      =
+|related2     =
+|reqkappa     =
+}}
+
+'''{{PAGENAME}}''' is a [[Story chapters|story chapter]] in ''[[Escape from Tarkov]]''.
+
+==Requirements==
+Pick up and read [[Note about the Eye of the World]] from one of the following locations:
+* In the "[[Dorm room 314 marked key|marked room]]" at the three-story dorms on [[Customs]]
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:They Are Already Here Customs Activation Location.png|Note on a stack of books
+</gallery></li>
+* In the "marked rooms" [[RB-BK marked key|RB-BK]], [[RB-VO marked key|RB-VO]] and [[RB-PKPM marked key|RB-PKPM]] on [[Reserve]]
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:They Are Already Here Reserve Activation Location 1.png|In RB-BK on the table with the pig carcass
+File:They Are Already Here Reserve Activation Location 2.png|In RB-VO on the table with the pig carcass
+File:They Are Already Here Reserve Activation Location 3.png|In RB-PKPM on the desk
+</gallery></li>
+* At the marked circle in the dilapidated village in the north of [[Woods]]
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:They Are Already Here Woods Activation Location Map.png|Circle location marked on map
+File:The second ritual spot in the Woods.png|The marked circle
+File:They Are Already Here Woods Activation Location.png|Note next to the burning candles
+</gallery></li>
+* In the house on the island on [[Shoreline]]
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:WetJob2IslandMap.png|Island location marked on map
+File:EOTW Shoreline location.png|Note on the floor in the house
+</gallery></li>
+
+==Objectives==
+* [[Note about the Eye of the World|Learn more]] about the hooded men/[[Note about the Eye of the World|Learn more]] about the people leaving strange symbols in Tarkov
+* Locate a place connected to the Eye of the World
+* [[Cult victim audio tape 2|Learn more]] about the cultist's victim from the torture room
+* Locate the [[Cult victim's apartment key|cult victim's apartment]]
+** (''Optional'') Obtain the [[Cult victim's apartment key|key]] to the apartment
+* Investigate the victim's apartment
+* Obtain the [[Cult victim audio tape 1|victim's first audio tape]]
+* Obtain and read the [[Book of the Arrival|book]] that the cultists planted with Igor 
+* Ask [[Mechanic]] about the Eye of the World
+** (''Optional'') Gain access to [[Mechanic]]
+* Locate and neutralize a [[Cultist priest]]
+* Obtain more [[Cultist priest's note|information]] about the Eye of the World
+* Locate the place marked with the Eye of the World on [[Lighthouse]]
+* Investigate the ransacked cultist room in the chalet
+** (''Optional'') Locate the [[Victim's note|victim's belongings]]
+* Locate and obtain the [[Station 14-4 KORD Arshavin K. pass (Damaged)|key]] mentioned in the [[victim's note]]
+* Locate the place marked with the Eye of the World on [[Woods]]
+* [[Newspaper clipping from the cultists' house|Investigate]] the cultists' house marked with the Eye of the World
+* Locate the place marked with the Eye of the World on [[Shoreline]]
+* [[Programmer's note|Investigate]] the area around the Sordi communications tower
+* [[Toolset|Repair]] the Sordi tower
+* Restore [[Station 14-4 KORD Arshavin K. pass (Damaged)|Arshavin's keycard]]
+* Gain [[Station 14-4 KORD Arshavin K. pass (Restored)|access]] to NGO Cobalt's secret facility
+* Restore power at the station
+* Turn on the cooling system in the server room
+* Install a [[Secure Flash drive|flash drive]] to download the data
+* [[Mysterious audio tape|Investigate]] ARRS Station 14-4 KORD thoroughly
+* Survive and extract from [[Interchange]]
+* [[ARRS station mechanic's notes|Find a way]] to disconnect the station from external agents
+* Restore the ARRS station to backup settings
+** (''Optional'') Check that the station power is turned on
+* Collect the [[Flash drive for ARRS station|flash drive]] from the ARRS station
+* Survive and extract from [[Interchange]]
+* Hand over the [[Flash drive for ARRS station|flash drive with data]] to [[Mechanic]]
+* Read the [[ARRS system specifications|ARRS station specifications]]
+
+==Guide==
+===Learn more about the hooded men/Learn more about the people leaving strange symbols in Tarkov===
+See [[They Are Already Here#Requirements|requirements]].
+
+===Locate a place connected to the Eye of the World/Learn more about the cultist's victim from the torture room===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Cult victim audio tape 2 icon.png|link=Cult victim audio tape 2]]
+|[[Cult victim audio tape 2|Cult victim audio tape #2]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+To fulfill these objectives, you have to locate the Cultist's torture house on [[Lighthouse]] and pick up and listen to the audio tape found there.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Cult victims apartment key Spawn Map.png|House location marked on map
+File:Cult victims apartment key Spawn House.png|The wanted house
+File:Cult victim audio tape 2 spawn.png|The tape on the chair
+</gallery></li>
+
+The [[Cult victim's apartment key]] required for the next objective can also be obtained in the house.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Cult victims apartment key Spawn 4.png|Spawn 1 on the fallen over shelf
+File:Cult victims apartment key Spawn 1.png|Spawn 2 on the chair
+File:Cult victims apartment key Spawn 2.png|Spawn 3 on the wooden table
+File:Cult victims apartment key Spawn 3.png|Spawn 4 on the metal table
+</gallery></li>
+
+===Locate the cult victim's apartment===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Cult victim's apartment key icon.png|link=Cult victim's apartment key]]
+|[[Cult victim's apartment key]]
+|1
+|Required
+!N/A
+|}
+The wanted apartment is located on the third floor of the old apartment building behind the Klimov shopping mall on [[Streets of Tarkov]]. A [[Cult victim's apartment key]] is required to enter it.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:CultVictimsApartmentKeyMap.png|Building location marked on map
+File:CultVictimsApartmentKeyBuilding.png|The old apartment building
+File:CultVictimsApartmentKeyDoor.png|Door to apartment 5
+</gallery></li>
+
+===Investigate the victim's apartment/Obtain the victim's first audio tape and the book the Cultists planted===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Note on preparations for the Arrival icon.png|link=Note on preparations for the Arrival]]
+|[[Note on preparations for the Arrival]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Cult victim audio tape 1 icon.png|link=Cult victim audio tape 1]]
+|[[Cult victim audio tape 1|Cult victim audio tape #1]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Book of the Arrival icon.png|link=Book of the Arrival]]
+|[[Book of the Arrival]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+To fulfill these objectives, you have to pick up and read 2 notes as well as pick up and listen to an audio tape from the office inside the apartment. The door has to be breached.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Cult Victim Apartment Office.png|Door to the office
+File:Book on the Arrival.png|The book on the bookshelf
+File:Note on preparations for the Arrival.png|The note on the desk
+File:Cult Victim Tape 1.png|The tape on the desk
+</gallery></li>
+
+===Ask [[Mechanic]] about the Eye of the World===
+Visit [[Mechanic]] in the menu through the trader screen and ask him about the Eye of the World.
+
+===Locate and neutralize a Cultist priest===
+Kill a [[Cultist priest]] on any location.
+
+===Obtain more information about the Eye of the World===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Marked-key-Icon.png|link=Dorm room 314 marked key]]
+|[[Dorm room 314 marked key]]
+|1
+|Required<font color="red"><big>'''<nowiki>*</nowiki>'''</big></font>
+!N/A
+|-
+![[File:Abandoned factory marked key icon.png|link=Abandoned factory marked key]]
+|[[Abandoned factory marked key]]
+|1
+|Required<font color="red"><big>'''<nowiki>*</nowiki>'''</big></font>
+!N/A
+|-
+![[File:RB-BK Icon.png|link=RB-BK marked key]]
+|[[RB-BK marked key]]
+|1
+|Required<font color="red"><big>'''<nowiki>*</nowiki>'''</big></font>
+!N/A
+|-
+![[File:RB-PKPM key icon.png|link=RB-PKPM marked key]]
+|[[RB-PKPM marked key]]
+|1
+|Required<font color="red"><big>'''<nowiki>*</nowiki>'''</big></font>
+!N/A
+|-
+![[File:RB-VO key icon.png|link=RB-VO marked key]]
+|[[RB-VO marked key]]
+|1
+|Required<font color="red"><big>'''<nowiki>*</nowiki>'''</big></font>
+!N/A
+|-
+![[File:Cultist priest's note icon.png|link=Cultist priest's note]]
+|[[Cultist priest's note]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+<big><font color="red">'''<nowiki>*</nowiki>'''</font></big>Only one of the keys is required to complete the objective.
+
+
+To fulfill this objective, you have to pick up and read the [[Cultist priest's note]] from one of the marked rooms on [[Customs]], [[Streets of Tarkov]] or [[Reserve]]. '''Note:''' The item doesn't spawn before the previous objective is completed.
+
+====Customs====
+Marked room on the third floor of the three-story dorms building. A [[Dorm room 314 marked key]] is required to enter it.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:TheCultPart2DormsMap.png|Room location marked on map
+File:Marked Room Door.png|Door to the room
+File:Customs Cultist priest's note spawn.png|Note on a stack of books
+</gallery></li>
+
+====Streets of Tarkov====
+Marked room on the third floor of the northern abandoned factory building. A [[Abandoned factory marked key]] is required to enter it.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:AbandonedFactoryNorthernBuilding.png|Room location marked on map
+File:FactoryMarkedRoomDoor.png|Door to the room
+File:Streets of Tarkov Cultist priest's note spawn.png|Note on the floor
+</gallery></li>
+
+====Reserve====
+=====RB-BK=====
+Marked room on the first floor of the black pawn barrack building. A [[RB-BK marked key]] is required to enter it.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:RB-BK lock location.png|Room location marked on map
+File:2019-10-28marked.png|Door to the room
+File:Reserve RB-BK Cultist priest's note spawn.png|Note on the bookshelf
+</gallery></li>
+
+=====RB-PKPM=====
+Marked room next to the command office in the underground tunnel system. A [[RB-PKPM marked key]] is required to enter it.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:RB-PKPM.png|Room location marked on underground map
+File:RBPKPM Entrance.png|Door to the room
+File:Reserve RB-PKPM Cultist priest's note spawn.png|Note on the fallen over bookshelf
+</gallery></li>
+
+=====RB-VO=====
+Marked room in the security barrack building on [[Reserve]]. A [[RB-VO marked key]] is required to enter it.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:RB-VO lock location.png|Room location marked on map
+File:RB-VO.png|Door to the room
+File:Reserve RB-VO Cultist priest's note spawn.png|Note on the bookshelf
+</gallery></li>
+
+===Locate the place marked with the Eye of the World on Lighthouse/Investigate the cultist room in the chalet/Obtain the victim's key===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Victim's note icon.png|link=Victim's note]]
+|[[Victim's note]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Station 14-4 KORD Arshavin K. pass (Damaged) icon.png|link=Station 14-4 KORD Arshavin K. pass (Damaged)]]
+|[[Station 14-4 KORD Arshavin K. pass (Damaged)]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+The wanted place is the small southern bedroom on the second floor of the northern blue chalet on [[Lighthouse]]. The [[Victim's note]] to pick up and read can be found on the adjacent balcony. 
+
+The [[Station 14-4 KORD Arshavin K. pass (Damaged)]] is located on an ATV in front of the garage opposite the chalet.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BlueChaletMapKTT.png|Chalet marked on map
+File:Victim's Note Spawn.png|Note on the balcony
+File:14-4 dmg. Spawn.png|Keycard on the ATV
+</gallery></li>
+
+===Locate the place marked with the Eye of the World on Woods===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Newspaper clipping from the cultists' house icon.png|link=Newspaper clipping from the cultists' house]]
+|[[Newspaper clipping from the cultists' house]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+The wanted place is a house in the dilapidated village in the north of [[Woods]]. The [[Newspaper clipping from the cultists' house]] to pick up and read can be found on a whiteboard next to the desk.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:EFT TAAH Woods House Map.png|House location marked on map
+File:EFT TAAH Woods House.png|The wanted house
+File:EFT TAAH Woods Newspaper.png|Newspaper on the whiteboard
+</gallery></li>
+
+===Locate the place marked with the Eye of the World on Shoreline/Investigate the area/Repair the Sordi tower===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+|[[File:Toolsicon.png|link=Toolset]]
+|[[Toolset]]
+|1
+|Required
+!N/A
+|This item is used to repair the Sordi tower. When used, the item is removed from the players' inventory.
+|-
+![[File:Programmer's note icon.png|link=Programmer's note]]
+|[[Programmer's note]]
+|1
+|Required
+!<font color="red">Yes</font>
+|
+|}
+The wanted place is a red metal shack at the radio tower near the "Road to Customs" extraction on [[Shoreline]]. The [[Programmer's note]] to pick up and read can be found on a dead body next to the tower. To repair the tower, a [[Toolset]] has to be used inside the shack.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Shoreline Eye of World Map.jpg|Radio tower location marked on map
+File:Signal3.png|The radio tower
+File:Shoreline Eye of World Location.png|The shack
+File:Shoreline Eye of World Dead Body Relative Location.png|Location of the body
+File:Note in dead body.png|The note at the right hand of the body
+File:Repair location for the Sordi tower.png|Repair location in the shack
+</gallery></li>
+
+===Learn more about Station 14-4 KORD from [[Mechanic]]===
+Visit [[Mechanic]] in the menu through the trader screen and ask him about the Eye of the World again.
+
+===Restore Arshavin's keycard===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+![[File:Station 14-4 KORD Arshavin K. pass (Restored) icon.png|link=Station 14-4 KORD Arshavin K. pass (Restored)]]
+|[[Station 14-4 KORD Arshavin K. pass (Restored)]]
+|1
+|Required
+!N/A
+|Has to be crafted in the [[Hideout]] (Intelligence center lv. 1).
+|}
+Craft the [[Station 14-4 KORD Arshavin K. pass (Restored)]] at the Intelligence Center level 1 in the [[Hideout]]. Electricity is required during the entire process, otherwise it will be interrupted.
+
+===Gain access to NGO Cobalt's secret facility===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Station 14-4 KORD Arshavin K. pass (Restored) icon.png|link=Station 14-4 KORD Arshavin K. pass (Restored)]]
+|[[Station 14-4 KORD Arshavin K. pass (Restored)]]
+|1
+|Required
+!N/A
+|}
+NGO Cobalt's secret facility is located in the basement of the power station on [[Interchange]]. A [[Station 14-4 KORD Arshavin K. pass (Restored)]] is required to enter it.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:PowerStationMap.png|Power station marked on map
+File:InterchangePowerStation.png|The power station
+File:PowerStationStairsDoor.png|Door to the basement stairs
+File:Station 14-4 KORD Door.png|Door to the secret facility
+</gallery></li>
+
+===Restore power at the station===
+To restore the power you have to swipe the [[Station 14-4 KORD Arshavin K. pass (Restored)]] at the keycard panel directly next to the entrance door.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Reader in 14-4 KORD.png|The keycard panel
+</gallery></li>
+
+===Turn on the cooling system in the server room===
+The server room is located behind the grate door. To turn on the cooling system, flip the lever in the back.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Grate door in 14-4 KORD.png|The grate door
+File:Lever in 14-4 KORD.png|The lever
+</gallery></li>
+
+===Install a flash drive to download the data===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+|[[File:Secure Flash drive Icon.png|link=Secure Flash drive]]
+|[[Secure Flash drive]]
+|1
+|Required
+!N/A
+|Stashed item
+|}
+The [[Secure Flash drive]] has to be stashed to the left of the cooling system lever in the server room.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:USB Plant Location inside Cooling Room in 14-4 KORD.png|Stashing location
+</gallery></li>
+
+===Investigate ARRS Station 14-4 KORD thoroughly===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Mysterious audio tape icon.png|link=Mysterious audio tape]]
+|[[Mysterious audio tape]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+To fulfill this objective, you have to pick up and listen to the [[Mysterious audio tape]] from the safe next to the entrance door. The safe opens automatically after turning on the cooling system.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Mysterious Audio Tape spawn.png|The tape in the safe
+</gallery></li>
+
+===Survive and extract from Interchange===
+Extract from [[Interchange]] with either the "Survived" or "Run-Through" extraction status.
+
+===Find a way to disconnect the station from external agents===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:ARRS station mechanic's notes icon.png|link=ARRS station mechanic's notes]]
+|[[ARRS station mechanic's notes]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+Return to the secret facility on [[Interchange]] and pick up and read the [[ARRS station mechanic's notes]] from the big desk.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:ARRS mech..png|The notes on the desk
+</gallery></li>
+
+===Restore the ARRS station to backup settings===
+Turn on the power again, then go inside the server room and press the button under the table.
+
+'''Note:''' Only 1 player per raid can press the button and get progress on this objective. If you can't interact with it, return in a new raid.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:ARRS disconnect button.png|The button
+</gallery></li>
+
+===Collect the flash drive from the ARRS station===
+{| style="border:2px solid #a52019; width:100%; margin:1em auto 1em auto; padding:5px;"
+| style="text-align:center;" | [[File:Icon-warning-red.svg|100px]]<big>'''Completing the <font color="red">previous objective first</font> is required to obtain the major evidence [[ARRS system specifications]]!'''</big>
+|}
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Flash drive for ARRS station icon.png|link=Flash drive for ARRS station]]
+|[[Flash drive for ARRS station]]
+|1
+|Handover item
+!<font color="red">Yes</font>
+|}
+
+Pick up the [[Flash drive for ARRS station]] from the server next to the cooling system lever.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:ARRS USB spawn.png|The flash drive
+</gallery></li>
+
+===Survive and extract from Interchange===
+Extract from [[Interchange]] with either the "Survived" or "Run-Through" extraction status.
+
+===Hand over the flash drive with data to [[Mechanic]]===
+Hand the [[Flash drive for ARRS station]] over to [[Mechanic]] through the trader screen.
+
+===Read the ARRS station specifications===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:ARRS system specifications icon.png|link=ARRS system specifications]]
+|[[ARRS system specifications]]
+|1
+|Required
+!N/A
+|}
+Read the [[ARRS system specifications]] from the handbook.
+
+====Rewards====
+* +128,000 [[EXP]]
+* Unlocks achievement [[Achievements#Achievements|Through Another's Eyes]]
+* Unlocks achievement [[Achievements#Achievements|When the Light Fades]]
+
+{{Navbox story chapters}}
+[[Category:Story chapters]]
+
+[[ru:Они уже здесь]]

@@ -1,0 +1,1042 @@
+{{Infobox quest
+|image        =Boreas Banner.png
+|icon         =Boreas Icon.png
+|icon size    =
+|location     =
+|given by     =
+|reward       =
+|reputation   =
+|quest number =
+|previous     =
+|leads to     =
+|related      =
+|related2     =
+|reqkappa     =
+}}
+
+'''{{PAGENAME}}''' is a [[Story chapters|story chapter]] in ''[[Escape from Tarkov]]''.
+
+{{TOC limit|2|}}
+
+==Requirements==
+Obtain a [[Paradigm Shipping poster]] or check the distress signal via the radio system at the Intelligence Center level 3 in the [[Hideout]].
+
+==Objectives==
+* Find out from traders more about the connection between TerraGroup and Paradigm Shipping/Ask [[Mechanic]] where the distress signal came from
+* Locate the equipment under the cellular tower on [[Woods]]
+* [[Toolset|Repair]] the equipment under the cellular tower on [[Woods]]
+* Report back to [[Mechanic]]
+* Locate and obtain the [[Paradigm Shipping directive|Paradigm Shipping documentation]]
+* Tell [[Mechanic]] about "Boreas"
+* Arrange a transport to the [[icebreaker]]
+'''If you gave the [[Armored case]] to [[Prapor]] in [[Falling Skies]]'''
+* Hand over the [[AMG-10 hydraulic fluid (quest item)|AMG-10 fluid]] to [[Prapor]]
+
+'''If you kept the [[Armored case]] from [[Prapor]] in [[Falling Skies]]'''
+* Hand over 3 found [[Found in raid|<font color="red">in raid</font>]] [[Military power filter]]s to [[Prapor]]
+* Hand over the [[AMG-10 hydraulic fluid (quest item)|AMG-10 fluid]] to [[Prapor]]
+
+'''If you have not completed [[Falling Skies]]'''
+* Eliminate any 30 targets on [[Reserve]]
+* Launch a yellow signal flare at the [[Woods]] transit on [[Reserve]]
+* Hand over the [[AMG-10 hydraulic fluid (quest item)|AMG-10 fluid]] to [[Prapor]]
+<hr/>
+* Find an alternative transport to the [[icebreaker]]
+* Talk to the [[BTR Driver]]
+'''If you have completed [[The Price of Independence]]'''
+* Return to the [[Hideout]]
+* Return to the [[BTR Driver]]
+* Tell [[Mechanic]] that you found transport to the [[icebreaker]]
+
+'''If you have completed [[Choose Your Friends Wisely]]'''
+* Hand over 200 [[7.62x54mm R BT gzh]]
+* Locate and obtain [[Skier's docs|Skier's reports]] on [[Customs]]
+* Burn [[Skier's docs|Skier's reports]] on [[Customs]]
+* Eliminate any 15 targets at the smugglers' territories
+* Report back to the [[BTR Driver]]
+* Tell [[Mechanic]] that you found transport to the [[icebreaker]]
+
+'''If you have not completed either [[The Price of Independence]] or [[Choose Your Friends Wisely]]'''
+* Eliminate any 10 targets at the smugglers' territories
+* Report back to the [[BTR Driver]]
+* Tell [[Mechanic]] that you found transport to the [[icebreaker]]
+<hr/>
+* Board the smuggler hovercraft on [[Shoreline]] or [[Lighthouse]]
+** (''Optional'') Bring a [[Sudak-Tudak marine repair kit|marine repair kit]]
+** (''Optional'') Bring a green RSP signal flare
+** (''Optional'') Bring 2,500 [[Euros]] to pay for the evacuation from the [[icebreaker]]
+* Arrive at the [[Icebreaker]]
+* Check if any crew members survived on the ship
+* Access the [[Boreas engine room keycard|engine room]]
+** (''Optional'') Locate and obtain the [[Boreas engine room keycard|engine room keycard]]
+** (''Optional'') Reach the [[Boreas engine room keycard|engine room]]
+* Find a [[SZ-1 explosive charge|way]] into the [[Icebreaker|icebreaker]] superstructure
+* Ask [[Mechanic]] about explosives
+* Ask [[Prapor]] about explosives
+* Arrive at the [[Icebreaker]]
+* Reach the damaged door on the roof of the engine room
+* Break the chain on the door on the roof of the engine room using the [[SZ-1 explosive charge (Icebreaker)|SZ-1 charge]]
+* Enter the [[Icebreaker|icebreaker]] superstructure from the roof of the engine room
+** (''Optional'') Inspect the crew living quarters in the [[Icebreaker|icebreaker]] superstructure
+* Find a way to the upper decks of the [[Icebreaker|icebreaker]] superstructure
+* Ask the surviving scientist how to open the code-locked door on level 6
+* Ask [[Mechanic]] for help with finding the second part of the code for the locked door on level 6
+* Plant the [[Local network hacking device|hacking device]] in the server room in [[The Lab]]
+* Return to [[Mechanic]]
+* Arrive at the [[Icebreaker]]
+* Reach the engine room
+** (''Optional'') Locate and obtain the [[Boreas engine room keycard|engine room keycard]]
+* Reach the damaged door on the roof of the engine room
+<hr/>
+'''After completing''' [[Stick to It]]
+* Return to the [[BTR Driver|BTR driver]]
+'''After completing''' [[A Bitter Victory]]
+* Return to the [[BTR Driver|BTR driver]]
+<hr/>
+* Break the chain on the door on the roof of the engine room using the [[SZ-1 explosive charge (Icebreaker)|SZ-1 charge]]
+* Reach the code-locked door
+* Use the correct access code
+* Locate [[Compartment C-1 keycard|compartment C-1]]
+** (''Optional'') Locate and obtain the [[Compartment C-1 keycard|keycard]] with access to compartment C-1
+** (''Optional'') Locate the entrance to the bridge
+** (''Optional'') Locate an alternative path to the bridge
+* Reach the upper decks
+* Thaw the hatch on the roof of the bridge
+** (''Optional'') Find [[BBQ-S43 gas torch|something]] to thaw the hatch on the roof of the bridge
+* Rescue the [[Icebreaker|icebreaker]] captain
+* Access [[Compartment C-1 keycard|Compartment C-1]]
+* [[Hard drive from compartment C-1 (3)|Search the shelves]] in [[Compartment C-1 keycard|compartment C-1]]
+* [[Hard drive from compartment C-1 (1)|Search the area near the workstation]] in [[Compartment C-1 keycard|compartment C-1]]
+* [[Hard drive from compartment C-1 (2)|Search the servers]] in [[Compartment C-1 keycard|compartment C-1]]
+* Ask [[Mechanic]] for help decoding the hard drives from the [[Icebreaker|icebreaker]]
+* Hand over 3 found [[Found in raid|<font color="red">in raid</font>]] [[Ultralink satellite communication module|Ultralink satellite modules]] to [[Mechanic]]
+** (''Optional'') Locate and obtain [[Ultralink satellite communication module|Ultralink satellite modules]] on the [[Icebreaker|icebreaker]]
+* Hand over 4 found [[Found in raid|<font color="red">in raid</font>]] server [[Memento Server RAM Module|RAM modules]] to [[Mechanic]]
+** (''Optional'') Locate and obtain the server [[Memento Server RAM Module|RAM modules]] on the [[Icebreaker|icebreaker]]
+* Hand over 2 found [[Found in raid|<font color="red">in raid</font>]] [[IBX Gigachad cryptographic processor|cryptographic processors]] to [[Mechanic]]
+** (''Optional'') Locate and obtain the [[IBX Gigachad cryptographic processor|cryptographic processors]] on the [[Icebreaker|icebreaker]]
+* Analyse the [[Icebreaker archive data|data]] from the [[Icebreaker|icebreaker]]
+* Inform the scientist about the captain's death
+* Ask the BTR driver if he can help evacuate the scientist from the [[Icebreaker|icebreaker]]
+* Assist the smugglers with their conflict against the Rogues
+* Return to the [[BTR Driver|BTR driver]]
+* Eliminate 20 targets on the [[Icebreaker|icebreaker]]
+* Hand over 5 respirators to the [[BTR Driver|BTR driver]]
+** (''Optional'') Obtain respirators for the [[BTR Driver|BTR driver]]
+* Hand over 2 class 5 or higher ballistic plates to the [[BTR Driver|BTR driver]]
+** (''Optional'') Obtain class 5+ ballistic plates for the [[BTR Driver|BTR driver]]
+* Hand over the [[BNTI Kirasa-N body armor|Kirasa-N body armor]] to the [[BTR Driver|BTR driver]]
+** (''Optional'') Obtain the [[BNTI Kirasa-N body armor|Kirasa-N body armor]] for the [[BTR Driver|BTR driver]]
+* Inform the scientist that everything is ready for his evacuation
+* Ask the [[BTR Driver|BTR driver]] how the scientist's rescue went
+
+==Guide==
+===Talk to [[Mechanic]]===
+Visit [[Mechanic]] in the menu through the trader screen and ask him about the distress signal.
+
+===Locate and repair the equipment under the cellular tower on Woods===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+|[[File:Toolsicon.png|link=Toolset]]
+|[[Toolset]]
+|1
+|Required
+!N/A
+|This item is used to repair the equipment. When used, the item is removed from the players' inventory.
+|}
+
+Find and repair the equipment at the Scav bunker on [[Woods]] with a [[Toolset]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:ThirstyDeliveryWoodsMap.png|Scav bunker location marked on map
+File:Boreas Equipment.png|The equipment
+</gallery></li>
+
+===Report back to [[Mechanic]]===
+Visit [[Mechanic]] in the menu through the trader screen.
+
+===Locate and obtain the Paradigm Shipping documentation===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Paradigm Shipping directive icon.png|link=Paradigm Shipping directive]]
+|[[Paradigm Shipping directive]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+
+The [[Paradigm Shipping directive]] to pick up and read can be found in the warehouse at the freight yard in the north of [[Lighthouse]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Boreas Lighthouse Warehouse Map.png|Warehouse location marked on map
+File:Boreas Paradigm Shipping Directive.png|The directive on the table next to the lamp
+</gallery></li>
+
+===Tell [[Mechanic]] about "Boreas"===
+Visit [[Mechanic]] in the menu through the trader screen.
+
+===Arrange a transport to the icebreaker===
+Visit [[Prapor]] in the menu through the trader screen and ask him about the transport.
+
+{| style="border:1px solid #9a8866; width:100%; margin:1em auto 1em auto; padding:5px; box-shadow: 0 0 15px rgba(65,61,52,1), 0 0 6px rgba(232,190,107,0.8);"
+| style="text-align:center; font-size: 132%;" | The next objectives depend on your choice, or respectively progress in [[Falling Skies]].
+|}
+
+====Hand over 3 Military power filters to [[Prapor]]====
+<font color="red">This objective only happens if you kept the [[Armored case]] from [[Prapor]] in [[Falling Skies]].</font>
+{| class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+! Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+|[[File:Mil Filter Icon.png|link=Military power filter]]
+|[[Military power filter]]
+|3
+| Handover item
+!<font color="red">Yes</font>
+|}
+
+====Eliminate any 30 targets on Reserve====
+<font color="green">This objective only happens if you have not completed [[Falling Skies]].</font>
+
+====Launch a yellow signal flare at the Woods transit on Reserve====
+<font color="green">This objective only happens if you have not completed [[Falling Skies]].</font>
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in Raid]]'''
+!Notes
+|-
+![[File:Yellow flare icon.png|link=RSP-30 reactive signal cartridge (Yellow)]]
+|[[RSP-30 reactive signal cartridge (Yellow)]]
+|1
+|Required
+!N/A
+|Must be fired into the sky while being at the transit.
+|-
+! colspan="6" |OR
+|-
+![[File:SP-81 Icon.png|link=ZiD SP-81 26x75 signal pistol]]
+|[[ZiD SP-81 26x75 signal pistol]]
+|1
+|Required
+!N/A
+|Used to fire the flare cartridge.
+|-
+![[File:26x75 flare cartridge (Yellow) icon.png|link=26x75mm flare cartridge (Yellow)]]
+|[[26x75mm flare cartridge (Yellow)]]
+|1
+|Required
+!N/A
+|Must be fired into the sky while being at the transit.
+|}
+Shoot a yellow flare into the sky while being at the [[Woods]] transit on [[Reserve]]. If the flare doesn't reach a certain height, the quest objective won't complete. You can use either the [[RSP-30 reactive signal cartridge (Yellow)|handheld RSP-30 yellow flare]] which can be bought at [[Prapor]] LL1 or a [[26x75mm flare cartridge (Yellow)|26x75mm yellow flare cartridge]] which can be bought at [[Jaeger]] LL1, and is fired from a [[ZiD SP-81 26x75 signal pistol|signal pistol]]. If you use the [[RSP-30 reactive signal cartridge (Yellow)|handheld RSP-30 yellow flare]], make sure to aim it upwards, but not too much or it lands behind you. 
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:ReserveTransitToWoodsMap.png|Transit location marked on map
+File:ReserveTransitToWoods2.png|Transit location
+File:ReserveTransitToWoods.png|The transit
+</gallery></li>
+
+===Hand over the AMG-10 fluid to [[Prapor]]===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:AMG-10 hydraulic fluid (quest item) icon.png|link=AMG-10 hydraulic fluid (quest item)]]
+|[[AMG-10 hydraulic fluid (quest item)]]
+|1
+|Handover item
+!<font color="red">Yes</font>
+|}
+
+The [[AMG-10 hydraulic fluid (quest item)]] can be found on [[Reserve]]. There are multiple possible spawns throughout the location. '''Note:''' The barter item [[AMG-10 hydraulic fluid]] '''cannot''' be used for this objective. 
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:AMG-10 hydraulic fluid Spawn 6.png|1: On one of the shelves in the northern storage area of the black bishop building basement
+File:AMG-10 hydraulic fluid Spawn 1.png|2: On one of the shelves in the northern storage area of the black bishop building basement
+File:AMG-10 hydraulic fluid Spawn 2.png|3: On the pallet with the spotlight in the northern storage area of the black bishop building basement 
+File:AMG-10 hydraulic fluid Spawn 3.png|4: On the open wooden crate inside the helicopter at the parade ground
+File:AMG-10 hydraulic fluid Spawn 4.png|5: Under the ladder inside the helicopter at the parade ground
+File:AMG-10 hydraulic fluid Spawn 5.png|6: Next to the forklift behind the helicopter at the parade ground
+</gallery></li>
+
+===Find an alternative transport to the icebreaker===
+Talk to the [[BTR Driver]] and ask him about the transport.
+
+{| style="border:1px solid #9a8866; width:100%; margin:1em auto 1em auto; padding:5px; box-shadow: 0 0 15px rgba(65,61,52,1), 0 0 6px rgba(232,190,107,0.8);"
+| style="text-align:center; font-size: 132%;" | The next objectives depend on your choice, or respectively progress in the [[BTR Driver]] questline.
+|}
+
+====Return to the Hideout====
+<font color="green">This objective only happens if you have completed [[The Price of Independence]].</font>
+
+Exit the raid by extracting or dying.
+
+====Hand over 200 7.62x54mm R BT gzh rounds to the [[BTR Driver|BTR driver]]====
+<font color="red">This objective only happens if you have completed [[Choose Your Friends Wisely]].</font>
+{| class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in Raid]]'''
+|-
+![[File:7bt1 icon.png|link=7.62x54mm R BT gzh]]
+|[[7.62x54mm R BT gzh]]
+|200
+|Handover item
+!<font color="green">No</font>
+|}
+
+====Locate and obtain Skier's reports on Customs====
+<font color="red">This objective only happens if you have completed [[Choose Your Friends Wisely]].</font>
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Skier's docs icon.png|link=Skier's docs]]
+|[[Skier's docs]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+
+[[Skier's docs]] can be found in the ditch between the Scav base and the laboratory on [[Customs]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Boreas Skiers Docs Map.png|Location marked on map
+File:Boreas Skiers Docs Location.png|The docs
+</gallery></li>
+
+====Burn Skier's reports on Customs====
+<font color="red">This objective only happens if you have completed [[Choose Your Friends Wisely]].</font>
+
+Burn [[Skier's docs]] at any fire barrel on [[Customs]]. The closest one to the pick up location is in the middle living quarters of the Scav base.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:EasyMoneyPart1CustomsMap1.png|Scav base location marked on map
+File:ZB-013 Building.png|The Scav base
+File:Customs Scav Base Fire Barrel.png|The fire barrel
+</gallery></li>
+
+====Eliminate any 15 targets at the smugglers' territories====
+<font color="red">This objective only happens if you have completed [[Choose Your Friends Wisely]].</font>
+
+Kill any 15 targets at the smuggler bases on [[Shoreline]] or [[Interchange]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Shoreline Smuggler Base Map.png|[[Shoreline]] smuggler base location marked on map
+File:Interchange Smuggler Base Map.jpg|[[Interchange]] smuggler base location marked on map
+</gallery></li>
+
+====Eliminate any 10 targets at the smugglers' territories====
+<font color="yellow">This objective only happens if you have not completed either [[The Price of Independence]] or [[Choose Your Friends Wisely]].</font>
+
+Kill any 10 targets at the smuggler bases on [[Shoreline]] or [[Interchange]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Shoreline Smuggler Base Map.png|[[Shoreline]] smuggler base location marked on map
+File:Interchange Smuggler Base Map.jpg|[[Interchange]] smuggler base location marked on map
+</gallery></li>
+
+===Return to the [[BTR Driver|BTR driver]]===
+Talk to the [[BTR Driver]].
+
+===Tell [[Mechanic]] that you found transport to the icebreaker===
+Visit [[Mechanic]] in the menu through the trader screen.
+
+===Board the smuggler hovercraft on Shoreline or Lighthouse===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in Raid]]'''
+|-
+![[File:Sudak-Tudak marine repair kit icon.png|link=Sudak-Tudak marine repair kit]]
+|[[Sudak-Tudak marine repair kit]]
+|1
+|Required
+!N/A
+|}
+The hovercraft is located at the piers on [[Shoreline]] and [[Lighthouse]]. It can only be boarded while carrying a [[Sudak-Tudak marine repair kit]]. To extract from the [[icebreaker]], a green flare and 2,400 [[Euros]] are required.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:ShorelineTransitToIcebreakerMap.png|[[Shoreline]] hovercraft location marked on map
+File:ShorelineTransitToIcebreaker.png|The hovercraft
+File:LighthouseTransitToIcebreakerMap.png|[[Lighthouse]] hovercraft location marked on map
+File:LighthouseTransitToIcebreaker.png|The hovercraft 
+</gallery></li>
+
+===Arrive at the [[Icebreaker]]===
+Access [[Icebreaker]] through the [[Shoreline]] or [[Lighthouse]] transit.
+
+===Check if any crew members survived on the ship===
+Talk to the scientist through the intercom located on level 1 of the [[Icebreaker]] on the east side of the ship.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasScientistIntercomMap.jpg|Intercom location marked on map
+File:BoreasDoorToScientistIntercom.png|The door next to the stairs leading to the intercom
+File:BoreasScientistIntercom.png|The intercom
+</gallery></li>
+
+===Access the engine room===
+Access the engine room by using the [[Boreas engine room keycard]]. Once the player reaches halfway through the engine room, [[Black Division]] operatives will come out of doors on the catwalks in front of the player.
+====Locate and obtain the [[Boreas engine room keycard|engine room keycard]]====
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Boreas engine room keycard icon.png|link=Boreas engine room keycard]]
+|[[Boreas engine room keycard|Boreas engine room keycard]]
+|1
+|Unlocks the engine room door
+!N/A
+|}
+The [[Boreas engine room keycard|engine room keycard]] is located in the center medical room at level 1, next to an engineer body.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasEngineRoomKeycardSpawn1.png|The keycard spawn next to the engineer head
+File:BoreasEngineRoomKeycardSpawn2.png|The keycard spawn in the right hand of the engineer
+File:BoreasEngineRoomKeycardSpawn3.png|The keycard spawn in the left hand of the engineer
+</gallery></li>
+
+====Reach the engine room====
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Boreas engine room keycard icon.png|link=Boreas engine room keycard]]
+|[[Boreas engine room keycard|Boreas engine room keycard]]
+|1
+|Unlocks the engine room door
+!N/A
+|}
+Head to level 0 on the east side of the ship and find the locked door with a keycard reader right next to the control room.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasEngineRoomKeycardDoorMap.jpg|The locked door location marked on map
+File:BoreasEngineRoomKeycardDoor.png|The door to the room
+</gallery></li>
+Continue to navigate the ship, and take the stairs to level 1 to find the doors to the engine room. Unseal them then enter the room and go downstairs to level -2.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasEngineRoomMap.jpg|The room location marked on map
+File:BoreasEngineRoomDoor.png|The door to unseal
+File:BoreasEngineRoomObjective.png|Access to the engine room
+File:BoreasEngineRoom.png|The engine room
+</gallery></li>
+
+===Find a way into the [[Icebreaker|icebreaker]] superstructure===
+The player needs to go to the extraction zone, but instead of extracting, go two levels down, turn around the helipad, and go all the way to the side of the ship, and go up to level 3 to find a door with a chain.
+
+A group of [[Black Division]] operatives will be waiting for the player on the helipad, and another group under the helipad.
+
+Once you reach the objective, try to open the damaged door locked with chains and you will be asked to find an explosive. You can now extract from the [[Icebreaker]]. At this point the quest [[Stick to It]] is unlocked.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasDamagedDoorMap.jpg|The damaged door location marked on map
+File:BoreasHelipadToMinusTwoLevel.png|Take the stairs on the left after leaving the drone hangar and continue all round the zone
+File:BoreasSuperstructureWay.png|The way to the [[Icebreaker]] superstructure
+</gallery></li>
+
+===Ask [[Mechanic]] about explosives===
+Visit [[Mechanic]] in the menu through the trader screen.
+
+===Ask [[Prapor]] about explosives===
+Visit [[Prapor]] in the menu through the trader screen.
+====Rewards====
+* Unlocks purchase of [[SZ-1 explosive charge (Icebreaker)]] at [[Prapor]] LL1
+
+===Reach the damaged door on the roof of the engine room===
+The player needs to get back to the damaged door with chains.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasDamagedDoorMap.jpg|The damaged door location marked on map
+File:BoreasHelipadToMinusTwoLevel.png|Take the stairs on the left after leaving the drone hangar and continue all round the zone
+File:Stick To It Activation Chained Door.png|The damaged door
+</gallery></li>
+
+===Break the chain on the door on the roof of the engine room using the [[SZ-1 explosive charge (Icebreaker)|SZ-1 charge]]===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:SZ-1 explosive charge icon.png|link=SZ-1 explosive charge (Icebreaker)]]
+|[[SZ-1 explosive charge (Icebreaker)|SZ-1 explosive charge]]
+|1
+|Used to break the chains.<br/>Can be purchased at [[Prapor]] LL1.
+!N/A
+|}
+Once the player reaches the damaged door, equipped with [[SZ-1 explosive charge (Icebreaker)]] the chain can be destroyed after placing the charge on it.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Stick To It Activation Chained Door.png|The door with the chains to place the charge
+</gallery></li>
+
+===Enter the [[Icebreaker|icebreaker]] superstructure from the roof of the engine room===
+After the door, the player need to enter the crew quarter. '''Be aware''',[[The Wedge]] squad is present within the crew quarter. A '''teargas''' grenade is setup as a tripwire trap at the entrance door of the quarters.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasEnterIcebreakerSuperstructure.png|The entrance of the crew quarter
+</gallery></li>
+
+===Find a way to the upper decks of the [[Icebreaker|icebreaker]] superstructure===
+Once the crew quarter have been cleared and [[The Wedge]] killed, head to level 5 of the ship and get outside of the quarters to take the stairs and find a code-locked door leading to the upper decks.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasUpperDecksSealedDoor.png|The door to unseal
+File:BoreasUpperDecksCodeLockedDoor.png|The code-locked door
+</gallery></li>
+
+===Ask the surviving scientist how to open the code-locked door on level 6===
+Talk to the scientist through the intercom located on level 1 of the [[Icebreaker]] on the east side of the ship.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasScientistIntercomMap.jpg|Intercom location marked on map
+File:BoreasDoorToScientistIntercom.png|The door next to the stairs leading to the intercom
+File:BoreasScientistIntercom.png|The intercom
+</gallery></li>
+
+===Ask [[Mechanic]] for help with finding the second part of the code for the locked door on level 6===
+Visit [[Mechanic]] in the menu through the trader screen.
+
+===Plant the [[Local network hacking device|hacking device]] in the server room in [[The Lab]]===
+{| style="border:1px solid #9a8866; width:100%; margin:1em auto 1em auto; padding:5px; box-shadow: 0 0 15px rgba(65,61,52,1), 0 0 6px rgba(232,190,107,0.8);"
+| style="text-align:center; font-size: 132%;" | If you have already planted the [[Local network hacking device]] in the [[Blue Fire]] story chapter, this objective auto-completes.
+|}
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+![[File:Local network hacking device icon.png|link=Local network hacking device]]
+|[[Local network hacking device]]
+|1
+|Required
+!N/A
+|Stashed item
+|}
+The [[Local network hacking device]] has to be stashed in the server room on the first floor of [[The Lab]]. [[Mechanic]] provides one via in-game mail and has a barter for more available.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Labs Server Room Plant Location.png|Stashing location marked on map
+File:Labs Server Room Plant Location 2.png|Stashing location next to the office chairs
+</gallery></li>
+
+===Return to [[Mechanic]]===
+Visit [[Mechanic]] in the menu through the trader screen.
+
+===Arrive at the [[Icebreaker]]===
+Access [[Icebreaker]] through the [[Shoreline]] transit or through the menu.
+
+===Access the engine room===
+Access the engine room by using the [[Boreas engine room keycard]]. Once the player reaches halfway of the engine room, [[Black Division]] operatives will come out of doors on the catwalks in front of the player.
+
+====Locate and obtain the [[Boreas engine room keycard|engine room keycard]]====
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Boreas engine room keycard icon.png|link=Boreas engine room keycard]]
+|[[Boreas engine room keycard|Boreas engine room keycard]]
+|1
+|Unlocks the engine room door
+!N/A
+|}
+The [[Boreas engine room keycard|engine room keycard]] is located in the center medical room at level 1 next to an engineer body.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasEngineRoomKeycardSpawn1.png|The keycard spawn next to the engineer head
+File:BoreasEngineRoomKeycardSpawn2.png|The keycard spawn in the right hand of the engineer
+File:BoreasEngineRoomKeycardSpawn3.png|The keycard spawn in the left hand of the engineer
+</gallery></li>
+
+====Reach the engine room====
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Boreas engine room keycard icon.png|link=Boreas engine room keycard]]
+|[[Boreas engine room keycard|Boreas engine room keycard]]
+|1
+|Unlocks the engine room door
+!N/A
+|}
+Head to level 0 on the east side of the ship and find the locked door with a keycard reader right next to the control room.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasEngineRoomKeycardDoorMap.jpg|The locked door location marked on map
+File:BoreasEngineRoomKeycardDoor.png|The door to the room
+</gallery></li>
+
+Continue to navigate the ship, and take the stairs to level 1 to find the doors to the engine room. Unseal them then enter the room and go downstairs to level -2.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasEngineRoomMap.jpg|The room location marked on map
+File:BoreasEngineRoomDoor.png|The door to unseal
+File:BoreasEngineRoomObjective.png|Access to the engine room
+File:BoreasEngineRoom.png|The engine room
+</gallery></li>
+
+===Reach the damaged door on the roof of the engine room===
+The player needs to get back to the damaged door with chains.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasDamagedDoorMap.jpg|The damaged door location marked on map
+File:BoreasHelipadToMinusTwoLevel.png|Take the stairs on the left after leaving the drone hangar and continue all round the zone
+File:Stick To It Activation Chained Door.png|The damaged door
+</gallery></li>
+
+===Break the chain on the door on the roof of the engine room using the [[SZ-1 explosive charge (Icebreaker)|SZ-1 charge]]===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:SZ-1 explosive charge icon.png|link=SZ-1 explosive charge (Icebreaker)]]
+|[[SZ-1 explosive charge (Icebreaker)|SZ-1 explosive charge]]
+|1
+|Used to break the chains.<br/>Can be purchased at [[Prapor]] LL1.
+!N/A
+|}
+Once the player reaches the damaged door, equipped with [[SZ-1 explosive charge (Icebreaker)]] the chain can be destroyed after placing the charge on it.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Stick To It Activation Chained Door.png|The door with the chains to place the charge
+</gallery></li>
+
+===Reach the code-locked door===
+Once the crew quarters have been cleared and [[The Wedge]] killed, head to level 5 of the ship and get outside of the quarters to take the stairs and find a code-locked door leading to the upper decks.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasUpperDecksSealedDoor.png|The door to unseal
+File:BoreasUpperDecksCodeLockedDoor.png|The code-locked door
+</gallery></li>
+
+===Use the correct access code===
+Use the code '''3-1-2-2-2-0''' on the pad to unlock the door. The code is the same every raid, does not change, and is the same for every door of the zone that leads to the exterior.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasUpperDecksCodeLockedDoor.png|The code-locked door
+</gallery></li>
+
+===Locate compartment C-1===
+The C-1 compartment is located on level 7 next to the exit leading outside. The [[Compartment C-1 keycard]] is required to open it.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Compartment C-1 keycard map.jpg|The location on the map
+File:Compartment C-1 keycard door.png|The door to the compartment C-1
+</gallery></li>
+
+===Reach the upper decks===
+Exit the level 7 rooms using the code '''3-1-2-2-2-0''' and go upstairs to find the bridge.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasBridgeDoors.png|The door to the bridge
+</gallery></li>
+
+===Thaw the hatch on the roof of the bridge===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:BBQ-S43icon.png|link=BBQ-S43 gas torch]]
+|[[BBQ-S43 gas torch]]
+|1
+|Used to thaw the hatch on the roof of the bridge.
+!N/A
+|}
+The hatch is located on the roof of the bridge, a frozen hatch with a frozen lever.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Gas torch apply Icebreaker.png|The hatch to thaw
+</gallery></li>
+
+===Find [[BBQ-S43 gas torch|something]] to thaw the hatch on the roof of the bridge===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:BBQ-S43icon.png|link=BBQ-S43 gas torch]]
+|[[BBQ-S43 gas torch]]
+|1
+|Used to thaw the hatch on the roof of the bridge.
+!N/A
+|}
+The [[BBQ-S43 gas torch]] can be found at level 3 inside the kitchen where [[The Wedge]] appears.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasBBQSpawn1.png|On a countertop next to lockers
+File:BoreasBBQSpawn2.png|Inside a green crate on a countertop next to lockers
+File:BoreasBBQSpawn3.png|Inside a wooden crate on a serving trolley
+</gallery></li>
+
+===Access Compartment C-1===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Compartment C-1 keycard icon.png|link=Compartment C-1 keycard]]
+|[[Compartment C-1 keycard]]
+|1
+|Needed to open the room.
+!N/A
+|}
+The [[Compartment C-1 keycard]] is required to enter the room.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Compartment C-1 keycard map.jpg|Room location marked on map
+File:Compartment C-1 keycard door.png|Door to the room
+File:Compartment C-1 keycard spawn.png|In the left hand of a body on level 9 of [[Icebreaker]]
+</gallery></li>
+
+===Rescue the [[Icebreaker|icebreaker]] captain===
+This objective completes once the player reaches the captain's body in the bridge on level 9.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Compartment C-1 keycard spawn.png|The body of the captain.
+</gallery></li>
+
+===Search the shelves in compartment C-1===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Hard drive from compartment C-1 (3) icon.png|link=Hard drive from compartment C-1 (3)]]
+|[[Hard drive from compartment C-1 (3)]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+The [[Hard drive from compartment C-1 (3)]] is located on the shelves to the left once you enter the room.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasHDD1 spawn.png|On the shelf with the keyboard
+</gallery></li>
+
+===Search the area near the workstation in compartment C-1===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Hard drive from compartment C-1 (1) icon.png|link=Hard drive from compartment C-1 (1)]]
+|[[Hard drive from compartment C-1 (1)]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+The [[Hard drive from compartment C-1 (1)]] is located under the desk, on the PC blocks.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasHDD2 spawn.png|On top of the PC blocks under the desk
+</gallery></li>
+
+===Search the servers in compartment C-1===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Hard drive from compartment C-1 (2) icon.png|link=Hard drive from compartment C-1 (2)]]
+|[[Hard drive from compartment C-1 (2)]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+The [[Hard drive from compartment C-1 (2)]] is located on top of the servers on the floor.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasHDD3 spawn.png|On top of the server on the floor.
+</gallery></li>
+
+===Ask [[Mechanic]] for help decoding the hard drives from the [[Icebreaker|icebreaker]]===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Hard drive from compartment C-1 (1) icon.png|link=Hard drive from compartment C-1 (1)]]
+|[[Hard drive from compartment C-1 (1)]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Hard drive from compartment C-1 (2) icon.png|link=Hard drive from compartment C-1 (2)]]
+|[[Hard drive from compartment C-1 (2)]]
+|1
+|Required
+!<font color="red">Yes</font>
+|-
+![[File:Hard drive from compartment C-1 (3) icon.png|link=Hard drive from compartment C-1 (3)]]
+|[[Hard drive from compartment C-1 (3)]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+Visit [[Mechanic]] in the menu through the trader screen and hand over the 3 hard drives.
+
+'''Note:''' After handing over the drives, the quests [[A Wedge Between Us]], [[Fresh Stock]], [[Oil Change]] and [[War Never Changes]] become available. Completing them is not required to continue this story chapter.
+
+===Hand over 3 found [[Found in raid|<font color="red">in raid</font>]] [[Ultralink satellite communication module|Ultralink satellite modules]] to [[Mechanic]]===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Ultralink satellite communication module icon.png|link=Ultralink satellite communication module]]
+|[[Ultralink satellite communication module]]
+|3
+|Required
+!<font color="red">Yes</font>
+|}
+Visit [[Mechanic]] in the menu through the trader screen and hand over the 3 [[Ultralink satellite communication module]].
+
+===Hand over 4 found [[Found in raid|<font color="red">in raid</font>]] server [[Memento Server RAM Module|RAM modules]] to [[Mechanic]]===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Memento Server RAM Module icon.png|link=Memento Server RAM Module]]
+|[[Memento Server RAM Module]]
+|4
+|Required
+!<font color="red">Yes</font>
+|}
+Visit [[Mechanic]] in the menu through the trader screen and hand over the 4 [[Memento Server RAM Module]].
+
+===Hand over 2 found [[Found in raid|<font color="red">in raid</font>]] [[IBX Gigachad cryptographic processor|cryptographic processors]] to [[Mechanic]]===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:IBX Gigachad cryptographic processor icon.png|link=IBX Gigachad cryptographic processor]]
+|[[IBX Gigachad cryptographic processor]]
+|2
+|Required
+!<font color="red">Yes</font>
+|}
+Visit [[Mechanic]] in the menu through the trader screen and hand over the 2 [[IBX Gigachad cryptographic processor]].
+====Rewards====
+* 1x [[Icebreaker archive data]]
+
+===Analyse the [[Icebreaker archive data|data]] from the [[Icebreaker|icebreaker]]===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Icebreaker archive data icon.png|link=Icebreaker archive data]]
+|[[Icebreaker archive data]]
+|1
+|Required
+!N/A
+|}
+Read the [[Icebreaker archive data]] through the handbook after receiving it from your messages.
+
+===Inform the scientist about the captain's death===
+Talk to the scientist through the intercom located on the level 1 of the [[Icebreaker]] on the east side of the ship.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasScientistIntercomMap.jpg|Intercom location marked on map
+File:BoreasDoorToScientistIntercom.png|The door next to the stairs leading to the intercom
+File:BoreasScientistIntercom.png|The intercom
+</gallery></li>
+
+===Ask the [[BTR Driver|BTR driver]] if he can help evacuate the scientist from the icebreaker===
+Talk to the [[BTR Driver]].
+
+===Assist the smugglers with their conflict against the Rogues===
+To fulfill this objective, you have to complete the quest [[Hangover]].
+
+===Return to the [[BTR Driver|BTR driver]]===
+Talk to the [[BTR Driver]].
+
+===Eliminate 20 targets on the [[Icebreaker|icebreaker]]===
+Kill any 20 targets on [[Icebreaker]].
+
+===Hand over 5 respirators to the [[BTR Driver|BTR driver]]===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Respirator icon.png|link=Respirator]]
+|[[Respirator]]
+|5
+|Handover item
+!<font color="green">No</font>
+|-
+! colspan="4" |OR
+|-
+![[File:Gentex Ops-Core SOTR respirator icon.png|link=Gentex Ops-Core SOTR respirator]]
+|[[Gentex Ops-Core SOTR respirator]]
+|5
+|Handover item
+!<font color="green">No</font>
+|-
+! colspan="4" |OR
+|-
+![[File:GP-5 Icon.png|link=GP-5 gas mask]]
+|[[GP-5 gas mask]]
+|5
+|Handover item
+!<font color="green">No</font>
+|-
+! colspan="4" |OR
+|-
+![[File:GP-7gasmaskicon.png|link=GP-7 gas mask]]
+|[[GP-7 gas mask]]
+|5
+|Handover item
+!<font color="green">No</font>
+|-
+! colspan="4" |OR
+|-
+![[File:Avon M53A1 gas mask icon.png|link=Avon M53A1 gas mask]]
+|[[Avon M53A1 gas mask]]
+|5
+|Handover item
+!<font color="green">No</font>
+|}
+
+===Hand over 2 class 5 or higher ballistic plates to the BTR driver===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+|Any class 5 or higher [[armor plate]] compatible with the [[BNTI Kirasa-N body armor|Kirasa-N body armor]]
+|2
+|Handover item
+!<font color="green">No</font>
+|}
+
+===Hand over the [[BNTI Kirasa-N body armor|Kirasa-N body armor]] to the [[BTR Driver|BTR driver]]===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:BNTIKirasaNarmorIcon.png|link=BNTI Kirasa-N body armor]]
+|[[BNTI Kirasa-N body armor]]
+|1
+|Handover item
+!<font color="green">No</font>
+|}
+
+===Inform the scientist that everything is ready for his evacuation===
+Talk to the scientist through the intercom located on level 1 of the [[Icebreaker]] on the east side of the ship.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:BoreasScientistIntercomMap.jpg|Intercom location marked on map
+File:BoreasDoorToScientistIntercom.png|The door next to the stairs leading to the intercom
+File:BoreasScientistIntercom.png|The intercom
+</gallery></li>
+
+===Ask the [[BTR Driver|BTR driver]] how the scientist's rescue went===
+Visit the [[BTR Driver]] on either [[Woods]] or [[Streets of Tarkov]].
+==Rewards==
+* +160,000 [[EXP]]
+* 1x [[Compartment C-3 keycard]]
+
+{{Navbox story chapters}}
+[[Category:Story chapters]]
+
+[[ru:Борей]]

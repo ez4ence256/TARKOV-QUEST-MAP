@@ -63,13 +63,13 @@
     "map": "customs",
     "positions": [
       {
-        "x": 80.7,
-        "z": -105.3
+        "x": 88.3,
+        "z": -54.5
       }
     ],
     "source": "ReshalasBunkhouseKeyMap.png",
-    "method": "homographie de l'affiche Customs (re3mr, vue 3D) : arêtes en ECC, recalage local sur les bâtiments des dortoirs ; contrôle : sortie Factory Shacks sur son icône ; centre du cercle ou du cadre rouge",
-    "errorM": 14
+    "method": "homographie par ECC sur les arêtes de l'affiche 3D de Customs (re3mr) puis contrôle par 23 repères (sorties et transits de tarkov.dev retrouvés sur leurs icônes) : accord à ~10 m dans le sud de la map, 40 à 75 m dans le centre et le nord (perspective) ; valeur retenue d'après les repères les plus proches ; recoupé avec les conteneurs de maps.json (tiroirs et vestes à 90,-53)",
+    "errorM": 25
   },
   "Accidental Witness::locate kozlov s hideout and obtain his evidence#0": {
     "map": "shoreline",
@@ -278,13 +278,13 @@
       "map": "customs",
       "positions": [
         {
-          "x": 188.4,
-          "z": -138.6
+          "x": 201,
+          "z": -127
         }
       ],
       "source": "EasyMoneyPart1CustomsMap1.png",
-      "method": "homographie par ECC sur les arêtes entre l'affiche 3D de Customs (re3mr) et notre SVG, contrôlée sur des sorties et sur les conteneurs de tarkov.dev ; repère rouge au centre",
-      "errorM": 55
+      "method": "homographie par ECC sur les arêtes de l'affiche 3D de Customs (re3mr) puis contrôle par 23 repères (sorties et transits de tarkov.dev retrouvés sur leurs icônes) : accord à ~10 m dans le sud de la map, 40 à 75 m dans le centre et le nord (perspective) ; valeur retenue d'après les repères les plus proches ; position de l'étiquette « Fortress » de tarkov.dev (le cercle rouge entoure le fort)",
+      "errorM": 50
     },
     {
       "map": "shoreline",
@@ -328,13 +328,13 @@
       "map": "lighthouse",
       "positions": [
         {
-          "x": -30.6,
-          "z": 465.8
+          "x": -84.5,
+          "z": 465.6
         }
       ],
       "source": "Bogatyrs patch Lighthouse map.png",
-      "method": "similitude par ECC sur les masques d'eau entre la carte du wiki et notre SVG de Lighthouse (cc 0,87-0,89), précision moindre",
-      "errorM": 45
+      "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
+      "errorM": 36
     }
   ],
   "Batya::locate the ryabina outpost#0": {
@@ -381,25 +381,25 @@
     "map": "lighthouse",
     "positions": [
       {
-        "x": 467.0,
-        "z": 472.3
+        "x": 413.1,
+        "z": 481.2
       }
     ],
     "source": "LightkeeperMap.png",
-    "method": "similitude par ECC sur les masques d'eau entre la carte du wiki et notre SVG de Lighthouse (cc 0,87-0,89), précision moindre",
-    "errorM": 47
+    "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
+    "errorM": 40
   },
   "Batya::locate the traces of the traitors#0": {
     "map": "lighthouse",
     "positions": [
       {
-        "x": -30.6,
-        "z": 465.8
+        "x": -84.5,
+        "z": 465.6
       }
     ],
     "source": "Bogatyrs patch Lighthouse map.png",
-    "method": "similitude par ECC sur les masques d'eau entre la carte du wiki et notre SVG de Lighthouse (cc 0,87-0,89), précision moindre",
-    "errorM": 45
+    "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
+    "errorM": 36
   },
   "Batya::figure out how the cultists are connected to the general#0": [
     {
@@ -662,13 +662,13 @@
       "map": "lighthouse",
       "positions": [
         {
-          "x": -142.2,
-          "z": -79.0
+          "x": -97.9,
+          "z": -63.8
         }
       ],
       "source": "BlueChaletMapKTT.png",
-      "method": "similitude par ECC sur les masques d'eau entre la carte du wiki et notre SVG de Lighthouse (cc 0,87-0,89), précision moindre",
-      "errorM": 56
+      "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
+      "errorM": 49
     },
     {
       "map": "the-lab",
@@ -698,5 +698,229 @@
     "source": "PostOfficeMap.png",
     "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Streets (résidu ≈ 0,3 m) ; contrôle : transit « The Lab » de tarkov.dev à 3 m de son repère",
     "errorM": 17
-  }
+  },
+  "They Are Already Here::req#0": [
+    {
+      "map": "woods",
+      "positions": [
+        {
+          "x": -87.6,
+          "z": -726.7
+        }
+      ],
+      "source": "They Are Already Here Woods Activation Location Map.png",
+      "method": "similitude par ECC sur les masques d'eau entre la carte JINDOUZ du wiki et notre SVG de Woods (cc 0,91) ; contrôle visuel de la superposition (lacs, rivière)",
+      "errorM": 18
+    },
+    {
+      "map": "shoreline",
+      "positions": [
+        {
+          "x": 214.9,
+          "z": 423.4
+        }
+      ],
+      "source": "WetJob2IslandMap.png",
+      "method": "similitude (appariement des masques d'eau et de routes, 5 m de résidu) entre la carte JINDOUZ du wiki et notre SVG de Shoreline ; contrôle : extractions de tarkov.dev sur leurs icônes (± 10 m)",
+      "errorM": 58
+    }
+  ],
+  "They Are Already Here::locate the cult victim s apartment#0": {
+    "map": "streets-of-tarkov",
+    "positions": [
+      {
+        "x": -58.6,
+        "z": -147.6
+      }
+    ],
+    "source": "CultVictimsApartmentKeyMap.png",
+    "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Streets (résidu ≈ 0,3 m) ; contrôle : transit « The Lab » de tarkov.dev à 3 m de son repère",
+    "errorM": 14
+  },
+  "They Are Already Here::obtain more information about the eye of the world#0": [
+    {
+      "map": "customs",
+      "positions": [
+        {
+          "x": 182.1,
+          "z": 148.8
+        }
+      ],
+      "source": "TheCultPart2DormsMap.png",
+      "method": "homographie par ECC sur les arêtes entre l'affiche 3D de Customs (re3mr) et notre SVG, contrôlée sur des sorties et sur les conteneurs de tarkov.dev ; repère rouge au centre",
+      "errorM": 59
+    },
+    {
+      "map": "streets-of-tarkov",
+      "positions": [
+        {
+          "x": -133.0,
+          "z": 271.4
+        }
+      ],
+      "source": "AbandonedFactoryNorthernBuilding.png",
+      "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Streets (résidu ≈ 0,3 m) ; contrôle : transit « The Lab » de tarkov.dev à 3 m de son repère",
+      "errorM": 9
+    },
+    {
+      "map": "reserve",
+      "positions": [
+        {
+          "x": -164.4,
+          "z": 55.1
+        }
+      ],
+      "source": "RB-BK lock location.png",
+      "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Reserve (résidu ≈ 1,2 m)",
+      "errorM": 29
+    },
+    {
+      "map": "reserve",
+      "positions": [
+        {
+          "x": 187.7,
+          "z": -214.0
+        }
+      ],
+      "source": "RB-VO lock location.png",
+      "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Reserve (résidu ≈ 1,2 m)",
+      "errorM": 17
+    }
+  ],
+  "They Are Already Here::locate the place marked with the eye of the world on lighthouse investigate the cultist room in the chalet obtain the victim s key#0": {
+    "map": "lighthouse",
+    "positions": [
+      {
+        "x": -97.9,
+        "z": -63.8
+      }
+    ],
+    "source": "BlueChaletMapKTT.png",
+    "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
+    "errorM": 49
+  },
+  "They Are Already Here::locate the place marked with the eye of the world on woods#0": {
+    "map": "woods",
+    "positions": [
+      {
+        "x": -128.7,
+        "z": -695.6
+      }
+    ],
+    "source": "EFT TAAH Woods House Map.png",
+    "method": "similitude par ECC sur les masques d'eau entre la carte JINDOUZ du wiki et notre SVG de Woods (cc 0,91) ; contrôle visuel de la superposition (lacs, rivière)",
+    "errorM": 23
+  },
+  "Boreas::locate and repair the equipment under the cellular tower on woods#0": {
+    "map": "woods",
+    "positions": [
+      {
+        "x": 217.3,
+        "z": -695.9
+      }
+    ],
+    "source": "ThirstyDeliveryWoodsMap.png",
+    "method": "similitude par ECC sur les masques d'eau entre la carte JINDOUZ du wiki et notre SVG de Woods (cc 0,91) ; contrôle visuel de la superposition (lacs, rivière)",
+    "errorM": 41
+  },
+  "Boreas::locate and obtain the paradigm shipping documentation#0": {
+    "map": "lighthouse",
+    "positions": [
+      {
+        "x": 39.3,
+        "z": -847.7
+      }
+    ],
+    "source": "Boreas Lighthouse Warehouse Map.png",
+    "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
+    "errorM": 42
+  },
+  "Boreas::arrange a transport to the icebreaker#0": {
+    "map": "reserve",
+    "positions": [
+      {
+        "x": 216.2,
+        "z": -201.8
+      }
+    ],
+    "source": "ReserveTransitToWoodsMap.png",
+    "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Reserve (résidu ≈ 1,2 m)",
+    "errorM": 13
+  },
+  "Boreas::find an alternative transport to the icebreaker#0": [
+    {
+      "map": "customs",
+      "positions": [
+        {
+          "x": 145.6,
+          "z": -85.8
+        }
+      ],
+      "source": "Boreas Skiers Docs Map.png",
+      "method": "repère local d'après 23 sorties et transits de tarkov.dev sur l'affiche 3D de Customs (re3mr) ; le cercle est entre la zone ZB-1013 et le sous-sol de la chaufferie, perspective : ± 60 m",
+      "errorM": 60
+    },
+    {
+      "map": "customs",
+      "positions": [
+        {
+          "x": 201,
+          "z": -127
+        }
+      ],
+      "source": "EasyMoneyPart1CustomsMap1.png",
+      "method": "étiquette « Fortress » de tarkov.dev à l'intérieur du cercle rouge de l'affiche 3D de Customs",
+      "errorM": 50
+    },
+    {
+      "map": "shoreline",
+      "positions": [
+        {
+          "x": -639.8,
+          "z": -197.0
+        }
+      ],
+      "source": "Shoreline Smuggler Base Map.png",
+      "method": "similitude (appariement des masques d'eau et de routes, 5 m de résidu) entre la carte JINDOUZ du wiki et notre SVG de Shoreline ; contrôle : extractions de tarkov.dev sur leurs icônes (± 10 m)",
+      "errorM": 70
+    },
+    {
+      "map": "interchange",
+      "positions": [
+        {
+          "x": 451.1,
+          "z": 147.5
+        }
+      ],
+      "source": "Interchange Smuggler Base Map.jpg",
+      "method": "similitude sur 4 sorties et transits de tarkov.dev retrouvés sur l'image satellite du wiki (écart ≤ 12 m)",
+      "errorM": 70
+    }
+  ],
+  "Boreas::board the smuggler hovercraft on shoreline or lighthouse#0": [
+    {
+      "map": "shoreline",
+      "positions": [
+        {
+          "x": -314.3,
+          "z": 519.1
+        }
+      ],
+      "source": "ShorelineTransitToIcebreakerMap.png",
+      "method": "similitude (appariement des masques d'eau et de routes, 5 m de résidu) entre la carte JINDOUZ du wiki et notre SVG de Shoreline ; contrôle : extractions de tarkov.dev sur leurs icônes (± 10 m)",
+      "errorM": 16
+    },
+    {
+      "map": "lighthouse",
+      "positions": [
+        {
+          "x": 132.9,
+          "z": -170.1
+        }
+      ],
+      "source": "LighthouseTransitToIcebreakerMap.png",
+      "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
+      "errorM": 22
+    }
+  ]
 }
