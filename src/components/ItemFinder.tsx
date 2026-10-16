@@ -4,12 +4,16 @@ import { useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode 
 import type { GameMap, GameMode, Task, Trader } from "../types";
 import { tr } from "../lib/i18n";
 import { scoreName } from "../lib/search";
+import { RECOGNIZED_MIN, matchItemLines } from "../lib/ocrMatch";
 import { iconSrc } from "../lib/itemIcons";
 import { buildUsageIndex, durationLabel, useLabel, type Exchange, type QuestUse } from "../lib/itemUsage";
 import { loadExchanges, loadHideout, loadItemList, type HideoutInfo, type ListedItem } from "../api/itemList";
 import { ItemThumb } from "./ItemThumb";
 
 const PAGE = 100;
+
+/** Lecture d'une capture collée (Ctrl+V) : null = recherche normale. */
+type OcrState = { step: "reading"; progress: number | null } | { step: "done"; items: ListedItem[] } | { step: "error" };
 
 /** Données téléchargées à la demande quand un objet est choisi (gardées en mémoire par api/itemList). */
 function useLazy<T>(wanted: boolean, load: () => Promise<T>, deps: unknown[]): { data: T | null; error: boolean } {
@@ -63,7 +67,10 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   const [query, setQuery] = useState("");
   const [shown, setShown] = useState(PAGE);
   const [selected, setSelected] = useState<ListedItem | null>(null);
+  const [ocr, setOcr] = useState<OcrState | null>(null);
   const search = useRef<HTMLInputElement>(null);
+  const run = useRef(0); // numéro de la dernière lecture : un résultat périmé est ignoré
+  const pasteRef = useRef<(blob: Blob) => void>(() => {});
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
 
@@ -84,8 +91,21 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   useEffect(() => {
     search.current?.focus();
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && closeRef.current();
+    // image collée : lue ici, et jamais envoyée à la capture de quêtes de App (écouteur window, plus haut dans la propagation)
+    const onPaste = (e: ClipboardEvent) => {
+      const blob = [...(e.clipboardData?.items ?? [])].find((i) => i.kind === "file" && i.type.startsWith("image/"))?.getAsFile();
+      if (!blob) return; // collage de texte normal dans la recherche
+      e.preventDefault();
+      e.stopPropagation();
+      pasteRef.current(blob);
+    };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    document.addEventListener("paste", onPaste);
+    return () => {
+      run.current++; // fermeture : le résultat en cours est ignoré
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("paste", onPaste);
+    };
   }, []);
 
   // objets du jeu + objets de quête (absents des fichiers d'objets) connus de l'app
@@ -98,6 +118,24 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
     return extra.length ? [...list, ...extra].sort((a, b) => a.name.localeCompare(b.name, lang)) : list;
   }, [list, itemNames, lang]);
 
+  pasteRef.current = async (blob) => {
+    const id = ++run.current;
+    if (!all) return setOcr({ step: "error" });
+    setOcr({ step: "reading", progress: null });
+    try {
+      const { readImageLines } = await import("../lib/ocr");
+      const lines = await readImageLines(blob, (p) => id === run.current && setOcr({ step: "reading", progress: p.progress }));
+      if (id !== run.current) return;
+      const matches = matchItemLines(lines.map((l) => l.text), all);
+      const sure = matches.filter((m) => m.score >= RECOGNIZED_MIN);
+      setQuery("");
+      setSelected(sure.length === 1 ? sure[0].item : null);
+      setOcr({ step: "done", items: matches.map((m) => m.item) });
+    } catch {
+      if (id === run.current) setOcr({ step: "error" });
+    }
+  };
+
   const q = useDeferredValue(query);
   const results = useMemo(() => {
     if (!all) return [];
@@ -109,6 +147,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
       .map((r) => r.item);
   }, [all, q]);
   useEffect(() => setShown(PAGE), [q]);
+  const shownItems = ocr?.step === "done" ? ocr.items : results;
 
   const usage = useMemo(() => buildUsageIndex(tasks), [tasks]);
   const tasksById = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
@@ -125,11 +164,13 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
               className="input finder-search"
               type="search"
               value={query}
-              placeholder={tr("Nom d'un objet (FR ou EN)…", "Item name (FR or EN)…")}
+              placeholder={tr("Nom d'un objet (FR ou EN) ou Ctrl+V d'une capture…", "Item name (FR or EN) or Ctrl+V a screenshot…")}
               aria-label={tr("Chercher un objet", "Search an item")}
               onChange={(e) => {
                 setQuery(e.target.value);
                 setSelected(null);
+                run.current++;
+                setOcr(null);
               }}
             />
           </div>
@@ -139,6 +180,28 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
         </div>
 
         <div className="finder-body">
+          {ocr && (
+            <div className="finder-ocr" role="status">
+              <span>
+                {ocr.step === "reading"
+                  ? ocr.progress === null
+                    ? tr("Lecture de la capture…", "Reading the screenshot…")
+                    : tr(`Lecture de la capture… ${Math.round(ocr.progress * 100)} %`, `Reading the screenshot… ${Math.round(ocr.progress * 100)}%`)
+                  : ocr.step === "error"
+                    ? !all
+                      ? tr("Liste des objets pas encore chargée.", "Item list not loaded yet.")
+                      : tr("Lecture impossible. La première utilisation demande une connexion (données de langue).", "Could not read the image. The first use needs a connection (language data).")
+                    : ocr.items.length
+                      ? tr(`Capture : ${ocr.items.length} objet(s) reconnu(s)`, `Screenshot: ${ocr.items.length} item(s) recognized`)
+                      : tr("Aucun objet reconnu dans la capture.", "No item recognized in the screenshot.")}
+              </span>
+              {ocr.step !== "reading" && (
+                <button className="btn btn-small" onClick={() => setOcr(null)}>
+                  {tr("Effacer", "Clear")}
+                </button>
+              )}
+            </div>
+          )}
           {error ? (
             <p className="muted">{tr("Liste des objets indisponible (réseau ?).", "Item list unavailable (network?).")}</p>
           ) : !all ? (
@@ -165,11 +228,13 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
             />
           ) : (
             <>
-              <p className="muted finder-count" role="status">
-                {tr(`${results.length} objet(s)`, `${results.length} item(s)`)}
-              </p>
+              {!ocr && (
+                <p className="muted finder-count" role="status">
+                  {tr(`${results.length} objet(s)`, `${results.length} item(s)`)}
+                </p>
+              )}
               <ul className="finder-grid">
-                {results.slice(0, shown).map((item) => (
+                {shownItems.slice(0, shown).map((item) => (
                   <li key={item.id}>
                     <button className="finder-tile" title={item.name} onClick={() => setSelected(item)}>
                       <span className="finder-icon">
@@ -180,7 +245,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                   </li>
                 ))}
               </ul>
-              {results.length > shown && (
+              {shownItems.length > shown && (
                 <div className="finder-more">
                   <button className="btn btn-small" onClick={() => setShown((n) => n + PAGE)}>
                     {tr("Afficher plus", "Show more")}

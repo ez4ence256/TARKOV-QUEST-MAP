@@ -11,10 +11,10 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | Élément | État |
 |---|---|
 | Branche | **`main`** seule (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**, branche par défaut). |
-| Version affichée | **0.8.0** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
+| Version affichée | **0.8.1** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
 | Derniers commits | `245ee03` Version 0.7.23 · `3a59955` Main story : ponts de l'Icebreaker pour Boreas · `2593e19` Icebreaker : calibrage corrigé · `45beb1b` positions > 100 m retirées (0.7.22) · `7acab9f` positions de The Ticket · `5447eef` bouton du panneau en icône seule sur téléphone (0.7.21) · `69ddc95` Item finder · `d81736d` infos du Labyrinthe sur la map |
 | Travail non commité | Seulement `.claude/` (non suivi, volontairement hors du dépôt : chemin propre à cette machine) |
-| Tests | **290/290** au vert (`npx vitest run`), 29 fichiers (voir « Tests ») |
+| Tests | **295/295** au vert (`npx vitest run`), 29 fichiers (voir « Tests ») |
 | Compilation | OK (`npm run build`). Avertissement Vite : le fichier principal fait **682 Ko** (198 Ko compressé) > 500 Ko. L'OCR est dans des fichiers séparés chargés à la demande (moteur 3,9 Mo, worker 111 Ko). |
 | **Production** | **https://tarkov.aprilox.fr**, déployée automatiquement à chaque push sur `main` (~1 min) par l'hébergeur, qui lance `npm start` (`server/index.mjs` : `dist/` + API des rooms sur le même port). Fichier absent = 404 sans cache (corrige l'empoisonnement du cache) ; `index.html` en `no-cache`, `/assets/*` en `immutable`. |
 | Vérifié dans le navigateur | Panneau à 400 à 720 px, téléphone, zoom 125 % simulé · sélection épinglée, ordre des sections · sorties (Douanes, Labs) · import d'une **image de synthèse** · rooms entre deux origines (création, jointure, coupure du serveur de 45 s) · Labyrinthe (marqueurs, bascule de map aux étapes) · Icebreaker après correction · voir l'historique pour le détail. |
@@ -320,6 +320,7 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
 
 ### Session 9
 - **Item finder redessiné** (0.8.0, `src/components/ItemFinder.tsx`) : fenêtre plus large à hauteur fixe ; liste en **grille de vignettes** (image 56 px + nom) ; fiche de l'objet avec grande image et **onglets avec compteurs** (Quêtes / Hideout / Barters / Crafts) à la place des trois cases à cocher (hideout, barters et crafts chargés ensemble au choix d'un objet, gardés en mémoire) ; quêtes en cartes (portrait du marchand, map, pastilles de rôle, FIR en vert) ; barters et crafts en **recettes** « ingrédients → résultat », groupées « Utilisé dans » / « Obtenu via ». `Exchange.with` (`itemUsage.ts`) garde désormais les autres ingrédients d'un échange où l'objet entre. Vérifié dans le navigateur (bureau et téléphone 375 px).
+- **Ctrl+V dans l'item finder** (0.8.1) : une image collée pendant que la fenêtre est ouverte est lue par l'OCR et cherchée dans les **objets** (`matchItemLines`, `ocrMatch.ts` : noms complets et courts FR/EN, noms de moins de 4 lettres ignorés, deux lignes jointes essayées) ; un seul objet sûr (≥ 0,88) ouvre sa fiche, sinon la grille montre les objets reconnus. Le collage est arrêté au niveau de `document` (`stopPropagation`), donc la capture de quêtes de `App` ne se déclenche pas ; hors du finder, rien ne change. Vérifié par un collage simulé (image de synthèse) : fiche ouverte dans le finder, onglet Capture ouvert hors du finder.
 
 ## Étude 3D (session 5, en attente de validation)
 

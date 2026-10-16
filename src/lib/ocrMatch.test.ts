@@ -2,7 +2,7 @@
 // lancée). Noms réels de l'API tarkov.dev (français et anglais).
 import { describe, expect, it } from "vitest";
 import type { Task } from "../types";
-import { dominantMap, matchOcrLines, normalizeOcr, numbersOf, similarity } from "./ocrMatch";
+import { UNCERTAIN_MIN, dominantMap, matchItemLines, matchOcrLines, normalizeOcr, numbersOf, similarity } from "./ocrMatch";
 
 const t = (id: string, name: string, nameEn: string): Pick<Task, "id" | "name" | "nameEn"> => ({ id, name, nameEn });
 const TASKS = [
@@ -103,6 +103,34 @@ describe("rapprochement des lignes OCR", () => {
     expect(r.recognized).toEqual([]);
     expect(r.uncertain).toEqual([]);
     expect(r.unmatched).toEqual(["Inventaire", "12:45"]);
+  });
+});
+
+describe("objets lus par l'OCR", () => {
+  const ITEMS = [
+    { id: "a", alts: ["Analyseur de gaz", "Gas analyzer"] },
+    { id: "b", alts: ["Fusil AK", "AK"] },
+  ];
+  it("nom exact : score 1 en premier", () => {
+    const r = matchItemLines(["Analyseur de gaz"], ITEMS);
+    expect(r[0].item.id).toBe("a");
+    expect(r[0].score).toBe(1);
+  });
+  it("faute d'OCR tolérée", () => {
+    const r = matchItemLines(["Analyseur de gax"], ITEMS);
+    expect(r[0].item.id).toBe("a");
+    expect(r[0].score).toBeGreaterThanOrEqual(UNCERTAIN_MIN);
+  });
+  it("nom court ignoré", () => {
+    expect(matchItemLines(["AK"], ITEMS)).toEqual([]);
+  });
+  it("bruit : rien", () => {
+    expect(matchItemLines(["12 345 ₽"], ITEMS)).toEqual([]);
+  });
+  it("nom sur deux lignes", () => {
+    const r = matchItemLines(["Analyseur", "de gaz"], ITEMS);
+    expect(r[0].item.id).toBe("a");
+    expect(r[0].score).toBe(1);
   });
 });
 

@@ -254,7 +254,7 @@ export default function App() {
   const showPhotos = useCallback((taskId: string) => showTaskTab(taskId, "photos"), [showTaskTab]);
   const showQuest = useCallback((taskId: string) => showTaskTab(taskId, "quest"), [showTaskTab]);
 
-  // Ctrl+V d'une image n'importe où (sauf dans un champ de texte) : import par capture
+  // Ctrl+V d'une image n'importe où (sauf dans un champ de texte, et sauf quand l'item finder est ouvert : il lit la capture lui-même) : import par capture
   const [pastedImage, setPastedImage] = useState<{ blob: Blob; n: number } | null>(null);
   useEffect(() => {
     const onPaste = (e: ClipboardEvent) => {

@@ -135,6 +135,38 @@ export function matchOcrLines(lines: string[], tasks: Pick<Task, "id" | "name" |
   };
 }
 
+export interface ItemOcrMatch<T> {
+  item: T;
+  score: number;
+  text: string;
+}
+
+/** Objets dont un nom (complet ou court, FR ou EN) ressemble à une ligne lue par l'OCR, du plus sûr au moins sûr. */
+export function matchItemLines<T extends { alts: string[] }>(lines: string[], items: T[]): ItemOcrMatch<T>[] {
+  // noms trop courts écartés (« AK » ressemblerait à du bruit d'OCR)
+  const names = items.map((item) => ({ item, alts: item.alts.map(normalizeOcr).filter((n) => n.length >= 4) }));
+  const clean = lines.map((l) => l.replace(/\s+/g, " ").trim());
+  const texts = [...clean];
+  clean.forEach((l, i) => i + 1 < clean.length && l && clean[i + 1] && texts.push(`${l} ${clean[i + 1]}`));
+  const best = new Map<T, ItemOcrMatch<T>>();
+  for (const text of texts) {
+    const l = normalizeOcr(text);
+    if (l.length < 4) continue;
+    for (const { item, alts } of names) {
+      for (const n of alts) {
+        const longest = Math.max(l.length, n.length);
+        const max = Math.floor(longest * (1 - UNCERTAIN_MIN));
+        const d = editDistance(l, n, max);
+        if (d > max) continue;
+        const score = 1 - d / longest;
+        const prev = best.get(item);
+        if (!prev || score > prev.score) best.set(item, { item, score, text });
+      }
+    }
+  }
+  return [...best.values()].sort((a, b) => b.score - a.score || a.text.length - b.text.length);
+}
+
 /**
  * Map où se trouve la majorité des points des quêtes données (au moins 60 %),
  * sinon null : on ne change pas de map.
