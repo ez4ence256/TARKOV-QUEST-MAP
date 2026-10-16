@@ -19,6 +19,8 @@ const roomsPlugin: Plugin = {
 // (ex. GitHub Pages) sans configuration supplémentaire.
 export default defineConfig({
   base: "./",
+  // images réduites des objets (item finder) et captures de test : fichiers binaires servis tels quels
+  assetsInclude: ["**/*.bin"],
   plugins: [react(), roomsPlugin],
   test: {
     environment: "jsdom",

@@ -1,12 +1,23 @@
-// Item finder : reconnaître un objet sur une image collée (capture recadrée autour de l'objet), sans lire
-// son nom. Signature compacte : forme (part de l'objet dans chaque case d'une grille) et couleur moyenne
-// de l'objet par case, après avoir retiré le fond (couleur dominante du bord) et recadré sur l'objet.
-// Même code pour les images de référence de tarkov.dev (scripts/sync-item-images.mjs) et pour la
-// capture (navigateur). Logique pure : aucun import, pour être lue telle quelle par Node.
+// Item finder : reconnaître un objet sur une image collée (capture recadrée sur l'objet, même partielle),
+// sans lire son nom. Les images « grille » de tarkov.dev (icône sur son fond de case, 64 px par case) sont
+// gardées en tout petit (P px par case) ; la capture, réduite à la même échelle, glisse sur chacune et
+// garde la position où les couleurs collent le mieux. La taille d'une case à l'écran dépend de la
+// résolution du jeu : plusieurs échelles sont essayées. Même code pour scripts/sync-item-images.mjs
+// (Node) et le navigateur. Logique pure : aucun import, pour être lue telle quelle par Node.
 
-export const GRID = 8;
-/** Octets par signature : rapport largeur/hauteur, puis par case : couverture, R, G, B. */
-export const SIG_BYTES = 1 + GRID * GRID * 4;
+/** Pixels par case dans les références. */
+export const P = 12;
+/** Tailles d'une case à l'écran essayées (px) : 1080p ≈ 63, 1440p ≈ 84, 4K ≈ 126. */
+export const CELL_SIZES = [54, 64, 74, 86, 100, 116];
+/** Capture réduite plus petite que ça (px) : elle collerait n'importe où, échelle ignorée. */
+const MIN_SIDE = 5;
+/** La capture peut déborder de la case de 15 % par côté (cadre ou voisin pris avec), si 85 % d'elle reste dessus. */
+const HANG = 0.15;
+const MIN_OVERLAP = 0.85;
+/** Résultats gardés : écart moyen ≤ MAX_SCORE (sur 255) et ≤ 1,2 x le meilleur, 5 au plus. */
+export const MAX_SCORE = 20;
+const RATIO = 1.2;
+const LIMIT = 5;
 
 export interface Rgba {
   width: number;
@@ -14,179 +25,151 @@ export interface Rgba {
   /** RGBA, 4 octets par pixel (ImageData.data ou fichier décodé). */
   data: Uint8ClampedArray | Uint8Array;
 }
-
-/** Écart de couleur au-delà duquel un pixel n'est plus du fond (somme des écarts R + G + B). */
-const BG_DISTANCE = 30;
-
-const median = (values: number[]) => {
-  values.sort((a, b) => a - b);
-  return values[values.length >> 1] ?? 0;
-};
-
-type Color = [number, number, number];
-interface Box {
-  x0: number;
-  y0: number;
-  x1: number;
-  y1: number;
+/** Image réduite : RGB, 3 valeurs par pixel. */
+export interface Thumb {
+  w: number;
+  h: number;
+  d: Float32Array | Uint8Array;
 }
-const near = (data: Rgba["data"], i: number, c: Color) => Math.abs(data[i] - c[0]) + Math.abs(data[i + 1] - c[1]) + Math.abs(data[i + 2] - c[2]) < BG_DISTANCE;
+
+/** Réduction par moyenne de blocs à tw x th. */
+export function shrink(img: Rgba, tw: number, th: number): Thumb {
+  const d = new Float32Array(tw * th * 3);
+  for (let ty = 0; ty < th; ty++) {
+    const y0 = Math.floor((ty * img.height) / th);
+    const y1 = Math.max(y0 + 1, Math.floor(((ty + 1) * img.height) / th));
+    for (let tx = 0; tx < tw; tx++) {
+      const x0 = Math.floor((tx * img.width) / tw);
+      const x1 = Math.max(x0 + 1, Math.floor(((tx + 1) * img.width) / tw));
+      let r = 0;
+      let g = 0;
+      let b = 0;
+      for (let y = y0; y < y1; y++) {
+        for (let x = x0; x < x1; x++) {
+          const i = (y * img.width + x) * 4;
+          r += img.data[i];
+          g += img.data[i + 1];
+          b += img.data[i + 2];
+        }
+      }
+      const n = (x1 - x0) * (y1 - y0);
+      d.set([r / n, g / n, b / n], (ty * tw + tx) * 3);
+    }
+  }
+  return { w: tw, h: th, d };
+}
+
+/** Référence tarkov.dev (64 px par case) -> P px par case. */
+export const referenceThumb = (img: Rgba) => shrink(img, Math.max(1, Math.round((img.width * P) / 64)), Math.max(1, Math.round((img.height * P) / 64)));
+
+/** La capture à chaque échelle essayée (assez grande pour être utile). */
+export function captureThumbs(img: Rgba): Thumb[] {
+  return CELL_SIZES.map((c) => [Math.round((img.width * P) / c), Math.round((img.height * P) / c)])
+    .filter(([w, h]) => Math.min(w, h) >= MIN_SIDE)
+    .map(([w, h]) => shrink(img, w, h));
+}
+
+/** Plus petit écart moyen (0 à 255) entre une capture réduite et une position sur la référence. */
+function bestOffset(cap: Thumb, ref: Thumb, best: number): number {
+  const hx = Math.floor(cap.w * HANG);
+  const hy = Math.floor(cap.h * HANG);
+  for (let oy = -hy; oy + cap.h <= ref.h + hy; oy++) {
+    for (let ox = -hx; ox + cap.w <= ref.w + hx; ox++) {
+      const x0 = Math.max(0, -ox);
+      const x1 = Math.min(cap.w, ref.w - ox);
+      const y0 = Math.max(0, -oy);
+      const y1 = Math.min(cap.h, ref.h - oy);
+      const area = (x1 - x0) * (y1 - y0);
+      if (x1 <= x0 || y1 <= y0 || area < MIN_OVERLAP * cap.w * cap.h) continue;
+      const limit = best * area * 3;
+      let s = 0;
+      for (let y = y0; y < y1 && s < limit; y++) {
+        for (let x = x0; x < x1; x++) {
+          const i = (y * cap.w + x) * 3;
+          const j = ((y + oy) * ref.w + x + ox) * 3;
+          s += Math.abs(cap.d[i] - ref.d[j]) + Math.abs(cap.d[i + 1] - ref.d[j + 1]) + Math.abs(cap.d[i + 2] - ref.d[j + 2]);
+        }
+      }
+      best = Math.min(best, s / (area * 3));
+    }
+  }
+  return best;
+}
+
+/** Écart de la capture (toutes échelles) à une référence : plus c'est bas, plus ça ressemble. */
+export function matchScore(caps: Thumb[], ref: Thumb): number {
+  let best = Infinity;
+  for (const cap of caps) best = bestOffset(cap, ref, best);
+  return best;
+}
 
 /**
- * Fond le long du bord du cadre : médiane des pixels encore gardés d'une bande au bord, et part de
- * la bande qui lui ressemble (un vrai fond couvre presque toute la bande, le bord d'un objet non).
+ * Fichier src/data/item-images.bin : nombre d'objets (uint32 LE), puis par objet 12 octets d'id,
+ * largeur et hauteur réduites (1 octet chacune) et les pixels en RGB565 (2 octets LE).
  */
-function borderColor(img: Rgba, fg: Uint8Array, box: Box): { color: Color; share: number } | null {
-  const band = Math.max(2, Math.round(Math.min(box.x1 - box.x0 + 1, box.y1 - box.y0 + 1) * 0.06));
-  const pixels: number[] = [];
-  let all = 0;
-  for (let y = box.y0; y <= box.y1; y++) {
-    for (let x = box.x0; x <= box.x1; x++) {
-      if (x >= box.x0 + band && x <= box.x1 - band && y >= box.y0 + band && y <= box.y1 - band) continue;
-      all++;
-      if (fg[y * img.width + x]) pixels.push((y * img.width + x) * 4);
+export function packIndex(rows: { id: string; thumb: Thumb }[]): Uint8Array {
+  const size = rows.reduce((n, r) => n + 14 + r.thumb.w * r.thumb.h * 2, 4);
+  const out = new Uint8Array(size);
+  const view = new DataView(out.buffer);
+  view.setUint32(0, rows.length, true);
+  let o = 4;
+  for (const { id, thumb } of rows) {
+    for (let k = 0; k < 12; k++) out[o + k] = parseInt(id.slice(k * 2, k * 2 + 2), 16);
+    out[o + 12] = thumb.w;
+    out[o + 13] = thumb.h;
+    o += 14;
+    for (let p = 0; p < thumb.w * thumb.h; p++, o += 2) {
+      const [r, g, b] = [0, 1, 2].map((c) => Math.round(thumb.d[p * 3 + c]));
+      view.setUint16(o, ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3), true);
     }
   }
-  if (!pixels.length) return null;
-  const color: Color = [0, 1, 2].map((c) => median(pixels.map((i) => img.data[i + c]))) as Color;
-  return { color, share: pixels.filter((i) => near(img.data, i, color)).length / all };
-}
-
-/** Cadre des pixels gardés (null si aucun). */
-function boxOf(fg: Uint8Array, w: number, h: number): Box | null {
-  let box: Box | null = null;
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      if (!fg[y * w + x]) continue;
-      box = box ? { x0: Math.min(box.x0, x), y0: Math.min(box.y0, y), x1: Math.max(box.x1, x), y1: Math.max(box.y1, y) } : { x0: x, y0: y, x1: x, y1: y };
-    }
-  }
-  return box;
-}
-
-/** Retire les pixels proches de `color` et renvoie le cadre de ce qui reste (null si vide). */
-function peel(img: Rgba, fg: Uint8Array, color: Color): Box | null {
-  for (let p = 0; p < img.width * img.height; p++) if (fg[p] && near(img.data, p * 4, color)) fg[p] = 0;
-  return boxOf(fg, img.width, img.height);
-}
-
-/**
- * Signatures après 1, 2… `peels` retraits successifs de la couleur du bord. Référence : 1 (le fond de
- * la case). Capture : jusqu'à 3, car on ignore si elle a de la marge autour de la case ; on garde le
- * meilleur score des trois (voir bestSimilarity).
- */
-export function imageSignatures(img: Rgba, peels: number): Uint8Array[] {
-  const { width: w, height: h } = img;
-  const fg = new Uint8Array(w * h);
-  for (let p = 0; p < w * h; p++) fg[p] = img.data[p * 4 + 3] >= 128 ? 1 : 0;
-  const out: Uint8Array[] = [];
-  let box: Box = { x0: 0, y0: 0, x1: w - 1, y1: h - 1 };
-  for (let pass = 0; pass < peels; pass++) {
-    const border = borderColor(img, fg, box);
-    if (!border) break;
-    const kept = fg.slice();
-    const next = peel(img, fg, border.color);
-    if (!next) {
-      fg.set(kept);
-      break;
-    }
-    box = next;
-    out.push(signatureOf(img, fg, box));
-  }
-  // rien ne se détache du fond : toute l'image compte
-  if (!out.length) out.push(signatureOf(img, fg.fill(1), { x0: 0, y0: 0, x1: w - 1, y1: h - 1 }));
   return out;
 }
 
-/** Signature d'une image de référence (tarkov.dev). */
-export const imageSignature = (img: Rgba) => imageSignatures(img, 1)[0];
-
-/** Forme et couleur des pixels gardés dans le cadre. */
-function signatureOf(img: Rgba, fg: Uint8Array, { x0, y0, x1, y1 }: Box): Uint8Array {
-  const { width: w, data } = img;
-  const bw = x1 - x0 + 1;
-  const bh = y1 - y0 + 1;
-  const sig = new Uint8Array(SIG_BYTES);
-  sig[0] = Math.round(((Math.max(-3, Math.min(3, Math.log2(bw / bh))) + 3) / 6) * 255);
-  const count = new Float64Array(GRID * GRID);
-  const total = new Float64Array(GRID * GRID);
-  const sum = new Float64Array(GRID * GRID * 3);
-  for (let y = y0; y <= y1; y++) {
-    const cy = Math.min(GRID - 1, Math.floor(((y - y0) * GRID) / bh));
-    for (let x = x0; x <= x1; x++) {
-      const c = cy * GRID + Math.min(GRID - 1, Math.floor(((x - x0) * GRID) / bw));
-      total[c]++;
-      if (!fg[y * w + x]) continue;
-      const i = (y * w + x) * 4;
-      count[c]++;
-      sum[c * 3] += data[i];
-      sum[c * 3 + 1] += data[i + 1];
-      sum[c * 3 + 2] += data[i + 2];
-    }
-  }
-  for (let c = 0; c < GRID * GRID; c++) {
-    const o = 1 + c * 4;
-    sig[o] = total[c] ? Math.round((count[c] / total[c]) * 255) : 0;
-    if (!count[c]) continue;
-    sig[o + 1] = Math.round(sum[c * 3] / count[c]);
-    sig[o + 2] = Math.round(sum[c * 3 + 1] / count[c]);
-    sig[o + 3] = Math.round(sum[c * 3 + 2] / count[c]);
-  }
-  return sig;
-}
-
-/** Ressemblance de deux signatures, de 0 à 1 (a et b lues à partir des positions ao et bo). */
-export function signatureSimilarity(a: Uint8Array, b: Uint8Array, ao = 0, bo = 0): number {
-  let shape = 0;
-  let color = 0;
-  let weight = 0;
-  for (let c = 0; c < GRID * GRID; c++) {
-    const i = ao + 1 + c * 4;
-    const j = bo + 1 + c * 4;
-    const ca = a[i] / 255;
-    const cb = b[j] / 255;
-    shape += Math.abs(ca - cb);
-    const both = Math.min(ca, cb);
-    if (both > 0) {
-      color += both * (Math.abs(a[i + 1] - b[j + 1]) + Math.abs(a[i + 2] - b[j + 2]) + Math.abs(a[i + 3] - b[j + 3])) / 765;
-      weight += both;
-    }
-  }
-  const shapeScore = 1 - shape / (GRID * GRID);
-  const colorScore = weight ? 1 - color / weight : 0;
-  const aspect = 1 - Math.min(1, Math.abs(a[ao] - b[bo]) / 255);
-  return 0.4 * shapeScore + 0.45 * colorScore + 0.15 * aspect;
-}
-
-/** Meilleure ressemblance entre les signatures d'une capture et une signature de référence. */
-export const bestSimilarity = (queries: Uint8Array[], ref: Uint8Array, offset = 0) => Math.max(...queries.map((q) => signatureSimilarity(q, ref, 0, offset)));
-
-/** Fichier src/data/item-images.bin lu : ids et signatures bout à bout. */
 export interface ImageIndex {
   ids: string[];
-  sigs: Uint8Array;
+  thumbs: Thumb[];
 }
 export function parseImageIndex(buf: ArrayBuffer): ImageIndex {
   const bytes = new Uint8Array(buf);
-  const n = new DataView(buf).getUint32(0, true);
+  const view = new DataView(buf);
+  const n = view.getUint32(0, true);
   const ids: string[] = [];
-  const sigs = new Uint8Array(n * SIG_BYTES);
+  const thumbs: Thumb[] = [];
+  let o = 4;
   for (let k = 0; k < n; k++) {
-    const o = 4 + k * (12 + SIG_BYTES);
     ids.push(Array.from(bytes.subarray(o, o + 12), (b) => b.toString(16).padStart(2, "0")).join(""));
-    sigs.set(bytes.subarray(o + 12, o + 12 + SIG_BYTES), k * SIG_BYTES);
+    const w = bytes[o + 12];
+    const h = bytes[o + 13];
+    o += 14;
+    const d = new Uint8Array(w * h * 3);
+    for (let p = 0; p < w * h; p++, o += 2) {
+      const v = view.getUint16(o, true);
+      d[p * 3] = ((v >> 11) * 255) / 31;
+      d[p * 3 + 1] = (((v >> 5) & 63) * 255) / 63;
+      d[p * 3 + 2] = ((v & 31) * 255) / 31;
+    }
+    thumbs.push({ w, h, d });
   }
-  return { ids, sigs };
+  return { ids, thumbs };
 }
 
 /**
- * Objets dont l'image ressemble le plus à la capture, du plus proche au moins proche : seulement ceux à
- * moins de `gap` du meilleur score (les scores sont serrés : un objet sans rapport obtient déjà ~0,90).
- * Banc d'essai (300 objets déformés) : écart 0,01 -> bon objet gardé 94 %, ~5 résultats.
+ * Objets dont l'image ressemble à la capture, du plus proche au moins proche. Rend la main au
+ * navigateur tous les 300 objets (quelques secondes en tout) ; `stop()` vrai = abandon (nouveau collage).
  */
-export function matchImage(img: Rgba, index: ImageIndex, gap = 0.01, limit = 5): { id: string; score: number }[] {
-  const queries = imageSignatures(img, 3);
-  const all = index.ids.map((id, k) => ({ id, score: bestSimilarity(queries, index.sigs, k * SIG_BYTES) })).sort((a, b) => b.score - a.score);
-  const best = all[0]?.score ?? 0;
-  return all.filter((m) => m.score >= best - gap).slice(0, limit);
+export async function matchImage(img: Rgba, index: ImageIndex, stop: () => boolean = () => false): Promise<{ id: string; score: number }[]> {
+  const caps = captureThumbs(img);
+  if (!caps.length) return [];
+  const scores: { id: string; score: number }[] = [];
+  for (let k = 0; k < index.ids.length; k++) {
+    if (k % 300 === 299) {
+      await new Promise((r) => setTimeout(r));
+      if (stop()) return [];
+    }
+    scores.push({ id: index.ids[k], score: matchScore(caps, index.thumbs[k]) });
+  }
+  scores.sort((a, b) => a.score - b.score);
+  const best = scores[0]?.score ?? Infinity;
+  return scores.filter((m) => m.score <= MAX_SCORE && m.score <= best * RATIO).slice(0, LIMIT);
 }

@@ -2,14 +2,14 @@
 //  - télécharge l'image « grille » de chaque objet (icône sur son fond coloré, comme dans l'inventaire)
 //    depuis assets.tarkov.dev, dans .cache/item-images (gardées : une relance ne retélécharge rien) ;
 //  - les décode avec Python + Pillow (Node ne lit pas le WebP sans dépendance) ;
-//  - écrit src/data/item-images.bin : nombre d'objets (uint32), puis par objet 12 octets d'id
-//    et la signature de src/lib/itemImage.ts.
+//  - écrit src/data/item-images.bin : chaque image réduite à P px par case (format : packIndex de
+//    src/lib/itemImage.ts).
 // Usage : npm run sync:items (Python 3 avec Pillow requis, seulement sur la machine qui lance le script)
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { imageSignature, SIG_BYTES } from "../src/lib/itemImage.ts";
+import { packIndex, referenceThumb } from "../src/lib/itemImage.ts";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const cache = join(root, ".cache", "item-images");
@@ -57,16 +57,8 @@ for (const item of items) {
   const file = join(cache, `${item.id}.rgba`);
   if (!existsSync(file)) continue;
   const buf = readFileSync(file);
-  const width = buf.readUInt32LE(0);
-  const height = buf.readUInt32LE(4);
-  rows.push({ id: item.id, sig: imageSignature({ width, height, data: buf.subarray(8) }) });
+  rows.push({ id: item.id, thumb: referenceThumb({ width: buf.readUInt32LE(0), height: buf.readUInt32LE(4), data: buf.subarray(8) }) });
 }
-const bin = Buffer.alloc(4 + rows.length * (12 + SIG_BYTES));
-bin.writeUInt32LE(rows.length, 0);
-rows.forEach((r, n) => {
-  const o = 4 + n * (12 + SIG_BYTES);
-  Buffer.from(r.id, "hex").copy(bin, o);
-  Buffer.from(r.sig).copy(bin, o + 12);
-});
+const bin = packIndex(rows);
 writeFileSync(out, bin);
-console.log(`${rows.length} signatures -> ${out} (${Math.round(bin.length / 1024)} Ko)`);
+console.log(`${rows.length} images -> ${out} (${Math.round(bin.length / 1024)} Ko)`);

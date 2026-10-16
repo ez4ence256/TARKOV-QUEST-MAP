@@ -16,16 +16,15 @@ const PAGE = 100;
 /** Lecture d'une capture collée (Ctrl+V) : null = recherche normale. */
 type OcrState = { step: "reading"; progress: number | null } | { step: "done"; text: ListedItem[]; image: ListedItem[] } | { step: "error" };
 
-/** Image collée -> pixels, réduite à 400 px au plus (une capture plein écran serait longue à parcourir). */
+/** Image collée -> pixels, à sa taille d'origine (la réduction se fait dans lib/itemImage). */
 async function blobPixels(blob: Blob): Promise<Rgba> {
   const bitmap = await createImageBitmap(blob);
-  const scale = Math.min(1, 400 / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+  canvas.width = bitmap.width;
+  canvas.height = bitmap.height;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("canvas");
-  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(bitmap, 0, 0);
   bitmap.close();
   return ctx.getImageData(0, 0, canvas.width, canvas.height);
 }
@@ -140,7 +139,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
     // texte (OCR) et image en même temps ; l'un peut échouer sans l'autre
     const [text, image] = await Promise.allSettled([
       import("../lib/ocr").then(({ readImageLines }) => readImageLines(blob, (p) => id === run.current && setOcr({ step: "reading", progress: p.progress }))),
-      Promise.all([loadItemImages(), blobPixels(blob)]).then(([index, pixels]) => matchImage(pixels, index)),
+      Promise.all([loadItemImages(), blobPixels(blob)]).then(([index, pixels]) => matchImage(pixels, index, () => id !== run.current)),
     ]);
     if (id !== run.current) return;
     if (text.status === "rejected" && image.status === "rejected") return setOcr({ step: "error" });

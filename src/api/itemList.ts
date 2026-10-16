@@ -3,7 +3,7 @@
 //  - noms : fichiers de traductions items_<langue> et items_en (~0,45 Mo chacun compressés) ; le fichier
 //    principal des objets (17 Mo) n'est pas lu. Un objet = une clé « <id> ShortName » (les catégories n'en ont pas).
 //  - hideout : fichier principal (~8 Ko compressé) + traductions.
-//  - signatures d'images (recherche par image) : src/data/item-images.bin (1,4 Mo), au premier collage d'une image.
+//  - signatures d'images (recherche par image) : src/data/item-images.bin (4,9 Mo, 1,6 Mo compressé), au premier collage d'une image.
 import type { GameMode } from "../types";
 import { fetchEndpoint, fetchJson, fetchTranslations } from "./tarkovJson";
 import itemImagesUrl from "../data/item-images.bin?url";
