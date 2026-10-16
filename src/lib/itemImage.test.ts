@@ -52,13 +52,14 @@ describe("recherche par image", () => {
     const crop = cell(96, 192, VIOLET, { x: 0.3, y: 0.1, w: 0.4, h: 0.85, color: [55, 95, 88] }, 7);
     const found = matchImage(crop, index);
     expect(found[0].id).toBe("5d1b376e86f774252519444e");
-    expect(found[0].score).toBeGreaterThan(found[1].score);
+    expect(found.every((m) => m.score >= found[0].score - 0.01)).toBe(true);
   });
   it("l'objet seul sur un autre fond", () => {
     const other = cell(64, 128, [200, 200, 210], { x: 0.3, y: 0.1, w: 0.4, h: 0.85, color: [50, 90, 85] });
     expect(matchImage(other, index)[0].id).toBe("5d1b376e86f774252519444e");
   });
-  it("image unie : pas d'erreur, tous les objets classés", () => {
-    expect(matchImage(cell(10, 10, VIOLET, { x: 0, y: 0, w: 0, h: 0, color: VIOLET }), index, 99)).toHaveLength(4);
+  it("image unie : pas d'erreur ; seuls les scores proches du meilleur sont gardés", () => {
+    expect(matchImage(cell(10, 10, VIOLET, { x: 0, y: 0, w: 0, h: 0, color: VIOLET }), index, 1, 99)).toHaveLength(4);
+    expect(matchImage(items["cccccccccccccccccccccccc"], index).map((m) => m.id)).toEqual(["cccccccccccccccccccccccc"]);
   });
 });

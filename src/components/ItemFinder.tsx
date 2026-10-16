@@ -14,7 +14,7 @@ import { ItemThumb } from "./ItemThumb";
 const PAGE = 100;
 
 /** Lecture d'une capture collée (Ctrl+V) : null = recherche normale. */
-type OcrState = { step: "reading"; progress: number | null } | { step: "done"; items: ListedItem[]; byText: number; byImage: number } | { step: "error" };
+type OcrState = { step: "reading"; progress: number | null } | { step: "done"; text: ListedItem[]; image: ListedItem[] } | { step: "error" };
 
 /** Image collée -> pixels, réduite à 400 px au plus (une capture plein écran serait longue à parcourir). */
 async function blobPixels(blob: Blob): Promise<Rgba> {
@@ -147,10 +147,11 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
     const byText = text.status === "fulfilled" ? matchItemLines(text.value.map((l) => l.text), all) : [];
     const byImage = image.status === "fulfilled" ? image.value.map((m) => byId.get(m.id)).filter((i): i is ListedItem => Boolean(i)) : [];
     const sure = byText.filter((m) => m.score >= RECOGNIZED_MIN);
-    const items = [...new Set([...byText.map((m) => m.item), ...byImage])];
+    // lecture sûre : elle seule ; sinon 3 lectures incertaines au plus, et les ressemblances d'image (sans doublon)
+    const textItems = (sure.length ? sure : byText.slice(0, 3)).map((m) => m.item);
     setQuery("");
     setSelected(sure.length === 1 ? sure[0].item : null);
-    setOcr({ step: "done", items, byText: byText.length, byImage: items.length - byText.length });
+    setOcr({ step: "done", text: textItems, image: sure.length ? [] : byImage.filter((i) => !textItems.includes(i)) });
   };
 
   const q = useDeferredValue(query);
@@ -164,7 +165,20 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
       .map((r) => r.item);
   }, [all, q]);
   useEffect(() => setShown(PAGE), [q]);
-  const shownItems = ocr?.step === "done" ? ocr.items : results;
+  const tiles = (items: ListedItem[]) => (
+    <ul className="finder-grid">
+      {items.map((item) => (
+        <li key={item.id}>
+          <button className="finder-tile" title={item.name} onClick={() => setSelected(item)}>
+            <span className="finder-icon">
+              <ItemThumb src={iconSrc(item.id, itemIcons)} name="" size={56} />
+            </span>
+            <span className="finder-tile-name">{item.name}</span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
 
   const usage = useMemo(() => buildUsageIndex(tasks), [tasks]);
   const tasksById = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
@@ -208,11 +222,8 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                     ? !all
                       ? tr("Liste des objets pas encore chargée.", "Item list not loaded yet.")
                       : tr("Lecture impossible. La première utilisation demande une connexion (données de langue).", "Could not read the image. The first use needs a connection (language data).")
-                    : ocr.items.length
-                      ? tr(
-                          `Capture : ${ocr.byText} objet(s) lu(s) dans le texte, ${ocr.byImage} ressemblance(s) par l'image`,
-                          `Screenshot: ${ocr.byText} item(s) read from the text, ${ocr.byImage} look-alike(s) from the image`,
-                        )
+                    : ocr.text.length + ocr.image.length
+                      ? tr("Capture lue : choisis l'objet ci-dessous.", "Screenshot read: pick the item below.")
                       : tr("Aucun objet reconnu dans la capture.", "No item recognized in the screenshot.")}
               </span>
               {ocr.step !== "reading" && (
@@ -253,19 +264,17 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                   {tr(`${results.length} objet(s)`, `${results.length} item(s)`)}
                 </p>
               )}
-              <ul className="finder-grid">
-                {shownItems.slice(0, shown).map((item) => (
-                  <li key={item.id}>
-                    <button className="finder-tile" title={item.name} onClick={() => setSelected(item)}>
-                      <span className="finder-icon">
-                        <ItemThumb src={iconSrc(item.id, itemIcons)} name="" size={56} />
-                      </span>
-                      <span className="finder-tile-name">{item.name}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              {shownItems.length > shown && (
+              {ocr?.step === "done" ? (
+                <>
+                  {ocr.text.length > 0 && <h3 className="finder-sub">{tr("Lu dans le texte", "Read from the text")}</h3>}
+                  {ocr.text.length > 0 && tiles(ocr.text)}
+                  {ocr.image.length > 0 && <h3 className="finder-sub">{tr("Ressemble à l'image", "Looks like the image")}</h3>}
+                  {ocr.image.length > 0 && tiles(ocr.image)}
+                </>
+              ) : ocr?.step === "reading" ? null : (
+                tiles(results.slice(0, shown))
+              )}
+              {!ocr && results.length > shown && (
                 <div className="finder-more">
                   <button className="btn btn-small" onClick={() => setShown((n) => n + PAGE)}>
                     {tr("Afficher plus", "Show more")}

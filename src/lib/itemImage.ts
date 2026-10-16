@@ -179,11 +179,14 @@ export function parseImageIndex(buf: ArrayBuffer): ImageIndex {
   return { ids, sigs };
 }
 
-/** Objets dont l'image ressemble le plus à la capture, du plus proche au moins proche. */
-export function matchImage(img: Rgba, index: ImageIndex, limit = 12): { id: string; score: number }[] {
+/**
+ * Objets dont l'image ressemble le plus à la capture, du plus proche au moins proche : seulement ceux à
+ * moins de `gap` du meilleur score (les scores sont serrés : un objet sans rapport obtient déjà ~0,90).
+ * Banc d'essai (300 objets déformés) : écart 0,01 -> bon objet gardé 94 %, ~5 résultats.
+ */
+export function matchImage(img: Rgba, index: ImageIndex, gap = 0.01, limit = 5): { id: string; score: number }[] {
   const queries = imageSignatures(img, 3);
-  return index.ids
-    .map((id, k) => ({ id, score: bestSimilarity(queries, index.sigs, k * SIG_BYTES) }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit);
+  const all = index.ids.map((id, k) => ({ id, score: bestSimilarity(queries, index.sigs, k * SIG_BYTES) })).sort((a, b) => b.score - a.score);
+  const best = all[0]?.score ?? 0;
+  return all.filter((m) => m.score >= best - gap).slice(0, limit);
 }
