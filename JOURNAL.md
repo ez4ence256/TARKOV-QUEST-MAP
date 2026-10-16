@@ -249,6 +249,25 @@ Signalé : « Le labyrinthe » montrait « Speak to Jaeger… » alors que le wi
 - **Non placé** : étage supérieur de la chambre 2 (5 volants + 2 figurines) : hors des tuiles de la map ; recherche (points cyan) et pièges : non demandés ; interrupteurs : la carte n'a que des textes (« Switch »), pas de point. Dans la chambre 5 les points numérotés sont noirs (liste du chalumeau) : couleurs prises par chambre d'après la liste, pas d'après la teinte.
 - **Affichage** : calque propre à la map « the-labyrinth », case « Infos du Labyrinthe » (retenue : `tqp:showLabyrinth`), crédit dans l'attribution. Code : `src/lib/labyrinth.ts`, `src/map/LabyrinthLayer.tsx`. Tests : `src/lib/labyrinth.test.ts` (+4).
 
+#### Main story : positions des 8 autres chapitres (octobre 2026)
+Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tuiles de Labs) rendus hors dépôt, les affiches du wiki sont recalées dessus, le point est le centre du repère rouge. Acceptation : reprojection regardée sur l'image + au moins un contrôle indépendant par map (sorties, transits, apparitions de tarkov.dev).
+
+| Chapitre | Cartes (a) | Placées | Rejetées / non placées (raison) | Précision |
+|---|---|---|---|---|
+| Tour | 7 | 2 cases, 3 lieux (terminal ; transit Rues + serveurs de Labs) | Ground Zero (affiche tutoriel sans repère rouge), Labs « Managers » (isométrique), Labs « Escape path » (tracé, pas un repère) | 8 à 30 m |
+| Falling Skies | 6 | 3 (G-Wagon, cachette de l'enregistreur, maison de l'Elektronik) | avion (image 3D sans repère calé) | 16 à 34 m |
+| Batya | 13 | 8 cases, 14 lieux (Customs, Bois, Phare, Littoral, Échangeur) | Radar, Bunker (rocher), Gnezdo (placé dans The Ticket), cabane du Bois sans cercle | 21 à 59 m |
+| The Unheard | 8 | 6 cases, 10 lieux (Rues, Usine, tunnels, Labs 1 et 2) | Saving the Mole (Ground Zero : affiche 3D, SIFT 59 paires mais icônes décalées), Health resort et Cardinal (images satellites, pas de calage) | 7 à 20 m |
+| Blue Fire | 10 | 5 cases, 8 lieux | Emercom et tentes de l'Échangeur (petits marqueurs seuls), LexOs, bureau Labs rejoué | 6 à 49 m |
+| They Are Already Here | 10 | 5 cases, 9 lieux | RB-PKPM (souterrain de Reserve, affiche sans calage), Eye of the World Littoral (satellite) | 9 à 59 m |
+| Boreas | 14 | 5 cases, 9 lieux | **ponts de l'Icebreaker (intercom, salle des machines, porte endommagée, C-1)** : les tuiles de la map ont les bornes de l'Usine dans maps.json, aucune conversion contrôlable | 13 à 70 m |
+| The Ticket | ~40 | 31 cases, 84 lieux (4 fins) | Kruglov (pas de repère), RB-PKPTS, Friendship Bridge, Scav Lands, Saving the Mole, lignes « Body/No. n » de Terminal (flèches, pas des repères), photos Icebreaker | 4 à 285 m (ULTRA = zone) |
+
+- **Recalages** : Streets/Reserve par SIFT (0,2 à 1,2 m), Shoreline/Woods par masques d'eau (ECC), **Phare par 8 extractions de tarkov.dev** (le premier recalage ECC était décalé d'environ 40 m ; corrigé, la version paysage v1.7 est la même carte pivotée), Terminal par silhouette, Échangeur par 4 sorties/transits (affiches satellites reliées entre elles par SIFT), Usine par silhouette, Labs par ECC sur les tuiles (3 niveaux), Customs 3D par homographie.
+- **Customs (affiche 3D)** : 23 repères (sorties, transits) comparés : accord à ~10 m dans le sud (voiture, dortoirs, Pasha, cabane, chambre des cultistes) mais **40 à 75 m dans le centre et le nord** (perspective). Corrigés d'après les repères les plus proches : bungalow de Reshala (88 ; -54, recoupé avec les conteneurs de maps.json ; l'ancien point était à 50 m), fort des Scavs (étiquette « Fortress »), documents de Skier (± 60 m).
+- **Code** : une case peut avoir **plusieurs lieux sur plusieurs maps** (clé -> liste d'entrées) ; le premier lieu choisit la map affichée. Étage connu d'après le plan (champ `floor` : Labs niveaux 1 et 2, tunnels de l'Usine), sinon `floorFromText`.
+- **Tests** : `storyPoints.test.ts` vérifie, pour chaque chapitre, que les clés du JSON sont celles de l'extrait réel (10 extraits dans `src/lib/__fixtures__`, The Ticket avec ses 4 modèles de fins) et que la photo source est dans la case.
+
 ### Rooms (jouer en groupe)
 - **Principe** : bouton « Room » à côté du sélecteur de map. « Créer une room » donne un ID de 6 caractères (sans 0 O 1 I L) à envoyer ; les autres le saisissent et « Rejoignent ». Sont partagés : **quêtes choisies, objectifs cochés, chapitres Main story choisis et étapes cochées**. Couleurs, notes, points perso et positions manuelles restent locaux.
 - **Protocole** (`server/rooms.mjs`, JavaScript simple car le Node de production n'importe pas `src/*.ts`) : `POST /api/rooms {mode,state}` crée ; `GET /api/rooms/:id/events?client=…` flux **SSE** (snapshot, puis `op`, `members`, battement toutes les 25 s) ; `POST /api/rooms/:id/ops {client,ops:[{kind:task|done|story|step,id,on}]}` ; `PUT /api/rooms/:id` recrée une room de même ID ; `GET /api/rooms/:id` (existe ?). Opérations **absolues** (« on » = présent), dernier écrit gagne.

@@ -96,7 +96,7 @@ SOFTWARE.
 
 ## Positions de la Main story : cartes du wiki Escape from Tarkov
 
-- `src/data/story-positions.json` : positions relevées sur les photos/cartes du wiki Escape from Tarkov (Fandom) des chapitres de l'histoire (pour l'instant Accidental Witness et The Labyrinth) : cartes de Customs et du Labyrinthe (re3mr.com), de Streets of Tarkov et de Shoreline (/u/JINDOUZ). Seules les coordonnées relevées sont gardées, aucune image n'est copiée ni affichée ; le fichier source de chaque position est noté dans le JSON.
+- `src/data/story-positions.json` : positions relevées sur les photos/cartes du wiki Escape from Tarkov (Fandom) des chapitres de l'histoire (les 10 chapitres) : cartes de Customs, du Labyrinthe, de Terminal, de Labs, de l'Usine, de l'Échangeur et de l'Icebreaker (re3mr.com) et cartes de Streets of Tarkov, Shoreline, Woods, Lighthouse et Reserve (/u/JINDOUZ). Seules les coordonnées relevées sont gardées, aucune image n'est copiée ni affichée ; le fichier source de chaque position est noté dans le JSON.
 
 ## Carte du Labyrinthe : re3mr.com et wiki Escape from Tarkov
 

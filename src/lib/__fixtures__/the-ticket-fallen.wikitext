@@ -1,0 +1,625 @@
+{| style="border:1px solid #77473c; width:100%; margin:1em auto 1em auto; padding:5px; box-shadow: 0 0 15px rgba(109, 87, 77), 0 0 6px rgba(109, 87, 77);"
+| style="text-align:center; text-color:#66BF58; font-size: 150%" | Fallen ending
+|}
+===Obtain Intelligence Center level 1===
+You need to have [[Hideout#Modules|Intelligence Center level 1]] built in order to continue.
+
+===Talk to Mr. Kerman===
+Visit Mr. Kerman through the hideout intelligence center laptop screen.
+
+===Wait for Mr. Kerman to reach out===
+It takes 2-6 hours for Mr. Kerman to reach out to you.
+
+===Talk to [[Prapor]]===
+Visit [[Prapor]] in the menu through the trader screen.
+
+===Talk to Mr. Kerman===
+Visit Mr. Kerman through the hideout intelligence center laptop screen.
+
+{| style="border:1px solid #9a8866; width:100%; margin:1em auto 1em auto; padding:5px; box-shadow: 0 0 15px rgba(65,61,52,1), 0 0 6px rgba(232,190,107,0.8);"
+| style="text-align:center; font-size: 132%;" | Keep reading here if the [[Armored case]] was given to [[Prapor]] in [[Falling Skies]], if not click [[The_Ticket#Ask_Mechanic_for_help_4|here]] to jump to the next relevant objective.
+|}
+
+===Locate the camp of Prapor's people on [[Lighthouse]]===
+You will have to find the camp of Prapor's people on [[Lighthouse]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Bogatyrs patch Lighthouse map.png|Camp location marked on map.
+File:Bogatyrs patch Lighthouse BEAR camp.png|The camp.
+</gallery></li>
+
+===Find any clues about Prapor's people's intentions===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Note from Prapor's men icon.png|link=Note from Prapor's men]]
+|[[Note from Prapor's men]]
+|1
+|Required
+!<font color="Red">Yes</font>
+|}
+The clue in the form of [[Note from Prapor's men]] can be found in one of two places in the camp.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:NoteFromPraporsMenSpawn1.png|1: On medical boxes.
+File:NoteFromPraporsMenSpawn2.png|2: In a supply crate.
+</gallery></li>
+
+===Talk to Mr. Kerman===
+Visit Mr. Kerman through the hideout intelligence center laptop screen.
+
+===Gain access to [[Lightkeeper]]===
+Lightkeeper can be found on the [[Lighthouse]] location. He is located in a locked area on the 3rd floor of the lighthouse building at the peninsula territory.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:LightkeeperMap.png|Lighthouse location marked on map
+File:Lightkeeper Area Door.png|Locked area door
+</gallery></li>
+The bridge that leads to the lighthouse is guarded by [[Zryachiy]] and full of [[Map of Tarkov#Claymores|Claymores]]. To safely pass the bridge and speak to Lightkeeper, an <font color="green">encoded</font> [[Digital secure DSP radio transmitter]] is required. It deactivates the claymores and has Zryachiy not shoot you. The questline to obtain one starts with the quest [[To the Light - Trust but Verify]].
+
+Harming Zryachiy, one of his followers, or a Lightkeeper acquainted PMC in the lighthouse premises will <font color="red">decode</font> your [[Digital secure DSP radio transmitter]] if you have it equipped ('''Attention:''' Unequipping it does not prevent this in '''local''' [[Game_modes#PvE_and_PvE_Co-op_game_mode|PvE game mode]] raids). PMCs that are acquainted with Lightkeeper can kill unacquainted intruders without penalty.
+
+===Talk to [[Lightkeeper]]===
+Visit [[Lightkeeper]] and talk to him on [[Lighthouse]].
+
+===Stay on good terms with [[Lightkeeper]]===
+You must stay on good terms with [[Lightkeeper]] until he gets the [[Armored case]] back.
+
+===Obtain the item: 3 TerraGroup "Blue Folders" materials===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Blue Folders materials icon.png|link=TerraGroup "Blue Folders" materials]]
+|[[TerraGroup "Blue Folders" materials]]
+|3
+|Required
+!<font color="green">No</font>
+|}
+You need to find 3 [[TerraGroup "Blue Folders" materials]] and hand them over to [[Lightkeeper]].
+
+===Bring the found items to [[Lightkeeper]]===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Blue Folders materials icon.png|link=TerraGroup "Blue Folders" materials]]
+|[[TerraGroup "Blue Folders" materials]]
+|3
+|Handover item
+!N/A
+|}
+Visit [[Lightkeeper]] with the [[TerraGroup "Blue Folders" materials]] in your inventory to hand them over.
+
+===Launch a yellow signal flare in front of ULTRA's main entrance on Interchange===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in Raid]]'''
+!Notes
+|-
+![[File:Yellow flare icon.png|link=RSP-30 reactive signal cartridge (Yellow)]]
+|[[RSP-30 reactive signal cartridge (Yellow)]]
+|1
+|Required
+!N/A
+|Must be fired into the sky while being in the specified areas.
+|-
+! colspan="6" |OR
+|-
+![[File:SP-81 Icon.png|link=ZiD SP-81 26x75 signal pistol]]
+|[[ZiD SP-81 26x75 signal pistol]]
+|1
+|Required
+!N/A
+|Used to fire the flare cartridge
+|-
+![[File:26x75 flare cartridge (Yellow) icon.png|link=26x75mm flare cartridge (Yellow)]]
+|[[26x75mm flare cartridge (Yellow)]]
+|1
+|Required
+!N/A
+|Must be fired into the sky while being in the specified areas.
+|}
+You need to fire a yellow flare in front of the ULTRA Mall on [[Interchange]]
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:TheTicketULTRAFlareYellowMap.jpg|The location on the map. 
+</gallery></li>
+
+===Eliminate any 15 targets in one raid on Interchange===
+You must get 15 kills on [[Interchange]] in one raid. If you don't eliminate 15 targets, it is possible to transit between [[Interchange]] and [[Interchange#Transits|other maps]] to complete the objective. However, the kills need to be performed on [[Interchange]] even if transits are used. If you extract without the necessary eliminations, both this and the previous objective will need to be completed again.
+
+===Talk to [[Lightkeeper]]===
+Visit [[Lightkeeper]] and talk to him on [[Lighthouse]]. You will need to have an empty special slot in order to be able to accept the reward.
+
+====Rewards====
+* 1x [[Armored case]]
+
+===Ask [[Mechanic]] for help===
+Visit [[Mechanic]] in the menu through the trader screen to ask for help. To unlock the [[Armored case]] you will need his help.
+
+===Obtain the experimental signal jammer===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+![[File:Terragroup Labs access keycard icon.png|link=TerraGroup Labs access keycard]]
+|[[TerraGroup Labs access keycard]]
+|1
+|Required
+!N/A
+|Allows access to [[The Lab]] location a single time
+|-
+![[File:Experimental signal jammer icon.png|link=Experimental signal jammer]]
+|[[Experimental signal jammer]]
+|1
+|Required
+!<font color="Red">Yes</font>
+|}
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:TheTicketExperimentalSignalJammerMap.png|The location of the jammer on the map.
+File:Experimental Signal Jammer Spawn 1.png|In the left side glass laboratory inside the containment block. On the middle desks.
+File:Experimental Signal Jammer Spawn 2.png|In the recreational area (R21). On the round table in "Cat" near the red keycard room.
+File:Experimental Signal Jammer Spawn 3.png|In the lecture hall (R16). On one of the desks of the conference room, downstairs from the kitchen area. 
+</gallery></li>
+
+===Use the Experimental signal jammer to unlock the case===
+You will need to find the [[Experimental signal jammer]] to be able to start the crafting recipe.
+
+===Unlock the [[Armored case]]===
+You need to complete the [[Armored case]] recipe at [[Hideout#Modules|Workbench level 1]]
+
+===Obtain the [[Kruglov's RFID keycard|"Ticket"]]===
+{|class="wikitable"
+! colspan="3" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+|-
+![[File:Armored case icon.png|link=Armored case]]
+|[[Armored case]]
+|1
+|-
+![[File:Kruglov's RFID keycard icon.png|link=Kruglov's RFID keycard]]
+|[[Kruglov's RFID keycard]]
+|1
+|}
+You will need to unlock the [[Armored case]] through your [[Hideout#Modules|Workbench level 1]] with the unlocked crafting recipe. Once the [[Armored case]] is unlocked, you will need to right click it then click "unpack" to receive a [[Kruglov's RFID keycard]] in your stash and [[RFID card manual]] in your Handbook.
+====Rewards====
+* Unlocks craft for [[Armored case]] at [[Hideout#Modules|Workbench level 1]]
+
+===Read the instructions from the [[Armored case|armored case]]===
+{|class="wikitable"
+! colspan="3" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+|-
+![[File:RFID card manual icon.png|link=RFID card manual]]
+|[[RFID card manual]]
+|1
+|}
+You will need to go through your handbook and find the [[RFID card manual]] note to read it.
+
+===Contact Mr. Kerman===
+'''<font color="red">This is an important point of no return choice!</font>'''
+
+Visit Mr. Kerman through the hideout intelligence center laptop screen. When talking to him, accept his offer to help you activate the keycard. 
+
+'''Declining Mr. Kerman's offer will end this ending's route.'''
+
+====Rewards====
+* Unlocks craft for [[Activated Kruglov's RFID keycard]] at [[Hideout#Modules|Intelligence center 1]]
+
+===Obtain the Laboratory master pass===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+![[File:Terragroup Labs access keycard icon.png|link=TerraGroup Labs access keycard]]
+|[[TerraGroup Labs access keycard]]
+|1
+|Required
+!N/A
+|Allows access to [[The Lab]] location a single time
+|-
+![[File:LkEA Icon.png|link=TerraGroup Labs keycard (Black)]]
+|[[TerraGroup Labs keycard (Black)]]
+|1
+|Required
+!N/A
+|Allows access to the '''Kruglov's office''' and '''Kruglov's safe''' within R22 zone. Needs at least 2 uses available.
+|-
+![[File:TerraGroup Labs master keycard icon.png|link=TerraGroup Labs master keycard]]
+|[[TerraGroup Labs master keycard]]
+|1
+|Required
+!<font color="Red">Yes</font>
+|}
+The [[TerraGroup Labs master keycard]] can be found in the safe inside Kruglov's office (R22) in [[The Lab]]. Two [[TerraGroup Labs keycard (Black)]] swipes are required to access it. It should be transferred to the off-raid quest inventory to not lose it in subsequent raids.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Kruglov's office map.png|Office location marked on map
+File:Kruglov's office door.png|Door to the office
+File:Kruglov's office safe.png|The safe
+File:Labs Master Keycard Safe Spawn.png|Keycard in the safe
+</gallery></li>
+
+===Obtain an RFID card encryption device===
+This objective is scripted to fail. To progress toward failing this objective, you must survive a total of at least 30 minutes on [[The Lab]]. The amount of raids to do so doesn't matter. Once the objective shows as failed, you will be contacted by Mr. Kerman to tell you to ask [[Mechanic]] for some help.
+
+===Talk to [[Mechanic]]===
+Visit [[Mechanic]] in the menu through the trader screen to ask for help. He will tell you that he needs to contact his friend.
+
+===Wait for a response from [[Mechanic]]===
+It takes 6-12 hours for [[Mechanic]] to reach out to you. 
+
+===Hand over 40 Physical Bitcoins to [[Mechanic]]===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Bitcoin icon.png|link=Physical Bitcoin]]
+|[[Physical Bitcoin]]
+|40
+|Handover item
+!<font color="Green">No</font>
+|}
+[[Mechanic]] will tell you that his friend will help you, only if you pay him 40 [[Physical Bitcoin]]. They do not need to be [[found in raid]], and can only be given to [[Mechanic]] when you have the required amount in your stash. Once the [[Physical Bitcoin]] are handed over, he will give you an [[Elektronik's key]] to access Elektronik's apartment.
+
+====Rewards====
+* 1x [[Elektronik's key]]
+* Unlocks barter for [[Elektronik's key]] at [[Mechanic]] LL2
+
+===Collect the RFID card encryption device===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+![[File:Elektronik's key icon.png|link=Elektronik's key]]
+|[[Elektronik's key]]
+|1
+|Required
+!N/A
+|The key is required to access Elektronik's apartment on [[Streets of Tarkov]]
+|-
+![[File:RFID keycard encryption device icon.png|link=RFID keycard encryption device]]
+|[[RFID keycard encryption device]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+You will need to access Elektronik's apartment, and head to the living room to find the [[RFID keycard encryption device]] under the coffee table. '''Note:''' The item doesn't spawn before the previous objective is completed.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:ElektroniksKeyMap.png|The location of the apartment on the map.
+File:ElektroniksKeyBuilding.png|The Klimova 14A building
+File:RFID Keycard Encryption doorway.png|The living room is directly in front of the doorway.
+File:RFID Keycard Encryption Device - The Ticket.png|The encryption device is under the coffee table.
+</gallery></li>
+
+===Use the RFID card encryption device to activate Kruglov's keycard===
+{|class="wikitable"
+! colspan="3" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+|-
+![[File:Activated Kruglov's RFID keycard icon.png|link=Activated Kruglov's RFID keycard]]
+|[[Activated Kruglov's RFID keycard]]
+|1
+|}
+Once you have gathered the [[RFID keycard encryption device]] you will be able to start crafting the [[Activated Kruglov's RFID keycard]] at your [[Hideout#Modules|Intelligence center 1]].
+
+===Arrive at the entrance pathway to the port [[Terminal]]===
+{|class="wikitable"
+! colspan="3" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+|-
+![[File:Activated Kruglov's RFID keycard icon.png|link=Activated Kruglov's RFID keycard]]
+|[[Activated Kruglov's RFID keycard]]
+|1
+|}
+Once at the intercom, you will need to swipe the newly crafted [[Activated Kruglov's RFID keycard]]. This still won't let you get to [[Terminal]], Mr. Kerman now wants to talk to you, so you will have to visit him in the hideout again.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Tour Shoreline Map.png|The location of the intercom on the map.
+File:Tour Shoreline Tower.png|Watchtower where the intercom is located.
+File:Tour Shoreline Intercom.png|The intercom where you need to swipe the [[Activated Kruglov's RFID keycard]].
+</gallery></li>
+
+===Talk to Mr. Kerman===
+'''<font color="red">This is an important point of no return choice!</font>'''
+
+Visit Mr. Kerman through the hideout intelligence center laptop screen. He will ask you to help him find dirt on TerraGroup. You need to say no to helping him.
+
+'''Saying you will help Mr. Kerman will end this ending's route.'''
+
+====Rewards====
+* Unlocks achievement [[Achievements#Achievements|Enough of Your Games!]]
+
+====Ask the traders how to leave Tarkov====
+You will now have to speak to [[Prapor]]. 
+
+{| style="border:1px solid #9a8866; width:100%; margin:1em auto 1em auto; padding:5px; box-shadow: 0 0 15px rgba(65,61,52,1), 0 0 6px rgba(232,190,107,0.8);"
+| style="text-align:center; font-size: 132%;" | Keep reading here if the [[Armored case]] was kept from [[Prapor]] in [[Falling Skies]], if not click [[The_Ticket#Hand_over_Case_with_dangerous_cargo_to_Prapor|here]] to jump to the next relevant objective.
+|}
+
+===Complete [[Prapor]]'s tasks===
+
+====Hand over any military or advanced electronics to [[Prapor]]====
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Mil thervis.png|link=Iridium military thermal vision module]]
+|[[Iridium military thermal vision module]]
+|50
+|Handover item
+!<font color="Green">No</font>
+|-
+! colspan="4" |OR
+|-
+![[File:MilitaryCableIcon.png|link=Military cable]]
+|[[Military cable]]
+|50
+|Handover item
+!<font color="Green">No</font>
+|-
+! colspan="4" |OR
+|-
+![[File:Far Forward Current Converter Icon.png|link=Advanced current converter]]
+|[[Advanced current converter]]
+|50
+|Handover item
+!<font color="Green">No</font>
+|-
+! colspan="4" |OR
+|-
+![[File:GPSamplifier icon.png|link=Far-forward GPS Signal Amplifier Unit]]
+|[[Far-forward GPS Signal Amplifier Unit]]
+|50
+|Handover item
+!<font color="Green">No</font>
+|-
+! colspan="4" |OR
+|-
+![[File:Microcontrollerboard icon.png|link=Microcontroller board]]
+|[[Microcontroller board]]
+|50
+|Handover item
+!<font color="Green">No</font>
+|-
+! colspan="4" |OR
+|-
+![[File:MilitaryCircuitBoardIcon.png|link=Military circuit board]]
+|[[Military circuit board]]
+|50
+|Handover item
+!<font color="Green">No</font>
+|-
+! colspan="4" |OR
+|-
+![[File:COFDM Icon.png|link=Military COFDM Wireless Signal Transmitter]]
+|[[Military COFDM Wireless Signal Transmitter]]
+|50
+|Handover item
+!<font color="Green">No</font>
+|-
+! colspan="4" |OR
+|-
+![[File:MGT Icon.png|link=Military gyrotachometer]]
+|[[Military gyrotachometer]]
+|50
+|Handover item
+!<font color="Green">No</font>
+|-
+! colspan="4" |OR
+|-
+![[File:Mil Filter Icon.png|link=Military power filter]]
+|[[Military power filter]]
+|50
+|Handover item
+!<font color="Green">No</font>
+|-
+! colspan="4" |OR
+|-
+![[File:Phased-Array-Element-icon.png|link=Phased array element]]
+|[[Phased array element]]
+|50
+|Handover item
+!<font color="Green">No</font>
+|-
+! colspan="4" |OR
+|-
+![[File:UHFRFIDIcon.png|link=UHF RFID Reader]]
+|[[UHF RFID Reader]]
+|50
+|Handover item
+!<font color="Green">No</font>
+|-
+! colspan="4" |OR
+|-
+![[File:Virtex programmable processor Icon.png|link=Virtex programmable processor]]
+|[[Virtex programmable processor]]
+|50
+|Handover item
+!<font color="Green">No</font>
+|}
+You must hand 50 total items from the above list over to [[Prapor]]. Any combination of these items will work.
+
+====Hand over Secure container Theta, Epsilon or Kappa to [[Prapor]]====
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Theta Secure container icon.png|link=Secure container Theta]]
+|[[Secure container Theta]]
+|1
+|Handover item
+!N/A
+|-
+! colspan="4" |OR
+|-
+![[File:Epsilon icon.png|link=Secure container Epsilon]]
+|[[Secure container Epsilon]]
+|1
+|Handover item
+!N/A
+|-
+! colspan="4" |OR
+|-
+![[File:Secure container Kappa icon.gif|link=Secure container Kappa]]
+|[[Secure container Kappa]]
+|1
+|Handover item
+!N/A
+|}
+You must hand over Secure container [[Secure container Theta|Theta]], [[Secure container Epsilon|Epsilon]] or [[Secure container Kappa|Kappa]] to [[Prapor]].
+
+====Hand over weapon and armor repair kits to [[Prapor]]====
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:ArmorRepairKit3.png|link=Body armor repair kit]]
+|[[Body armor repair kit]]
+|40
+|Handover item
+!<font color="Green">No</font>
+|-
+! colspan="4" |OR
+|-
+![[File:WeaponRepairKit3.png|link=Weapon repair kit]]
+|[[Weapon repair kit]]
+|40
+|Handover item
+!<font color="Green">No</font>
+|}
+You must hand over 40 repair kits. Any combination of [[Body armor repair kit|armor]] and [[Weapon repair kit|weapon repair kits]] will work. Despite the optional objective suggesting so, the repair kits don't need to have full durability.
+
+===Talk to [[Prapor]]===
+Visit [[Prapor]] in the menu through the trader screen, he will ask you to hand over the [[Case with dangerous cargo]], and 1,000,000 [[Dollars]].
+
+====Hand over [[Case with dangerous cargo]] to [[Prapor]]====
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+![[File:RB-PKPTS key icon.png|link=RB-PKPTS key]]
+|[[RB-PKPTS key]]
+|1
+|Required
+!N/A
+|Unlocks room RB-PKPTS where the [[Case with dangerous cargo]] is located.
+|-
+![[File:Case with dangerous cargo icon.png|link=Case with dangerous cargo]]
+|[[Case with dangerous cargo]]
+|1
+|Handover item
+!<font color="red">Yes</font>
+|}
+
+You will need to find a [[Case with dangerous cargo]], the case is located inside the [[RB-PKPTS key]] room on [[Reserve]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:RB-PKPTS key map.png|The location on the map.
+File:TheTicketDangerousCaseSpawn1.png|On the left shelf next to a jerrycan.
+File:TheTicketDangerousCaseSpawn2.png|On the back shelf left to the bedroll, behind a yellow can.
+File:TheTicketDangerousCaseSpawn3.png|On the chair to the right when entering the room.
+</gallery></li>
+
+====Report to [[Prapor]]====
+Visit [[Prapor]] in the menu through the trader screen to hand over the [[Case with dangerous cargo]].
+
+====Hand over 1,000,000 [[Dollars]] to [[Prapor]]====
+{|class="wikitable"
+! colspan="3" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+|-
+![[File:Dollarsicon.png|link=Dollars]]
+|[[Dollars]]
+|1,000,000
+|}
+You need to hand over 1,000,000 [[Dollars]] to [[Prapor]]. The hand-over option is only available once the entire amount is gathered when visiting him in the menu through the trader screen.
+
+=====Rewards=====
+* Unlocks achievement [[Achievements#Achievements|Will It Blow?]]
+
+===Wait for the info from [[Prapor]]===
+It takes 18-24 hours for [[Prapor]] to reach out to you.
+
+===Collect the updated hash codes from [[Prapor]]===
+Retrieve the hash codes from [[Prapor]].
+
+====Rewards====
+* Unlocks craft for [[Reprogrammed RFID keycard with Prapor's hash codes]] at [[Hideout#Modules|Intelligence center 1]]
+
+===Obtain Solar Power level 1===
+You need to have [[Hideout#Modules|Solar Power level 1]] built in order to continue.

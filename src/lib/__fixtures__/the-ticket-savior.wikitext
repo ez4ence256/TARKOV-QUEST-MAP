@@ -1,0 +1,968 @@
+{| style="border:1px solid #718e63; width:100%; margin:1em auto 1em auto; padding:5px; box-shadow: 0 0 15px rgba(113, 142, 99), 0 0 6px rgba(113, 142, 99);"
+| style="text-align:center; font-size: 150%" | Savior ending
+|}
+===Obtain Intelligence Center level 1===
+You need to have [[Hideout#Modules|Intelligence Center level 1]] built in order to continue.
+
+===Talk to Mr. Kerman===
+Visit Mr. Kerman through the hideout intelligence center laptop screen.
+
+===Wait for Mr. Kerman to reach out===
+It takes 2-6 hours for Mr. Kerman to reach out to you.
+
+===Talk to [[Prapor]]===
+Visit [[Prapor]] in the menu through the trader screen.
+
+===Talk to Mr. Kerman===
+Visit Mr. Kerman through the hideout intelligence center laptop screen.
+
+{| style="border:1px solid #9a8866; width:100%; margin:1em auto 1em auto; padding:5px; box-shadow: 0 0 15px rgba(65,61,52,1), 0 0 6px rgba(232,190,107,0.8);"
+| style="text-align:center; font-size: 132%;" | Keep reading here if the [[Armored case]] was given to [[Prapor]] in [[Falling Skies]], if not click [[The_Ticket#Ask_Mechanic_for_help|here]] to jump to the next relevant objective.
+|}
+
+===Locate the camp of Prapor's people on [[Lighthouse]]===
+You will have to find the camp of Prapor's people on [[Lighthouse]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Bogatyrs patch Lighthouse map.png|Camp location marked on map.
+File:Bogatyrs patch Lighthouse BEAR camp.png|The camp.
+</gallery></li>
+
+===Find any clues about Prapor's people's intentions===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Note from Prapor's men icon.png|link=Note from Prapor's men]]
+|[[Note from Prapor's men]]
+|1
+|Required
+!<font color="Red">Yes</font>
+|}
+The clue in the form of [[Note from Prapor's men]] can be found in one of two places in the camp.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:NoteFromPraporsMenSpawn1.png|1: On medical boxes.
+File:NoteFromPraporsMenSpawn2.png|2: In a supply crate.
+</gallery></li>
+
+===Talk to Mr. Kerman===
+Visit Mr. Kerman through the hideout intelligence center laptop screen.
+
+===Gain access to [[Lightkeeper]]===
+Lightkeeper can be found on the [[Lighthouse]] location. He is located in a locked area on the third floor of the lighthouse building at the peninsula territory.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:LightkeeperMap.png|Lighthouse location marked on map
+File:Lightkeeper Area Door.png|Locked area door
+</gallery></li>
+The bridge that leads to the lighthouse is guarded by [[Zryachiy]] and full of [[Map of Tarkov#Claymores|Claymores]]. To safely pass the bridge and speak to Lightkeeper, an <font color="green">encoded</font> [[Digital secure DSP radio transmitter]] is required. It deactivates the claymores and has Zryachiy not shoot you. The questline to obtain one starts with the quest [[To the Light - Trust but Verify]].
+
+Harming Zryachiy, one of his followers, or a Lightkeeper acquainted PMC in the lighthouse premises will <font color="red">decode</font> your [[Digital secure DSP radio transmitter]] if you have it equipped ('''Attention:''' Unequipping it does not prevent this in '''local''' [[Game_modes#PvE_and_PvE_Co-op_game_mode|PvE game mode]] raids). PMCs that are acquainted with Lightkeeper can kill unacquainted intruders without penalty.
+
+===Talk to [[Lightkeeper]]===
+Visit [[Lightkeeper]] and talk to him on [[Lighthouse]].
+
+===Stay on good terms with [[Lightkeeper]]===
+You must stay on good terms with [[Lightkeeper]] until he gets the [[Armored case]] back.
+
+===Obtain the item: 3 TerraGroup "Blue Folders" materials===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Blue Folders materials icon.png|link=TerraGroup "Blue Folders" materials]]
+|[[TerraGroup "Blue Folders" materials]]
+|3
+|Required
+!<font color="green">No</font>
+|}
+You need to find 3 [[TerraGroup "Blue Folders" materials]] and hand them over to [[Lightkeeper]].
+
+===Bring the found items to [[Lightkeeper]]===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Blue Folders materials icon.png|link=TerraGroup "Blue Folders" materials]]
+|[[TerraGroup "Blue Folders" materials]]
+|3
+|Handover item
+!N/A
+|}
+Visit [[Lightkeeper]] with the [[TerraGroup "Blue Folders" materials]] in your inventory to hand them over.
+
+===Launch a yellow signal flare in front of ULTRA's main entrance on Interchange===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in Raid]]'''
+!Notes
+|-
+![[File:Yellow flare icon.png|link=RSP-30 reactive signal cartridge (Yellow)]]
+|[[RSP-30 reactive signal cartridge (Yellow)]]
+|1
+|Required
+!N/A
+|Must be fired into the sky while being in the specified areas.
+|-
+! colspan="6" |OR
+|-
+![[File:SP-81 Icon.png|link=ZiD SP-81 26x75 signal pistol]]
+|[[ZiD SP-81 26x75 signal pistol]]
+|1
+|Required
+!N/A
+|Used to fire the flare cartridge
+|-
+![[File:26x75 flare cartridge (Yellow) icon.png|link=26x75mm flare cartridge (Yellow)]]
+|[[26x75mm flare cartridge (Yellow)]]
+|1
+|Required
+!N/A
+|Must be fired into the sky while being in the specified areas.
+|}
+You need to fire a yellow flare in front of the ULTRA Mall on [[Interchange]]
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:TheTicketULTRAFlareYellowMap.jpg|The location on the map. 
+</gallery></li>
+
+===Eliminate any 15 targets in one raid on Interchange===
+You must get 15 kills on [[Interchange]] in one raid. If you don't eliminate 15 targets, it is possible to transit between [[Interchange]] and [[Interchange#Transits|other maps]] to complete the objective. However, the kills need to be performed on [[Interchange]] even if transits are used. If you extract without the necessary eliminations, both this and the previous objective will need to be completed again.
+
+===Talk to [[Lightkeeper]]===
+Visit [[Lightkeeper]] and talk to him on [[Lighthouse]]. You will need to have an empty special slot in order to be able to accept the reward.
+
+====Rewards====
+* 1x [[Armored case]]
+
+===Ask [[Mechanic]] for help===
+Visit [[Mechanic]] in the menu through the trader screen to ask for help. To unlock the [[Armored case]] you will need his help.
+
+===Obtain the experimental signal jammer===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+![[File:Terragroup Labs access keycard icon.png|link=TerraGroup Labs access keycard]]
+|[[TerraGroup Labs access keycard]]
+|1
+|Required
+!N/A
+|Allows access to [[The Lab]] location a single time
+|-
+![[File:Experimental signal jammer icon.png|link=Experimental signal jammer]]
+|[[Experimental signal jammer]]
+|1
+|Required
+!<font color="Red">Yes</font>
+|}
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:TheTicketExperimentalSignalJammerMap.png|The location of the jammer on the map.
+File:Experimental Signal Jammer Spawn 1.png|In the left side glass laboratory inside the containment block. On the middle desks.
+File:Experimental Signal Jammer Spawn 2.png|In the recreational area (R21). On the round table in "Cat" near the red keycard room.
+File:Experimental Signal Jammer Spawn 3.png|In the lecture hall (R16). On one of the desks of the conference room, downstairs from the kitchen area. 
+</gallery></li>
+
+===Use the Experimental signal jammer to unlock the case===
+You will need to find the [[Experimental signal jammer]] to be able to start the crafting recipe.
+
+===Unlock the [[Armored case]]===
+You need to complete the [[Armored case]] recipe at [[Hideout#Modules|Workbench level 1]]
+
+===Obtain the [[Kruglov's RFID keycard|"Ticket"]]===
+{|class="wikitable"
+! colspan="3" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+|-
+![[File:Armored case icon.png|link=Armored case]]
+|[[Armored case]]
+|1
+|-
+![[File:Kruglov's RFID keycard icon.png|link=Kruglov's RFID keycard]]
+|[[Kruglov's RFID keycard]]
+|1
+|}
+You will need to unlock the [[Armored case]] through your [[Hideout#Modules|Workbench level 1]] with the unlocked crafting recipe. Once the [[Armored case]] is unlocked, you will need to right click it then click "unpack" to receive a [[Kruglov's RFID keycard]] in your stash and [[RFID card manual]] in your Handbook.
+
+====Rewards====
+* Unlocks craft for [[Armored case]] at [[Hideout#Modules|Workbench level 1]]
+
+===Read the instructions from the [[Armored case|armored case]]===
+{|class="wikitable"
+! colspan="3" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+|-
+![[File:RFID card manual icon.png|link=RFID card manual]]
+|[[RFID card manual]]
+|1
+|}
+You will need to go through your handbook and find the [[RFID card manual]] note to read it.
+
+===Contact Mr. Kerman===
+'''<font color="red">This is an important point of no return choice!</font>'''
+
+Visit Mr. Kerman through the hideout intelligence center laptop screen. When talking to him, accept his offer to help you activate the keycard. 
+
+'''Declining Mr. Kerman's offer will end this ending's route.'''
+
+====Rewards====
+* Unlocks craft for [[Activated Kruglov's RFID keycard]] at [[Hideout#Modules|Intelligence center 1]]
+
+===Obtain the Laboratory master pass===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+![[File:Terragroup Labs access keycard icon.png|link=TerraGroup Labs access keycard]]
+|[[TerraGroup Labs access keycard]]
+|1
+|Required
+!N/A
+|Allows access to [[The Lab]] location a single time
+|-
+![[File:LkEA Icon.png|link=TerraGroup Labs keycard (Black)]]
+|[[TerraGroup Labs keycard (Black)]]
+|1
+|Required
+!N/A
+|Allows access to the '''Kruglov's office''' and '''Kruglov's safe''' within R22 zone. Needs at least 2 uses available.
+|-
+![[File:TerraGroup Labs master keycard icon.png|link=TerraGroup Labs master keycard]]
+|[[TerraGroup Labs master keycard]]
+|1
+|Required
+!<font color="Red">Yes</font>
+|}
+The [[TerraGroup Labs master keycard]] can be found in the safe inside Kruglov's office (R22) in [[The Lab]]. Two [[TerraGroup Labs keycard (Black)]] swipes are required to access it. It should be transferred to the off-raid quest inventory to not lose it in subsequent raids.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Kruglov's office map.png|Office location marked on map
+File:Kruglov's office door.png|Door to the office
+File:Kruglov's office safe.png|The safe
+File:Labs Master Keycard Safe Spawn.png|Keycard in the safe
+</gallery></li>
+
+===Obtain an RFID card encryption device===
+This objective is scripted to fail. To progress toward failing this objective, you must survive a total of at least 30 minutes on [[The Lab]]. The amount of raids to do so doesn't matter. Once the objective shows as failed, you will be contacted by Mr. Kerman to tell you to ask [[Mechanic]] for some help.
+
+===Talk to [[Mechanic]]===
+Visit [[Mechanic]] in the menu through the trader screen to ask for help. He will tell you that he needs to contact his friend.
+
+===Wait for a response from [[Mechanic]]===
+It takes 6-12 hours for [[Mechanic]] to reach out to you.
+
+===Hand over 40 Physical Bitcoins to [[Mechanic]]===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Bitcoin icon.png|link=Physical Bitcoin]]
+|[[Physical Bitcoin]]
+|40
+|Handover item
+!<font color="Green">No</font>
+|}
+[[Mechanic]] will tell you that his friend will help you, only if you pay him 40 [[Physical Bitcoin]]. They do not need to be [[found in raid]], and can only be given to [[Mechanic]] when you have the required amount in your stash. Once the [[Physical Bitcoin]] are handed over, he will give you an [[Elektronik's key]] to access Elektronik's apartment.
+
+====Rewards====
+* 1x [[Elektronik's key]]
+* Unlocks barter for [[Elektronik's key]] at [[Mechanic]] LL2
+
+===Collect the RFID card encryption device===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+![[File:Elektronik's key icon.png|link=Elektronik's key]]
+|[[Elektronik's key]]
+|1
+|Required
+!N/A
+|The key is required to access Elektronik's apartment on [[Streets of Tarkov]]
+|-
+![[File:RFID keycard encryption device icon.png|link=RFID keycard encryption device]]
+|[[RFID keycard encryption device]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+You will need to access Elektronik's apartment, and head to the living room to find the [[RFID keycard encryption device]] under the coffee table. '''Note:''' The item doesn't spawn before the previous objective is completed.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:ElektroniksKeyMap.png|The location of the apartment on the map.
+File:ElektroniksKeyBuilding.png|The Klimova 14A building
+File:RFID Keycard Encryption doorway.png|The living room is directly in front of the doorway.
+File:RFID Keycard Encryption Device - The Ticket.png|The encryption device is under the coffee table.
+</gallery></li>
+
+===Use the RFID card encryption device to activate Kruglov's keycard===
+{|class="wikitable"
+! colspan="3" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+|-
+![[File:Activated Kruglov's RFID keycard icon.png|link=Activated Kruglov's RFID keycard]]
+|[[Activated Kruglov's RFID keycard]]
+|1
+|}
+Once you have gathered the [[RFID keycard encryption device]] you will be able to start crafting the [[Activated Kruglov's RFID keycard]] at your [[Hideout#Modules|Intelligence center 1]].
+
+===Arrive at the entrance pathway to the port [[Terminal]]===
+{|class="wikitable"
+! colspan="3" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+|-
+![[File:Activated Kruglov's RFID keycard icon.png|link=Activated Kruglov's RFID keycard]]
+|[[Activated Kruglov's RFID keycard]]
+|1
+|}
+Once at the intercom, you will need to swipe the newly crafted [[Activated Kruglov's RFID keycard]]. This still won't let you get to [[Terminal]], Mr. Kerman now wants to talk to you, so you will have to visit him in the hideout again.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Tour Shoreline Map.png|The location of the intercom on the map.
+File:Tour Shoreline Tower.png|Watchtower where the intercom is located.
+File:Tour Shoreline Intercom.png|The intercom where you need to swipe the [[Activated Kruglov's RFID keycard]].
+</gallery></li>
+
+===Talk to Mr. Kerman===
+'''<font color="red">This is an important point of no return choice!</font>'''
+
+Visit Mr. Kerman through the hideout intelligence center laptop screen. He will ask you to help him find dirt on TerraGroup. You need to say yes to helping him.
+
+'''Refusing to find dirt on TerraGroup will end this ending's route.'''
+
+===Agree to find dirt on TerraGroup for Mr. Kerman===
+
+====Obtain Intelligence Center level 3====
+You need to have [[Hideout#Modules|Intelligence Center level 3]] built in order to deliver evidence to Mr. Kerman.
+
+====Deliver 8 major TerraGroup evidence to Mr. Kerman====
+There are a total of 9 major evidence available, of which only 8 have to be delivered.
+<table-progress-tracking table-id="24" unique-column-index="2">
+{|class="wikitable sortable"
+! colspan="3" |Related Quest Items
+|-
+!Icon
+!Item name
+!Story chapter
+|-
+![[File:Audio tape with incriminating evidence icon.png|link=Audio tape with incriminating evidence]]
+|[[Audio tape with incriminating evidence]]
+|[[Accidental Witness]]
+|-
+![[File:Agent network deployment report icon.png|link=Agent network deployment report]]
+|[[Agent network deployment report]]
+|[[Batya]]
+|-
+![[File:Item 1156 specification icon.png|link=Item 1156 specification]]
+|[[Item 1156 specification|Item #1156 specification]]
+|[[Blue Fire]]
+|-
+![[File:Icebreaker archive data icon.png|link=Icebreaker archive data]]
+|[[Icebreaker archive data]]
+|[[Boreas]]
+|-
+![[File:Labyrinth facility research report icon.png|link=Labyrinth facility research report]]
+|[[Labyrinth facility research report]]
+|[[The Labyrinth (story chapter)|The Labyrinth]]
+|-
+![[File:Document mentioning the Warden icon.png|link=Document mentioning the Warden]]
+|[[Document mentioning the Warden]]
+|[[The Unheard]]
+|-
+![[File:Fuel catalyst test report icon.png|link=Fuel catalyst test report]]
+|[[Fuel catalyst test report]]
+|[[The Unheard]]
+|-
+![[File:ARRS system specifications icon.png|link=ARRS system specifications]]
+|[[ARRS system specifications]]
+|[[They Are Already Here]]
+|-
+![[File:Transcript of conversation with Ms. A. icon.png|link=Transcript of conversation with Ms. A.]]
+|[[Transcript of conversation with Ms. A.]]
+|None
+|}</table-progress-tracking>
+
+=====[[Audio tape with incriminating evidence]]=====
+Can be obtained on [[Shoreline]], while progressing through the story chapter [[Accidental Witness]]. It is in a flower bed at Kozlov's hideout.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:AccidentalWitnessKozlovsHideoutMap.png|Location marked on map
+File:AccidentalWitnessKozlovsHideout2.png|The house.
+File:AccidentalWitnessKozlovsHideoutTapeFar.png|The flower bed.
+File:AccidentalWitnessKozlovsHideoutTapeClose.png|The tape in the flower bed.
+</gallery></li>
+
+=====[[Agent network deployment report]]=====
+Can be obtained on [[Lighthouse]], while progressing through the story chapter [[Batya]]. It is inside [[Lightkeeper]]'s locked area on a red crate.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:LightkeeperMap.png|Location on the map.
+File:Lightkeeper Area Door.png|The door to the locked area
+File:Lighthouse agent network documents.png|Spawn on top of the red crate, on the right once you enter the locked area.
+</gallery></li>
+
+=====[[Item 1156 specification|Item #1156 specification]]=====
+Can be obtained on [[Streets of Tarkov]], while progressing through the story chapter [[Blue Fire]]. You will need a [[Rus Post car key]] to access it.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:PostOfficeMap.png|The car is located right in front of the Post Office.
+File:Rus Post car key Location.png|The car to find.
+File:The Ticket Item 1156 Specification Spawn.png|Spawn in the trunk of the car.
+</gallery></li>
+
+=====[[Icebreaker archive data]]=====
+Can be obtained via the in-game mail once you help Mechanic decode the hard drives in the story chapter [[Boreas]].
+
+=====[[Labyrinth facility research report]]=====
+Can be obtained on [[Shoreline]], while progressing through the story chapter [[The Labyrinth (story chapter)|The Labyrinth]]. It is on the shore next to the Pier area.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Labyrinth facility research report location map.png|Location on the map.
+File:Labyrinth facility research report location far.png|Right before entering the pier area, get on the right of the bridge.
+File:Labyrinth facility research report location close.png|Spawn at the bottom of the pillar, left of the evacuation pipe.
+</gallery></li>
+
+=====[[Document mentioning the Warden]]=====
+Can be obtained on [[Streets of Tarkov]], while progressing through the story chapter [[The Unheard]]. You will need a [[Reprogrammed keycard for A.P.'s apartment lock (Green)]] and a [[TerraGroup corporate apartment key]] to access the room.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Cardinal apartment complex Map.jpg|The location on the map.
+File:TerraGroup corporate apartment key inside 4.png|The locked room.
+File:Document mentioning the Warden spawn.png|Spawn on the edge of the desk to the right.
+</gallery></li>
+
+=====[[Fuel catalyst test report]]=====
+Can be obtained on [[Factory]], while progressing through the story chapter [[The Unheard]]. Can be obtained from the [[TerraGroup storage room keycard]] room. The file has multiple spawns throughout the room.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:TerraGroup storage room keycard map.png|The location on the map.
+File:TerraGroup storage room keycard door.png|The locked room.
+File:The Unheard Fuel catalyst test report Spawn 1.png|Spawn on the safe left of the door
+File:The Unheard Fuel catalyst test report Spawn 2.png|Spawn on the shelves behind the door
+</gallery></li>
+
+=====[[ARRS system specifications]]=====
+Can be obtained via the in-game mail once you complete the story chapter [[They Are Already Here]].
+
+=====[[Transcript of conversation with Ms. A.]]=====
+Can be obtained on [[Streets of Tarkov]], from the [[Cardinal apartment key]] bedroom safe. You are required to have a [[TerraGroup Labs keycard (Black)]], but no use will be removed from it to open the safe.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Cardinal apartment complex Map.jpg|The location on the map.
+File:Cardinal apartment key inside 5.png|The locked bedroom where the safe is.
+File:Cardinal Apartment Keycard Safe.png|The locked safe to open with the keypad behind the painting.
+File:The Ticket Transcript of Conversation with Ms A Spawn.png|The transcript inside the safe.
+</gallery></li>
+
+====(''Optional'') Deliver the 36 minor TerraGroup evidence to Mr. Kerman====
+There are a total of 36 minor evidence which are entirely optional to be delivered. Delivering all of them rewards an achievement.
+<table-progress-tracking table-id="23" unique-column-index="2">
+{|class="wikitable sortable"
+! colspan="3" |Related Quest Items
+|-
+!Icon
+!Item name
+!Story chapter
+|-
+![[File:FSB report icon.png|link=FSB report]]
+|[[FSB report]]
+|[[Accidental Witness]]
+|-
+![[File:Letter from Kozlov's room icon.png|link=Letter from Kozlov's room]]
+|[[Letter from Kozlov's room]]
+|[[Accidental Witness]]
+|-
+![[File:Letter from Reshala's bunkhouse icon.png|link=Letter from Reshala's bunkhouse]]
+|[[Letter from Reshala's bunkhouse]]
+|[[Accidental Witness]]
+|-
+![[File:Letter from the mailbox icon.png|link=Letter from the mailbox]]
+|[[Letter from the mailbox]]
+|[[Accidental Witness]]
+|-
+![[File:Audio tape with report icon.png|link=Audio tape with report]]
+|[[Audio tape with report]]
+|[[Batya]]
+|-
+![[File:Bogatyr squad operations report icon.png|link=Bogatyr squad operations report]]
+|[[Bogatyr squad operations report]]
+|[[Batya]]
+|-
+![[File:Hostage evacuation report from Voevoda icon.png|link=Hostage evacuation report from Voevoda]]
+|[[Hostage evacuation report from Voevoda]]
+|[[Batya]]
+|-
+![[File:Moreman's personal file icon.png|link=Moreman's personnel file]]
+|[[Moreman's personnel file]]
+|[[Batya]]
+|-
+![[File:Strelets' personal file icon.png|link=Strelets' personnel file]]
+|[[Strelets' personnel file]]
+|[[Batya]]
+|-
+![[File:Taran's personal file icon.png|link=Taran's personnel file]]
+|[[Taran's personnel file]]
+|[[Batya]]
+|-
+![[File:Voevoda's personal file icon.png|link=Voevoda's personnel file]]
+|[[Voevoda's personnel file]]
+|[[Batya]]
+|-
+![[File:Boreas scientist audio tape icon.png|link=Boreas scientist audio tape]]
+|[[Boreas scientist audio tape]]
+|[[Boreas]]
+|-
+![[File:Compartment C-1 access log icon.png|link=Compartment C-1 access log]]
+|[[Compartment C-1 access log]]
+|[[Boreas]]
+|-
+![[File:Paradigm Shipping directive icon.png|link=Paradigm Shipping directive]]
+|[[Paradigm Shipping directive]]
+|[[Boreas]]
+|-
+![[File:Sailor's diary icon.png|link=Sailor's diary]]
+|[[Sailor's diary]]
+|[[Boreas]]
+|-
+![[File:Plane crew transcript icon.png|link=Plane crew transcript]]
+|[[Plane crew transcript]]
+|[[Falling Skies]]
+|-
+![[File:Assistant's notes on Group 12 icon.png|link=Assistant's notes on Group 12]]
+|[[Assistant's notes on Group 12|Assistant's notes on Group #12]]
+|[[The Labyrinth (story chapter)|The Labyrinth]]
+|-
+![[File:Assistant's notes on Group 3 and Group 10 icon.png|link=Assistant's notes on Group 3 and Group 10]]
+|[[Assistant's notes on Group 3 and Group 10|Assistant's notes on Group #3 and Group #10]]
+|[[The Labyrinth (story chapter)|The Labyrinth]]
+|-
+![[File:Assistant's notes on Group 3 icon.png|link=Assistant's notes on Group 3]]
+|[[Assistant's notes on Group 3|Assistant's notes on Group #3]]
+|[[The Labyrinth (story chapter)|The Labyrinth]]
+|-
+![[File:Assistant's notes on Group 8 icon.png|link=Assistant's notes on Group 8]]
+|[[Assistant's notes on Group 8|Assistant's notes on Group #8]]
+|[[The Labyrinth (story chapter)|The Labyrinth]]
+|-
+![[File:Assistant's notes on TG-Vi-24 test subjects icon.png|link=Assistant's notes on TG-Vi-24 test subjects]]
+|[[Assistant's notes on TG-Vi-24 test subjects]]
+|[[The Labyrinth (story chapter)|The Labyrinth]]
+|-
+![[File:Leshy's diary icon.png|link=Leshy's diary]]
+|[[Leshy's diary]]
+|[[The Labyrinth (story chapter)|The Labyrinth]]
+|-
+![[File:A.P. meeting audio tape Part 1 icon.png|link=A.P. meeting audio tape Part 1]]
+|[[A.P. meeting audio tape Part 1]]
+|[[The Unheard]]
+|-
+![[File:A.P. meeting audio tape Part 2 icon.png|link=A.P. meeting audio tape Part 2]]
+|[[A.P. meeting audio tape Part 2]]
+|[[The Unheard]]
+|-
+![[File:Cargo transport fax icon.png|link=Cargo transport fax]]
+|[[Cargo transport fax]]
+|[[The Unheard]]
+|-
+![[File:Copy of report for TG Worldwide icon.png|link=Copy of report for TG Worldwide]]
+|[[Copy of report for TG Worldwide]]
+|[[The Unheard]]
+|-
+![[File:Document mentioning a protocol icon.png|link=Document mentioning a protocol]]
+|[[Document mentioning a protocol]]
+|[[The Unheard]]
+|-
+![[File:Document on changes in enterprise interactions icon.png|link=Document on changes in enterprise interactions]]
+|[[Document on changes in enterprise interactions]]
+|[[The Unheard]]
+|-
+![[File:Hard drive printout icon.png|link=Hard drive printout]]
+|[[Hard drive printout]]
+|[[The Unheard]]
+|-
+![[File:Order from TerraGroup Worldwide headquarters icon.png|link=Order from TerraGroup Worldwide headquarters]]
+|[[Order from TerraGroup Worldwide headquarters]]
+|[[The Unheard]]
+|-
+![[File:Transport log with notes icon.png|link=Transport log with notes]]
+|[[Transport log with notes]]
+|[[The Unheard]]
+|-
+![[File:Book of the Arrival icon.png|link=Book of the Arrival]]
+|[[Book of the Arrival]]
+|[[They Are Already Here]]
+|-
+![[File:Cult victim audio tape 1 icon.png|link=Cult victim audio tape 1]]
+|[[Cult victim audio tape 1|Cult victim audio tape #1]]
+|[[They Are Already Here]]
+|-
+![[File:Cult victim audio tape 2 icon.png|link=Cult victim audio tape 2]]
+|[[Cult victim audio tape 2|Cult victim audio tape #2]]
+|[[They Are Already Here]]
+|-
+![[File:Note on preparations for the Arrival icon.png|link=Note on preparations for the Arrival]]
+|[[Note on preparations for the Arrival]]
+|[[They Are Already Here]]
+|-
+![[File:Folder with intelligence on Norvinsk region facilities icon.png|link=Folder with intelligence on Norvinsk region facilities]]
+|[[Folder with intelligence on Norvinsk region facilities]]
+|None
+|}</table-progress-tracking>
+
+=====[[FSB report]]=====
+Can be obtained in the [[Zmeisky 3 apartment key]] room on [[Streets of Tarkov]] while progressing through the story chapter [[Accidental Witness]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Cardinal apartment complex Map.jpg|The location on the map.
+File:FSB Report Spawn 1.png|First spawn in one of the drawers below the TV
+File:FSB Report Spawn 2.png|Second spawn on the windowsill next to the TV
+</gallery></li>
+
+=====[[Letter from Kozlov's room]]=====
+Can be obtained in the [[Dorm room 110 key]] room on [[Customs]] while progressing through the story chapter [[Accidental Witness]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Room 110 Door.png|The door inside the two story dorm.
+File:Letter from Kozlov's room spawn.png|Inside Kozlov's room under a mug on the nightstand.
+</gallery></li>
+
+=====[[Letter from Reshala's bunkhouse]]=====
+Can be obtained in the [[Reshala's bunkhouse key]] room on [[Customs]] while progressing through the story chapter [[Accidental Witness]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:ReshalasBunkhouseKeyMap.png|The location on the map.
+File:AccidentalWitnessReshalasStashNote2.png|Inside Reshala's bunkhouse, inside a bag on the left.
+</gallery></li>
+
+=====[[Letter from the mailbox]]=====
+Can be obtained on [[Streets of Tarkov]] while progressing through the story chapter [[Accidental Witness]]. This is located in the right entrance of the Chekannaya 13 building, in the mailbox.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:AccidentalWitnessAnastasiaBuildingMap.png|Building location marked on map
+File:AccidentalWitnessAnastasiaMailboxNote2.png|In the mailbox in the entrance of the Chekannaya 13 building.
+</gallery></li>
+
+=====[[Audio tape with report]]=====
+Can be obtained from '''Gnezdo Outpost''' on [[Interchange]] while progressing through the story chapter [[Batya#Gnezdo Outpost (Interchange)|Batya]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Gnezdo outpost Map.jpg|The location on the map.
+File:Gnezdo - Audio tape with report.png|In the tent, next to the radio.
+</gallery></li>
+
+=====[[Bogatyr squad operations report]]=====
+Can be obtained from '''Gnezdo Outpost''' on [[Interchange]] while progressing through the story chapter [[Batya#Gnezdo Outpost (Interchange)|Batya]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Gnezdo outpost Map.jpg|The location on the map.
+File:Gnezdo - Bogatyr squad operations report.png|Under the guitar on an ammunition box.
+</gallery></li>
+
+=====[[Hostage evacuation report from Voevoda]]=====
+Can be obtained from '''Ryabina Outpost''' on [[Woods]] while progressing through the story chapter [[Batya#Ryabina Outpost (Woods)|Batya]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Ryabina outpost location.png|The location on the map.
+File:Batya Ryabina Camp Note 2.png|On a set of pallets inside the camp.
+</gallery></li>
+
+=====[[Moreman's personnel file]]=====
+Can be obtained from '''Gnezdo Outpost''' on [[Interchange]] while progressing through the story chapter [[Batya#Gnezdo Outpost (Interchange)|Batya]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Gnezdo outpost Map.jpg|The location on the map.
+File:Gnezdo - Moreman's personal file.png|In the tent, on the bed in the corner.
+</gallery></li>
+
+=====[[Strelets' personnel file]]=====
+Can be obtained from '''Carousel Outpost''' on [[Interchange]] while progressing through the story chapter [[Batya#Carousel Outpost (Interchange)|Batya]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Carousel outpost.jpg|Location marked on map
+File:Batya Carousel Outpost Strelets' personal file.png|On the second floor of the carousel outpost, on an armchair.
+</gallery></li>
+
+=====[[Taran's personnel file]]=====
+Can be obtained from '''Carousel Outpost''' on [[Interchange]] while progressing through the story chapter [[Batya#Carousel Outpost (Interchange)|Batya]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Carousel outpost.jpg|Location marked on map
+File:Batya Carousel Outpost Taran's personal file.png|Between the military beds next to a bag.
+</gallery></li>
+
+=====[[Voevoda's personnel file]]=====
+Can be obtained from '''Carousel Outpost''' on [[Interchange]] while progressing through the story chapter [[Batya#Carousel Outpost (Interchange)|Batya]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Carousel outpost.jpg|Location marked on map
+File:Batya Carousel Outpost Voevoda's personal file.png|On the second floor of the carousel outpost, on a table.
+</gallery></li>
+
+=====[[Boreas scientist audio tape]]=====
+Can be obtained from a desk in the laboratory on level 1 of [[Icebreaker]]. A [[Compartment C-3 keycard]] is required to access it.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Compartment C-3 keycard map.jpg|The location on the map.
+File:Compartment C-3 keycard door.png|Door to the laboratory.
+File:Boreas scientist audio tape spawn.png|The tape on the desk.
+</gallery></li>
+
+=====[[Compartment C-1 access log]]=====
+Can be obtained from a wall on level 7 of [[Icebreaker]] next to the [[Compartment C-1 keycard|Compartment C-1]] door.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Compartment C-1 keycard map.jpg|The location on the map.
+File:Compartment C-1 access log spawn.png|The log on the wall.
+</gallery></li>
+
+=====[[Paradigm Shipping directive]]=====
+Can be obtained in the warehouse at the freight yard in the north of [[Lighthouse]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Boreas Lighthouse Warehouse Map.png|Warehouse location marked on map.
+File:Boreas Paradigm Shipping Directive.png|The directive on the table next to the lamp
+</gallery></li>
+
+=====[[Sailor's diary]]=====
+Can be obtained in crew room no. 18 on level 4 of [[Icebreaker]]. A [[Boreas crew quarters keycard]] is required to access it.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Boreas crew quarters keycard door 18 map.jpg|The location on the map.
+File:Boreas crew quarters keycard door 18.png|Door to the room.
+File:Sailor's diary spawn.png|The diary on the desk.
+</gallery></li>
+
+=====[[Plane crew transcript]]=====
+Can be obtained on [[Shoreline]] while progressing through the story chapter [[Falling Skies]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:FallingSkiesElektroniksUSBMap.png|The location on the map.
+File:FallingSkiesElektroniksTranscript.png|Under the flipped bed mattress.
+</gallery></li>
+
+=====[[Assistant's notes on Group 12|Assistant's notes on Group #12]]=====
+Can be obtained on [[The Labyrinth]], behind the [[Observation room key]] door, under the dead scientist.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Observation room Map.png|Room location marked on map
+File:Assistant note 12 spawn.png|Under the dead scientist's body.
+</gallery></li>
+
+=====[[Assistant's notes on Group 3 and Group 10|Assistant's notes on Group #3 and Group #10]]=====
+Can be obtained on [[The Labyrinth]]. It spawns under the arm of a dead scientist
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:The Labyrinth Scientist locations map.png|On dead scientist #3.
+File:Assistant note 3 and 10 spawn.png|Under the arm of the dead scientist.
+</gallery></li>
+
+=====[[Assistant's notes on Group 3|Assistant's notes on Group #3]]=====
+Can be obtained on [[The Labyrinth]]. It spawns in the hand of a dead scientist
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:The Labyrinth Scientist locations map.png|On dead scientist #1.
+File:Assistant note 3 spawn.png|In the bomb room in the hand of the dead scientist.
+</gallery></li>
+
+=====[[Assistant's notes on Group 8|Assistant's notes on Group #8]]=====
+Can be obtained on [[The Labyrinth]]. It spawns next to a dead scientist
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:The Labyrinth Scientist locations map.png|On dead scientist #2.
+File:Assistant note 8 spawn.png|Next to the dead scientist.
+</gallery></li>
+
+=====[[Assistant's notes on TG-Vi-24 test subjects]]=====
+Can be obtained on [[The Labyrinth]]. It spawns under the head of a dead scientist
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:The Labyrinth Scientist locations map.png|On dead scientist #5.
+File:Assistant note on TG-Vi-24 test subject spawn.png|Under the head of the dead scientist.
+</gallery></li>
+
+=====[[Leshy's diary]]=====
+Can be obtained on [[The Labyrinth]]. It spawns next to a dead PMC located near the torture room.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Labryrinth torture room map.png|Torture room location marked on map
+File:Leshy's diary location close.png|The diary next to the PMC
+</gallery></li>
+
+=====[[A.P. meeting audio tape Part 1]]=====
+Can be obtained on [[The Lab]] while progressing through the story chapter [[The Unheard]]. It is located in the Lecture Hall (R16).
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:A.P meeting audio tape map.png|The location on the map.
+File:Location of first tapeunheardlabs.png|Inside the lecture room on [[The Lab]] on the floor on the stairs.
+</gallery></li>
+
+=====[[A.P. meeting audio tape Part 2]]=====
+Can be obtained on [[The Lab]] while progressing through the story chapter [[The Unheard]]. It is located in the Lecture Hall (R16).
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:A.P meeting audio tape map.png|The location on the map.
+File:Location of second tapetheunheardlabs.png|Inside the lecture room on [[The Lab]] next to a computer at second row.
+</gallery></li>
+
+=====[[Cargo transport fax]]=====
+Can be obtained on [[The Lab]] while progressing through the story chapter [[The Unheard]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Dark office 2nd floor.png|The location on the map.
+File:The Unheard Fax.png|Between a plant and a printer.
+</gallery></li>
+
+=====[[Copy of report for TG Worldwide]]=====
+Can be obtained on [[Streets of Tarkov]] in the [[Reprogrammed keycard for A.P.'s apartment lock (Green)]] room in the [[TerraGroup corporate apartment key]] room while progressing through the story chapter [[The Unheard]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Cardinal apartment complex Map.jpg|The location on the map.
+File:TerraGroup corporate apartment key inside 4.png|The locked room.
+File:Copy of report for TG Worldwide spawn.png|In the secret room in A.P.'s apartment inside the Cardinal apartment complex.
+</gallery></li>
+
+=====[[Document mentioning a protocol]]=====
+Can be obtained on [[Streets of Tarkov]] in the [[Reprogrammed keycard for A.P.'s apartment lock (Green)]] room in the [[TerraGroup corporate apartment key]] room while progressing through the story chapter [[The Unheard]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Cardinal apartment complex Map.jpg|The location on the map.
+File:TerraGroup corporate apartment key inside 4.png|The locked room.
+File:Document mentioning a protocol spawn.png|In the secret room in A.P.'s apartment inside the Cardinal apartment complex.
+</gallery></li>
+
+=====[[Document on changes in enterprise interactions]]=====
+Can be obtained on [[The Lab]] while progressing through the story chapter [[The Unheard]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Document on changes in enterprise interactions map.png|The location on the map.
+File:The Unheard Changes.png|Inside the containment zone on [[The Lab]], in a white prefab.
+</gallery></li>
+
+=====[[Hard drive printout]]=====
+Can be obtained from a craft at [[Hideout#Modules|Intelligence center 1]] after obtaining the [[Hard drive from Rzhevsky's car]] while progressing through the story chapter [[The Unheard]].
+
+=====[[Order from TerraGroup Worldwide headquarters]]=====
+Can be obtained on [[Streets of Tarkov]] in the [[Reprogrammed keycard for A.P.'s apartment lock (Green)]] room in the [[TerraGroup corporate apartment key]] room while progressing through the story chapter [[The Unheard]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Cardinal apartment complex Map.jpg|The location on the map.
+File:TerraGroup corporate apartment key inside 4.png|The locked room.
+File:Order from TerraGroup Worldwide headquarters spawn.png|In the secret room in A.P.'s apartment inside the Cardinal apartment complex.
+</gallery></li>
+
+=====[[Transport log with notes]]=====
+Can be obtained on [[Factory]] while progressing through the story chapter [[The Unheard]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:The Unheard Transport Log Map.jpg|Location marked on map
+File:Location of unheard log.png|The log on a yellow barrel next to the hole in the ground
+</gallery></li>
+
+=====[[Book of the Arrival]]=====
+Can be obtained in the [[Cult victim's apartment key]] room on [[Streets of Tarkov]] while progressing through the story chapter [[They Are Already Here]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:CultVictimsApartmentKeyMap.png|The location on the map.
+File:Book on the Arrival.png|On the shelf with books.
+</gallery></li>
+
+=====[[Cult victim audio tape 1|Cult victim audio tape #1]]=====
+Can be obtained in the [[Cult victim's apartment key]] room on [[Streets of Tarkov]] while progressing through the story chapter [[They Are Already Here]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:CultVictimsApartmentKeyMap.png|The location on the map.
+File:Cult Victim Tape 1.png|On the desk.
+</gallery></li>
+
+=====[[Cult victim audio tape 2|Cult victim audio tape #2]]=====
+Can be obtained on [[Lighthouse]] while progressing through the story chapter [[They Are Already Here]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Cult victims apartment key Spawn Map.png|The location on the map.
+File:Cult victim audio tape 2 spawn.png|On the chair in the middle of the room.
+</gallery></li>
+
+=====[[Note on preparations for the Arrival]]=====
+Can be obtained in the [[Cult victim's apartment key]] room on [[Streets of Tarkov]] while progressing through the story chapter [[They Are Already Here]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:CultVictimsApartmentKeyMap.png|The location on the map.
+File:Note on preparations for the Arrival.png|On the desk.
+</gallery></li>
+
+=====[[Folder with intelligence on Norvinsk region facilities]]=====
+Can be obtained in [[The Lab]] in Kruglov's office (R22) inside the locked safe. You will need a [[TerraGroup Labs keycard (Black)]] to open the safe.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Kruglov's office map.png|The location on the map.
+File:Folder with intelligence on Norvinsk region facilities spawn.png|Located inside Kruglov's office (R22) behind the locked safe.
+</gallery></li>
+
+====Rewards====
+* Unlocks achievement [[Achievements#Achievements|Little Triumphs]]
+
+===Confirm with Mr. Kerman that all the evidence has been delivered===
+Once 8 major evidence have been delivered, talk to Mr. Kerman via the hideout intelligence center laptop screen. After confirming that enough major evidence have been delivered, you will be told to wait for Mr. Kerman's trusted contact to get in touch. '''Note:''' After confirming the major evidence, minor evidence can no longer be handed over.
+
+====Rewards====
+* 1x [[Secure container Alpha-1 with TerraGroup evidence]]
+
+===Wait for Mr. Kerman's trusted contact to get in touch===
+After 12-24 hours, [[Fence]] will contact you.
+
+===Complete [[Fence]]'s assignments===
+====Keep the standing with [[Fence]] above 4.0====
+You need to keep your [[Scavs#Scav karma|Scav karma]] over 4.0 for the entire duration of the assignments.
+
+====Extract through the Friendship Bridge (Co-Op) on [[Woods]]====
+Extract through the "Friendship Bridge" co-op extraction on [[Woods]] without killing any members of the [[Scavs]] faction or [[The Goons]]. You can lure [[Scavs]] into the extraction with the help of [[Weapons#Smoke grenades|smoke grenades]] to extract with them.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Friendship Bridge Map.jpg|Extraction marked on map.
+File:Scav bridge.png|The extraction.
+</gallery></li>
+
+'''Note:''' The objective in the [[Game_modes#PvE_and_PvE_Co-op_game_mode|PvE mode]] is to eliminate 5 PMC operatives on [[Interchange]] in one raid without killing [[Scavs]] instead.
+
+====Extract through the Scav Lands (Co-Op) on [[Reserve]]====
+Extract through the "Scav Lands" co-op extraction on [[Reserve]] without killing any members of the [[Scavs]] faction or [[The Goons]]. You can lure [[Scavs]] into the extraction with the help of [[Weapons#Smoke grenades|smoke grenades]] to extract with them.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Scav Lands Map.png|Extraction marked on map.
+File:Scav lands.png|The extraction.
+</gallery></li>
+
+'''Note:''' The objective in the [[Game_modes#PvE_and_PvE_Co-op_game_mode|PvE mode]] is to eliminate 5 PMC operatives on [[Shoreline]] in one raid without killing [[Scavs]] instead.
+
+===Tell [[Fence]] that the assignment is complete===
+Visit [[Fence]] in the menu through the trader screen.
+
+===Reach 0.4 standing with the [[BTR Driver]]===
+To fulfill this objective, you have to complete the quest [[The Price of Independence]].
+
+'''Completing the quest [[Choose Your Friends Wisely]] will fail this objective and end this ending's route.'''
+
+===Talk to [[Fence]]===
+{|class="wikitable"
+! colspan="3" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+|-
+![[File:Flash drive with Mr. Kerman's hash codes icon.png|link=Flash drive with Mr. Kerman's hash codes]]
+|[[Flash drive with Mr. Kerman's hash codes]]
+|1
+|}
+[[Fence]] will call you, and will send you a [[Flash drive with Mr. Kerman's hash codes]] via the in-game mail once his assignments have been completed.
+
+===Obtain Solar Power level 1===
+You need to have [[Hideout#Modules|Solar Power level 1]] built in order to continue.
+
+====Rewards====
+* Unlocks craft for [[Reprogrammed RFID keycard with Mr. Kerman's hash codes]] at [[Hideout#Modules|Intelligence Center level 1]]

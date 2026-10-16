@@ -1,0 +1,367 @@
+{| style="border:1px solid #797565; width:100%; margin:1em auto 1em auto; padding:5px; box-shadow: 0 0 15px rgb(121, 117, 101), 0 0 6px rgb(121, 117, 101)"
+| style="text-align:center; text-color:#66BF58; font-size: 150%" | Survivor ending
+|}
+===Obtain Intelligence Center level 1===
+You need to have [[Hideout#Modules|Intelligence Center level 1]] built in order to continue.
+
+===Talk to Mr. Kerman===
+Visit Mr. Kerman through the hideout intelligence center laptop screen.
+
+===Wait for Mr. Kerman to reach out===
+It takes 2-6 hours for Mr. Kerman to reach out to you.
+
+===Talk to [[Prapor]]===
+Visit [[Prapor]] in the menu through the trader screen.
+
+===Talk to Mr. Kerman===
+Visit Mr. Kerman through the hideout intelligence center laptop screen.
+
+{| style="border:1px solid #9a8866; width:100%; margin:1em auto 1em auto; padding:5px; box-shadow: 0 0 15px rgba(65,61,52,1), 0 0 6px rgba(232,190,107,0.8);"
+| style="text-align:center; font-size: 132%;" | Keep reading here if the [[Armored case]] was given to [[Prapor]] in [[Falling Skies]], if not click [[The_Ticket#Ask_Mechanic_for_help_3|here]] to jump to the next relevant objective.
+|}
+
+===Locate the camp of Prapor's people on [[Lighthouse]]===
+You will have to find the camp of Prapor's people on [[Lighthouse]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Bogatyrs patch Lighthouse map.png|Camp location marked on map.
+File:Bogatyrs patch Lighthouse BEAR camp.png|The camp.
+</gallery></li>
+
+===Find any clues about Prapor's people's intentions===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Note from Prapor's men icon.png|link=Note from Prapor's men]]
+|[[Note from Prapor's men]]
+|1
+|Required
+!<font color="Red">Yes</font>
+|}
+The clue in the form of [[Note from Prapor's men]] can be found in one of two places in the camp.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:NoteFromPraporsMenSpawn1.png|1: On medical boxes.
+File:NoteFromPraporsMenSpawn2.png|2: In a supply crate.
+</gallery></li>
+
+===Talk to Mr. Kerman===
+Visit Mr. Kerman through the hideout intelligence center laptop screen.
+
+===Gain access to [[Lightkeeper]]===
+Lightkeeper can be found on the [[Lighthouse]] location. He is located in a locked area on the 3rd floor of the lighthouse building at the peninsula territory.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:LightkeeperMap.png|Lighthouse location marked on map
+File:Lightkeeper Area Door.png|Locked area door
+</gallery></li>
+The bridge that leads to the lighthouse is guarded by [[Zryachiy]] and full of [[Map of Tarkov#Claymores|Claymores]]. To safely pass the bridge and speak to Lightkeeper, an <font color="green">encoded</font> [[Digital secure DSP radio transmitter]] is required. It deactivates the claymores and has Zryachiy not shoot you. The questline to obtain one starts with the quest [[To the Light - Trust but Verify]].
+
+Harming Zryachiy, one of his followers, or a Lightkeeper acquainted PMC in the lighthouse premises will <font color="red">decode</font> your [[Digital secure DSP radio transmitter]] if you have it equipped ('''Attention:''' Unequipping it does not prevent this in '''local''' [[Game_modes#PvE_and_PvE_Co-op_game_mode|PvE game mode]] raids). PMCs that are acquainted with Lightkeeper can kill unacquainted intruders without penalty.
+
+===Talk to [[Lightkeeper]]===
+Visit [[Lightkeeper]] and talk to him on [[Lighthouse]].
+
+===Stay on good terms with [[Lightkeeper]]===
+You must stay on good terms with [[Lightkeeper]] until he gets the [[Armored case]] back.
+
+===Obtain the item: 3 TerraGroup "Blue Folders" materials===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Blue Folders materials icon.png|link=TerraGroup "Blue Folders" materials]]
+|[[TerraGroup "Blue Folders" materials]]
+|3
+|Required
+!<font color="green">No</font>
+|}
+You need to find 3 [[TerraGroup "Blue Folders" materials]] and hand them over to [[Lightkeeper]].
+
+===Bring the found items to [[Lightkeeper]]===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Blue Folders materials icon.png|link=TerraGroup "Blue Folders" materials]]
+|[[TerraGroup "Blue Folders" materials]]
+|3
+|Handover item
+!N/A
+|}
+Visit [[Lightkeeper]] with the [[TerraGroup "Blue Folders" materials]] in your inventory to hand them over.
+
+===Launch a yellow signal flare in front of ULTRA's main entrance on Interchange===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+![[File:Yellow flare icon.png|link=RSP-30 reactive signal cartridge (Yellow)]]
+|[[RSP-30 reactive signal cartridge (Yellow)]]
+|1
+|Required
+!N/A
+|Must be fired into the sky while being in the specified areas.
+|-
+! colspan="6" |OR
+|-
+![[File:SP-81 Icon.png|link=ZiD SP-81 26x75 signal pistol]]
+|[[ZiD SP-81 26x75 signal pistol]]
+|1
+|Required
+!N/A
+|Used to fire the flare cartridge
+|-
+![[File:26x75 flare cartridge (Yellow) icon.png|link=26x75mm flare cartridge (Yellow)]]
+|[[26x75mm flare cartridge (Yellow)]]
+|1
+|Required
+!N/A
+|Must be fired into the sky while being in the specified areas.
+|}
+You need to fire a yellow flare in front of the ULTRA Mall on [[Interchange]]
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:TheTicketULTRAFlareYellowMap.jpg|The location on the map. 
+</gallery></li>
+
+===Eliminate any 15 targets in one raid on Interchange===
+You must get 15 kills on [[Interchange]] in one raid. If you don't eliminate 15 targets, it is possible to transit between [[Interchange]] and [[Interchange#Transits|other maps]] to complete the objective. However, the kills need to be performed on [[Interchange]] even if transits are used. If you extract without the necessary eliminations, both this and the previous objective will need to be completed again.
+
+===Talk to [[Lightkeeper]]===
+Visit [[Lightkeeper]] and talk to him on [[Lighthouse]]. You will need to have an empty special slot in order to be able to accept the reward.
+
+====Rewards====
+* 1x [[Armored case]]
+
+===Ask [[Mechanic]] for help===
+Visit [[Mechanic]] in the menu through the trader screen to ask for help. To unlock the [[Armored case]] you will need his help.
+
+===Obtain the experimental signal jammer===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+![[File:Terragroup Labs access keycard icon.png|link=TerraGroup Labs access keycard]]
+|[[TerraGroup Labs access keycard]]
+|1
+|Required
+!N/A
+|Allows access to [[The Lab]] location a single time
+|-
+![[File:Experimental signal jammer icon.png|link=Experimental signal jammer]]
+|[[Experimental signal jammer]]
+|1
+|Required
+!<font color="Red">Yes</font>
+|}
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:TheTicketExperimentalSignalJammerMap.png|The location of the jammer on the map.
+File:Experimental Signal Jammer Spawn 1.png|In the left side glass laboratory inside the containment block. On the middle desks.
+File:Experimental Signal Jammer Spawn 2.png|In the recreational area (R21). On the round table in "Cat" near the red keycard room.
+File:Experimental Signal Jammer Spawn 3.png|In the lecture hall (R16). On one of the desks of the conference room, downstairs from the kitchen area. 
+</gallery></li>
+
+===Use the Experimental signal jammer to unlock the case===
+You will need to find the [[Experimental signal jammer]] to be able to start the crafting recipe.
+
+===Unlock the [[Armored case]]===
+You need to complete the [[Armored case]] recipe at [[Hideout#Modules|Workbench level 1]]
+
+===Obtain the [[Kruglov's RFID keycard|"Ticket"]]===
+{|class="wikitable"
+! colspan="3" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+|-
+![[File:Armored case icon.png|link=Armored case]]
+|[[Armored case]]
+|1
+|-
+![[File:Kruglov's RFID keycard icon.png|link=Kruglov's RFID keycard]]
+|[[Kruglov's RFID keycard]]
+|1
+|}
+You will need to unlock the [[Armored case]] through your [[Hideout#Modules|Workbench level 1]] with the unlocked crafting recipe. Once the [[Armored case]] is unlocked, you will need to right click it then click "unpack" to receive a [[Kruglov's RFID keycard]] in your stash and [[RFID card manual]] in your Handbook.
+====Rewards====
+* Unlocks craft for [[Armored case]] at [[Hideout#Modules|Workbench level 1]]
+
+===Read the instructions from the [[Armored case|armored case]]===
+{|class="wikitable"
+! colspan="3" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+|-
+![[File:RFID card manual icon.png|link=RFID card manual]]
+|[[RFID card manual]]
+|1
+|}
+You will need to go through your handbook and find the [[RFID card manual]] note to read it.
+
+===Contact Mr. Kerman===
+Visit Mr. Kerman through the hideout intelligence center laptop screen.
+
+===Refuse Mr. Kerman's offer===
+'''<font color="red">This is an important point of no return choice!</font>'''
+
+You will have to refuse Mr. Kerman's offer to help.
+
+'''Accepting Mr. Kerman's help will end this ending's route'''
+
+====Rewards====
+* Unlocks craft for [[Activated Kruglov's RFID keycard]] at [[Hideout#Modules|Intelligence center 1]]
+
+====Talk to [[Prapor]]====
+Once the [[Kruglov's RFID keycard]] has been swiped and refused at the [[Terminal]] intercom on [[Shoreline]], you will need to visit [[Prapor]] in the menu through the trader screen and he will ask you to hand over 500,000,000 Roubles. If you gave Prapor the [[Armored case]] in [[Falling Skies]], he will instead ask for 300,000,000 Roubles.
+
+=====Rewards=====
+* Unlocks achievement [[Achievements#Achievements|Easy Way]]
+
+===Hand over the cash to [[Prapor]]===
+{|class="wikitable"
+! colspan="3" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+|-
+![[File:roublesicon.png|link=Roubles]]
+|[[Roubles]]
+|500,000,000<font color="Red">*</font>
+|}
+<font color="Red">*</font>If you gave Prapor the [[Armored case]] in [[Falling Skies]], this will instead be 300,000,000 Roubles.
+
+{| style="border:1px solid #9a8866; width:100%; margin:1em auto 1em auto; padding:5px; box-shadow: 0 0 15px rgba(65,61,52,1), 0 0 6px rgba(232,190,107,0.8);"
+| style="text-align:center; font-size: 132%;" | Keep reading here if the [[Armored case]] was kept from [[Prapor]] in [[Falling Skies]], if not click [[The_Ticket#Report_to_Prapor|here]] to jump to the next relevant objective.
+|}
+
+====Complete all [[Prapor]]'s tasks in time====
+You will have to complete the following tasks in the following order, in under 72 hours.
+{|class="wikitable"
+! colspan="3" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+|-
+![[File:Folder with TerraGroup Labs evidence (Reports) icon.png|link=Folder with TerraGroup Labs evidence (Reports)]]
+|[[Folder with TerraGroup Labs evidence (Reports)]]
+|1
+|-
+![[File:Folder with TerraGroup evidence (Staff) icon.png|link=Folder with TerraGroup evidence (Staff)]]
+|[[Folder with TerraGroup evidence (Staff)]]
+|1
+|-
+![[File:Folder with TerraGroup Labs evidence (Developments) icon.png|link=Folder with TerraGroup Labs evidence (Developments)]]
+|[[Folder with TerraGroup Labs evidence (Developments)]]
+|1
+|-
+![[File:Folder with TerraGroup evidence (Finances) icon.png|link=Folder with TerraGroup evidence (Finances)]]
+|[[Folder with TerraGroup evidence (Finances)]]
+|1
+|}
+
+====Obtain the item: [[Folder with TerraGroup Labs evidence (Reports)]]====
+The document can be found on [[The Lab]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:TheTicketFolderWithEvidence(Reports)Map.png|The location on the map.
+File:TheTicketFolderWithEvidence(Reports)Spawn1.png|In the [[TerraGroup Labs keycard (Red)]] room (R23) on the desk.
+File:TheTicketFolderWithEvidence(Reports)Spawn2.png|Inside a shelf in the office (G21) right in front of Cargo Elevator extraction.
+File:TheTicketFolderWithEvidence(Reports)Spawn3.png|Inside Dark Offices (O23), inside a shelf on the desk close to the two sofas.
+</gallery></li>
+
+====Obtain the item: [[Folder with TerraGroup evidence (Staff)]]====
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:TheTicketFolderWithEvidence(Staff)Map.png|The location on the map.
+File:TheTicketFolderWithEvidence(Staff)Spawn1.png|Inside a glass room (R22), on the shelf in the office next to Kruglov's Office room.
+File:TheTicketFolderWithEvidence(Staff)Spawn2.png|Inside the room with the button to open Parking Gates extraction door (Y21).
+File:TheTicketFolderWithEvidence(Staff)Spawn3.png|On a round table inside experimental area (O11).
+</gallery></li>
+
+====Obtain the item: [[Folder with TerraGroup Labs evidence (Developments)]]====
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:TheTicketFolderWithEvidence(Developments)Map.png|The location on the map.
+File:TheTicketFolderWithEvidence(Developments)Spawn1.png|Inside the lecture hall (R16), on a table at the last row.
+File:TheTicketFolderWithEvidence(Developments)Spawn2.png|On the table in the [[TerraGroup Labs residential unit keycard]] room.
+File:TheTicketFolderWithEvidence(Developments)Spawn3.png|Under the conference table near the Labs Manager's Office (O21).
+</gallery></li>
+
+====Obtain the item: [[Folder with TerraGroup evidence (Finances)]]====
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:TheTicketFolderWithEvidence(Finances)Map.png|The location on the map.
+File:TheTicketFolderWithEvidence(Finances)Spawn1.png|On the middle desk next to the [[TerraGroup Labs keycard (Red)]] room (R23).
+File:TheTicketFolderWithEvidence(Finances)Spawn2.png|In the [[TerraGroup Labs manager's office room key]] room (O21), on the desk next to a printer.
+File:TheTicketFolderWithEvidence(Finances)Spawn3.png|On the desk in the server room (B22).
+</gallery></li>
+
+====Convert the evidence folders to digital format and save them to an [[SSD with TerraGroup evidence|SSD]]====
+{|class="wikitable"
+! colspan="3" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+|-
+![[File:SSD with TerraGroup evidence icon.png|link=SSD with TerraGroup evidence]]
+|[[SSD with TerraGroup evidence]]
+|1
+|}
+Reaching this objective will unlock the craft for [[SSD with TerraGroup evidence]] at [[Hideout#Modules|Intelligence center 1]].
+
+====Eliminate any 50 targets on [[Streets of Tarkov]]====
+You need to eliminate 50 targets on [[Streets of Tarkov]]. The eliminations can be completed across multiple raids.
+
+====Eliminate 4 PMC operatives in one raid====
+You need to eliminate 4 PMC operatives on any map in one raid. Transits can be used if not enough PMCs are found in a single raid.
+
+=====Rewards=====
+* Unlocks achievement [[Achievements#Achievements|I am Speed]]<font color="Red">*</font>
+<font color="Red">*</font>Not granted if you fail to complete [[Prapor]]'s 3 tasks within 72 hours.
+
+====Hand over [[Secure container Kappa]] to [[Prapor]]<font color="Red">*</font>====
+{|class="wikitable"
+! colspan="3" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+|-
+![[File:Secure container Kappa icon.gif|link=Secure container Kappa]]
+|[[Secure container Kappa]]
+|1
+|}
+<font color="Red">*</font>This objective only happens if you fail to complete [[Prapor]]'s 3 tasks within 72 hours. You will need to hand over the [[Secure container Kappa]] to [[Prapor]] to continue.
+
+====Report to [[Prapor]]====
+Visit [[Prapor]] in the menu through the trader screen.
+
+=====Rewards=====
+* 1x [[Prapor's letter for the port checkpoint]]

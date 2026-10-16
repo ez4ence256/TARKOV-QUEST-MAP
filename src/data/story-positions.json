@@ -334,7 +334,7 @@
       ],
       "source": "Bogatyrs patch Lighthouse map.png",
       "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
-      "errorM": 36
+      "errorM": 45
     }
   ],
   "Batya::locate the ryabina outpost#0": {
@@ -387,7 +387,7 @@
     ],
     "source": "LightkeeperMap.png",
     "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
-    "errorM": 40
+    "errorM": 45
   },
   "Batya::locate the traces of the traitors#0": {
     "map": "lighthouse",
@@ -399,7 +399,7 @@
     ],
     "source": "Bogatyrs patch Lighthouse map.png",
     "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
-    "errorM": 36
+    "errorM": 45
   },
   "Batya::figure out how the cultists are connected to the general#0": [
     {
@@ -833,7 +833,7 @@
     ],
     "source": "Boreas Lighthouse Warehouse Map.png",
     "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
-    "errorM": 42
+    "errorM": 45
   },
   "Boreas::arrange a transport to the icebreaker#0": {
     "map": "reserve",
@@ -920,7 +920,1115 @@
       ],
       "source": "LighthouseTransitToIcebreakerMap.png",
       "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
+      "errorM": 45
+    }
+  ],
+  "The Ticket::savior gain access to lightkeeper#0": {
+    "map": "lighthouse",
+    "positions": [
+      {
+        "x": 413.1,
+        "z": 481.2
+      }
+    ],
+    "source": "LightkeeperMap.png",
+    "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
+    "errorM": 45
+  },
+  "The Ticket::savior launch a yellow signal flare in front of ultra s main entrance on interchange#0": {
+    "map": "interchange",
+    "positions": [
+      {
+        "x": 197.0,
+        "z": -58.3
+      }
+    ],
+    "source": "TheTicketULTRAFlareYellowMap.jpg",
+    "method": "zone encadrée en rouge sur l'image satellite de l'Échangeur, recalée par SIFT sur l'image des repères (écart ≤ 12 m) ; le cadre est la zone entière devant l'entrée (≈ 540 m de long), pas un point",
+    "errorM": 285
+  },
+  "The Ticket::savior obtain the experimental signal jammer#0": [
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -89.1,
+          "z": -428.4
+        }
+      ],
+      "source": "TheTicketExperimentalSignalJammerMap.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 10,
+      "floor": {
+        "fr": "Niveau 1 (Labs)",
+        "en": "First level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -206.0,
+          "z": -298.9
+        }
+      ],
+      "source": "TheTicketExperimentalSignalJammerMap.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 15,
+      "floor": {
+        "fr": "Niveau 1 (Labs)",
+        "en": "First level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -229.4,
+          "z": -337.6
+        }
+      ],
+      "source": "TheTicketExperimentalSignalJammerMap.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 13,
+      "floor": {
+        "fr": "Niveau 2 (Labs)",
+        "en": "Second level (Labs)"
+      }
+    }
+  ],
+  "The Ticket::debtor gain access to lightkeeper#0": {
+    "map": "lighthouse",
+    "positions": [
+      {
+        "x": 413.1,
+        "z": 481.2
+      }
+    ],
+    "source": "LightkeeperMap.png",
+    "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
+    "errorM": 45
+  },
+  "The Ticket::debtor launch a yellow signal flare in front of ultra s main entrance on interchange#0": {
+    "map": "interchange",
+    "positions": [
+      {
+        "x": 197.0,
+        "z": -58.3
+      }
+    ],
+    "source": "TheTicketULTRAFlareYellowMap.jpg",
+    "method": "zone encadrée en rouge sur l'image satellite de l'Échangeur, recalée par SIFT sur l'image des repères (écart ≤ 12 m) ; le cadre est la zone entière devant l'entrée (≈ 540 m de long), pas un point",
+    "errorM": 285
+  },
+  "The Ticket::debtor obtain the experimental signal jammer#0": [
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -89.1,
+          "z": -428.4
+        }
+      ],
+      "source": "TheTicketExperimentalSignalJammerMap.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 10,
+      "floor": {
+        "fr": "Niveau 1 (Labs)",
+        "en": "First level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -206.0,
+          "z": -298.9
+        }
+      ],
+      "source": "TheTicketExperimentalSignalJammerMap.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 15,
+      "floor": {
+        "fr": "Niveau 1 (Labs)",
+        "en": "First level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -229.4,
+          "z": -337.6
+        }
+      ],
+      "source": "TheTicketExperimentalSignalJammerMap.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 13,
+      "floor": {
+        "fr": "Niveau 2 (Labs)",
+        "en": "Second level (Labs)"
+      }
+    }
+  ],
+  "The Ticket::survivor gain access to lightkeeper#0": {
+    "map": "lighthouse",
+    "positions": [
+      {
+        "x": 413.1,
+        "z": 481.2
+      }
+    ],
+    "source": "LightkeeperMap.png",
+    "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
+    "errorM": 45
+  },
+  "The Ticket::survivor launch a yellow signal flare in front of ultra s main entrance on interchange#0": {
+    "map": "interchange",
+    "positions": [
+      {
+        "x": 197.0,
+        "z": -58.3
+      }
+    ],
+    "source": "TheTicketULTRAFlareYellowMap.jpg",
+    "method": "zone encadrée en rouge sur l'image satellite de l'Échangeur, recalée par SIFT sur l'image des repères (écart ≤ 12 m) ; le cadre est la zone entière devant l'entrée (≈ 540 m de long), pas un point",
+    "errorM": 285
+  },
+  "The Ticket::survivor obtain the experimental signal jammer#0": [
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -89.1,
+          "z": -428.4
+        }
+      ],
+      "source": "TheTicketExperimentalSignalJammerMap.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 10,
+      "floor": {
+        "fr": "Niveau 1 (Labs)",
+        "en": "First level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -206.0,
+          "z": -298.9
+        }
+      ],
+      "source": "TheTicketExperimentalSignalJammerMap.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 15,
+      "floor": {
+        "fr": "Niveau 1 (Labs)",
+        "en": "First level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -229.4,
+          "z": -337.6
+        }
+      ],
+      "source": "TheTicketExperimentalSignalJammerMap.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 13,
+      "floor": {
+        "fr": "Niveau 2 (Labs)",
+        "en": "Second level (Labs)"
+      }
+    }
+  ],
+  "The Ticket::fallen gain access to lightkeeper#0": {
+    "map": "lighthouse",
+    "positions": [
+      {
+        "x": 413.1,
+        "z": 481.2
+      }
+    ],
+    "source": "LightkeeperMap.png",
+    "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
+    "errorM": 45
+  },
+  "The Ticket::fallen launch a yellow signal flare in front of ultra s main entrance on interchange#0": {
+    "map": "interchange",
+    "positions": [
+      {
+        "x": 197.0,
+        "z": -58.3
+      }
+    ],
+    "source": "TheTicketULTRAFlareYellowMap.jpg",
+    "method": "zone encadrée en rouge sur l'image satellite de l'Échangeur, recalée par SIFT sur l'image des repères (écart ≤ 12 m) ; le cadre est la zone entière devant l'entrée (≈ 540 m de long), pas un point",
+    "errorM": 285
+  },
+  "The Ticket::fallen obtain the experimental signal jammer#0": [
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -89.1,
+          "z": -428.4
+        }
+      ],
+      "source": "TheTicketExperimentalSignalJammerMap.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 10,
+      "floor": {
+        "fr": "Niveau 1 (Labs)",
+        "en": "First level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -206.0,
+          "z": -298.9
+        }
+      ],
+      "source": "TheTicketExperimentalSignalJammerMap.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 15,
+      "floor": {
+        "fr": "Niveau 1 (Labs)",
+        "en": "First level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -229.4,
+          "z": -337.6
+        }
+      ],
+      "source": "TheTicketExperimentalSignalJammerMap.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 13,
+      "floor": {
+        "fr": "Niveau 2 (Labs)",
+        "en": "Second level (Labs)"
+      }
+    }
+  ],
+  "The Ticket::savior collect the rfid card encryption device#0": {
+    "map": "streets-of-tarkov",
+    "positions": [
+      {
+        "x": 224.0,
+        "z": 69.5
+      }
+    ],
+    "source": "ElektroniksKeyMap.png",
+    "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Streets (résidu ≈ 0,3 m) ; contrôle : transit « The Lab » de tarkov.dev à 3 m de son repère",
+    "errorM": 19
+  },
+  "The Ticket::savior arrive at the entrance pathway to the port terminal#0": {
+    "map": "shoreline",
+    "positions": [
+      {
+        "x": -916.7,
+        "z": 259.7
+      }
+    ],
+    "source": "Tour Shoreline Map.png",
+    "method": "similitude (appariement des masques d'eau et de routes, 5 m de résidu) entre la carte JINDOUZ du wiki et notre SVG de Shoreline ; contrôle : extractions de tarkov.dev sur leurs icônes (± 10 m)",
+    "errorM": 21
+  },
+  "The Ticket::debtor collect the rfid card encryption device#0": {
+    "map": "streets-of-tarkov",
+    "positions": [
+      {
+        "x": 224.0,
+        "z": 69.5
+      }
+    ],
+    "source": "ElektroniksKeyMap.png",
+    "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Streets (résidu ≈ 0,3 m) ; contrôle : transit « The Lab » de tarkov.dev à 3 m de son repère",
+    "errorM": 19
+  },
+  "The Ticket::debtor arrive at the entrance pathway to the port terminal#0": {
+    "map": "shoreline",
+    "positions": [
+      {
+        "x": -916.7,
+        "z": 259.7
+      }
+    ],
+    "source": "Tour Shoreline Map.png",
+    "method": "similitude (appariement des masques d'eau et de routes, 5 m de résidu) entre la carte JINDOUZ du wiki et notre SVG de Shoreline ; contrôle : extractions de tarkov.dev sur leurs icônes (± 10 m)",
+    "errorM": 21
+  },
+  "The Ticket::fallen collect the rfid card encryption device#0": {
+    "map": "streets-of-tarkov",
+    "positions": [
+      {
+        "x": 224.0,
+        "z": 69.5
+      }
+    ],
+    "source": "ElektroniksKeyMap.png",
+    "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Streets (résidu ≈ 0,3 m) ; contrôle : transit « The Lab » de tarkov.dev à 3 m de son repère",
+    "errorM": 19
+  },
+  "The Ticket::fallen arrive at the entrance pathway to the port terminal#0": {
+    "map": "shoreline",
+    "positions": [
+      {
+        "x": -916.7,
+        "z": 259.7
+      }
+    ],
+    "source": "Tour Shoreline Map.png",
+    "method": "similitude (appariement des masques d'eau et de routes, 5 m de résidu) entre la carte JINDOUZ du wiki et notre SVG de Shoreline ; contrôle : extractions de tarkov.dev sur leurs icônes (± 10 m)",
+    "errorM": 21
+  },
+  "The Ticket::arrive at the entrance pathway to the port terminal#0": {
+    "map": "shoreline",
+    "positions": [
+      {
+        "x": -916.7,
+        "z": 259.7
+      }
+    ],
+    "source": "Tour Shoreline Map.png",
+    "method": "similitude (appariement des masques d'eau et de routes, 5 m de résidu) entre la carte JINDOUZ du wiki et notre SVG de Shoreline ; contrôle : extractions de tarkov.dev sur leurs icônes (± 10 m)",
+    "errorM": 21
+  },
+  "The Ticket::locate the camp of prapor s people on lighthouse#0": {
+    "map": "lighthouse",
+    "positions": [
+      {
+        "x": -84.5,
+        "z": 465.6
+      }
+    ],
+    "source": "Bogatyrs patch Lighthouse map.png",
+    "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
+    "errorM": 45
+  },
+  "The Ticket::survivor hand over the cash to prapor#0": [
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -126.0,
+          "z": -386.7
+        }
+      ],
+      "source": "TheTicketFolderWithEvidence(Reports)Map.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 14,
+      "floor": {
+        "fr": "Niveau 2 (Labs)",
+        "en": "Second level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -147.5,
+          "z": -398.8
+        }
+      ],
+      "source": "TheTicketFolderWithEvidence(Reports)Map.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 14,
+      "floor": {
+        "fr": "Niveau 2 (Labs)",
+        "en": "Second level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -247.1,
+          "z": -320.0
+        }
+      ],
+      "source": "TheTicketFolderWithEvidence(Reports)Map.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 9,
+      "floor": {
+        "fr": "Niveau 2 (Labs)",
+        "en": "Second level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -179.8,
+          "z": -365.0
+        }
+      ],
+      "source": "TheTicketFolderWithEvidence(Staff)Map.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 7,
+      "floor": {
+        "fr": "Niveau 1 (Labs)",
+        "en": "First level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -236.6,
+          "z": -375.6
+        }
+      ],
+      "source": "TheTicketFolderWithEvidence(Staff)Map.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 7,
+      "floor": {
+        "fr": "Niveau 2 (Labs)",
+        "en": "Second level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -245.6,
+          "z": -357.5
+        }
+      ],
+      "source": "TheTicketFolderWithEvidence(Staff)Map.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 7,
+      "floor": {
+        "fr": "Niveau 2 (Labs)",
+        "en": "Second level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -110.6,
+          "z": -441.4
+        }
+      ],
+      "source": "TheTicketFolderWithEvidence(Developments)Map.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 8,
+      "floor": {
+        "fr": "Niveau 1 (Labs)",
+        "en": "First level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -206.4,
+          "z": -299.2
+        }
+      ],
+      "source": "TheTicketFolderWithEvidence(Developments)Map.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 13,
+      "floor": {
+        "fr": "Niveau 1 (Labs)",
+        "en": "First level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -166.7,
+          "z": -338.1
+        }
+      ],
+      "source": "TheTicketFolderWithEvidence(Developments)Map.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 9,
+      "floor": {
+        "fr": "Niveau 2 (Labs)",
+        "en": "Second level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -126.7,
+          "z": -278.0
+        }
+      ],
+      "source": "TheTicketFolderWithEvidence(Finances)Map.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 12,
+      "floor": {
+        "fr": "Niveau 2 (Labs)",
+        "en": "Second level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -157.9,
+          "z": -338.4
+        }
+      ],
+      "source": "TheTicketFolderWithEvidence(Finances)Map.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 12,
+      "floor": {
+        "fr": "Niveau 2 (Labs)",
+        "en": "Second level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -254.8,
+          "z": -321.5
+        }
+      ],
+      "source": "TheTicketFolderWithEvidence(Finances)Map.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 8,
+      "floor": {
+        "fr": "Niveau 2 (Labs)",
+        "en": "Second level (Labs)"
+      }
+    }
+  ],
+  "The Ticket::debtor hand over the military flash drive with compiled data to lightkeeper#0": [
+    {
+      "map": "lighthouse",
+      "positions": [
+        {
+          "x": -97.9,
+          "z": -63.8
+        }
+      ],
+      "source": "BlueChaletMapKTT.png",
+      "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
+      "errorM": 49
+    },
+    {
+      "map": "lighthouse",
+      "positions": [
+        {
+          "x": -142.7,
+          "z": 113.9
+        }
+      ],
+      "source": "BlackChaletMap.png",
+      "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
+      "errorM": 56
+    },
+    {
+      "map": "factory",
+      "positions": [
+        {
+          "x": -23.9,
+          "z": 41.6
+        }
+      ],
+      "source": "TerraGroup storage room keycard map.png",
+      "method": "similitude par ECC sur la silhouette (cc 0,95) entre l'affiche re3mr du wiki et notre SVG de Factory ; contrôle : les extractions Gate 3, Gate 0 et Gate M de tarkov.dev sur leurs icônes (tunnels : décalage mesuré sur l'icône de la porte du bunker caméra, ± 6 m)",
+      "errorM": 10,
+      "floor": {
+        "fr": "Tunnels",
+        "en": "Tunnels"
+      }
+    },
+    {
+      "map": "customs",
+      "positions": [
+        {
+          "x": 112,
+          "z": -48
+        }
+      ],
+      "source": "BoilerBuildingMap.png",
+      "method": "étiquette « Boiler room basement » (coop) de tarkov.dev dans le rectangle rouge de l'affiche 3D de Customs ; perspective : ± 45 m",
+      "errorM": 45
+    },
+    {
+      "map": "woods",
+      "positions": [
+        {
+          "x": 53.1,
+          "z": -42.8
+        }
+      ],
+      "source": "TicketDebtorWoodsTopographicMap.png",
+      "method": "similitude par ECC sur les masques d'eau entre la carte JINDOUZ du wiki et notre SVG de Woods (cc 0,91) ; contrôle visuel de la superposition (lacs, rivière)",
+      "errorM": 18
+    }
+  ],
+  "The Ticket::debtor obtain the sacred amulets#0": [
+    {
+      "map": "customs",
+      "positions": [
+        {
+          "x": 182.1,
+          "z": 148.8
+        }
+      ],
+      "source": "TheCultPart2DormsMap.png",
+      "method": "homographie par ECC sur les arêtes entre l'affiche 3D de Customs (re3mr) et notre SVG, contrôlée sur des sorties et sur les conteneurs de tarkov.dev ; repère rouge au centre",
+      "errorM": 59
+    },
+    {
+      "map": "streets-of-tarkov",
+      "positions": [
+        {
+          "x": -133.0,
+          "z": 271.4
+        }
+      ],
+      "source": "AbandonedFactoryNorthernBuilding.png",
+      "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Streets (résidu ≈ 0,3 m) ; contrôle : transit « The Lab » de tarkov.dev à 3 m de son repère",
+      "errorM": 9
+    },
+    {
+      "map": "reserve",
+      "positions": [
+        {
+          "x": -164.4,
+          "z": 55.1
+        }
+      ],
+      "source": "RB-BK lock location.png",
+      "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Reserve (résidu ≈ 1,2 m)",
+      "errorM": 29
+    },
+    {
+      "map": "reserve",
+      "positions": [
+        {
+          "x": 187.7,
+          "z": -214.0
+        }
+      ],
+      "source": "RB-VO lock location.png",
+      "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Reserve (résidu ≈ 1,2 m)",
+      "errorM": 17
+    },
+    {
+      "map": "streets-of-tarkov",
+      "positions": [
+        {
+          "x": 187.8,
+          "z": 226.8
+        }
+      ],
+      "source": "Mysterious marked key onmap.png",
+      "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Streets (résidu ≈ 0,3 m) ; contrôle : transit « The Lab » de tarkov.dev à 3 m de son repère",
+      "errorM": 6
+    }
+  ],
+  "The Ticket::debtor stash the amulets in the marked room on lighthouse#0": {
+    "map": "lighthouse",
+    "positions": [
+      {
+        "x": 309.7,
+        "z": 512.4
+      }
+    ],
+    "source": "Lighthouse Island Stash Map.png",
+    "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
+    "errorM": 45
+  },
+  "The Ticket::locate the armory with your confiscated equipment#0": {
+    "map": "terminal",
+    "positions": [
+      {
+        "x": 189.0,
+        "z": -244.4
+      }
+    ],
+    "source": "Armory key Map.png",
+    "method": "similitude par ECC sur la silhouette entre la carte re3mr du wiki et notre SVG de Terminal (cc 0,78) ; contrôle : apparitions PMC de tarkov.dev sur la case « Spawn » de l'affiche (3 m)",
+    "errorM": 14
+  },
+  "The Ticket::obtain the keycard to unlock the service passage#0": {
+    "map": "terminal",
+    "positions": [
+      {
+        "x": 272.4,
+        "z": -242.6
+      }
+    ],
+    "source": "Seaport terminal building Map.png",
+    "method": "similitude par ECC sur la silhouette entre la carte re3mr du wiki et notre SVG de Terminal (cc 0,78) ; contrôle : apparitions PMC de tarkov.dev sur la case « Spawn » de l'affiche (3 m)",
+    "errorM": 64
+  },
+  "The Ticket::access the terminal loading zone#0": {
+    "map": "terminal",
+    "positions": [
+      {
+        "x": 92.5,
+        "z": -150.8
+      }
+    ],
+    "source": "Black Division keycard Lock Map.png",
+    "method": "similitude par ECC sur la silhouette entre la carte re3mr du wiki et notre SVG de Terminal (cc 0,78) ; contrôle : apparitions PMC de tarkov.dev sur la case « Spawn » de l'affiche (3 m)",
+    "errorM": 51
+  },
+  "The Ticket::locate the way into the fuel depot#0": {
+    "map": "terminal",
+    "positions": [
+      {
+        "x": 119.6,
+        "z": 10.9
+      }
+    ],
+    "source": "Terminal Metal Gate Map.png",
+    "method": "similitude par ECC sur la silhouette entre la carte re3mr du wiki et notre SVG de Terminal (cc 0,78) ; contrôle : apparitions PMC de tarkov.dev sur la case « Spawn » de l'affiche (3 m)",
+    "errorM": 13
+  },
+  "The Ticket::drain the water in the pumping station#0": {
+    "map": "terminal",
+    "positions": [
+      {
+        "x": 154.8,
+        "z": 269.1
+      }
+    ],
+    "source": "TerminalPumpingStationMap.png",
+    "method": "similitude par ECC sur la silhouette entre la carte re3mr du wiki et notre SVG de Terminal (cc 0,78) ; contrôle : apparitions PMC de tarkov.dev sur la case « Spawn » de l'affiche (3 m)",
+    "errorM": 31
+  },
+  "The Ticket::obtain the key to the gate blocking the road to the pier#0": {
+    "map": "terminal",
+    "positions": [
+      {
+        "x": -260.1,
+        "z": 338.3
+      }
+    ],
+    "source": "Terminal Pier Building Map.png",
+    "method": "similitude par ECC sur la silhouette entre la carte re3mr du wiki et notre SVG de Terminal (cc 0,78) ; contrôle : apparitions PMC de tarkov.dev sur la case « Spawn » de l'affiche (3 m)",
+    "errorM": 32
+  },
+  "The Ticket::savior agree to find dirt on terragroup for mr kerman#0": [
+    {
+      "map": "shoreline",
+      "positions": [
+        {
+          "x": 292.2,
+          "z": 118.3
+        }
+      ],
+      "source": "AccidentalWitnessKozlovsHideoutMap.png",
+      "method": "similitude par appariement des bâtiments avec le SVG de Shoreline (19 paires, résidu 0,9 m) ; centre du carré rouge autour de la maison",
+      "errorM": 9
+    },
+    {
+      "map": "lighthouse",
+      "positions": [
+        {
+          "x": 413.1,
+          "z": 481.2
+        }
+      ],
+      "source": "LightkeeperMap.png",
+      "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
+      "errorM": 45
+    },
+    {
+      "map": "streets-of-tarkov",
+      "positions": [
+        {
+          "x": 37.6,
+          "z": 119.3
+        }
+      ],
+      "source": "PostOfficeMap.png",
+      "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Streets (résidu ≈ 0,3 m) ; contrôle : transit « The Lab » de tarkov.dev à 3 m de son repère",
+      "errorM": 17
+    },
+    {
+      "map": "lighthouse",
+      "positions": [
+        {
+          "x": 39.3,
+          "z": -847.7
+        }
+      ],
+      "source": "Boreas Lighthouse Warehouse Map.png",
+      "method": "similitude sur 8 repères (extractions de tarkov.dev retrouvées sur les icônes de la carte JINDOUZ, résidu 10 m) ; la version paysage v1.7 est la même carte pivotée (extractions vérifiées dessus)",
+      "errorM": 45
+    },
+    {
+      "map": "customs",
+      "positions": [
+        {
+          "x": 88.3,
+          "z": -54.5
+        }
+      ],
+      "source": "ReshalasBunkhouseKeyMap.png",
+      "method": "homographie par ECC sur les arêtes de l'affiche 3D de Customs (re3mr) puis contrôle par 23 repères (sorties et transits de tarkov.dev retrouvés sur leurs icônes) : accord à ~10 m dans le sud de la map, 40 à 75 m dans le centre et le nord (perspective) ; valeur retenue d'après les repères les plus proches ; recoupé avec les conteneurs de maps.json (tiroirs et vestes à 90,-53)",
+      "errorM": 25
+    },
+    {
+      "map": "streets-of-tarkov",
+      "positions": [
+        {
+          "x": 226.5,
+          "z": 228.2
+        }
+      ],
+      "source": "AccidentalWitnessAnastasiaBuildingMap.png",
+      "method": "similitude par points SIFT sur le SVG de Streets (résidu 0,2 m) ; centre du carré rouge autour du bâtiment",
+      "errorM": 8
+    },
+    {
+      "map": "woods",
+      "positions": [
+        {
+          "x": 38.2,
+          "z": -334.4
+        }
+      ],
+      "source": "Ryabina outpost location.png",
+      "method": "similitude par ECC sur les masques d'eau entre la carte JINDOUZ du wiki et notre SVG de Woods (cc 0,91) ; contrôle visuel de la superposition (lacs, rivière)",
       "errorM": 22
+    },
+    {
+      "map": "interchange",
+      "positions": [
+        {
+          "x": 75.5,
+          "z": -325.1
+        },
+        {
+          "x": 75.5,
+          "z": -291.6
+        }
+      ],
+      "source": "Carousel outpost.jpg",
+      "method": "plan du centre commercial (src/map/basement.ts) recalé par points SIFT sur l'image du wiki (échelle 0,5 exacte)",
+      "errorM": 25
+    },
+    {
+      "map": "shoreline",
+      "positions": [
+        {
+          "x": -276.1,
+          "z": 466.3
+        }
+      ],
+      "source": "Labyrinth facility research report location map.png",
+      "method": "similitude par appariement des bâtiments (12 paires, résidu 0,8 m) avec le SVG de Littoral ; centre de l'anneau de l'épingle rouge ; contrôle approximatif : les icônes d'extraction du wiki sont décalées de 10 à 15 m",
+      "errorM": 12
+    },
+    {
+      "map": "the-labyrinth",
+      "positions": [
+        {
+          "x": 20.7,
+          "z": 6.7
+        }
+      ],
+      "source": "Labryrinth torture room map.png",
+      "method": "similitude (ECC sur les masques de sol) entre l'affiche re3mr du Labyrinthe et les tuiles de la map de l'appli (même échelle 0,99 sur les 5 affiches) ; contrôle : sorties « The Way Up » et « Ariadne » de tarkov.dev sur leurs icônes, résidu < 1 m ; centre du cadre rouge de la pièce",
+      "errorM": 4
+    },
+    {
+      "map": "the-labyrinth",
+      "positions": [
+        {
+          "x": -6.7,
+          "z": 30.6
+        },
+        {
+          "x": -13.7,
+          "z": 51.5
+        },
+        {
+          "x": 12.0,
+          "z": 32.8
+        },
+        {
+          "x": 9.7,
+          "z": 4.7
+        },
+        {
+          "x": -5.5,
+          "z": 10.0
+        }
+      ],
+      "source": "The Labyrinth Scientist locations map.png",
+      "method": "similitude (ECC sur les masques de sol) entre l'affiche re3mr du Labyrinthe et les tuiles de la map de l'appli (même échelle 0,99 sur les 5 affiches) ; contrôle : sorties « The Way Up » et « Ariadne » de tarkov.dev sur leurs icônes, résidu < 1 m ; centres des 5 repères orange numérotés (le n°4 est dans le bureau d'observation, recoupé avec l'autre affiche à 0,4 m)",
+      "errorM": 4
+    },
+    {
+      "map": "the-labyrinth",
+      "positions": [
+        {
+          "x": 10.1,
+          "z": 4.7
+        }
+      ],
+      "source": "Observation room Map.png",
+      "method": "similitude (ECC sur les masques de sol) entre l'affiche re3mr du Labyrinthe et les tuiles de la map de l'appli (même échelle 0,99 sur les 5 affiches) ; contrôle : sorties « The Way Up » et « Ariadne » de tarkov.dev sur leurs icônes, résidu < 1 m ; centre du cadre rouge du bureau d'observation",
+      "errorM": 4
+    },
+    {
+      "map": "factory",
+      "positions": [
+        {
+          "x": -5.7,
+          "z": -17.0
+        }
+      ],
+      "source": "The Unheard Transport Log Map.jpg",
+      "method": "similitude par ECC sur la silhouette (cc 0,95) entre l'affiche re3mr du wiki et notre SVG de Factory ; contrôle : les extractions Gate 3, Gate 0 et Gate M de tarkov.dev sur leurs icônes (tunnels : décalage mesuré sur l'icône de la porte du bunker caméra, ± 6 m)",
+      "errorM": 7
+    },
+    {
+      "map": "factory",
+      "positions": [
+        {
+          "x": -23.9,
+          "z": 41.6
+        }
+      ],
+      "source": "TerraGroup storage room keycard map.png",
+      "method": "similitude par ECC sur la silhouette (cc 0,95) entre l'affiche re3mr du wiki et notre SVG de Factory ; contrôle : les extractions Gate 3, Gate 0 et Gate M de tarkov.dev sur leurs icônes (tunnels : décalage mesuré sur l'icône de la porte du bunker caméra, ± 6 m)",
+      "errorM": 10,
+      "floor": {
+        "fr": "Tunnels",
+        "en": "Tunnels"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -206.4,
+          "z": -299.7
+        }
+      ],
+      "source": "A.P meeting audio tape map.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 14,
+      "floor": {
+        "fr": "Niveau 1 (Labs)",
+        "en": "First level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -147.3,
+          "z": -399.5
+        }
+      ],
+      "source": "A.P meeting audio tape map.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 15,
+      "floor": {
+        "fr": "Niveau 2 (Labs)",
+        "en": "Second level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -255.5,
+          "z": -358.5
+        }
+      ],
+      "source": "A.P meeting audio tape map.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 15,
+      "floor": {
+        "fr": "Niveau 2 (Labs)",
+        "en": "Second level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -155.1,
+          "z": -370.4
+        }
+      ],
+      "source": "Document on changes in enterprise interactions map.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki (version mono-niveau, même dessin) et les tuiles de la map Labs ; contrôle : porte du hangar de tarkov.dev à 3 m",
+      "errorM": 12,
+      "floor": {
+        "fr": "Niveau 1 (Labs)",
+        "en": "First level (Labs)"
+      }
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -146.0,
+          "z": -398.8
+        }
+      ],
+      "source": "Dark office 2nd floor.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 17,
+      "floor": {
+        "fr": "Niveau 2 (Labs)",
+        "en": "Second level (Labs)"
+      }
+    },
+    {
+      "map": "shoreline",
+      "positions": [
+        {
+          "x": 405.4,
+          "z": -41.5
+        }
+      ],
+      "source": "FallingSkiesElektroniksUSBMap.png",
+      "method": "similitude (appariement des masques d'eau et de routes, 5 m de résidu) entre la carte JINDOUZ du wiki et notre SVG de Shoreline ; contrôle : extractions de tarkov.dev sur leurs icônes (± 10 m)",
+      "errorM": 26
+    },
+    {
+      "map": "streets-of-tarkov",
+      "positions": [
+        {
+          "x": -58.6,
+          "z": -147.6
+        }
+      ],
+      "source": "CultVictimsApartmentKeyMap.png",
+      "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Streets (résidu ≈ 0,3 m) ; contrôle : transit « The Lab » de tarkov.dev à 3 m de son repère",
+      "errorM": 14
+    },
+    {
+      "map": "interchange",
+      "positions": [
+        {
+          "x": -342.7,
+          "z": -54.0
+        }
+      ],
+      "source": "Gnezdo outpost Map.jpg",
+      "method": "similitude sur 4 sorties et transits de tarkov.dev retrouvés sur l'image satellite du wiki (écart ≤ 12 m) ; les affiches ULTRA et Gnezdo sont recalées sur cette image par SIFT",
+      "errorM": 36
     }
   ]
 }
