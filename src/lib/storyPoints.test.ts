@@ -1,6 +1,9 @@
 import wikitext from "./__fixtures__/accidental-witness.wikitext?raw";
 import labWikitext from "./__fixtures__/labyrinth-en.wikitext?raw";
 import { describe, expect, it } from "vitest";
+import L from "leaflet";
+import { BUNDLED_CALIBRATION } from "../map/calibration";
+import { getCRS } from "../map/crs";
 import { requirementKeys, stepKeys, stepText, parseStoryPage, storyStepId } from "./story";
 import { chaptersWithPositions, currentStoryItem, currentStoryPoints, pointsOnMap, STORY_POSITIONS, type StoryItem } from "./storyPoints";
 
@@ -143,5 +146,38 @@ describe("filtrage par map", () => {
     expect(pointsOnMap(customs, "customs")).toHaveLength(1);
     expect(pointsOnMap(customs, "shoreline")).toHaveLength(0);
     expect(pointsOnMap(customs, undefined)).toHaveLength(0);
+  });
+});
+
+describe("Boreas : ponts de l'Icebreaker", () => {
+  const ice = Object.entries(STORY_POSITIONS)
+    .filter(([k]) => k.startsWith("Boreas::"))
+    .flatMap(([k, v]) => [v].flat().filter((e) => e.map === "icebreaker").map((e) => ({ k, e })));
+
+  it("11 cases (interphone, salle des machines, porte endommagée, C-1), avec leur pont", () => {
+    expect(new Set(ice.map((i) => i.k)).size).toBe(11);
+    for (const { e } of ice) expect(e.floor?.fr).toMatch(/^Pont \d/);
+  });
+
+  it("chaque point est sur le bateau dans la grille de tuiles, avec le calibrage corrigé", () => {
+    const cal = BUNDLED_CALIBRATION["icebreaker"];
+    const crs = getCRS(cal);
+    for (const { k, e } of ice) {
+      for (const p of e.positions) {
+        const px = crs.latLngToPoint(L.latLng(p.z, p.x), 0);
+        expect(px.x, k).toBeGreaterThan(80);
+        expect(px.x, k).toBeLessThan(176);
+        expect(px.y, k).toBeGreaterThan(10);
+        expect(px.y, k).toBeLessThan(250);
+      }
+    }
+  });
+
+  it("contrôle indépendant : serrures de tarkov.dev (pont 0, pont 7) à moins de 4 m des cadres rouges", () => {
+    const at = (file: string) => ice.find((i) => i.e.source === file)!.e.positions[0];
+    const near = (p: { x: number; z: number }, x: number, z: number) => Math.hypot(p.x - x, p.z - z);
+    expect(near(at("BoreasEngineRoomKeycardDoorMap.jpg"), 10.5, 25.6)).toBeLessThan(4);
+    expect(near(at("Compartment C-1 keycard map.jpg"), -5.3, 28.4)).toBeLessThan(4);
+    expect(near(at("BoreasScientistIntercomMap.jpg"), 11.4, 41.6)).toBeLessThan(2.5); // serrure C-3, pont 1
   });
 });

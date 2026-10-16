@@ -1982,5 +1982,217 @@
       "method": "similitude sur 4 sorties et transits de tarkov.dev retrouvés sur l'image satellite du wiki (écart ≤ 12 m) ; les affiches ULTRA et Gnezdo sont recalées sur cette image par SIFT",
       "errorM": 36
     }
-  ]
+  ],
+  "Boreas::check if any crew members survived on the ship#0": {
+    "map": "icebreaker",
+    "positions": [
+      {
+        "x": 11.2,
+        "z": 39.8
+      }
+    ],
+    "source": "BoreasScientistIntercomMap.jpg",
+    "method": "similitude (ECC sur les masques de plancher) entre le pont 1 de l'affiche re3mr du wiki et les tuiles du pont d'Icebreaker (cc 0,96), échelle et repère d'Icebreaker recalés sur les points de tarkov.dev ; contrôle : la serrure de porte C-3 de tarkov.dev (pont 1) à 1,8 m du centre du cercle rouge",
+    "errorM": 7,
+    "floor": {
+      "fr": "Pont 1 (Infirmary)",
+      "en": "Deck 1 (Infirmary)"
+    }
+  },
+  "Boreas::ask the surviving scientist how to open the code locked door on level 6#0": {
+    "map": "icebreaker",
+    "positions": [
+      {
+        "x": 11.2,
+        "z": 39.8
+      }
+    ],
+    "source": "BoreasScientistIntercomMap.jpg",
+    "method": "similitude (ECC sur les masques de plancher) entre le pont 1 de l'affiche re3mr du wiki et les tuiles du pont d'Icebreaker (cc 0,96), échelle et repère d'Icebreaker recalés sur les points de tarkov.dev ; contrôle : la serrure de porte C-3 de tarkov.dev (pont 1) à 1,8 m du centre du cercle rouge",
+    "errorM": 7,
+    "floor": {
+      "fr": "Pont 1 (Infirmary)",
+      "en": "Deck 1 (Infirmary)"
+    }
+  },
+  "Boreas::inform the scientist about the captain s death#0": {
+    "map": "icebreaker",
+    "positions": [
+      {
+        "x": 11.2,
+        "z": 39.8
+      }
+    ],
+    "source": "BoreasScientistIntercomMap.jpg",
+    "method": "similitude (ECC sur les masques de plancher) entre le pont 1 de l'affiche re3mr du wiki et les tuiles du pont d'Icebreaker (cc 0,96), échelle et repère d'Icebreaker recalés sur les points de tarkov.dev ; contrôle : la serrure de porte C-3 de tarkov.dev (pont 1) à 1,8 m du centre du cercle rouge",
+    "errorM": 7,
+    "floor": {
+      "fr": "Pont 1 (Infirmary)",
+      "en": "Deck 1 (Infirmary)"
+    }
+  },
+  "Boreas::inform the scientist that everything is ready for his evacuation#0": {
+    "map": "icebreaker",
+    "positions": [
+      {
+        "x": 11.2,
+        "z": 39.8
+      }
+    ],
+    "source": "BoreasScientistIntercomMap.jpg",
+    "method": "similitude (ECC sur les masques de plancher) entre le pont 1 de l'affiche re3mr du wiki et les tuiles du pont d'Icebreaker (cc 0,96), échelle et repère d'Icebreaker recalés sur les points de tarkov.dev ; contrôle : la serrure de porte C-3 de tarkov.dev (pont 1) à 1,8 m du centre du cercle rouge",
+    "errorM": 7,
+    "floor": {
+      "fr": "Pont 1 (Infirmary)",
+      "en": "Deck 1 (Infirmary)"
+    }
+  },
+  "Boreas::access the engine room#0": [
+    {
+      "map": "icebreaker",
+      "positions": [
+        {
+          "x": 7.8,
+          "z": 23.4
+        }
+      ],
+      "source": "BoreasEngineRoomKeycardDoorMap.jpg",
+      "method": "similitude (ECC sur les masques de plancher) entre le pont 0 de l'affiche re3mr du wiki et les tuiles du pont d'Icebreaker (cc 0,93), échelle et repère d'Icebreaker recalés sur les points de tarkov.dev ; contrôle : la serrure du pont 0 de tarkov.dev à 3,5 m du centre du cadre rouge",
+      "errorM": 9,
+      "floor": {
+        "fr": "Pont 0 (Storage/Security)",
+        "en": "Deck 0 (Storage/Security)"
+      }
+    },
+    {
+      "map": "icebreaker",
+      "positions": [
+        {
+          "x": 0.2,
+          "z": -8.3
+        }
+      ],
+      "source": "BoreasEngineRoomMap.jpg",
+      "method": "similitude (ECC sur les masques de plancher) entre le pont 1 de l'affiche re3mr du wiki et les tuiles du pont d'Icebreaker (cc 0,96), échelle et repère d'Icebreaker recalés sur les points de tarkov.dev ; centre du cadre rouge posé sur le pont 1 : emprise de la salle des machines, pas un point précis ; même recalage que le pont 1 (contrôle : serrure C-3)",
+      "errorM": 17,
+      "floor": {
+        "fr": "Pont 1 (Infirmary), au-dessus de la salle des machines",
+        "en": "Deck 1 (Infirmary), above the engine room"
+      }
+    }
+  ],
+  "Boreas::access the engine room#1": [
+    {
+      "map": "icebreaker",
+      "positions": [
+        {
+          "x": 7.8,
+          "z": 23.4
+        }
+      ],
+      "source": "BoreasEngineRoomKeycardDoorMap.jpg",
+      "method": "similitude (ECC sur les masques de plancher) entre le pont 0 de l'affiche re3mr du wiki et les tuiles du pont d'Icebreaker (cc 0,93), échelle et repère d'Icebreaker recalés sur les points de tarkov.dev ; contrôle : la serrure du pont 0 de tarkov.dev à 3,5 m du centre du cadre rouge",
+      "errorM": 9,
+      "floor": {
+        "fr": "Pont 0 (Storage/Security)",
+        "en": "Deck 0 (Storage/Security)"
+      }
+    },
+    {
+      "map": "icebreaker",
+      "positions": [
+        {
+          "x": 0.2,
+          "z": -8.3
+        }
+      ],
+      "source": "BoreasEngineRoomMap.jpg",
+      "method": "similitude (ECC sur les masques de plancher) entre le pont 1 de l'affiche re3mr du wiki et les tuiles du pont d'Icebreaker (cc 0,96), échelle et repère d'Icebreaker recalés sur les points de tarkov.dev ; centre du cadre rouge posé sur le pont 1 : emprise de la salle des machines, pas un point précis ; même recalage que le pont 1 (contrôle : serrure C-3)",
+      "errorM": 17,
+      "floor": {
+        "fr": "Pont 1 (Infirmary), au-dessus de la salle des machines",
+        "en": "Deck 1 (Infirmary), above the engine room"
+      }
+    }
+  ],
+  "Boreas::find a way into the icebreaker superstructure#0": {
+    "map": "icebreaker",
+    "positions": [
+      {
+        "x": -10.8,
+        "z": 18.9
+      }
+    ],
+    "source": "BoreasDamagedDoorMap.jpg",
+    "method": "similitude (ECC sur les masques de plancher) entre le pont 3 de l'affiche re3mr du wiki et les tuiles du pont d'Icebreaker (cc 0,95), échelle et repère d'Icebreaker recalés sur les points de tarkov.dev ; contrôle : 3 serrures de cabines du pont 3 de tarkov.dev retrouvées sur leurs icônes de l'affiche v0.3 (0,2 à 1,1 m)",
+    "errorM": 7,
+    "floor": {
+      "fr": "Pont 3 (Gym/Canteen), côté bâbord",
+      "en": "Deck 3 (Gym/Canteen), port side"
+    }
+  },
+  "Boreas::reach the damaged door on the roof of the engine room#0": {
+    "map": "icebreaker",
+    "positions": [
+      {
+        "x": -10.8,
+        "z": 18.9
+      }
+    ],
+    "source": "BoreasDamagedDoorMap.jpg",
+    "method": "similitude (ECC sur les masques de plancher) entre le pont 3 de l'affiche re3mr du wiki et les tuiles du pont d'Icebreaker (cc 0,95), échelle et repère d'Icebreaker recalés sur les points de tarkov.dev ; contrôle : 3 serrures de cabines du pont 3 de tarkov.dev retrouvées sur leurs icônes de l'affiche v0.3 (0,2 à 1,1 m)",
+    "errorM": 7,
+    "floor": {
+      "fr": "Pont 3 (Gym/Canteen), côté bâbord",
+      "en": "Deck 3 (Gym/Canteen), port side"
+    }
+  },
+  "Boreas::reach the damaged door on the roof of the engine room#1": {
+    "map": "icebreaker",
+    "positions": [
+      {
+        "x": -10.8,
+        "z": 18.9
+      }
+    ],
+    "source": "BoreasDamagedDoorMap.jpg",
+    "method": "similitude (ECC sur les masques de plancher) entre le pont 3 de l'affiche re3mr du wiki et les tuiles du pont d'Icebreaker (cc 0,95), échelle et repère d'Icebreaker recalés sur les points de tarkov.dev ; contrôle : 3 serrures de cabines du pont 3 de tarkov.dev retrouvées sur leurs icônes de l'affiche v0.3 (0,2 à 1,1 m)",
+    "errorM": 7,
+    "floor": {
+      "fr": "Pont 3 (Gym/Canteen), côté bâbord",
+      "en": "Deck 3 (Gym/Canteen), port side"
+    }
+  },
+  "Boreas::locate compartment c 1#0": {
+    "map": "icebreaker",
+    "positions": [
+      {
+        "x": -2.9,
+        "z": 29.7
+      }
+    ],
+    "source": "Compartment C-1 keycard map.jpg",
+    "method": "similitude (ECC sur les masques de plancher) entre le pont 7 de l'affiche re3mr du wiki et les tuiles du pont d'Icebreaker (cc 0,89), échelle et repère d'Icebreaker recalés sur les points de tarkov.dev ; contrôle : la serrure du pont 7 de tarkov.dev à 2,7 m du centre du cadre rouge",
+    "errorM": 7,
+    "floor": {
+      "fr": "Pont 7 (Officers' Deck)",
+      "en": "Deck 7 (Officers' Deck)"
+    }
+  },
+  "Boreas::access compartment c 1#0": {
+    "map": "icebreaker",
+    "positions": [
+      {
+        "x": -2.9,
+        "z": 29.7
+      }
+    ],
+    "source": "Compartment C-1 keycard map.jpg",
+    "method": "similitude (ECC sur les masques de plancher) entre le pont 7 de l'affiche re3mr du wiki et les tuiles du pont d'Icebreaker (cc 0,89), échelle et repère d'Icebreaker recalés sur les points de tarkov.dev ; contrôle : la serrure du pont 7 de tarkov.dev à 2,7 m du centre du cadre rouge",
+    "errorM": 7,
+    "floor": {
+      "fr": "Pont 7 (Officers' Deck)",
+      "en": "Deck 7 (Officers' Deck)"
+    }
+  }
 }
