@@ -362,8 +362,10 @@ export default function App() {
           onClick={() => setPanelOpen((o) => !o)}
           aria-expanded={panelOpen}
           aria-controls="side-panel"
+          aria-label={panelOpen ? tr("Masquer le panneau", "Hide panel") : tr("Afficher les quêtes", "Show quests")}
         >
-          {panelOpen ? tr("◀ Masquer", "◀ Hide") : tr("☰ Quêtes", "☰ Quests")}
+          {panelOpen ? "◀" : "☰"}
+          <span className="panel-toggle-text">{panelOpen ? tr(" Masquer", " Hide") : tr(" Quêtes", " Quests")}</span>
         </button>
         <div className="brand">
           Quest Planner <span className="mode-badge">{modeLabel}</span>

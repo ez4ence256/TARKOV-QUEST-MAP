@@ -1605,6 +1605,9 @@ kbd {
   .brand {
     display: none;
   }
+  .panel-toggle-text {
+    display: none; /* téléphone : icône seule, place pour le choix de la map */
+  }
   .map-picker {
     max-width: none;
     flex: 1;
