@@ -4,84 +4,88 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 
 ---
 
-## État actuel (11 octobre 2026, fin de session 7)
+## État actuel (16 octobre 2026, fin de session 8)
+
+La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : versions **0.7.0 à 0.7.23** (voir « Session 8 » dans l'historique).
 
 | Élément | État |
 |---|---|
-| Branche | **`main`** (renommée depuis `claude/tarkov-quest-planner-axir48` en session 7 ; dépôt **`ez4ence256/TARKOV-QUEST-MAP`**). Sur GitHub, `main` est la seule branche et la branche par défaut. |
-| Derniers commits | `c12988e` case « Extracts Scav » · `709720a` main story mélangée aux quêtes · `d51bc68` photos du wiki dans le Guide · `72e0a00` pages wiki supprimées si stockage plein · `c3dc322` main story · `3302076` cache du wiki renouvelé à chaque utilisation · `6ff1ee9` cache libéré si plein · `959bb7c` images fiche quête |
-| Travail non commité | Seulement `.claude/launch.json` (volontairement hors du dépôt : chemin propre à cette machine) |
-| Tests | 207/207 au vert (`npx vitest run`) |
-| Compilation | OK (`npm run build`). Avertissement Vite : le fichier principal fait 516 Ko (> 500 Ko). L'OCR est dans des fichiers séparés, chargés à la demande. |
-| Vérifié dans le navigateur | Panneau à 400 / 440 / 520 / 540 / 560 / 720 px, fenêtre de 1024 px et zoom simulé à 125 %, téléphone · sélection épinglée avec filtre et recherche, « Tout désélectionner » · ordre des sections sur Signal - Partie 3 · sorties sur Douanes (niveau principal + sous-sol) et Labs (principal + niveau technique) · import d'une **image de synthèse** (Ctrl+V, vérification, ajout, map choisie) |
-| **Pas vérifié** | **Import avec les captures de l'utilisateur** : elles ne sont pas arrivées en session 5 (ni l'image de référence 3D). |
-| **Poussé sur GitHub** | Session 7 poussée jusqu'à `72e0a00` par URL HTTPS (vérifié avec `git ls-remote`). Voir « Push ». |
-| **En attente de validation** | Main story : chapitres suivis en session 7, à valider à l'usage ; étude 3D (session 5) ; liste finale des libellés d'onglets (proposition) |
+| Branche | **`main`** seule (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**, branche par défaut). |
+| Version affichée | **0.7.23** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
+| Derniers commits | `245ee03` Version 0.7.23 · `3a59955` Main story : ponts de l'Icebreaker pour Boreas · `2593e19` Icebreaker : calibrage corrigé · `45beb1b` positions > 100 m retirées (0.7.22) · `7acab9f` positions de The Ticket · `5447eef` bouton du panneau en icône seule sur téléphone (0.7.21) · `69ddc95` Item finder · `d81736d` infos du Labyrinthe sur la map |
+| Travail non commité | Seulement `.claude/` (non suivi, volontairement hors du dépôt : chemin propre à cette machine) |
+| Tests | **290/290** au vert (`npx vitest run`), 29 fichiers (voir « Tests ») |
+| Compilation | OK (`npm run build`). Avertissement Vite : le fichier principal fait **682 Ko** (198 Ko compressé) > 500 Ko. L'OCR est dans des fichiers séparés chargés à la demande (moteur 3,9 Mo, worker 111 Ko). |
+| **Production** | **https://tarkov.aprilox.fr**, déployée automatiquement à chaque push sur `main` (~1 min) par l'hébergeur, qui lance `npm start` (`server/index.mjs` : `dist/` + API des rooms sur le même port). Fichier absent = 404 sans cache (corrige l'empoisonnement du cache) ; `index.html` en `no-cache`, `/assets/*` en `immutable`. |
+| Vérifié dans le navigateur | Panneau à 400 à 720 px, téléphone, zoom 125 % simulé · sélection épinglée, ordre des sections · sorties (Douanes, Labs) · import d'une **image de synthèse** · rooms entre deux origines (création, jointure, coupure du serveur de 45 s) · Labyrinthe (marqueurs, bascule de map aux étapes) · Icebreaker après correction · voir l'historique pour le détail. |
+| **Poussé sur GitHub** | `main` poussée jusqu'à `245ee03` par URL HTTPS (vérifié avec `git ls-remote`). Le commit de journal de fin de session 8 est à pousser. Voir « Push ». |
+| **En attente / à valider** | Main story à valider à l'usage ; étude 3D (session 5) ; liste finale des libellés d'onglets (proposition) |
+| **Pas vérifié** | **OCR sur de vraies photos / captures** (surtout les photos de téléphone) ; **points de la Main story pas tous parcourus dans l'app** (Falling Skies, Boreas…) : contrôlés par le recalage et les tests, pas étape par étape ; rendu visuel souvent vérifié par le **DOM seulement** (panneau du navigateur masqué, pas de capture) ; libellés anglais de certaines fonctions (item finder, rooms, Labyrinthe) ; rooms derrière Cloudflare (SSE, tampon) |
 
 ### Push
-- Sessions 2 à 4 : jamais poussé (identifiants GitHub absents de la session de Claude).
-- Session 5 : **une tentative à la toute fin, réussie** : `git push origin claude/tarkov-quest-planner-axir48` a envoyé `ecbe77a..63a8ed7` (18 commits). Après `git fetch`, local et origin sont identiques (0 en avance, 0 en retard). Les identifiants GitHub sont donc maintenant disponibles dans la session (gestionnaire d'identifiants Windows ou GitHub Desktop) ; aucune configuration Git n'a été modifiée.
-- Ce commit de journal a été poussé ensuite par un second push.
-- **Session 6** : le dépôt est maintenant `ez4ence256/TARKOV-QUEST-MAP`. Le remote `origin` est en SSH et ne marche pas sur ce PC. Pousser avec `git push https://github.com/ez4ence256/TARKOV-QUEST-MAP.git claude/tarkov-quest-planner-axir48`, puis vérifier avec `git ls-remote <url> claude/tarkov-quest-planner-axir48` contre `HEAD` (`origin/...` n'est pas mis à jour par un push par URL).
-- **Session 7 (fin)** : branche renommée en `main`. Pousser avec `git push https://github.com/ez4ence256/TARKOV-QUEST-MAP.git main`, vérifier avec `git ls-remote https://github.com/ez4ence256/TARKOV-QUEST-MAP.git main`.
+- Sessions 2 à 4 : jamais poussé. Session 5 : un push réussi à la fin (identifiants GitHub disponibles dans la session).
+- **Le remote `origin` est en SSH et ne marche pas sur ce PC.** Pousser par URL : `git push https://github.com/ez4ence256/TARKOV-QUEST-MAP.git main`, puis vérifier avec `git ls-remote https://github.com/ez4ence256/TARKOV-QUEST-MAP.git main` contre `HEAD` (`origin/main` n'est pas mis à jour par un push par URL).
+- La branche `claude/tarkov-quest-planner-axir48` a été renommée en `main` en fin de session 7 ; `main` est la seule branche.
+- Un push sur `main` déclenche le déploiement en production (voir la ligne « Production »).
 
-### Commits depuis la session 1 (locaux, à pousser)
+### Commits depuis la session 1
 
 | Commit | Session | Contenu |
 |---|---|---|
-| `1342d80` | 2 | Étages (sélecteur) et fonds en tuiles pour Labs, Labyrinth et Icebreaker |
-| `0fb439b` | 3 | Étages supérieurs affichés sur la carte de base |
-| `3591047` | 3 | Recherche bilingue tolérante aux fautes |
-| `8b74a2f` | 3 | Spawns d'objets de quête numérotés et photos du wiki |
-| `77c642c` | 3 | Journal |
-| `78d3e96` | 4 | Réinitialisation de la progression |
-| `e25a742` | 4 | Onglet Quête : objectifs à cocher, progression, réinitialisation |
-| `c79daf5` | 4 | Journal (rapport sur l'API du wiki) |
-| `708060c` | 4 | Onglet Quête : informations complètes du wiki et de tarkov.dev |
-| `e362f55`, `0c90833`, `bd1f31d` | 4 | Journal |
-| `010a9b4` | 5 | Panneau réglable (440 px par défaut), onglets sans césure |
-| `7d2655a` | 5 | Quêtes sélectionnées épinglées, « Tout désélectionner » |
-| `3cad781` | 5 | Ordre des sections de la fiche quête |
-| `70bf964` | 5 | Sorties, coops et transits |
-| `09d0146` | 5 | Import de quêtes par capture d'écran (OCR) |
-| `63a8ed7` | 5 | Journal (fin de session 5), poussé |
-| (suivant) | 5 | Journal : résultat du push |
-| `8ad2e50` | 6 | Interface bilingue FR/EN : `tr(fr, en)` dans `src/lib/i18n.ts`, choix enregistré (`tqp:lang`), sélecteur dans la barre du haut et sur l'écran de choix du mode ; changer de langue reconstruit la mise en page |
-| `7355d20` | 6 | Variantes de maps regroupées sur leur map de base |
-| `bd5db84`, `879395c` | 6 | Carte libre sans effet ressort ; vue conservée au changement de langue et au chargement du calibrage |
-| `1a441f1` | 6 | Filtre de map = map affichée |
-| `df9e5f3` | 6 | Icônes de sorties PMC / Scav / communes (légende dans Réglages → Affichage) |
-| `188e0b8` | 6 | Photos du wiki dans la bulle des sorties |
-| `959bb7c` | 6 | Images de la fiche quête (objets, clés, récompenses), prérequis cliquables |
-| `6ff1ee9` | 6 | Cache : place libérée si le stockage local est plein |
-| `3302076` | 7 | Wiki : cache renouvelé à chaque utilisation, entrées expirées purgées |
-| `c3dc322` | 7 | Main story : chapitres du wiki suivis étape par étape |
-| `72e0a00` | 7 | Wiki : pages les moins utilisées supprimées si le stockage est plein |
-| `d51bc68` | 7 | Fiche quête : photos du wiki dans la section Guide |
-| `709720a` | 7 | Main story : chapitres mélangés aux quêtes, « Main story » à la place du marchand |
-| `c12988e` | 7 | Carte : case « Extracts Scav » dans la barre du haut (sorties Scav seules masquées, sorties communes gardées ; choix retenu `tqp:showScavExits`) |
 
-### Tests (207)
+| `ca692bf`, `72faaa5`, `eb5851a`, `c8602c5`, `3ab6f50`, `79ed635`, `23f9283`, `f4ba92f`, `a95742b`, `61286e3`, `545c355`, `f055390`, `a0bc9d2`, `91307c1`, `a500549`, `2f0a39d`, `ac5d787`, `aa8642e`, `c97553e`, `e666553`, `9a00761`, `5447eef`, `45beb1b`, `245ee03` | 8 | Versions affichées 0.7.0 à 0.7.23 (la plupart dans le commit de la fonction livrée) |
+| `72faaa5`, `eb5851a`, `c2e085b`, `19a421c` | 8 | Production : panne de cache (fichier principal renommé, chargeur qui se répare, serveur `npm start` avec 404 sans cache), journal |
+| `2a72a1d`, `695ec9b`, `ddb3f41`, `c8602c5` | 8 | Sorties : hors map écartées (`exitsNearMap`), clic -> photos dans l'onglet Photos |
+| `13da7d2`, `28f9390`, `677d7d9` | 8 | Étages : sorties de cave au niveau principal (ZB-1011/1012), étage lu dans la description (`floorFromText`), mall d'Interchange (rez-de-chaussée / 2e étage, 2e étage grisé au niveau principal) |
+| `c41ea5d`, `585e8c1`, `a95742b`, `b3044b9`, `bc42bfe` | 8 | Interchange : niveau « Sous-sol (parking) » (SVG abandonné, image re3mr pleine résolution) |
+| `7bf0c2c`, `f5f346a` | 8 | Interchange : plans détaillés de l'intérieur du mall, trous des icônes comblés |
+| `c2e085b`, `554d6dc`, `2960a2a`, `3ab6f50`, `ec0f3c3` | 8 | Rooms : serveur (SSE + POST), client (sync par différence), reprise après coupure, journal |
+| `83de7c1`, `6d34ac3` | 8 | Choix de la map avec les images des maps (barre du haut, filtre des quêtes) |
+| `4cf51cf`, `79ed635`, `c81c15e` | 8 | Quêtes d'événement du wiki, Kappa selon le wiki, audit des quêtes (test de non-perte) |
+| `890f1a3` | 8 | Un objectif à la fois sur la carte, bascule sur la map de la quête, repère « en cours » |
+| `91307c1` | 8 | Capture : bouton « Prendre une photo » sur téléphone |
+| `fda3c3c`, `cc8ee5d` | 8 | Main story : conditions de déblocage (Requirements) ; « Terminer le chapitre X » d'après l'infobox |
+| `9c8b74b`, `870170f`, `631d5d3` | 8 | Main story : positions sur les cartes du wiki (pilote Accidental Witness), correction du test |
+| `f4f9078`, `c458dd4` | 8 | Main story : positions de The Labyrinth ; photos de l'étape en cours depuis la bulle de la carte |
+| `c37d6c7`, `3fdf578`, `bca5c49`, `b94bd8a`, `b5d35ff`, `7acab9f`, `45beb1b` | 8 | Main story : positions des 8 autres chapitres (Tour, Falling Skies, Batya, The Unheard, Blue Fire, They Are Already Here, Boreas, The Ticket), positions > 100 m retirées |
+| `2593e19`, `3a59955` | 8 | Icebreaker : calibrage corrigé (`withKnownFixes`), ponts de Boreas |
+| `d81736d` | 8 | Labyrinthe : chambres, clés, cadavres et salles verrouillées sur la map |
+| `32c1932`, `1c9f3b6` | 8 | Images d'objets dans les tableaux et le texte du wiki, objectifs du chapitre repliés |
+| `69ddc95` | 8 | Item finder (objets du jeu, quêtes, hideout, barters, crafts) |
+| `5447eef` | 8 | Barre du haut : bouton du panneau en icône seule sur téléphone |
+
+### Tests (290, 29 fichiers)
 
 | Fichier | Ce qui est couvert |
 |---|---|
-| `src/map/crs.test.ts` | conversion de coordonnées identique à tarkov.dev |
-| `src/map/levels.test.ts` | étages supérieurs / souterrains, numéro d'étage, Icebreaker |
-| `src/api/tarkovJson.test.ts` | lecture de l'API (traductions, positions, prérequis, clés, Find in raid, récompenses, noms d'objets, **sorties, coops et transits**) |
+| `src/map/crs.test.ts` | conversion de coordonnées identique à tarkov.dev ; Icebreaker corrigé (5 points du bateau dans la grille, sortie Heli) |
+| `src/map/levels.test.ts` | étages supérieurs / souterrains, numéro d'étage, Icebreaker, étages d'Interchange |
+| `src/map/basement.test.ts` | Interchange : plan du parking (résidus), emprise, plans du mall, calque « Sous-sol » ajouté une seule fois, classement des points |
+| `src/api/tarkovJson.test.ts` | lecture de l'API (traductions, positions, prérequis, clés, Find in raid, récompenses, noms d'objets, sorties, coops et transits) |
 | `src/api/cache.test.ts` | écriture du cache : autres entrées `tqp:data:` supprimées si le stockage est plein, avertissement si l'échec persiste |
 | `src/api/wiki.test.ts` | accès au wiki : page partagée, page absente, erreurs, photos, cache, demandes simultanées |
+| `src/api/story.test.ts` | chapitres : liste FR/EN, catégorie, un chapitre en 3 requêtes, conditions, cache |
+| `src/api/eventQuests.test.ts` | quêtes d'événement : infobox et objectifs, tâches synthétiques, retrait quand tarkov.dev les a, identifiants valides pour les rooms |
+| `src/api/mapImages.test.ts` | image de l'infobox d'une map du wiki |
+| `src/api/itemList.test.ts` | item finder : liste d'objets (jamais le fichier de 17 Mo), hideout, barters, crafts |
 | `src/lib/wikiText.test.ts` | lecture du wikitext sur des extraits réels |
 | `src/lib/questWiki.test.ts` | association, PVP ZONE, page historique, désaccords, « à emporter », récompenses |
 | `src/lib/questSections.test.ts` | ordre des sections de la fiche quête, sections ouvertes par défaut |
 | `src/lib/questFilter.test.ts` | liste des quêtes : sélection épinglée, filtres, recherche, « Tout désélectionner » sans effet sur la progression |
 | `src/lib/panelWidth.test.ts` | largeur du panneau : bornes, 60 % de la fenêtre, enregistrement |
-| `src/lib/exits.test.ts` | sorties : classement normal / transit / coop, fusion des doublons, échappement du nom, placement réel sur Douanes, Labs, Littoral |
-| `src/lib/ocrMatch.test.ts` | rapprochement OCR ↔ quêtes sur textes simulés (bruit, fautes, deux lignes, Partie 2/3, FR/EN, PVP ZONE), map dominante |
+| `src/lib/exits.test.ts` | sorties : classement normal / transit / coop, doublons, échappement du nom, placement réel, `exitsNearMap` (Point zéro), ZB-1011 |
+| `src/lib/floorText.test.ts` | étage écrit dans la description (FR/EN, « underground » seul exclu) |
+| `src/lib/ocrMatch.test.ts` | rapprochement OCR <-> quêtes sur textes simulés (bruit, fautes, Partie 2/3, FR/EN, PVP ZONE), map dominante |
 | `src/lib/ocr.test.ts` | séparation des colonnes d'une ligne lue |
 | `src/lib/search.test.ts` | recherche bilingue |
 | `src/lib/points.test.ts` | points de la carte, spawns numérotés, progression |
-| `src/state/store.test.ts` | réinitialisation, isolation entre modes, ajout de quêtes par capture |
+| `src/lib/story.test.ts` | chapitres : liste, The Ticket (4 fins), conditions, langue FR/EN, clés des cases |
+| `src/lib/storyPoints.test.ts` | positions des 10 chapitres : forme et clés du JSON contre les extraits réels (`src/lib/__fixtures__`), case en cours, filtrage par map |
+| `src/lib/labyrinth.test.ts` | annotations du Labyrinthe : chambres, comptes par type, emprise, filtrage par map |
+| `src/lib/itemIcons.test.ts` | icônes d'objets : nom -> id, repère `{{id}}`, cellules de tableau, lots de 50 titres |
+| `src/lib/itemUsage.test.ts` | item finder : index d'usage (trouver/rendre, clé, récompense), hideout |
 | `src/lib/roomSync.test.ts` | rooms : différences d'état, validation, fusion, opérations distantes |
+| `src/state/store.test.ts` | réinitialisation, isolation entre modes, ajout de quêtes par capture |
 | `server/rooms.test.ts` | rooms et serveur statique sur un vrai port (SSE à deux clients, limites, 404, MIME, traversée) |
 
 ---
@@ -216,6 +220,28 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 - Le wiki FR écrit les noms d'objets en {{identifiant tarkov.dev}} (192 dans les 8 pages) : gardés comme repères puis remplacés par le nom de `itemNames` (tarkov.dev), « […] » si l'objet est inconnu ; ils ne comptent pas dans la comparaison des nombres.
 - Limites : le cache des chapitres (≈ 0,6 M caractères pour les 10 chapitres, FR compris) s'ajoute aux données de quêtes ; avec plusieurs modes en cache, une écriture peut échouer en silence et le chapitre est relu à chaque ouverture (The Ticket : environ 7 requêtes).
 
+### Session 8 (versions 0.7.0 à 0.7.23)
+Résumé de chaque livraison ; les détails des gros chantiers suivent (audit des chapitres, positions, Icebreaker, Rooms) et les décisions sont dans « Décisions prises ».
+
+- **Version affichée** (0.7.0) : `version` de `package.json` en bas à droite de l'écran d'accueil ; à augmenter à chaque livraison (`0.<session>.<n>`).
+- **Panne de cache en production** (0.7.1, 0.7.2, serveur) : l'hébergeur publiait `index.html` avant `assets/` ; un fichier absent recevait la page HTML, gardée en cache ~2 h 30 (« Failed to load module script … text/html »). Trois parades : fichier principal renommé (0.7.1) ; petit script de `index.html` qui redemande le fichier avec `?r=<date>` (0.7.2, « chargeur qui se répare », utile derrière un autre hébergeur, sans effet sur les morceaux chargés plus tard comme l'OCR) ; **vraie correction** dans `server/index.mjs` : 404 sans cache pour un fichier absent, `index.html` en `no-cache`, `/assets/*` en `immutable`.
+- **Sorties -> onglet Photos** (0.7.3) : un clic sur une sortie ouvre l'onglet Photos avec ses photos du wiki (la bulle garde nom, type, faction, destination, étage). **`exitsNearMap`** (`src/lib/exits.ts`, appelée par `MapView`) masque les sorties à plus de 50 % de la taille de la map hors de son emprise : données fausses de tarkov.dev pour Point zéro (« Barrage ONU » x = -528, « Bunker Scav » z = -706) ; les autres sorties sont à moins de 4 % du bord.
+- **ZB-1011 / ZB-1012** (Douanes) : entrées de cave, au sous-sol d'après le calcul d'étage ; elles s'affichent aussi au niveau principal (badge « ↓ ») par `isCellarEntrance` (`levels.ts`). Détail dans « Décisions prises ».
+- **Étage lu dans la description** (`src/lib/floorText.ts`, `floorFromText`) : étage numéroté, rez-de-chaussée, sous-sol, toit ; prioritaire dans la bulle. **Calques du mall d'Interchange** : rez-de-chaussée du mall (`MALL_MAIN`, dessiné sur le niveau principal) et 2e étage (`MALL_UPPER`, choisi dans le sélecteur, grisé au niveau principal) ; l'ancien « 2nd Floor » de maps.json est le rez-de-chaussée du mall (+28 m).
+- **Sous-sol d'Interchange** (`src/map/basement.ts`, `public/maps/interchange-parking.webp`) : image re3mr pleine résolution (sections A-D + garages Idea, Goshan, Oli), icônes retirées, recalée sur 17 points (RMS 4,3 m, max 7,7 m) ; un SVG redessiné a été essayé puis abandonné (« on dirait une ombre »). **Intérieur du mall** (`interchange-mall-first.webp`, `interchange-mall-second.webp`) : plans re3mr recalés directement sur le SVG (rez-de-chaussée RMS 1,24 m, max 6,71 m ; 2e étage RMS 0,76 m). Crédit « Plans du mall et du parking ». Chiffres et contrôles dans « Décisions prises ».
+- **Rooms** : section « Rooms » plus bas (SSE + POST, `server/rooms.mjs`, synchronisation par différence d'état, jointure = fusion, reprise après coupure, aucune authentification, limites 500 rooms / 20 membres / 256 Ko). `npm start` est nécessaire en production.
+- **Choix de la map avec images** (`src/components/MapPicker.tsx`, `src/api/mapImages.ts`) : bandeaux d'images des maps (image de l'infobox du wiki) dans la barre du haut et dans le filtre de map des quêtes.
+- **Quêtes d'événement du wiki** (`src/api/eventQuests.ts`) : 16 quêtes absentes de tarkov.dev, tâches synthétiques `wiki-<slug>` sans points ni ids d'objets, retirées dès que tarkov.dev les ajoute (nom anglais ou page wiki). Source : `Category:Event_content` ∩ `Category:Quests` − `Category:Historical_content`. **Audit des quêtes** : tarkov.dev gardé en entier (504 / 500 / 463 quêtes conservées, 0 retirée) ; test de non-perte (factions BEAR/USEC, noms à tiret).
+- **Un objectif à la fois** (réglage activé par défaut) : seul le premier objectif non fait (obligatoire avant optionnel) est sur la carte ; sélectionner une quête sans point sur la map affichée bascule sur sa map (bandeau), repère « en cours ».
+- **Capture sur téléphone** (0.7.13) : bouton « Prendre une photo » (`<input capture="environment">`), même OCR et même écran de vérification ; non mesuré sur de vraies photos.
+- **Main story : conditions de déblocage** (0.7.14) : bloc « Pour débloquer ce chapitre » au-dessus des étapes, audit des 10 pages (voir « Audit des chapitres »).
+- **Main story : positions sur la map** (`src/data/story-positions.json`, `src/lib/storyPoints.ts`, `src/map/StoryLayer.tsx`) : pilote Accidental Witness (7 cartes), The Labyrinth (8), puis les 8 autres chapitres. Méthode : fonds du jeu rendus hors dépôt, affiches du wiki recalées dessus (SIFT / ECC / homographie selon la map), point = centre du repère rouge. Acceptation : reprojection regardée + au moins un contrôle indépendant par map (sorties, transits, apparitions de tarkov.dev). Précision par chapitre (tableau plus bas) : Accidental Witness ± 8 à 28 m, Labyrinth ± 3 à 12 m, Tour 8 à 30 m, Falling Skies 16 à 34 m, Batya 21 à 59 m, The Unheard 7 à 20 m, Blue Fire 6 à 49 m, They Are Already Here 9 à 59 m, Boreas 7 à 70 m, The Ticket 4 à 285 m. Les positions de **plus de 100 m d'incertitude ont été retirées** (0.7.22). Sources rejetées : captures du jeu (non géoréférencées), affiches sans repère calé, images satellites, flèches et tracés. Photos de l'étape en cours depuis la bulle de la carte (0.7.18).
+- **Icebreaker** : calibrage de tarkov.dev faux (bornes de l'Usine) corrigé par `withKnownFixes` (`src/map/calibration.ts`), voir « Icebreaker : calibrage corrigé » ; ponts de Boreas placés ensuite (11 cases).
+- **Infos du Labyrinthe** (`src/map/LabyrinthLayer.tsx`, `src/lib/labyrinth.ts`, `src/data/labyrinth-annotations.json`) : 55 marqueurs (5 chambres, 6 clés, 6 cadavres, 20 apparitions de clés, 10 du chalumeau, 13 figurines) et 2 salles verrouillées surlignées, d'après les affiches re3mr (CC BY-NC-SA 4.0) ; case « Infos du Labyrinthe » (`tqp:showLabyrinth`). Détail dans « Infos du Labyrinthe sur la map ».
+- **Icônes d'objets** (`src/lib/itemIcons.ts`, `src/components/ItemThumb.tsx`) : image 32 px dans la colonne « Item name » des tableaux du wiki (et les repères `{{id}}` du texte français) : tarkov.dev si le nom ou l'id est connu, sinon vignette `pageimages` de la page du wiki (≤ 50 titres par requête, cache 7 jours), sinon le nom seul ; « Find in raid : N/A » affiché « — ». Dans le texte anglais, icône 22 px avant les liens `[[Cible|texte]]` qui sont des objets ; liste d'exclusion des pages qui n'en sont pas (catégories Locations, Traders, Bosses, Quests…, `isItemPage`) : sur Accidental Witness, 25 cibles -> 12 objets, 8 non-objets écartés, 0 faux positif. « Objectifs du chapitre » **replié par défaut**.
+- **Item finder** (`src/components/ItemFinder.tsx`, `src/api/itemList.ts`, `src/lib/itemUsage.ts`) : bouton 🔍 de la barre du haut, recherche FR/EN sur tous les objets du jeu, usages dans les quêtes, au choix hideout / barters / crafts. Tailles et sources dans « Décisions prises ».
+- **Barre du haut sur téléphone** (0.7.21) : bouton du panneau en icône seule.
+
 #### Audit des chapitres : conditions de déblocage (octobre 2026)
 Signalé : « Le labyrinthe » montrait « Speak to Jaeger… » alors que le wiki demande d'abord de trouver le transit (clé Knossos LLC) : cette info est dans `== Requirements ==`, que l'appli ignorait. Audit des 10 pages EN et des 8 pages FR existantes (Flammes bleues et They Are Already Here n'existent pas en FR ; 22 requêtes « action=parse » au total : 10 pages EN, 10 pages FR dont 2 absentes, 2 listes, une par page).
 - **Requirements** (EN) : Accidental Witness 1 (voiture sur Customs) · Batya 1 (phrase + 4 lieux, 9 photos) · Blue Fire 1 (phrase + 5 lieux) · Boreas 1 (affiche Paradigm ou signal radio) · Falling Skies 1 (demander au Mécano pendant Tour) · The Labyrinth 1 (transit + clé Knossos) · The Unheard 1 (phrase + 3 lieux) · They Are Already Here 1 (phrase + 4 lieux) · Tour 1 (« ajouté automatiquement au lancement ») · The Ticket aucune section (infobox : `previous = Falling Skies`). FR : « Prérequis » (Batya, L'Unheard, Le labyrinthe, Témoin accidentel), « Conditions » (Boreas) ; absente de Excursion, Tombé du ciel (l'anglais est alors gardé pour la condition).
@@ -276,7 +302,7 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
 - **Écart signalé** : le texte du wiki dit l'interphone « sur le côté est » du bateau ; l'affiche (boussole N en haut, E à droite) le met à gauche (ouest) ; on suit l'affiche, confirmée par la serrure. Le texte parle aussi de « toit de la salle des machines » pour la porte endommagée, que l'affiche place au pont 3, bâbord ; idem, on suit l'affiche (légende v0.3 : « SZ-1 : porte extérieure bâbord du niveau 3 »).
 - **Pas fait** : `Stick To It` et autres quêtes d'Icebreaker (non demandé) ; la hauteur n'est pas stockée, l'étage est un texte.
 
-### Rooms (jouer en groupe)
+### Rooms (jouer en groupe, session 8)
 - **Principe** : bouton « Room » à côté du sélecteur de map. « Créer une room » donne un ID de 6 caractères (sans 0 O 1 I L) à envoyer ; les autres le saisissent et « Rejoignent ». Sont partagés : **quêtes choisies, objectifs cochés, chapitres Main story choisis et étapes cochées**. Couleurs, notes, points perso et positions manuelles restent locaux.
 - **Protocole** (`server/rooms.mjs`, JavaScript simple car le Node de production n'importe pas `src/*.ts`) : `POST /api/rooms {mode,state}` crée ; `GET /api/rooms/:id/events?client=…` flux **SSE** (snapshot, puis `op`, `members`, battement toutes les 25 s) ; `POST /api/rooms/:id/ops {client,ops:[{kind:task|done|story|step,id,on}]}` ; `PUT /api/rooms/:id` recrée une room de même ID ; `GET /api/rooms/:id` (existe ?). Opérations **absolues** (« on » = présent), dernier écrit gagne.
 - **Client** (`src/api/room.ts`, `src/lib/roomSync.ts`, `src/components/RoomControl.tsx`) : synchronisation **par différence d'état** (pas par action) : après chaque changement local (délai 150 ms), l'état partageable est comparé au dernier état connu du serveur et les écarts sont envoyés. Les opérations reçues sont aussi appliquées à cet état connu, donc elles ne repartent pas. Le reducer a 3 actions : `roomSnapshot`, `roomOps`, `restoreMode`.
@@ -288,13 +314,9 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
 - **Dev** : `vite.config.ts` monte le même gestionnaire (plugin `tqp-rooms`, dev et preview). Vite écoute seulement sur `localhost` (`::1`) : pour tester avec deux origines (donc deux `localStorage`, `localhost` et `127.0.0.1`), lancer `npm run dev -- --host ::` le temps du test (le serveur de dev est alors visible sur le réseau local).
 - **Limites et sécurité** : rooms **en mémoire** (perdues au redémarrage, recréées par le créateur) ; **aucune authentification** : qui a l'ID modifie la room ; corps 256 Ko, 500 rooms, 20 membres, 20 000 identifiants par room, 1000 opérations par envoi, room vide supprimée après 30 min. Identifiants validés (quêtes et objectifs `[A-Za-z0-9_-:.]` 100 max ; Main story 200 max sans caractère de contrôle) des deux côtés ; rien n'est inséré comme HTML. Pas de limite par adresse IP (un client peut remplir les 500 rooms ; 500 rooms x 20 000 identifiants de 200 caractères = plusieurs Go en théorie, bien moins en pratique) ni de HTTPS/CORS (même origine uniquement).
 - **Vérifié dans le navigateur** (`localhost:5173` et `127.0.0.1:5173`, deux `localStorage`) : création / jointure avec bascule de mode, quête cochée A -> B, objectif coché B -> A, chapitre Main story, réinitialisation propagée, Quitter -> restauration, redémarrage du serveur de dev (Vite recharge alors les pages : nouveaux clients) **et** de `npm start` coupé 45 s **sans recharger** les pages (les deux navigateurs reviennent, avec la sélection faite pendant la coupure), rechargement, 375 px sans débordement, hébergement statique (`python -m http.server`) -> message d'indisponibilité ; `npm run build` puis `PORT=4123 npm start` : site, room, 404 sans cache. **Non vérifié** : étapes cochées de la Main story entre navigateurs (couvert par les tests), vrai déploiement derrière Cloudflare (SSE et tampon à vérifier ; l'en-tête `X-Accel-Buffering: no` est envoyé), plus de 2 navigateurs.
-- **Tests** (+24 : 207 au total) : `src/lib/roomSync.test.ts` (différences, validation, fusion/remplacement, opérations distantes) et `server/rooms.test.ts` (serveur réel sur un port libre : deux clients SSE, validation, 413, plafond de rooms, PUT, MIME, 404 sans cache, traversée de chemin).
+- **Tests** (+24) : `src/lib/roomSync.test.ts` (différences, validation, fusion/remplacement, opérations distantes) et `server/rooms.test.ts` (serveur réel sur un port libre : deux clients SSE, validation, 413, plafond de rooms, PUT, MIME, 404 sans cache, traversée de chemin).
 
 ---
-
-- **Images d'objets dans les tableaux du wiki** (octobre 2026) : « Objectifs du chapitre » replié par défaut ; colonne « Item name » (et repères `{{id}}` du texte français) avec une image 32 px : tarkov.dev si le nom ou l'id est connu, sinon vignette de la page du wiki (`pageimages`, une requête groupée ≤ 50 titres par page, cache 7 jours), sinon le nom seul ; « Find in raid : N/A » affiché « — ». Non couvert : liens d'objets dans le texte anglais (les liens sont retirés au nettoyage). `src/lib/itemIcons.ts`, `ItemThumb.tsx`.
-
-- **Images d'objets dans le texte du wiki** (octobre 2026) : `parseBlocks` garde les liens `[[Cible|texte]]` dans `links` (blocs et puces) ; au rendu, icône 22 px avant le texte du lien si la cible est un objet tarkov.dev (nom normalisé) ou une page du wiki avec vignette hors catégories Locations / Traders / Bosses / Quests… (`isItemPage`, même lot `pageimages|categories` ≤ 50 titres, cache `thumbs2:`). Mesuré : Accidental Witness 25 cibles -> 12 objets avec icône, 8 non-objets (Customs, Skier, Reshala, EXP…) écartés, 0 faux positif ; Chumming 5 cibles, 0 faux positif. Cache des chapitres relu une fois (`linked`).
 
 ## Étude 3D (session 5, en attente de validation)
 
@@ -361,7 +383,6 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
 - **Un seul accès au wiki** (`src/api/wiki.ts`, 1 requête/s, cache 7 jours).
 - **Main story (session 7, après validation)** : chapitres **mélangés aux quêtes** (pas de section à part) dans « Quêtes sélectionnées » / « Autres quêtes » et dans l'onglet Sélection, triés par nom affiché ; « Main story » à la place du marchand ; « Tout désélectionner » les inclut ; `story` reste séparé de `selected` (rien sur la carte). Liste = tableau « Story chapters » + pages de `Category:Story_chapters` absentes du tableau (1 requête de plus, constaté : 10 aussi, rien à ajouter ; le wiki FR n'a pas de chapitre en plus).
 - **Case « Extracts Scav » (session 7)** : dans la barre du haut, cochée par défaut ; décochée, elle masque seulement les sorties Scav (les sorties PMC + Scav, coops et transits restent). Sur téléphone, le libellé devient « Scav ».
-- **Case « Extracts Scav » (session 7)** : dans la barre du haut, cochée par défaut ; décochée, elle masque seulement les sorties Scav (les sorties PMC + Scav, coops et transits restent). Sur téléphone, le libellé devient « Scav ».
 - **Étages et sorties souterraines (hors version)** :
   - *Sorties* : une sortie souterraine s'affiche aussi sur le niveau principal (badge « ↓ ») si c'est une simple entrée de cave : map de plein air (fond SVG) et aucune zone d'étage supérieur de maps.json au-dessus d'elle en x/z (zones réduites de 5 m : ZB-1011 est à 3,5 m du bord de « pump 2nd »). Résultat : Douanes ZB-1011 (PMC et Scav) et bunker Voron, Littoral « Adm Basement », Réserve (3 sorties de bunker). Restent au sous-sol seulement : coop de la chaufferie (sous un bâtiment à étages), Labs, Icebreaker. `isCellarEntrance` dans `levels.ts`.
   - *Étage des points, cause* : les zones x/z des étages étaient **déjà** prises en compte. Sur Interchange, maps.json appelle « 2nd Floor » (25-34 m, limité au mall) le **rez-de-chaussée du mall**, surélevé d'environ 28 m, et « 3rd Floor » son vrai 2e étage. Noms corrigés dans `levelName` (« Niveau principal du centre commercial » sans numéro sur le badge, « 2e étage du centre commercial »). Points concernés : 18 (ex-« 2e étage ») et 10 (ex-« 3e étage ») ; les 19 autres d'Interchange sont dehors. Aucun autre changement de calcul sur les autres maps.
@@ -404,6 +425,16 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
 | Étages | `src/map/levels.ts`, sous-sol d'Interchange `src/map/basement.ts` |
 | Carte, fond, popups | `src/map/MapView.tsx`, `src/map/BaseLayer.tsx`, `src/components/PointPopups.tsx` |
 | Rooms (serveur, client, bouton) | `server/rooms.mjs`, `server/index.mjs`, `src/api/room.ts`, `src/lib/roomSync.ts`, `src/components/RoomControl.tsx` |
+| Choix de la map avec images | `src/components/MapPicker.tsx`, `src/api/mapImages.ts` |
+| Quêtes d'événement du wiki | `src/api/eventQuests.ts` |
+| Main story : lecture, chargement, fiche | `src/lib/story.ts`, `src/api/story.ts`, `src/components/StoryView.tsx` |
+| Main story : positions sur la map | `src/data/story-positions.json`, `src/lib/storyPoints.ts`, `src/map/StoryLayer.tsx` ; extraits de test dans `src/lib/__fixtures__/` |
+| Étage écrit dans la description | `src/lib/floorText.ts` |
+| Interchange : parking et plans du mall | `src/map/basement.ts`, images dans `public/maps/` |
+| Calibrage des maps et corrections connues (`withBasement`, `withKnownFixes`) | `src/map/calibration.ts` |
+| Infos du Labyrinthe | `src/map/LabyrinthLayer.tsx`, `src/lib/labyrinth.ts`, `src/data/labyrinth-annotations.json` |
+| Icônes d'objets (tableaux et texte du wiki) | `src/lib/itemIcons.ts`, `src/components/ItemThumb.tsx` |
+| Item finder | `src/components/ItemFinder.tsx`, `src/api/itemList.ts`, `src/lib/itemUsage.ts` |
 | État sauvegardé (dont `selectTasks`, `clearSelection`, resets) | `src/state/store.ts` |
 | Conversion de coordonnées | `src/map/crs.ts` (ne pas modifier sans les tests) |
 
@@ -418,9 +449,7 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
 - Nouveaux champs de données **facultatifs**.
 - Un commit par tâche, en français, avec tests et build verts avant.
 - **Version** : `version` de `package.json`, affichée en bas à droite de l'écran d'accueil (choix PvP / PvE / PvP Saison). **À augmenter à chaque livraison**, avant le dernier commit : `0.<session>.<n° de livraison dans la session>` (0.7.0 = fin de session 7).
-- **Production (tarkov.aprilox.fr, derrière Cloudflare)** : déployée automatiquement à chaque push sur `main` (~1 min). L'hébergeur publie `index.html` avant les fichiers de `assets/` ; pendant cet écart, un fichier absent reçoit la page HTML, **mise en cache ~2 h 30** à cette adresse (« Failed to load module script … text/html »). Parade dans l'app (0.7.2) : un petit script dans `index.html` redemande le fichier avec `?r=<date>`. Vraie correction côté hébergeur : 404 (sans cache) pour un fichier absent de `assets/`, ou fichiers envoyés avant `index.html`. Les morceaux chargés plus tard (OCR) ne sont pas couverts par la parade.
-- **Sorties (0.7.3)** : un clic sur une sortie ouvre l'onglet **Photos** avec ses photos du wiki (la bulle ne garde que nom, type, faction, destination, étage). Sorties à plus de 50 % de la taille de la map hors de son emprise **masquées** (`exitsNearMap`) : données tarkov.dev fausses pour Point zéro « Barrage ONU » (UN Roadblock, x = -528) et « Bunker Scav » (z = -706) ; toutes les autres sorties sont à moins de 4 % du bord. ZB-1011 (Douanes) est au **sous-sol** : visible seulement avec l'étage « Sous-sol » (règle de la session 5, inchangée).
-- **Capture sur téléphone (0.7.13)** : bouton « 📷 Prendre une photo » (classe `mobile-only`, visible à ≤ 800 px ou écran tactile) : `<input capture="environment">` ouvre l'appareil photo, puis même lecture OCR dans le navigateur et même écran de vérification. Une photo d'écran (reflets, angle, moiré) se lit moins bien qu'une capture : non mesuré sur de vraies photos.
+- **Production (https://tarkov.aprilox.fr, derrière Cloudflare)** : déployée automatiquement à chaque push sur `main` (~1 min) ; l'hébergeur lance `npm start` (`server/index.mjs` : `dist/` + rooms sur le même port, voir « Rooms »). Un fichier absent reçoit un **404 sans cache** (plus de repli sur `index.html`, qui avait fait mettre en cache ~2 h 30 une page HTML à l'adresse d'un fichier de `assets/`) ; `index.html` en `no-cache`, `/assets/*` en `immutable`. La parade côté app (0.7.2 : `index.html` redemande le fichier avec `?r=<date>`) reste utile derrière un autre hébergeur ; les morceaux chargés plus tard (OCR) ne sont pas couverts par elle.
 
 **Commandes** : `npm run dev` · `npm start` (production : `dist/` + rooms, voir « Rooms ») · `npm test` · `npm run build` · `npm run sync:maps`. Node est dans `C:\Program Files\nodejs`. npm 12 bloque le script d'après-installation de tesseract.js (simple annonce de financement, inutile).
 
@@ -428,40 +457,53 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
 
 ## Limites connues
 
-- **OCR non mesurée sur de vraies captures du jeu** (seulement sur une image de synthèse favorable). La police et les textures du jeu peuvent dégrader la lecture. Il n'y a pas de recadrage manuel de la colonne des quêtes.
-- **OCR, première utilisation** : connexion nécessaire (données de langue depuis jsdelivr).
-- **Taille** : le fichier principal fait 516 Ko (avertissement Vite) ; le moteur OCR de 3,9 Mo est déployé avec le site mais chargé seulement à la demande.
-- **[PVP ZONE] / [JcJ]** : si l'OCR ne lit pas le marqueur, la quête normale peut être proposée à la place de la version PVP ZONE.
-- **Coop** : détection par le nom anglais. Le champ `switch` des sorties n'est pas affiché (sens inconnu). 15 sorties sans faction (« non précisée »).
-- **Libellés d'onglets** : à 400 px, « Fiche quête » et « Mes points » passent sur 2 lignes. Le zoom à 125 % n'a été que simulé.
-- Plans des étages supérieurs non affichables ; photos par quête ; texte du wiki en anglais et parfois incomplet ; récompenses comparées seulement sur l'expérience, l'argent et la réputation.
-- Erreur Leaflet `_leaflet_pos` possible si on change de map pendant un zoom.
-- **Session 6** :
-  - le premier chargement télécharge le fichier d'objets de 17 Mo par langue, et de nouveau quand le cache de 6 h expire ;
-  - localStorage proche du plein quand plusieurs modes / langues sont en cache (le dernier commit libère la place) ;
-  - 18 sorties sans photo du wiki ;
-  - images « lazy » non observées en chargement dans le navigateur masqué (URLs vérifiées avec `new Image()`) ;
-  - pastilles de sorties vérifiées par le DOM seulement (pas de capture d'écran) ;
-  - erreurs Leaflet vues seulement avec des événements synthétiques.
-- **localStorage proche du quota** (~4,3 M sur ~5 M de caractères avec un seul mode en FR+EN et tous les chapitres) : l'éviction des pages du wiki les moins utilisées protège le wiki, mais mettre plusieurs modes en cache peut encore évincer des données ou des chapitres.
+**Données et stockage**
+- **localStorage proche du quota** (~4,3 M sur ~5 M de caractères avec un seul mode en FR+EN et tous les chapitres) : l'éviction des pages du wiki les moins utilisées protège le wiki, mais mettre plusieurs modes en cache peut encore évincer des données ou des chapitres (une écriture peut échouer en silence, le chapitre est alors relu à chaque ouverture).
+- **Fichier d'objets de 17 Mo** par langue, téléchargé au premier chargement puis toutes les 6 h (expiration du cache).
+- **Taille** : le fichier principal fait 682 Ko (avertissement Vite) ; le moteur OCR de 3,9 Mo est déployé avec le site mais chargé à la demande.
+- tarkov.dev : **données d'histoire désactivées en amont** (endpoint introuvable) ; wiki en anglais et parfois incomplet ; récompenses comparées seulement sur l'expérience, l'argent et la réputation ; 15 sorties sans faction, 18 sans photo du wiki ; coop détectée par « (Co-op) » dans le nom anglais ; champ `switch` des sorties non affiché.
+
+**Main story**
+- **Positions** : centres de repères rouges avec une incertitude annoncée (± 3 à 70 m selon le chapitre, jusqu'à 100 m gardé) ; certaines **approximatives** (affiches 3D de Customs, images satellites d'Échangeur) ; **aucune pour les étapes sans carte du wiki** (captures du jeu seulement) ; aucune hauteur (l'étage vient du plan ou du texte).
 - **The Ticket** affiche 4 fins empilées (129 étapes) : son X/N n'atteint jamais N.
+- **Icebreaker** : correction empirique (échelle 1,5 ± 0,1), ± 2 à 5 m ; elle disparaît seule quand tarkov.dev corrige ses bornes.
+
+**Cartes**
+- **Interchange** : image du parking à ± 4 à 8 m (schématique) ; pas de tunnel vers « Hole Exfill » ni de rampes extérieures ; plans du mall schématiques (quelques mètres).
+- **Labyrinthe** : étage supérieur de la chambre 2 non dessiné (hors des tuiles) ; points de recherche (cyan) et pièges non placés.
+- Plans des étages supérieurs non affichables sur les autres maps ; photos par quête.
+- Erreur Leaflet `_leaflet_pos` possible si on change de map pendant un zoom.
+
+**Rooms**
+- En **mémoire** (perdues au redémarrage, recréées par le créateur) ; **aucune authentification** (qui a l'ID modifie la room) ; pas de limite par adresse IP.
+- **Quêtes d'événement** : pas de points sur la map ni d'identifiants d'objets.
+
+**OCR / interface**
+- **OCR non mesurée sur de vraies captures ni photos** (seulement sur une image de synthèse favorable) ; pas de recadrage manuel ; connexion nécessaire la première fois (données de langue depuis jsdelivr) ; [PVP ZONE] / [JcJ] non lu = quête normale proposée.
+- **Libellés d'onglets** : à 400 px, « Fiche quête » et « Mes points » passent sur 2 lignes ; zoom à 125 % seulement simulé.
+- Vérifications visuelles souvent faites par le DOM seulement (navigateur masqué) : pastilles de sorties, images « lazy » (URLs vérifiées avec `new Image()`), erreurs Leaflet vues seulement avec des événements synthétiques.
 
 ---
 
 ## Idées pour la suite (prompts prêts à l'emploi)
 
 **À faire en premier**
-- « Valide le plan de la main story (tâche 6) » : voir la recherche de la session 6.
-- « Voici mes captures du menu Tâches : mesure l'OCR dessus et ajuste les réglages. »
+- « Voici mes captures / photos du menu Tâches : mesure l'OCR dessus et ajuste les réglages. »
 - « Voici l'image de référence 3D ; je valide (ou non) la recommandation de l'étude 3D. »
 - Confirmer ou corriger la liste des libellés d'onglets.
+- « Parcours dans l'app les points de la Main story chapitre par chapitre (Falling Skies, Boreas…) et corrige les positions fausses. »
 
-**Main story / cache**
+**Cartes**
+- « Labyrinthe : ajoute les notes de recherche (points cyan) et l'étage supérieur de la chambre 2 sur la map. »
+- « Interchange : dessine le tunnel vers Hole in the Fence / Hole Exfill et les rampes extérieures du parking. »
+
+**Données**
+- « Re-teste le point d'accès d'histoire de tarkov.dev (json et GraphQL) ; s'il revient, remplace la lecture du wiki pour la Main story. »
+- « Déplace le cache du wiki vers IndexedDB (plus de place, fin du quota localStorage). »
+- « Dérive les icônes de l'id (`assets.tarkov.dev/<id>-icon.webp`) pour éviter le fichier d'objets de 17 Mo. »
+
+**Main story**
 - « Main story : choisir sa fin dans The Ticket pour n'afficher que ses étapes. »
-- « Déplacer le cache du wiki vers IndexedDB (plus de place). »
-
-**Mise en ligne**
-- « Publie l'app sur GitHub Pages depuis ez4ence256/testss, avec un workflow GitHub Actions. »
 
 **Quêtes**
 - « Dans la fiche quête, ajoute un bouton "Ajouter à la sélection" quand la quête affichée n'est pas sélectionnée. »
@@ -473,7 +515,7 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
 - « Héberge les données de langue fra/eng dans l'app (sans CDN). »
 
 **Qualité**
-- « Dérive les icônes de l'id (`assets.tarkov.dev/<id>-icon.webp`) pour éviter le fichier d'objets de 17 Mo. »
-- « Découpe le fichier principal (> 500 Ko) avec des imports dynamiques. »
+- « Découpe le fichier principal (682 Ko, > 500 Ko) avec des imports dynamiques. »
 - « Configure Vite en usePolling si l'observateur rate encore des modifications sur M:. »
 - « Audit du projet sans rien modifier, corrections par priorité. »
+- « Étude 3D : lance la première version (three.js à la demande) si la recommandation est validée. »
