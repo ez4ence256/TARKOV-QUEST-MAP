@@ -3,11 +3,14 @@
 //  - noms : fichiers de traductions items_<langue> et items_en (~0,45 Mo chacun compressés) ; le fichier
 //    principal des objets (17 Mo) n'est pas lu. Un objet = une clé « <id> ShortName » (les catégories n'en ont pas).
 //  - hideout : fichier principal (~8 Ko compressé) + traductions.
-//  - signatures d'images (recherche par image) : src/data/item-images.bin (4,9 Mo, 1,6 Mo compressé), au premier collage d'une image.
+//  - recherche par image, au premier collage d'une image : src/data/item-images.bin (cases d'inventaire, 4,9 Mo)
+//    ou src/data/item-inspect.bin (vues d'inspection, 1,4 Mo), selon la capture.
 import type { GameMode } from "../types";
 import { fetchEndpoint, fetchJson, fetchTranslations } from "./tarkovJson";
 import itemImagesUrl from "../data/item-images.bin?url";
+import itemInspectUrl from "../data/item-inspect.bin?url";
 import { parseImageIndex, type ImageIndex } from "../lib/itemImage";
+import { parseInspect, type InspectIndex } from "../lib/itemInspect";
 import { buildBarterIndex, buildCraftIndex, buildHideoutIndex, type Exchange, type HideoutUse } from "../lib/itemUsage";
 
 export interface ListedItem {
@@ -43,6 +46,19 @@ export function loadItemImages(): Promise<ImageIndex> {
     images.catch(() => (images = null));
   }
   return images;
+}
+
+let inspect: Promise<InspectIndex> | null = null;
+/** Signatures des vues d'inspection (npm run sync:items). */
+export function loadItemInspect(): Promise<InspectIndex> {
+  if (!inspect) {
+    inspect = fetch(itemInspectUrl).then((r) => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.arrayBuffer().then(parseInspect);
+    });
+    inspect.catch(() => (inspect = null));
+  }
+  return inspect;
 }
 
 const items = new Map<string, Promise<ListedItem[]>>();

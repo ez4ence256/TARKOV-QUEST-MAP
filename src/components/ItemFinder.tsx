@@ -7,8 +7,9 @@ import { scoreName } from "../lib/search";
 import { RECOGNIZED_MIN, matchItemLines } from "../lib/ocrMatch";
 import { iconSrc } from "../lib/itemIcons";
 import { matchImage, type Rgba } from "../lib/itemImage";
+import { looksLikeInspect, matchInspect } from "../lib/itemInspect";
 import { buildUsageIndex, durationLabel, useLabel, type Exchange, type QuestUse } from "../lib/itemUsage";
-import { loadExchanges, loadHideout, loadItemImages, loadItemList, type HideoutInfo, type ListedItem } from "../api/itemList";
+import { loadExchanges, loadHideout, loadItemImages, loadItemInspect, loadItemList, type HideoutInfo, type ListedItem } from "../api/itemList";
 import { ItemThumb } from "./ItemThumb";
 
 const PAGE = 100;
@@ -139,7 +140,10 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
     // texte (OCR) et image en même temps ; l'un peut échouer sans l'autre
     const [text, image] = await Promise.allSettled([
       import("../lib/ocr").then(({ readImageLines }) => readImageLines(blob, (p) => id === run.current && setOcr({ step: "reading", progress: p.progress }))),
-      Promise.all([loadItemImages(), blobPixels(blob)]).then(([index, pixels]) => matchImage(pixels, index, () => id !== run.current)),
+      // fenêtre d'inspection (objet entier sur fond rayé) ou case d'inventaire : deux méthodes, deux fichiers
+      blobPixels(blob).then(async (pixels) =>
+        looksLikeInspect(pixels) ? matchInspect(pixels, await loadItemInspect()) : matchImage(pixels, await loadItemImages(), () => id !== run.current),
+      ),
     ]);
     if (id !== run.current) return;
     if (text.status === "rejected" && image.status === "rejected") return setOcr({ step: "error" });
