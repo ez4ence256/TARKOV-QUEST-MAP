@@ -19,11 +19,12 @@ export interface StoryPosition {
   errorM: number;
 }
 
-/** Clé = `<titre anglais du chapitre>::<clé de la case>` (voir storyStepId). */
-export const STORY_POSITIONS = positionsJson as Record<string, StoryPosition>;
+/** Clé = `<titre anglais du chapitre>::<clé de la case>` (voir storyStepId). Une liste quand la case a des lieux sur plusieurs maps. */
+export type StoryPositionEntry = StoryPosition | StoryPosition[];
+export const STORY_POSITIONS = positionsJson as Record<string, StoryPositionEntry>;
 
 /** Chapitres qui ont au moins une position (les seuls dont la page est lue pour la carte). */
-export const chaptersWithPositions = (positions: Record<string, StoryPosition> = STORY_POSITIONS): string[] => [
+export const chaptersWithPositions = (positions: Record<string, StoryPositionEntry> = STORY_POSITIONS): string[] => [
   ...new Set(Object.keys(positions).map((k) => k.split("::")[0])),
 ];
 
@@ -66,14 +67,14 @@ export function currentStoryPoints(
   chapter: string,
   items: StoryItem[],
   done: Record<string, true>,
-  positions: Record<string, StoryPosition> = STORY_POSITIONS,
+  positions: Record<string, StoryPositionEntry> = STORY_POSITIONS,
 ): StoryMapPoint[] {
   const item = currentStoryItem(chapter, items, done);
-  const entry = item && positions[storyStepId(chapter, item.key)];
-  if (!item || !entry) return [];
+  const found = item && positions[storyStepId(chapter, item.key)];
+  if (!item || !found) return [];
   const floor = floorFromText(item.text);
-  return entry.positions.map((p, i) => ({
-    id: `story:${chapter}:${item.key}#${i}`,
+  return [found].flat().flatMap((entry, e) => entry.positions.map((p, i) => ({
+    id: `story:${chapter}:${item.key}#${e}.${i}`,
     chapter,
     stepKey: item.key,
     stepTitle: item.title,
@@ -85,7 +86,7 @@ export function currentStoryPoints(
     errorM: entry.errorM,
     source: entry.source,
     floor,
-  }));
+  })));
 }
 
 /** Points d'une map (la map affichée), les autres sont sur leur propre map. */

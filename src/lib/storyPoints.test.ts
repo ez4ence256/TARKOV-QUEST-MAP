@@ -10,8 +10,6 @@ const page = parseStoryPage(wikitext.replace(/\r\n/g, "\n"), CHAPTER);
 const keys = [...requirementKeys(page.requirements.length), ...stepKeys(page.steps)];
 const items: StoryItem[] = [...page.requirements, ...page.steps].map((s, i) => ({ key: keys[i], title: s.title, text: stepText(s) }));
 const done = (...ks: string[]) => Object.fromEntries(ks.map((k) => [storyStepId(CHAPTER, k), true as const]));
-const KNOWN_MAPS = ["customs", "streets-of-tarkov", "shoreline", "the-labyrinth"];
-
 // The Labyrinth : wikitext réel de la page anglaise (octobre 2026)
 const LAB = "The Labyrinth (story chapter)";
 const labPage = parseStoryPage(labWikitext.replace(/\r\n/g, "\n"), LAB);
@@ -19,40 +17,63 @@ const labKeys = [...requirementKeys(labPage.requirements.length), ...stepKeys(la
 const labItems: StoryItem[] = [...labPage.requirements, ...labPage.steps].map((s, i) => ({ key: labKeys[i], title: s.title, text: stepText(s) }));
 const labDone = (...ks: string[]) => Object.fromEntries(ks.map((k) => [storyStepId(LAB, k), true as const]));
 
+// Extraits réels des pages anglaises (octobre 2026), un par chapitre placé ; The Ticket : + les 4 modèles de fins
+const RAW = import.meta.glob("./__fixtures__/*.wikitext", { query: "?raw", import: "default", eager: true }) as Record<string, string>;
+const raw = (slug: string) => (RAW[`./__fixtures__/${slug}.wikitext`] ?? "").replace(/\r\n/g, "\n");
+const FIXTURE_CHAPTERS: Record<string, string> = {
+  "accidental-witness": CHAPTER,
+  "labyrinth-en": LAB,
+  tour: "Tour",
+  "falling-skies": "Falling Skies",
+  batya: "Batya",
+  "the-unheard": "The Unheard",
+  "blue-fire": "Blue Fire",
+  boreas: "Boreas",
+  "they-are-already-here": "They Are Already Here",
+  "the-ticket": "The Ticket",
+};
+const parsed = (chapter: string) => {
+  const slug = Object.keys(FIXTURE_CHAPTERS).find((k) => FIXTURE_CHAPTERS[k] === chapter)!;
+  const templates = Object.fromEntries(["Savior", "Debtor", "Fallen", "Survivor"].map((e) => [`The Ticket Section ${e} Guide`, raw(`the-ticket-${e.toLowerCase()}`)]).filter(([, t]) => t));
+  const pg = parseStoryPage(raw(slug), chapter, templates);
+  const all = [...pg.requirements, ...pg.steps];
+  const ks = [...requirementKeys(pg.requirements.length), ...stepKeys(pg.steps)];
+  return new Map(all.map((s, i) => [storyStepId(chapter, ks[i]), s.files.map((f) => f.file)]));
+};
+const KNOWN_MAPS = ["customs", "streets-of-tarkov", "shoreline", "the-labyrinth", "factory", "ground-zero", "interchange", "lighthouse", "reserve", "terminal", "woods", "the-lab", "icebreaker"];
+
 describe("story-positions.json", () => {
   it("a la bonne forme", () => {
     expect(Object.keys(STORY_POSITIONS).length).toBeGreaterThan(0);
-    for (const [key, e] of Object.entries(STORY_POSITIONS)) {
+    for (const [key, entry] of Object.entries(STORY_POSITIONS)) {
       expect(key).toMatch(/^.+::(req#\d+|.+#\d+)$/);
-      expect(KNOWN_MAPS).toContain(e.map);
-      expect(e.positions.length).toBeGreaterThan(0);
-      for (const p of e.positions) expect(Number.isFinite(p.x) && Number.isFinite(p.z)).toBe(true);
-      expect(e.source).toMatch(/\.png$/);
-      expect(e.method.length).toBeGreaterThan(10);
-      expect(e.errorM).toBeGreaterThan(0);
+      for (const e of [entry].flat()) {
+        expect(KNOWN_MAPS).toContain(e.map);
+        expect(e.positions.length).toBeGreaterThan(0);
+        for (const p of e.positions) expect(Number.isFinite(p.x) && Number.isFinite(p.z)).toBe(true);
+        expect(e.source).toMatch(/\.(png|jpg)$/);
+        expect(e.method.length).toBeGreaterThan(10);
+        expect(e.errorM).toBeGreaterThan(0);
+      }
     }
   });
 
-  it("ses clés sont celles que lit la page Accidental Witness", () => {
-    expect(chaptersWithPositions()).toEqual([CHAPTER, LAB]);
-    const known = [...keys.map((k) => storyStepId(CHAPTER, k)), ...labKeys.map((k) => storyStepId(LAB, k))];
-    for (const key of Object.keys(STORY_POSITIONS)) expect(known).toContain(key);
+  it("ses clés sont celles que lit la page de chaque chapitre, et la photo source est dans la case", () => {
+    const chapters = chaptersWithPositions();
+    for (const c of chapters) expect(Object.values(FIXTURE_CHAPTERS)).toContain(c);
+    for (const c of chapters) {
+      const known = parsed(c);
+      for (const [key, entry] of Object.entries(STORY_POSITIONS).filter(([k]) => k.startsWith(c + "::"))) {
+        expect(known.has(key), key).toBe(true);
+        for (const e of [entry].flat()) expect(known.get(key), key).toContain(e.source);
+      }
+    }
   });
 
-  it("ne place que des cases dont le texte parle d'une carte du wiki (7 cartes)", () => {
-    expect(Object.keys(STORY_POSITIONS).filter((k) => k.startsWith(CHAPTER + "::"))).toHaveLength(7);
-    expect(Object.keys(STORY_POSITIONS).filter((k) => k.startsWith(LAB + "::"))).toHaveLength(8);
-    // chaque case placée a bien la photo source dans ses galeries
-    const all = [...page.requirements, ...page.steps];
-    for (const [key, e] of Object.entries(STORY_POSITIONS).filter(([k]) => k.startsWith(CHAPTER + "::"))) {
-      const i = keys.findIndex((k) => storyStepId(CHAPTER, k) === key);
-      expect(all[i].files.map((f) => f.file)).toContain(e.source);
-    }
-    const labAll = [...labPage.requirements, ...labPage.steps];
-    for (const [key, e] of Object.entries(STORY_POSITIONS).filter(([k]) => k.startsWith(LAB + "::"))) {
-      const i = labKeys.findIndex((k) => storyStepId(LAB, k) === key);
-      expect(labAll[i].files.map((f) => f.file)).toContain(e.source);
-    }
+  it("nombre de cases placées par chapitre", () => {
+    const n = (c: string) => Object.keys(STORY_POSITIONS).filter((k) => k.startsWith(c + "::")).length;
+    expect(n(CHAPTER)).toBe(7);
+    expect(n(LAB)).toBe(8);
   });
 });
 

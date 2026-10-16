@@ -1,0 +1,297 @@
+{{Infobox quest
+|image        =Falling Skies Banner.png
+|icon         =Falling Skies Icon.png
+|icon size    =
+|location     =
+|given by     =
+|reward       =
+|reputation   =
+|quest number =
+|previous     =
+|leads to     =[[The Ticket]]
+|related      =
+|related2     =
+|reqkappa     =
+}}
+
+'''{{PAGENAME}}''' is a [[Story chapters|story chapter]] in ''[[Escape from Tarkov]]''.
+
+==Description==
+{{quote|Mechanic and I got to talking about that plane that went down somewhere in the nature reserve. Nobody really knows what happened to it. I should track it down and take a look — maybe I'll find something interesting.}}
+
+==Requirements==
+Ask [[Mechanic]] about the downed plane while progressing through the story chapter [[Tour]].
+
+==Objectives==
+* Locate the fallen plane
+* Reach Loyalty Level 2 with [[Prapor]]
+* Ask the traders about the fallen plane
+* (''Optional'') Hand over 2,000 [[Dollars|USD]] to [[Therapist]] to learn details about the right G-Wagon SUV
+* Retrieve the [[G-Wagon flash drive|flash drive]] from one of the G-Wagon SUVs
+* Hand over the [[G-Wagon flash drive|flash drive]] to [[Prapor]]
+* Wait for information from [[Prapor]]
+* Retrieve the [[Crashed plane's flight recorder|plane's flight recorder]]
+* Leave the [[Crashed plane's flight recorder|flight recorder]] in the specified spot
+* Visit [[Prapor]]
+* Hand over 3 found [[Found in raid|<font color="red">in raid</font>]] [[Rechargeable battery|Rechargeable batteries]]
+* Hand over 5 found [[Found in raid|<font color="red">in raid</font>]] [[Printed circuit board]]s
+* Hand over 2 found [[Found in raid|<font color="red">in raid</font>]] [[Toolset]]s
+* Wait for information from [[Prapor]]
+* Hand over the [[Plane crew transcript|flight crew's transcript]] to [[Prapor]]
+* Hand over [[Elektronik's flash drive|Elektronik's secure flash drive]] to [[Prapor]]
+* Wait for information from [[Prapor]]
+* Retrieve the [[Armored case|armored case]]
+** (''Optional'') Find any [[Note from Mr. Kerman|additional clues]]
+* Keep the [[Armored case|armored case]] for yourself '''or''' hand it over to [[Prapor]]
+
+==Guide==
+===Locate the fallen plane===
+The fallen plane is located on the eastern side of [[Woods]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Falling Skies Map.jpg|Location marked on map
+File:Woods Showcase 12.png|The wanted plane
+</gallery></li>
+
+===Speak to [[Prapor]]===
+Visit [[Prapor]] in the menu through the trader screen and ask him about the fallen plane.
+
+===Reach Loyalty Level 2 with [[Prapor]]===
+To get further information about the plane, you have to reach loyalty level 2 with [[Prapor]] and then ask him again about the fallen plane.
+
+===Ask the traders about the fallen plane===
+Visit [[Prapor]], [[Therapist]], [[Skier]], [[Mechanic]] and [[Jaeger]] in the menu through the trader screen and ask them about the fallen plane.
+
+===(''Optional'') Hand over 2,000 [[Dollars|USD]] to [[Therapist]] to learn details about the right G-Wagon SUV===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:dollarsicon.png|link=Dollars]]
+|[[Dollars]]
+|2,000
+|Handover item
+!<font color="green">No</font>
+|}
+Visit [[Therapist]] in the menu through the trader screen and ask her about information on the fallen plane. Upon handing over 2,000 [[Dollars|USD]], she reveals the position of the wanted SUV.
+
+===Retrieve the flash drive from one of the G-Wagon SUVs===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:G-Wagon flash drive icon.png|link=G-Wagon flash drive]]
+|[[G-Wagon flash drive]]
+|1
+|Handover item
+!<font color="red">Yes</font>
+|}
+The [[G-Wagon flash drive]] can be found on the driver side running board of the G-Wagon SUV next to the "Tunnel" extraction on [[Shoreline]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:FallingSkiesGWagonUSBMap.png|Location marked on map
+File:FallingSkiesGWagonUSBSpawn.png|The wanted SUV with the flash drive on the running board
+</gallery></li>
+
+Hand the [[G-Wagon flash drive]] over to [[Prapor]] through the trader screen.
+
+===Wait for the information from [[Prapor]]===
+Wait 1 hour then visit [[Prapor]] in the menu through the trader screen and ask him about the fallen plane.
+
+===Retrieve the plane's flight recorder===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Crashed plane's flight recorder icon.png|link=Crashed plane's flight recorder]]
+|[[Crashed plane's flight recorder]]
+|1
+|Required
+!<font color="red">Yes</font>
+|}
+The fallen plane is located on the eastern side of [[Woods]], where the [[Crashed plane's flight recorder]] can be found on the right side of the plane in the broken section near the back.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Falling Skies Map.jpg|Plane location marked on map
+File:Woods Showcase 12.png|The wanted plane
+File:FallingSkiesFlightRecorderSpawn.png|The broken section with the recorder
+File:FallingSkiesFlightRecorderSpawnCloseUp.png|The recorder
+</gallery></li>
+
+====Leave the flight recorder in the specified spot====
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+![[File:Crashed plane's flight recorder icon.png|link=Crashed plane's flight recorder]]
+|[[Crashed plane's flight recorder]]
+|1
+|Required
+!N/A
+|Stashed item
+|}
+The [[Crashed plane's flight recorder]] has to be stashed at the destroyed room in the house on the [[Shoreline]] island.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:FallingSkiesFlightRecorderStashMap.png|House location marked on map
+File:FallingSkiesFlightRecorderStashLocation.png|Stashing location
+</gallery></li>
+
+===Visit [[Prapor]]===
+{|class="wikitable"
+! colspan="6" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+![[File:Toolsicon.png|link=Toolset]]
+|[[Toolset]]
+|2
+|Handover item
+!<font color="red">Yes</font>
+|Can be crafted in the [[Hideout]] (Workbench lv. 1).
+|-
+![[File:recicon.png|link=Rechargeable battery]]
+|[[Rechargeable battery]]
+|3
+|Handover item
+!<font color="red">Yes</font>
+|Can be crafted in the [[Hideout]] (Workbench lv. 2).
+|-
+![[File:Circuit Icon.png|link=Printed circuit board]]
+|[[Printed circuit board]]
+|5
+|Handover item
+!<font color="red">Yes</font>
+|Can be crafted in the [[Hideout]] (Workbench lv. 1).
+|}
+[[Prapor]] asks for these items to continue.
+
+===Wait for the information from [[Prapor]]===
+Wait 3-5 hours then visit [[Prapor]] in the menu through the trader screen and ask him about the fallen plane.
+
+===Hand over the flight crew's transcript and Elektronik's secure flash drive to [[Prapor]]===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Plane crew transcript icon.png|link=Plane crew transcript]]
+|[[Plane crew transcript]]
+|1
+|Handover item
+!<font color="red">Yes</font>
+|-
+![[File:Elektronik's flash drive icon.png|link=Elektronik's flash drive]]
+|[[Elektronik's flash drive]]
+|1
+|Handover item
+!<font color="red">Yes</font>
+|}
+Both items can be found in the chairman's house on [[Shoreline]].
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:FallingSkiesElektroniksUSBMap.png|House location marked on map
+File:Chairman house.png|The wanted house
+File:FallingSkiesElektroniksTranscript.png|The transcript under mattress at the overturned bed
+File:FallingSkiesElektroniksFlashDrive.png|The flash drive on top of the shelf next to the bed
+</gallery></li>
+
+====Rewards====
+You will receive the reward once you hand over both items.
+* 300,000 Roubles
+** 315,000 Roubles with [[Hideout#Modules|Intelligence Center]] Level 1
+** 345,000 Roubles with [[Hideout#Modules|Intelligence Center]] Level 2
+
+===Wait for the information from Prapor===
+Wait 1-3 hours then visit [[Prapor]] in the menu through the trader screen and ask him about the fallen plane. [[Prapor]] asks if you read the transcript and if you answer with yes, you'll get a reward, if you answer with no you won't.
+
+====Rewards====
+* 300,000 Roubles
+** 315,000 Roubles with [[Hideout#Modules|Intelligence Center]] Level 1
+** 345,000 Roubles with [[Hideout#Modules|Intelligence Center]] Level 2
+
+===Retrieve the armored case/Find any additional clues===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+![[File:Armored case icon.png|link=Armored case]]
+|[[Armored case]]
+|1
+|Handover item
+!<font color="red">Yes</font>
+|-
+![[File:Note from Mr. Kerman icon.png|link=Note from Mr. Kerman]]
+|[[Note from Mr. Kerman]]
+|1
+|Optional
+!<font color="red">Yes</font>
+|}
+The [[Armored case]] can be found behind the cockpit of the fallen plane, and the optional [[Note from Mr. Kerman]] is located on the pilot seat.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:FallingSkiesArmoredCaseSpawn.png|The [[Armored case]]
+File:FallingSkiesKermanNoteSpawn.png|The [[Note from Mr. Kerman]]
+</gallery></li>
+
+===Keep the armored case for yourself or hand it over to [[Prapor]]===
+'''<font color="red">This is an important point of no return choice! It influences the course of the story chapter [[The Ticket]].</font>'''
+[[File:The Ticket Flowchart by Callsign Smokey.png|thumb|right|240px|Decision consequences flowchart|link={{filepath:The Ticket Flowchart by Callsign Smokey.png}}]]
+
+====Decision: Keep the armored case====
+=====Rewards=====
+* +80,000 [[EXP]]
+* [[Prapor]] Rep <font color="red">'''-0.7'''</font>
+* 1× [[Armored case]]
+* Unlocks achievement [[Achievements#Achievements|Just Business]]
+
+====Decision: Hand over the armored case directly to [[Prapor]]====
+=====Rewards=====
+* +80,000 [[EXP]]
+* 1,000,000 Roubles
+** 1,050,000 Roubles with [[Hideout#Modules|Intelligence Center]] Level 1
+** 1,150,000 Roubles with [[Hideout#Modules|Intelligence Center]] Level 2
+* Unlocks achievement [[Achievements#Achievements|Man of His Word]]
+
+====Decision: Pretend you didn't find the armored case, but still hand it over to [[Prapor]]====
+=====Rewards=====
+* +80,000 [[EXP]]
+* 1,000,000 Roubles
+** 1,050,000 Roubles with [[Hideout#Modules|Intelligence Center]] Level 1
+** 1,150,000 Roubles with [[Hideout#Modules|Intelligence Center]] Level 2
+* Unlocks achievement [[Achievements#Achievements|Man of His Word]]
+
+{{Navbox story chapters}}
+[[Category:Story chapters]]
+
+[[fr:Tombé du ciel]]
+[[ru:Небеса в огне]]

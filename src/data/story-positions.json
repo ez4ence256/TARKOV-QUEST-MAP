@@ -194,5 +194,79 @@
     "source": "Labyrinth facility research report location map.png",
     "method": "similitude par appariement des bâtiments (12 paires, résidu 0,8 m) avec le SVG de Littoral ; centre de l'anneau de l'épingle rouge ; contrôle approximatif : les icônes d'extraction du wiki sont décalées de 10 à 15 m",
     "errorM": 12
+  },
+  "Tour::terminal#0": {
+    "map": "shoreline",
+    "positions": [
+      {
+        "x": -916.7,
+        "z": 259.7
+      }
+    ],
+    "source": "Tour Shoreline Map.png",
+    "method": "similitude (appariement des masques d'eau et de routes, 5 m de résidu) entre la carte JINDOUZ du wiki et notre SVG de Shoreline ; contrôle : extractions de tarkov.dev sur leurs icônes (± 10 m)",
+    "errorM": 21
+  },
+  "Tour::secret terragroup facility the lab#0": [
+    {
+      "map": "streets-of-tarkov",
+      "positions": [
+        {
+          "x": 211.3,
+          "z": 84.6
+        }
+      ],
+      "source": "StreetsTransitToLabsMap.png",
+      "method": "similitude par points SIFT entre la carte JINDOUZ du wiki et notre SVG de Streets (résidu ≈ 0,3 m) ; contrôle : transit « The Lab » de tarkov.dev à 3 m de son repère",
+      "errorM": 8
+    },
+    {
+      "map": "the-lab",
+      "positions": [
+        {
+          "x": -122.8,
+          "z": -304.8
+        }
+      ],
+      "source": "LabsServerRoomMap.png",
+      "method": "similitude par ECC sur les masques de sol entre l'affiche du wiki et les tuiles de la map Labs (cc 0,87-0,90) ; contrôle : la porte du hangar de tarkov.dev à 3 m de son icône",
+      "errorM": 28
+    }
+  ],
+  "Falling Skies::retrieve the flash drive from one of the g wagon suvs#0": {
+    "map": "shoreline",
+    "positions": [
+      {
+        "x": 348.1,
+        "z": 299.5
+      }
+    ],
+    "source": "FallingSkiesGWagonUSBMap.png",
+    "method": "similitude (appariement des masques d'eau et de routes, 5 m de résidu) entre la carte JINDOUZ du wiki et notre SVG de Shoreline ; contrôle : extractions de tarkov.dev sur leurs icônes (± 10 m)",
+    "errorM": 16
+  },
+  "Falling Skies::retrieve the plane s flight recorder#0": {
+    "map": "shoreline",
+    "positions": [
+      {
+        "x": 245.8,
+        "z": 422.6
+      }
+    ],
+    "source": "FallingSkiesFlightRecorderStashMap.png",
+    "method": "similitude (appariement des masques d'eau et de routes, 5 m de résidu) entre la carte JINDOUZ du wiki et notre SVG de Shoreline ; contrôle : extractions de tarkov.dev sur leurs icônes (± 10 m)",
+    "errorM": 34
+  },
+  "Falling Skies::hand over the flight crew s transcript and elektronik s secure flash drive to prapor#0": {
+    "map": "shoreline",
+    "positions": [
+      {
+        "x": 405.4,
+        "z": -41.5
+      }
+    ],
+    "source": "FallingSkiesElektroniksUSBMap.png",
+    "method": "similitude (appariement des masques d'eau et de routes, 5 m de résidu) entre la carte JINDOUZ du wiki et notre SVG de Shoreline ; contrôle : extractions de tarkov.dev sur leurs icônes (± 10 m)",
+    "errorM": 26
   }
 }

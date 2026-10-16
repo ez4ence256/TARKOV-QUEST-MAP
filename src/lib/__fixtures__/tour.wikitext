@@ -1,0 +1,264 @@
+{{Infobox quest
+|image        =Tour Banner.png
+|icon         =Tour Icon.png
+|icon size    =
+|location     =[[Ground Zero|Ground Zero (Tutorial)]]
+|given by     =
+|reward       =
+|reputation   =
+|quest number =
+|previous     =
+|leads to     =
+|related      =
+|related2     =
+|reqkappa     =
+}}
+
+'''{{PAGENAME}}''' is a [[Story chapters|story chapter]] in ''[[Escape from Tarkov]]''.
+
+==Description==
+{{quote|During the assault on the TerraGroup office, a massive explosion erupted on top of one of the nearby high-rises. I got left on my own, with no contact with command. Looks like I'll have to handle the evacuation myself. But first things first, I have to get out of this Ground Zero.}}
+
+==Requirements==
+This chapter gets automatically added to the quest list upon starting the game.
+
+==Objectives==
+* Escape [[Ground Zero]]
+* Talk to [[Therapist]]
+* Ensure access to the [[Streets of Tarkov]]
+** Hand over the cash to [[Therapist]]
+** (''Optional'') Collect the required 250,000 [[Roubles]]
+* Talk to [[Ragman]]
+* Survive and extract from [[Interchange]] or visit [[Interchange]] 3 times
+* Tell [[Ragman]] what you found during the recon
+* Talk to [[Skier]]
+* Survive and extract from [[Customs]] or visit [[Customs]] 3 times
+* Hand over any 5 found [[Found in raid|<font color="red">in raid</font>]] building materials items to [[Skier]]
+** (''Optional'') Find any 5 items [[Found in raid|<font color="red">in raid</font>]] from the building materials category
+* Talk to [[Mechanic]]
+* Survive and extract from [[Factory]] or visit [[Factory]] 3 times
+* Hand over any 2 found [[Found in raid|<font color="red">in raid</font>]] [[weapons]] to [[Mechanic]]
+** (''Optional'') Find any 2 [[weapons]] [[Found in raid|<font color="red">in raid</font>]]
+* Talk to [[Skier]]
+* Eliminate any 3 targets on [[Woods]]
+* Survive and extract from [[Woods]] or visit [[Woods]] 3 times
+* Locate the entrance to the port Terminal
+* Find a way to contact the soldiers at the Terminal
+* Use the intercom to contact the port garrison
+* Learn how to escape Tarkov
+* Ensure access to [[Reserve]]
+** Survive and extract from [[Shoreline]] or visit [[Shoreline]] 3 times
+** Hand over 5 [[Dogtag|PMC dogtag]]s to [[Prapor]]
+** (''Optional'') Find 5 [[Dogtag|PMC dogtag]]s [[Found in raid|<font color="red">in raid</font>]]
+* Ensure access to [[Lighthouse]]
+** Hand over 8,000 [[Dollars|USD]] to [[Mechanic]]
+** (''Optional'') Collect the required 8,000 [[Dollars|USD]]
+* Ensure access to [[The Lab]]
+** Access the secret [[The Lab|TerraGroup facility]]
+** (''Optional'') Obtain a [[TerraGroup Labs access keycard|keycard]] or access codes to enter the [[The Lab|facility]]
+** (''Optional'') Locate the entrance to the [[The Lab|facility]] on [[Factory]]
+** (''Optional'') Locate the entrance to the [[The Lab|facility]] on [[Streets of Tarkov]]
+** Search the top management offices in [[The Lab]]
+** Search the server room in [[The Lab]]
+** Locate the escape path through the drainage system in [[The Lab]]
+
+==Guide==
+===Escape Ground Zero===
+Finish the tutorial raid by extracting via the "Klimov Street" extraction which is located behind the "Skyside" business center. During the tutorial, numerous hints on controls and game mechanics are displayed, but none of them need to be followed in order to complete the raid.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Tutorial By xTycho.png|Map of the location
+</gallery></li>
+
+===Talk to [[Therapist]]===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+|[[File:roublesicon.png|link=Roubles]]
+|[[Roubles]]
+|250,000
+|Handover item
+!<font color="green">No</font>
+|}
+
+Visit [[Therapist]] in the menu through the trader screen and hand over 250,000 [[Roubles]] when the dialogue option appears.
+
+====Rewards====
+* Unlocks [[Streets of Tarkov]] in the location selection
+
+===[[Ragman]] - [[Interchange]]===
+Extract from [[Interchange]] with either the "Survived" or "Run-Through" extraction status, or visit the location 3 times.
+
+====Rewards====
+* Unlocks [[Skier]] as trader
+* Unlocks [[Customs]] in the location selection
+
+===[[Skier]] - [[Customs]]===
+{|class="wikitable"
+! colspan="5" | Related Quest Items
+|-
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+!Notes
+|-
+|Any [[Loot#Building_materials|building materials]] or [[Loot#Tools|tools]]
+|5
+|Handover item
+!<font color="red">Yes</font>
+|Partial handover not possible
+|}
+Extract from [[Customs]] with either the "Survived" or "Run-Through" extraction status, or visit the location 3 times.
+
+====Rewards====
+* Unlocks [[Mechanic]] as trader
+* Unlocks [[Factory]] in the location selection
+
+===[[Mechanic]] - [[Factory]]===
+{|class="wikitable"
+! colspan="4" | Related Quest Items
+|-
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+|Any [[weapons]]
+|2
+|Handover item
+!<font color="red">Yes</font>
+|}
+Extract from [[Factory]] with either the "Survived" or "Run-Through" extraction status, or visit the location 3 times.
+
+====Rewards====
+* Unlocks [[Prapor]] as trader
+* Unlocks [[Woods]] in the location selection
+
+===[[Skier]] - [[Woods]]===
+Kill any 3 targets on [[Woods]] and extract with either the "Survived" or "Run-Through" extraction status, or visit the location 3 times. The kills don't need to be performed in the same raid as the "survive" objective.
+
+====Rewards====
+* Unlocks [[Peacekeeper]] as trader
+* Unlocks [[Shoreline]] in the location selection
+
+===Terminal===
+To complete the next few objectives you have to go to the south-east corner of [[Shoreline]] and interact with the intercom at the watchtower in front of the Terminal.
+
+Be careful not to get too close to the Terminal wall, as there are guards that will shoot at anyone. Do not try to kill them, they return fire with deadly precision. Interacting with the intercom too many times after being told to leave will also lead to your death by the guards. 
+
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Tour Shoreline Map.png|Intercom location marked on map
+File:Tour Shoreline Tower.png|Watchtower where the intercom is located
+File:Tour Shoreline Intercom.png|The intercom
+</gallery></li>
+
+===[[Prapor]] - [[Reserve]]===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+|[[File:Dogtags.png|link=Dogtag]]
+|[[Dogtag]]
+|5
+|Handover item
+!<font color="green">No</font>
+|}
+Extract from [[Shoreline]] with either the "Survived" or "Run-Through" extraction status, or visit the location 3 times. Afterwards visit [[Prapor]] in the menu through the trader screen and hand over 5 [[Dogtag]]s when the dialogue option appears. The [[Dogtag]]s can be obtained by taking them off dead PMCs (they do not have to be killed by your hand).
+
+====Rewards====
+* Unlocks [[Reserve]] in the location selection
+
+===[[Mechanic]] - [[Lighthouse]]===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Requirement
+!'''[[Found in raid|Find in raid]]'''
+|-
+|[[File:Dollarsicon.png|link=Dollars]]
+|[[Dollars]]
+|8,000
+|Handover item
+!<font color="green">No</font>
+|}
+Visit [[Mechanic]] in the menu through the trader screen and hand over 8,000 [[Dollars]] when the dialogue option appears. [[Dollars]] can be purchased from [[Peacekeeper]] with [[Roubles]].
+
+====Rewards====
+* Unlocks [[Lighthouse]] in the location selection
+
+===Secret TerraGroup facility [[The Lab]]===
+{|class="wikitable"
+! colspan="5" |Related Quest Items
+|-
+!Icon
+!Item name
+!Amount
+!Notes
+|-
+![[File:Terragroup Labs access keycard icon.png|frameless|link=TerraGroup Labs access keycard]]
+|[[TerraGroup Labs access keycard]]
+|1
+|Allows access to [[The Lab]] location a single time.
+|}
+
+One of the following two [[transits]] has to be used to access [[The Lab]]:
+====[[Streets of Tarkov]] to [[The Lab]]====
+Underground entrance in front of the Klimova 16A building with the Cosmonaut painting. [[TerraGroup Labs access keycard]] required. Transits are only available 1 min after raid start.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:StreetsTransitToLabsMap.png
+File:StreetsTransitToLabsUpstairs.png
+File:StreetsTransitToLabsDownstairs.png
+</gallery></li>
+
+====[[Factory]] to [[The Lab]]====
+In the sewer tunnel connected to the flooded area in the underground. [[TerraGroup Labs access keycard]] required. Transits are only available 1 min after raid start.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:FactoryTransitToLabsMap.png
+File:FactoryTransitToTheLab2.png
+File:FactoryTransitToTheLab.png
+</gallery></li>
+
+====Search the top management offices====
+Laboratory manager's office (O21) on the second level.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Lab Managers Location.png|Location marked on map
+File:Lab Managers Bridge.png|The top management offices
+</gallery></li>
+
+====Search the server room====
+Next to the hangar on the first level.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:LabsServerRoomMap.png|Location marked on map
+File:LabsServerRoom.png|The server room
+</gallery></li>
+
+====Locate the escape path through the drainage====
+In the basement at the "Sewage Conduit" extraction. The extraction does not need to be activated for this objective. You do not need to survive the raid.
+<li style="display: inline-block;"><gallery widths="300" heights="169" mode="packed">
+File:Tour The Lab Escape path Map.png|Location marked on map
+File:Tour The Lab Escape path 1.png|One of the doors leading into the sewers
+File:Tour The Lab Escape path 2.png|The escape path at the end of the sewers
+</gallery></li>
+
+====Rewards====
+* Unlocks [[The Lab]] in the location selection
+* Unlocks achievement [[Achievements#Achievements|Pathfinder]]
+
+{{Navbox story chapters}}
+[[Category:Story chapters]]
+
+[[ru:Тур]]
