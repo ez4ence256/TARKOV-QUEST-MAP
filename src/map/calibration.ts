@@ -111,6 +111,24 @@ function svgUrlFor(svgPath: unknown): string | undefined {
   return SVG_REMOTE_BASE + file;
 }
 
+/** Bornes de l'Usine, recopiées telles quelles par maps.json sur Icebreaker (valeur de remplissage, pas une mesure). */
+const FACTORY_BOUNDS: RawBounds = [[77, -64.5], [-65.5, 67.4]];
+
+/**
+ * Correction d'Icebreaker. maps.json lui donne les bornes de l'Usine et transform [2, 125, 3.5, 91] :
+ * avec ces valeurs 60 % du bateau tombe hors de la grille de tuiles (la sortie « Heli » à z = -66 aussi).
+ * Les spawns, objets et serrures de tarkov.dev se calent sur les ponts des tuiles avec 1,5 pixel par mètre
+ * (zoom 0, tuile de 256 px) centré sur (128, 128), rotation 180° inchangée : 134 points sur 145 tombent sur
+ * le plancher de leur pont (0,17 m d'écart moyen), contre 3,2 m avec les valeurs de maps.json.
+ * shortcut: échelle à 1,5 ± 0,1 (± 5 m en bout de bateau : les icônes de l'affiche re3mr donneraient 1,38, les points
+ * de tarkov.dev 1,40 à 1,54) ; la correction s'efface d'elle-même quand
+ * maps.json a d'autres bornes que celles de l'Usine.
+ */
+export function withKnownFixes(c: MapCalibration): MapCalibration {
+  if (c.key !== "icebreaker" || JSON.stringify(c.bounds) !== JSON.stringify(FACTORY_BOUNDS)) return c;
+  return { ...c, transform: [1.5, 128, 1.5, 128], bounds: [[42.7, -85.3], [-42.7, 85.3]] };
+}
+
 /**
  * Transforme le contenu de maps.json en table normalizedName -> calibrage.
  * Seules les entrées "projection: interactive" possèdent un calibrage ; les
@@ -149,7 +167,7 @@ export function parseCalibration(groups: unknown): CalibrationTable {
       calibration.mainLevelName = dup.name;
       calibration.layers = calibration.layers.filter((l) => l !== dup);
     }
-    const withLevels = withBasement(calibration);
+    const withLevels = withKnownFixes(withBasement(calibration));
     table[group.normalizedName] = withLevels;
     for (const alt of Array.isArray(m.altMaps) ? m.altMaps : []) {
       if (typeof alt === "string") table[alt] = withLevels;
@@ -160,7 +178,7 @@ export function parseCalibration(groups: unknown): CalibrationTable {
 
 /** Le cache local peut dater d'avant le calque Sous-sol : on le (re)met. */
 const withBasements = (table: CalibrationTable): CalibrationTable =>
-  Object.fromEntries(Object.entries(table).map(([k, c]) => [k, withBasement(c)]));
+  Object.fromEntries(Object.entries(table).map(([k, c]) => [k, withKnownFixes(withBasement(c))]));
 
 export const BUNDLED_CALIBRATION = parseCalibration(bundledMaps);
 

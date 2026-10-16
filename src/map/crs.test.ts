@@ -1,7 +1,7 @@
 // Vérifie que la conversion de coordonnées est identique à celle du site tarkov.dev.
 import { describe, expect, it } from "vitest";
 import L from "leaflet";
-import { BUNDLED_CALIBRATION } from "./calibration";
+import { BUNDLED_CALIBRATION, withKnownFixes } from "./calibration";
 import { gameToLatLng, getCRS, toLatLngBounds } from "./crs";
 
 // --- Copie de référence du code de tarkov.dev (src/pages/map/index.jsx, commit 97ff6e7) ---
@@ -71,5 +71,40 @@ describe("calibrage", () => {
 
   it("Customs : un point du jeu est converti en [z, x]", () => {
     expect(gameToLatLng({ x: 100, z: -50 })).toEqual([-50, 100]);
+  });
+});
+
+describe("Icebreaker : le bateau tombe sur ses tuiles", () => {
+  const cal = BUNDLED_CALIBRATION["icebreaker"];
+  const crs = getCRS(cal);
+  // pixel au zoom 0 : la grille de tuiles va de 0 à tileSize
+  const px = (x: number, z: number) => crs.latLngToPoint(L.latLng(z, x), 0);
+  // sortie « Heli » et extrêmes des spawns de tarkov.dev (json.tarkov.dev/pve/maps, octobre 2026)
+  const ship: [string, number, number][] = [
+    ["Heli", 0.28, -66.03],
+    ["spawn poupe", -11.7, -78.3],
+    ["spawn proue", 12, 82.3],
+    ["objet bâbord", -12, 49],
+    ["objet tribord", 13.6, -63],
+  ];
+
+  for (const [name, x, z] of ship) {
+    it(`${name} est dans la grille de tuiles`, () => {
+      const p = px(x, z);
+      expect(p.x).toBeGreaterThan(0);
+      expect(p.x).toBeLessThan(cal.tileSize);
+      expect(p.y).toBeGreaterThan(0);
+      expect(p.y).toBeLessThan(cal.tileSize);
+    });
+  }
+
+  it("la sortie Heli est sur le pont d'hélicoptère, près de la poupe (haut de l'image)", () => {
+    const p = px(0.28, -66.03);
+    expect(p.x).toBeCloseTo(128, -1); // axe du bateau
+    expect(p.y).toBeLessThan(50);
+  });
+
+  it("la correction s'efface quand maps.json donne d'autres bornes", () => {
+    expect(withKnownFixes({ ...cal, bounds: [[10, 10], [-10, -10]], transform: [3, 3, 3, 3] }).transform).toEqual([3, 3, 3, 3]);
   });
 });
