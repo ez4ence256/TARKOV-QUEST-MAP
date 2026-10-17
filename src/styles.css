@@ -1996,6 +1996,18 @@ kbd {
   border: 1px solid var(--line);
   border-radius: 4px;
 }
+/* offre payée en objets : sous le badge du niveau */
+.trader-troc {
+  position: absolute;
+  top: 24px;
+  left: 4px;
+  padding: 0 0.3rem;
+  font-size: 0.72em;
+  color: var(--ok);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
 .trader-lock {
   position: absolute;
   top: 3px;

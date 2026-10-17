@@ -229,6 +229,11 @@ function OfferTile({ offer, name, itemIcons, taskName, lang }: { offer: Offer; n
     <li>
       <div className="finder-tile trader-tile" title={title}>
         <span className="trader-ll">{tr(`Niv. ${offer.level}`, `LL${offer.level}`)}</span>
+        {offer.barter && (
+          <span className="trader-troc" title={tr("Offre payée en objets (troc)", "Paid with items (barter trade)")}>
+            {tr("⇄ Troc", "⇄ Barter")}
+          </span>
+        )}
         {offer.task && (
           <span className="trader-lock" aria-label={tr(`Débloqué par une quête : ${taskName(offer.task)}`, `Unlocked by a quest: ${taskName(offer.task)}`)}>
             🔒
