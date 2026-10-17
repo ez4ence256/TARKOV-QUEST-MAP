@@ -174,7 +174,7 @@ export function parseRequirements(body: string, pageTitle: string): StoryStep[] 
  * Galeries d'une étape, chaque photo avec sa sous-partie : nombre de sous-titres (==== Customs ====,
  * ===== FSB report =====…) avant elle, comptés comme les blocs du texte (même lecture).
  */
-function stepGalleries(body: string, pageTitle: string): StoryStep["files"] {
+export function stepGalleries(body: string, pageTitle: string): StoryStep["files"] {
   return [...body.matchAll(/<gallery[^>]*>[\s\S]*?<\/gallery>/gi)].flatMap((g) => {
     const section = parseBlocks(body.slice(0, g.index), pageTitle).filter((b) => b.type === "heading").length;
     return parseGalleries(g[0]).map((f) => ({ ...f, section }));

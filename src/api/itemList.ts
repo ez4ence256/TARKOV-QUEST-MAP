@@ -6,6 +6,7 @@
 //  - recherche par image, au premier collage d'une image : src/data/item-images.bin (cases d'inventaire, 4,9 Mo)
 //    ou src/data/item-inspect.bin (vues d'inspection, 1,4 Mo), selon la capture.
 //  - catégories du flea : src/data/item-categories.json (145 Ko, 60 Ko compressé), à l'ouverture du finder.
+//  - meilleurs spots et titres wiki : src/data/item-where.json (115 Ko, 30 Ko compressé), à l'ouverture d'un objet.
 import type { GameMode } from "../types";
 import { fetchEndpoint, fetchJson, fetchTranslations } from "./tarkovJson";
 import itemImagesUrl from "../data/item-images.bin?url";
@@ -13,6 +14,7 @@ import itemInspectUrl from "../data/item-inspect.bin?url";
 import { parseImageIndex, type ImageIndex } from "../lib/itemImage";
 import { parseInspect, type InspectIndex } from "../lib/itemInspect";
 import type { CategoryFile } from "../lib/itemCategories";
+import type { Spot } from "../lib/itemSpots";
 import { buildBarterIndex, buildCraftIndex, buildHideoutIndex, type Exchange, type HideoutUse } from "../lib/itemUsage";
 
 export interface ListedItem {
@@ -20,6 +22,8 @@ export interface ListedItem {
   name: string;
   /** Textes comparés à la recherche : noms et noms courts, français et anglais. */
   alts: string[];
+  /** Nom anglais : titre de la page de l'objet sur le wiki. */
+  nameEn: string;
 }
 
 /** Traductions d'objets (langue puis anglais) -> liste triée par nom. */
@@ -32,7 +36,7 @@ export function parseItemList(primary: Record<string, string>, english: Record<s
     const name = primary[`${id} Name`] ?? english[`${id} Name`];
     if (!name) continue;
     const alts = [name, primary[`${id} ShortName`], english[`${id} Name`], english[key]].filter((s): s is string => Boolean(s));
-    out.push({ id, name, alts: [...new Set(alts)] });
+    out.push({ id, name, alts: [...new Set(alts)], nameEn: english[`${id} Name`] ?? name });
   }
   return out.sort((a, b) => a.name.localeCompare(b.name, lang));
 }
@@ -95,6 +99,10 @@ export function loadItemList(mode: GameMode, lang: string): Promise<ListedItem[]
   }
   return p;
 }
+
+/** Meilleurs spots par objet et titres wiki qui diffèrent du nom anglais (src/data/item-where.json, chargé à part). */
+export const loadItemWhere = () =>
+  import("../data/item-where.json").then((m) => m.default as unknown as { spots: Record<string, Spot[]>; wiki: Record<string, string> });
 
 /** Catégories du flea (src/data/item-categories.json, chargé à part) et leurs noms dans la langue. */
 export async function loadItemCategories(mode: GameMode, lang: string): Promise<{ file: CategoryFile; names: Translations }> {

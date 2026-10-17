@@ -10,6 +10,7 @@ import { markerIcon } from "./icons";
 import { BaseLayer, type BaseStatus } from "./BaseLayer";
 import { ExitsLayer } from "./ExitsLayer";
 import { StoryLayer } from "./StoryLayer";
+import { ItemSpotsLayer, type ItemSpotMarker } from "./ItemSpotsLayer";
 import { LabyrinthLayer } from "./LabyrinthLayer";
 import { labyrinthFor } from "../lib/labyrinth";
 import type { StoryMapPoint } from "../lib/storyPoints";
@@ -67,6 +68,9 @@ interface MapViewProps {
   onStoryDone: (chapter: string, stepKey: string) => void;
   onStoryOpen: (chapter: string) => void;
   onStoryPhotos: (chapter: string, stepKey: string, source: string) => void;
+  /** Meilleurs spots d'un objet (item finder), toutes maps : seuls ceux de cette map sont montrés. */
+  itemSpots: ItemSpotMarker[];
+  onClearItemSpots: () => void;
 }
 
 /** Emprise par défaut quand une map n'a pas de calibrage : celle des points, sinon un carré. */
@@ -258,9 +262,10 @@ function MapViewInner(props: MapViewProps) {
     else markers.current.delete(key);
   };
 
+  const spotsHere = useMemo(() => props.itemSpots.filter((s) => s.mapId === props.map.id), [props.itemSpots, props.map.id]);
   const allFocusable = useMemo(
-    () => [...points, ...customPoints.map((c) => ({ key: `custom:${c.id}`, x: c.x, z: c.z }))],
-    [points, customPoints],
+    () => [...points, ...customPoints.map((c) => ({ key: `custom:${c.id}`, x: c.x, z: c.z })), ...spotsHere],
+    [points, customPoints, spotsHere],
   );
 
   return (
@@ -295,6 +300,7 @@ function MapViewInner(props: MapViewProps) {
 
         {labyrinth && showLab && <LabyrinthLayer data={labyrinth} />}
         <StoryLayer points={props.storyPoints} nameOf={props.storyName} onDone={props.onStoryDone} onOpen={props.onStoryOpen} onPhotos={props.onStoryPhotos} />
+        <ItemSpotsLayer spots={spotsHere} register={registerMarker} onClear={props.onClearItemSpots} />
 
         {points.map((pt) => {
           const task = pt.taskId ? props.tasksById.get(pt.taskId) : undefined;

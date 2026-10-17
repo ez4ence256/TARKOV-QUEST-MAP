@@ -5,6 +5,7 @@ import { GAME_MODES } from "./types";
 import { loadTarkovData } from "./api/cache";
 import { BUNDLED_CALIBRATION, loadCalibration } from "./map/calibration";
 import { MapView, type Placing } from "./map/MapView";
+import type { ItemSpotMarker } from "./map/ItemSpotsLayer";
 import { exportState, getLastMode, useAppState, type CustomPoint } from "./state/store";
 import { QUEST_COLORS } from "./lib/objectiveTypes";
 import { buildObjectivePoints, manualPointKey, shownObjectives, taskMapIds } from "./lib/points";
@@ -105,6 +106,8 @@ export default function App() {
   }, []);
   const [placing, setPlacing] = useState<Placing>(null);
   const [focus, setFocus] = useState<{ key: string; n: number } | null>(null);
+  // meilleurs spots d'un objet (item finder) affichés sur la carte, jusqu'à ce qu'on les retire
+  const [itemSpots, setItemSpots] = useState<ItemSpotMarker[]>([]);
 
   // Calibrage des cartes (copie embarquée tout de suite, version en ligne ensuite)
   useEffect(() => {
@@ -375,7 +378,12 @@ export default function App() {
         <div className="brand">
           Quest Planner <span className="mode-badge">{modeLabel}</span>
         </div>
-        <ItemFinder gameMode={gameMode} lang={lang} tasks={tasks} traders={data?.traders ?? []} maps={maps} itemNames={data?.itemNames ?? NO_NAMES} itemIcons={data?.itemIcons ?? NO_NAMES} onShowQuest={showQuest} />
+        <ItemFinder gameMode={gameMode} lang={lang} tasks={tasks} traders={data?.traders ?? []} maps={maps} itemNames={data?.itemNames ?? NO_NAMES} itemIcons={data?.itemIcons ?? NO_NAMES} onShowQuest={showQuest}
+          onShowSpots={(spots, spot) => {
+            setItemSpots(spots);
+            focusPoint(spot.key, spot.mapId);
+          }}
+        />
         <MapPicker maps={maps} currentId={currentMap?.id ?? ""} counts={mapCounts} onPick={showMap} />
         <RoomControl room={room} />
         <label className="scav-check">
@@ -626,6 +634,8 @@ export default function App() {
               onStoryDone={(chapter, stepKey) => setStoryStep(chapter, stepKey, true)}
               onStoryOpen={(chapter) => showQuest(storyIdOf(chapter))}
               onStoryPhotos={showStoryPhotos}
+              itemSpots={itemSpots}
+              onClearItemSpots={() => setItemSpots([])}
               onPhotos={showPhotos}
               onExit={showExitPhotos}
               onQuest={showQuest}

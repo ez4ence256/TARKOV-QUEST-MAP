@@ -125,6 +125,29 @@ function splitAtHeadings(blocks: WikiBlock[]): WikiBlock[][] {
   return parts;
 }
 
+/** Texte du wiki avec chaque photo sous le sous-titre où le wiki la place (sans sous-partie connue : à la fin). */
+export function BlocksWithPhotos({ blocks, photos, itemNames, itemIcons }: { blocks: WikiBlock[]; photos: WikiPhoto[]; itemNames: Record<string, string>; itemIcons?: Record<string, string> }) {
+  return (
+    <>
+      {splitAtHeadings(blocks).map((part, i, parts) => {
+        const here = photos.filter((p) => Math.min(p.section ?? parts.length - 1, parts.length - 1) === i);
+        return (
+          <Fragment key={i}>
+            <WikiBlocks blocks={part} itemNames={itemNames} itemIcons={itemIcons} />
+            {here.length > 0 && (
+              <div className="story-photos">
+                {here.map((p) => (
+                  <Photo key={p.file} photo={p} itemNames={itemNames} />
+                ))}
+              </div>
+            )}
+          </Fragment>
+        );
+      })}
+    </>
+  );
+}
+
 /** Une case de la fiche (condition ou étape) : titre, texte et photos. `n` : numéro affiché (aucun pour une condition). */
 function StoryRow({ item, n, index, done, current, itemNames, itemIcons, onChange }: { item: Item; n?: number; index: number; done: boolean; current: boolean; itemNames: Record<string, string>; itemIcons?: Record<string, string>; onChange: (done: boolean) => void }) {
   return (
@@ -139,22 +162,7 @@ function StoryRow({ item, n, index, done, current, itemNames, itemIcons, onChang
       </label>
       {(item.blocks.length > 0 || (item.photos?.length ?? 0) > 0) && (
         <div className="story-step-body">
-          {/* chaque photo sous le sous-titre où le wiki la place (sans sous-partie connue : à la fin) */}
-          {splitAtHeadings(item.blocks).map((part, i, parts) => {
-            const photos = (item.photos ?? []).filter((p) => Math.min(p.section ?? parts.length - 1, parts.length - 1) === i);
-            return (
-              <Fragment key={i}>
-                <WikiBlocks blocks={part} itemNames={itemNames} itemIcons={itemIcons} />
-                {photos.length > 0 && (
-                  <div className="story-photos">
-                    {photos.map((p) => (
-                      <Photo key={p.file} photo={p} itemNames={itemNames} />
-                    ))}
-                  </div>
-                )}
-              </Fragment>
-            );
-          })}
+          <BlocksWithPhotos blocks={item.blocks} photos={item.photos ?? []} itemNames={itemNames} itemIcons={itemIcons} />
         </div>
       )}
     </li>

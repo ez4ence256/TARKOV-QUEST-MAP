@@ -9,7 +9,11 @@ import { iconSrc } from "../lib/itemIcons";
 import { matchImage, type Rgba } from "../lib/itemImage";
 import { looksLikeInspect, matchInspect } from "../lib/itemInspect";
 import { buildUsageIndex, durationLabel, useLabel, type Exchange, type QuestUse } from "../lib/itemUsage";
-import { loadExchanges, loadHideout, loadItemCategories, loadItemImages, loadItemInspect, loadItemList, type HideoutInfo, type ListedItem } from "../api/itemList";
+import { loadExchanges, loadHideout, loadItemCategories, loadItemImages, loadItemInspect, loadItemList, loadItemWhere, type HideoutInfo, type ListedItem } from "../api/itemList";
+import { loadItemLocation, type ItemLocation, type LocationSectionTitle } from "../api/itemLocation";
+import type { Spot } from "../lib/itemSpots";
+import type { ItemSpotMarker } from "../map/ItemSpotsLayer";
+import { BlocksWithPhotos } from "./StoryView";
 import { iconUrl } from "../api/tarkovJson";
 import { buildCategoryTree, OTHER, type CategoryNode } from "../lib/itemCategories";
 import { ItemThumb } from "./ItemThumb";
@@ -58,6 +62,8 @@ interface Props {
   itemNames: Record<string, string>;
   itemIcons: Record<string, string>;
   onShowQuest: (taskId: string) => void;
+  /** « Voir sur la carte » : tous les spots de l'objet, et celui à centrer. */
+  onShowSpots: (spots: ItemSpotMarker[], focus: ItemSpotMarker) => void;
 }
 
 export function ItemFinder(props: Props) {
@@ -78,7 +84,7 @@ export function ItemFinder(props: Props) {
   );
 }
 
-function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIcons, onShowQuest, onClose }: Props & { onClose: () => void }) {
+function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIcons, onShowQuest, onShowSpots, onClose }: Props & { onClose: () => void }) {
   const [list, setList] = useState<ListedItem[] | null>(null);
   const [error, setError] = useState(false);
   const [query, setQuery] = useState("");
@@ -135,7 +141,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
     const known = new Set(list.map((i) => i.id));
     const extra = Object.entries(itemNames)
       .filter(([id]) => !known.has(id))
-      .map(([id, name]): ListedItem => ({ id, name, alts: [name] }));
+      .map(([id, name]): ListedItem => ({ id, name, alts: [name], nameEn: name }));
     return extra.length ? [...list, ...extra].sort((a, b) => a.name.localeCompare(b.name, lang)) : list;
   }, [list, itemNames, lang]);
 
@@ -300,6 +306,10 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                   onShowQuest(id);
                   onClose();
                 }}
+                onShowSpots={(spots, focus) => {
+                  onShowSpots(spots, focus);
+                  onClose();
+                }}
               />
             </>
           ) : (
@@ -346,7 +356,15 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   );
 }
 
-type Tab = "quests" | "hideout" | "barters" | "crafts";
+type Tab = "quests" | "hideout" | "barters" | "crafts" | "where";
+
+/** Titres des sections d'emplacement du wiki (pages d'objets et de clés). */
+const LOCATION_TITLE: Record<LocationSectionTitle, [string, string]> = {
+  Location: ["Emplacements connus", "Known locations"],
+  "Key Location": ["Où trouver la clé", "Where to find the key"],
+  "Lock Location": ["Où est la serrure", "Where the lock is"],
+  "Behind the Lock": ["Derrière la serrure", "Behind the lock"],
+};
 type Lazy<T> = { data: T | null; error: boolean };
 
 function Usage(p: {
@@ -363,8 +381,35 @@ function Usage(p: {
   itemIcons: Record<string, string>;
   onBack: () => void;
   onShowQuest: (taskId: string) => void;
+  onShowSpots: (spots: ItemSpotMarker[], focus: ItemSpotMarker) => void;
 }) {
   const [tab, setTab] = useState<Tab>("quests");
+  // « Où le trouver » : meilleurs spots (fichier généré) puis la page wiki de l'objet
+  const [spots, setSpots] = useState<Spot[] | null>(null);
+  const [location, setLocation] = useState<ItemLocation | "!" | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    loadItemWhere()
+      .then((where) => {
+        if (cancelled) return;
+        setSpots(where.spots[p.item.id] ?? []);
+        return loadItemLocation(where.wiki[p.item.id] ?? p.item.nameEn).then((loc) => !cancelled && setLocation(loc));
+      })
+      .catch(() => !cancelled && setLocation("!"));
+    return () => {
+      cancelled = true;
+    };
+    // la fiche est recréée pour chaque objet (key)
+  }, []);
+  const wikiSections = location && location !== "!" ? location.sections : [];
+  const wikiCount = wikiSections.reduce((n, s) => n + s.blocks.reduce((m, b) => m + (b.type === "list" ? b.items.length : 0), 0), 0);
+  const linked = new Set(location && location !== "!" ? location.links.map((l) => l.toLowerCase()) : []);
+  const markers: ItemSpotMarker[] = (spots ?? []).flatMap(([mapName, x, y, z, n, , keyId], i) => {
+    const map = p.maps.find((m) => m.normalizedName === mapName);
+    if (!map) return [];
+    const key = keyId ? p.byId.get(keyId) : undefined;
+    return [{ key: `spot:${i}`, mapId: map.id, x, y, z, rank: i + 1, item: p.item.name, details: [tr(`${n} point(s) d'apparition regroupés`, `${n} spawn point(s) grouped`), ...(!key ? [] : linked.has(key.nameEn.toLowerCase()) ? [tr(`Derrière la porte : ${key.name} (confirmé par le wiki)`, `Behind the door: ${key.name} (confirmed by the wiki)`)] : [tr(`Porte fermée à proximité : ${key.name}`, `Locked door nearby: ${key.name}`)])] }];
+  });
   const rows = p.quests
     .map((u) => ({ ...u, task: p.tasksById.get(u.taskId) }))
     .filter((r): r is typeof r & { task: Task } => Boolean(r.task))
@@ -381,12 +426,14 @@ function Usage(p: {
     hideout: p.hideout.error ? "!" : p.hideout.data ? hideoutRows.length : null,
     barters: p.barters.error ? "!" : p.barters.data ? barterRows.length : null,
     crafts: p.crafts.error || p.hideout.error ? "!" : p.crafts.data && p.hideout.data ? craftRows.length : null,
+    where: spots === null || location === null ? null : (spots.length || 0) + wikiCount || (location === "!" ? "!" : 0),
   };
   const tabs: [Tab, string][] = [
     ["quests", tr("Quêtes", "Quests")],
     ["hideout", "Hideout"],
     ["barters", "Barters"],
     ["crafts", "Crafts"],
+    ["where", tr("Où le trouver", "Where to find")],
   ];
 
   /** Contenu d'un onglet dont les données sont chargées à la demande. */
@@ -438,6 +485,77 @@ function Usage(p: {
         ))}
       </div>
       <div role="tabpanel" id={`finder-panel-${tab}`} aria-labelledby={`finder-tab-${tab}`}>
+        {tab === "where" &&
+          gate("where", () => {
+            const wiki = (
+              <>
+                {wikiSections.map((sec) => (
+                  <section key={sec.title} className="finder-where-wiki">
+                    <h3 className="finder-sub">{tr(...LOCATION_TITLE[sec.title])}</h3>
+                    <BlocksWithPhotos blocks={sec.blocks} photos={sec.photos} itemNames={{}} itemIcons={p.itemIcons} />
+                  </section>
+                ))}
+                {location === "!" && <p className="muted finder-empty">{tr("Le wiki ne répond pas (réseau ?).", "The wiki is not responding (network?).")}</p>}
+                {location !== "!" && location && wikiSections.length === 0 && (
+                  <p className="muted finder-empty">{location.exists ? tr("Le wiki ne donne pas d'emplacement pour cet objet.", "The wiki gives no location for this item.") : tr("Pas de page pour cet objet sur le wiki.", "No page for this item on the wiki.")}</p>
+                )}
+                {location && location !== "!" && location.exists && (
+                  <p className="muted small">
+                    {tr("Texte : ", "Text: ")}
+                    <a href={location.pageUrl} target="_blank" rel="noreferrer">
+                      {tr("wiki Escape from Tarkov (en anglais)", "Escape from Tarkov wiki")}
+                    </a>{" "}
+                    (CC BY-NC-SA)
+                  </p>
+                )}
+              </>
+            );
+            if (!spots?.length) return wiki;
+            return (
+              <>
+                <h3 className="finder-sub">{tr("Meilleurs spots", "Best spots")}</h3>
+                <p className="muted small">
+                  {tr(
+                    "Du plus prometteur au moins prometteur : points d'apparition au sol regroupés au même endroit (tarkov.dev). Un ordre, pas une probabilité.",
+                    "Most promising first: loose loot spawn points grouped in one place (tarkov.dev). An order, not a probability.",
+                  )}
+                </p>
+                <ul className="finder-cards">
+                  {spots.map(([mapName, , , , n, , keyId], i) => {
+                    const map = p.maps.find((m) => m.normalizedName === mapName);
+                    const key = keyId ? p.byId.get(keyId) : undefined;
+                    const confirmed = key && linked.has(key.nameEn.toLowerCase());
+                    const marker = markers.find((m) => m.key === `spot:${i}`);
+                    return (
+                      <li key={i} className="finder-card finder-spot">
+                        <div className="finder-recipe-head">
+                          <span className="finder-badge">{i + 1}</span>
+                          <strong>{map?.name ?? mapName}</strong>
+                          <span className="finder-pill">{tr(`${n} point(s)`, `${n} point(s)`)}</span>
+                          {marker && (
+                            <button className="btn btn-small finder-spot-map" onClick={() => p.onShowSpots(markers, marker)}>
+                              {tr("📍 Voir sur la carte", "📍 Show on map")}
+                            </button>
+                          )}
+                        </div>
+                        {key && (
+                          <p className="finder-spot-key">
+                            🔑 {confirmed ? tr("Derrière la porte : ", "Behind the door: ") : tr("Porte fermée à proximité : ", "Locked door nearby: ")}
+                            <strong>{key.name}</strong>
+                            {confirmed && <span className="muted"> {tr("(confirmé par le wiki)", "(confirmed by the wiki)")}</span>}
+                          </p>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+                <details className="finder-where-more">
+                  <summary>{tr("Tous les emplacements connus (wiki)", "All known locations (wiki)")}</summary>
+                  {wiki}
+                </details>
+              </>
+            );
+          })}
         {tab === "quests" &&
           (rows.length === 0 ? (
             <p className="muted finder-empty">{tr("Aucune quête ne l'utilise.", "No quest uses it.")}</p>

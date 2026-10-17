@@ -1905,6 +1905,24 @@ kbd {
   border-radius: var(--radius);
   font-size: 0.9em;
 }
+/* onglet « Où le trouver » */
+.finder-spot-map {
+  margin-left: auto;
+}
+.finder-spot-key {
+  margin: 0.4rem 0 0;
+  font-size: 0.9em;
+}
+.finder-where-more {
+  margin-top: 1rem;
+}
+.finder-where-more > summary {
+  cursor: pointer;
+  color: var(--accent-2);
+}
+.finder-where-wiki .story-photos {
+  margin: 0.4rem 0 0.75rem;
+}
 /* liste : grille à gauche, catégories du flea à droite, chacune défile seule */
 .finder-body.finder-split {
   display: flex;
