@@ -1909,6 +1909,18 @@ kbd {
 .finder-spot-map {
   margin-left: auto;
 }
+/* quête déjà terminée : grisée mais cliquable */
+.finder-quest.is-done {
+  opacity: 0.5;
+}
+.finder-quest.is-done:hover,
+.finder-quest.is-done:focus-visible {
+  opacity: 0.85;
+}
+.finder-done-tag {
+  margin-left: 0.4rem;
+  font-weight: 400;
+}
 .finder-spot-summary {
   cursor: pointer;
 }

@@ -19,6 +19,7 @@ import { CUSTOM_ICONS, ICON_LABELS, type IconId } from "../lib/objectiveTypes";
 import { iconUrl } from "../api/tarkovJson";
 import { buildCategoryTree, OTHER, type CategoryNode } from "../lib/itemCategories";
 import { ItemThumb } from "./ItemThumb";
+import { taskProgress } from "../lib/points";
 
 const PAGE = 100;
 
@@ -68,6 +69,8 @@ interface Props {
   onShowSpots: (spots: ItemSpotMarker[], focus: ItemSpotMarker) => void;
   /** « Ajouter un point perso » à l'emplacement d'un spot. */
   onAddPoint: (point: NewPoint) => void;
+  /** Objectifs cochés (objectiveId -> date) : quêtes terminées grisées dans l'onglet Quêtes. */
+  done: Record<string, number>;
 }
 
 export interface NewPoint {
@@ -97,7 +100,7 @@ export function ItemFinder(props: Props) {
   );
 }
 
-function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIcons, onShowQuest, onShowSpots, onAddPoint, onClose }: Props & { onClose: () => void }) {
+function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIcons, onShowQuest, onShowSpots, onAddPoint, done, onClose }: Props & { onClose: () => void }) {
   const [list, setList] = useState<ListedItem[] | null>(null);
   const [error, setError] = useState(false);
   const [query, setQuery] = useState("");
@@ -324,6 +327,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                   onClose();
                 }}
                 onAddPoint={onAddPoint}
+                done={done}
               />
             </>
           ) : (
@@ -397,6 +401,7 @@ function Usage(p: {
   onShowQuest: (taskId: string) => void;
   onShowSpots: (spots: ItemSpotMarker[], focus: ItemSpotMarker) => void;
   onAddPoint: (point: NewPoint) => void;
+  done: Record<string, number>;
 }) {
   const [tab, setTab] = useState<Tab>("quests");
   const [wikiTitles, setWikiTitles] = useState<Record<string, string>>({});
@@ -587,12 +592,18 @@ function Usage(p: {
               {rows.map((r) => {
                 const trader = p.traders.find((t) => t.id === r.task.traderId);
                 const map = p.maps.find((m) => m.id === r.task.mapId)?.name;
+                // quête terminée (tous ses objectifs cochés, comme « Masquer les quêtes terminées ») : grisée, toujours cliquable
+                const progress = taskProgress(r.task, p.done);
+                const finished = progress.total > 0 && progress.done === progress.total;
                 return (
                   <li key={r.taskId}>
-                    <button className="finder-card finder-quest" onClick={() => p.onShowQuest(r.taskId)}>
+                    <button className={`finder-card finder-quest${finished ? " is-done" : ""}`} onClick={() => p.onShowQuest(r.taskId)}>
                       <span className="finder-avatar">{trader?.imageLink && <img src={trader.imageLink} alt="" width={36} height={36} loading="lazy" referrerPolicy="no-referrer" />}</span>
                       <span className="finder-quest-main">
-                        <strong>{r.task.name}</strong>
+                        <strong>
+                          {r.task.name}
+                          {finished && <span className="tag finder-done-tag">{tr("✓ Terminée", "✓ Completed")}</span>}
+                        </strong>
                         <span className="muted finder-quest-meta">{[trader?.name, map].filter(Boolean).join(" · ")}</span>
                         <span className="finder-pills">
                           {r.uses.map((u, i) => (
