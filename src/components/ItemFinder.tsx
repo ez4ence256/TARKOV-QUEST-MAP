@@ -426,6 +426,15 @@ function Usage(p: {
   const wikiSections = location && location !== "!" ? location.sections : [];
   const wikiCount = wikiSections.reduce((n, s) => n + s.blocks.reduce((m, b) => m + (b.type === "list" ? b.items.length : 0), 0), 0);
   const linked = new Set(location && location !== "!" ? location.links.map((l) => l.toLowerCase()) : []);
+  // spots dont la map n'a pas de sous-titre dans la section Location : ils montreraient tous le même texte
+  // (« Key Location » d'une clé…) ; il n'est affiché que dans le premier
+  const mapHeadings = new Set(
+    wikiSections.find((s) => s.title === "Location")?.blocks.flatMap((b) => (b.type === "heading" ? [b.text.toLowerCase()] : [])) ?? [],
+  );
+  const sharedAt = (spots ?? []).findIndex(([mapName]) => {
+    const map = p.maps.find((m) => m.normalizedName === mapName);
+    return !mapHeadings.has((map?.nameEn ?? map?.name ?? mapName).toLowerCase());
+  });
   const markers: ItemSpotMarker[] = (spots ?? []).flatMap(([mapName, x, y, z, n, , keyId], i) => {
     const map = p.maps.find((m) => m.normalizedName === mapName);
     if (!map) return [];
@@ -545,13 +554,15 @@ function Usage(p: {
                 <ul className="finder-cards">
                   {spots.map(([mapName, x, y, z, n, , keyId], i) => {
                     const map = p.maps.find((m) => m.normalizedName === mapName);
+                    const mapEn = map?.nameEn ?? map?.name ?? mapName;
                     const key = keyId ? p.byId.get(keyId) : undefined;
                     return (
                       <SpotCard
                         key={i}
                         rank={i + 1}
                         mapLabel={map?.name ?? mapName}
-                        mapEn={map?.nameEn ?? map?.name ?? mapName}
+                        mapEn={mapEn}
+                        sharedAt={sharedAt + 1}
                         n={n}
                         keyItem={key}
                         keyTitle={key ? (wikiTitles[key.id] ?? key.nameEn) : undefined}
@@ -715,6 +726,8 @@ export function CategoryTree(p: { nodes: CategoryNode[]; depth: number; selected
  */
 function SpotCard(p: {
   rank: number;
+  /** Rang du spot qui affiche le texte commun (« Key Location »…) ; 0 : aucun. */
+  sharedAt: number;
   mapLabel: string;
   mapEn: string;
   n: number;
@@ -745,7 +758,8 @@ function SpotCard(p: {
   const keySections = keyLoc && keyLoc !== "!" ? keyLoc.sections.filter((s) => s.title === "Lock Location" || s.title === "Behind the Lock") : [];
   // pas de sous-titre pour cette map : la section « Key Location » (pages de clés : aile, étage, chambre…)
   // ou une section Location qui n'est pas découpée par map
-  const fallback = idx > 0 ? null : (p.itemLocation?.sections.find((s) => s.title === "Key Location") ?? (location && parts.length === 1 ? location : null));
+  const shared = idx > 0 ? null : (p.itemLocation?.sections.find((s) => s.title === "Key Location") ?? (location && parts.length === 1 ? location : null));
+  const fallback = p.sharedAt === p.rank ? shared : null;
 
   return (
     <li className="finder-card finder-spot">
@@ -810,7 +824,8 @@ function SpotCard(p: {
               <BlocksWithPhotos blocks={fallback.blocks} photos={fallback.photos} itemNames={{}} itemIcons={p.itemIcons} showCaptions />
             </section>
           )}
-          {!p.keyItem && idx <= 0 && !fallback && <p className="muted small">{tr("Pas de photo du wiki pour ce spot.", "No wiki photo for this spot.")}</p>}
+          {shared && !fallback && <p className="muted small">{tr(`Emplacements du wiki : voir le spot ${p.sharedAt}.`, `Wiki locations: see spot ${p.sharedAt}.`)}</p>}
+          {!p.keyItem && idx <= 0 && !shared && <p className="muted small">{tr("Pas de photo du wiki pour ce spot.", "No wiki photo for this spot.")}</p>}
           {p.onAddPoint && (
             <div className="finder-spot-add">
               {added ? (

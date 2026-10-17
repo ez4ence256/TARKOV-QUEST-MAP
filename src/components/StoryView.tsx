@@ -107,7 +107,7 @@ export function useStoryPage(id: string, chapters: ChaptersState, wantFr: boolea
 function Photo({ photo, itemNames, showCaption }: { photo: WikiPhoto; itemNames: Record<string, string>; showCaption?: boolean }) {
   const caption = fillItems(photo.caption, itemNames);
   const link = (
-    <a className="story-photo" href={photo.fullUrl} target="_blank" rel="noopener noreferrer" title={caption || tr("Voir en grand", "View full size")}>
+    <a className="story-photo" data-lightbox href={photo.fullUrl} target="_blank" rel="noopener noreferrer" title={caption || tr("Voir en grand", "View full size")}>
       <img src={photo.thumbUrl} alt={caption || photo.file} width={120} height={68} loading="lazy" referrerPolicy="no-referrer" />
     </a>
   );

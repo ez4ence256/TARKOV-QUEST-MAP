@@ -31,6 +31,7 @@ import { RoomControl } from "./components/RoomControl";
 import { MapPicker } from "./components/MapPicker";
 import { ItemFinder } from "./components/ItemFinder";
 import { TraderWindow } from "./components/TraderWindow";
+import { Lightbox } from "./components/Lightbox";
 
 type Tab = "selection" | "quests" | "capture" | "quest" | "photos" | "custom" | "settings";
 
@@ -365,6 +366,7 @@ export default function App() {
 
   return (
     <div className="app" style={{ ["--panel-user-w" as string]: `${panelWidth}px` }}>
+      <Lightbox />
       <header className="topbar">
         <button
           className="btn btn-small panel-toggle"

@@ -69,7 +69,7 @@ function PhotoList({ photos }: { photos: WikiPhoto[] }) {
     <ul className="photo-grid">
       {photos.map((photo) => (
         <li key={photo.file} className="photo">
-          <a href={photo.fullUrl} target="_blank" rel="noreferrer" title={tr("Voir en grand", "View full size")}>
+          <a data-lightbox href={photo.fullUrl} target="_blank" rel="noreferrer" title={photo.caption || tr("Voir en grand", "View full size")}>
             <img src={photo.thumbUrl} alt={photo.caption || photo.file} loading="lazy" referrerPolicy="no-referrer" />
           </a>
           {photo.caption && <p className="photo-caption">{photo.caption}</p>}

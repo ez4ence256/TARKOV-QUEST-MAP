@@ -2021,6 +2021,45 @@ kbd {
 .trader-limit {
   font-size: 0.75em;
 }
+/* visionneuse de photos (components/Lightbox.tsx) : au-dessus de tout, fermée d'un clic à côté */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.82);
+  cursor: zoom-out;
+}
+.lightbox figure {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-width: min(1100px, 92vw);
+  margin: 0;
+  cursor: default;
+}
+.lightbox img {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+.lightbox figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.9em;
+  color: var(--text);
+}
+.lightbox-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+}
 /* photo du wiki avec sa légende visible (onglet « Où le trouver ») */
 .story-figure {
   display: inline-flex;

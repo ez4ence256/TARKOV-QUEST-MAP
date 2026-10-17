@@ -115,7 +115,7 @@ function GuidePhotos({ wikiLink }: { wikiLink: string }) {
   return (
     <div className="story-photos">
       {state.photos.map((p) => (
-        <a key={p.file} className="story-photo" href={p.fullUrl} target="_blank" rel="noopener noreferrer" title={p.caption || tr("Voir en grand", "View full size")}>
+        <a key={p.file} className="story-photo" data-lightbox href={p.fullUrl} target="_blank" rel="noopener noreferrer" title={p.caption || tr("Voir en grand", "View full size")}>
           <img src={p.thumbUrl} alt={p.caption || p.file} width={120} height={68} loading="lazy" referrerPolicy="no-referrer" />
         </a>
       ))}
