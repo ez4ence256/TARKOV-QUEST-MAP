@@ -129,15 +129,18 @@ async function fetchTemplates(names: string[], lang: WikiLang): Promise<Record<s
 // vient de `files`, la page du fichier se déduit du nom.
 const CDN = "https://static.wikia.nocookie.net/escapefromtarkov_gamepedia/images/";
 type StoredStep = Omit<StoryStep, "photos"> & { photos?: [string, string, string][] };
-/** linked : blocs lus avec les liens (`links`) ; une entrée plus ancienne est relue sur le wiki. */
-type StoredPage = Omit<StoryPageData, "steps" | "requirements"> & { steps: StoredStep[]; requirements: StoredStep[]; linked?: true };
+/**
+ * linked : blocs lus avec les liens (`links`) ; sectioned : photos rangées par sous-partie de l'étape.
+ * Une entrée plus ancienne est relue sur le wiki.
+ */
+type StoredPage = Omit<StoryPageData, "steps" | "requirements"> & { steps: StoredStep[]; requirements: StoredStep[]; linked?: true; sectioned?: true };
 
 const compactUrl = (u: string) => (u.startsWith(CDN) ? u.slice(CDN.length) : u);
 const expandUrl = (u: string) => (u.startsWith("http") ? u : CDN + u);
 
 const compactStep = (s: StoryStep): StoredStep => ({ ...s, photos: s.photos?.map((p): [string, string, string] => [p.file, compactUrl(p.thumbUrl), compactUrl(p.fullUrl)]) });
 
-const compactPage = (page: StoryPageData): StoredPage => ({ ...page, steps: page.steps.map(compactStep), requirements: page.requirements.map(compactStep), linked: true });
+const compactPage = (page: StoryPageData): StoredPage => ({ ...page, steps: page.steps.map(compactStep), requirements: page.requirements.map(compactStep), linked: true, sectioned: true });
 
 const expandPage = (page: StoredPage): StoryPageData => {
   const expand = (s: StoredStep): StoryStep => ({
@@ -145,6 +148,7 @@ const expandPage = (page: StoredPage): StoryPageData => {
     photos: s.photos?.map(([file, thumb, full]) => ({
       file,
       caption: s.files.find((f) => f.file === file)?.caption ?? "",
+      section: s.files.find((f) => f.file === file)?.section,
       thumbUrl: expandUrl(thumb),
       fullUrl: expandUrl(full),
       pageUrl: pageUrlFor(`File:${file}`, page.lang).replace("File%3A", "File:"),
@@ -159,8 +163,8 @@ const pageInFlight = new Map<string, Promise<StoryPageData>>();
 export function loadStoryPage(title: string, lang: WikiLang): Promise<StoryPageData> {
   const key = `${lang}:${title}`;
   const cached = readCache<StoredPage>(`story:${key}`);
-  // sans `requirements` : chapitre mis en cache avant l'ajout des conditions, relu une fois sur le wiki
-  if (cached && Array.isArray(cached.requirements) && cached.previous !== undefined && cached.linked) {
+  // sans `requirements`, `linked` ou `sectioned` : chapitre mis en cache dans un ancien format, relu une fois sur le wiki
+  if (cached && Array.isArray(cached.requirements) && cached.previous !== undefined && cached.linked && cached.sectioned) {
     try {
       return Promise.resolve(expandPage(cached));
     } catch {
@@ -193,7 +197,7 @@ async function fetchStoryPage(title: string, lang: WikiLang): Promise<StoryPageD
         const image = info.get(fileTitle(f.file))?.imageinfo?.[0];
         // fichier absent du wiki ou sans adresse : pas affiché
         if (!image?.url || !image.descriptionurl) return [];
-        return [{ file: f.file, caption: f.caption, thumbUrl: image.thumburl ?? image.url, fullUrl: image.url, pageUrl: image.descriptionurl }];
+        return [{ file: f.file, caption: f.caption, thumbUrl: image.thumburl ?? image.url, fullUrl: image.url, pageUrl: image.descriptionurl, section: f.section }];
       }),
     });
     data = { ...page, steps: page.steps.map(withPhotos), requirements: page.requirements.map(withPhotos), title: finalTitle, lang, pageUrl: pageUrlFor(finalTitle, lang), exists: true, fetchedAt: Date.now() };

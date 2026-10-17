@@ -1,6 +1,6 @@
 // Onglet "Photos" : photos d'emplacements d'une quête, tirées du wiki Escape from Tarkov.
 // Chargées seulement quand l'onglet est ouvert sur une quête (voir src/api/wiki.ts).
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import type { Task } from "../types";
 import { WIKI_HOST, loadExitPhotos, loadQuestPhotos, photosForExit, type ExitPhotosPage, type WikiGallery, type WikiPhoto } from "../api/wiki";
 import { EXIT_KIND_LABELS } from "../lib/exits";
@@ -20,6 +20,8 @@ export interface ExitPhotosTarget {
 export interface StoryPhotosTarget {
   title: string;
   photos: WikiPhoto[];
+  /** Sous-titres de l'étape (photo.section = n -> sous-titre n - 1), pour grouper les photos. */
+  sections?: string[];
   pageUrl?: string;
   pageTitle?: string;
 }
@@ -89,7 +91,14 @@ function StoryPhotosView({ story }: { story: StoryPhotosTarget }) {
       <p>
         <strong>{story.title}</strong>
       </p>
-      {story.photos.length === 0 ? <p className="muted">{tr("Pas de photo pour cette étape", "No photo for this step")}</p> : <PhotoList photos={story.photos} />}
+      {story.photos.length === 0 && <p className="muted">{tr("Pas de photo pour cette étape", "No photo for this step")}</p>}
+      {/* une liste par sous-partie de l'étape (Customs, Woods…), sous son sous-titre */}
+      {[...new Set(story.photos.map((p) => p.section ?? 0))].map((section) => (
+        <Fragment key={section}>
+          {story.sections?.[section - 1] && <h3 className="photo-section">{story.sections[section - 1]}</h3>}
+          <PhotoList photos={story.photos.filter((p) => (p.section ?? 0) === section)} />
+        </Fragment>
+      ))}
       {story.pageUrl && (
         <p className="muted small">
           {tr("Photos : ", "Photos: ")}

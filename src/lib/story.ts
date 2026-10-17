@@ -75,8 +75,8 @@ export interface StoryStep {
   /** Fin concernée (The Ticket : « Savior », « Debtor »…), absente pour les étapes communes. */
   branch?: string;
   blocks: WikiBlock[];
-  /** Photos des galeries de l'étape, telles qu'écrites dans le wikitext. */
-  files: { file: string; caption: string }[];
+  /** Photos des galeries de l'étape, telles qu'écrites dans le wikitext ; `section` : nombre de sous-titres avant la galerie. */
+  files: { file: string; caption: string; section?: number }[];
   /** Photos résolues par le wiki (adresses), remplies par le chargement. */
   photos?: WikiPhoto[];
 }
@@ -170,6 +170,17 @@ export function parseRequirements(body: string, pageTitle: string): StoryStep[] 
   return steps;
 }
 
+/**
+ * Galeries d'une étape, chaque photo avec sa sous-partie : nombre de sous-titres (==== Customs ====,
+ * ===== FSB report =====…) avant elle, comptés comme les blocs du texte (même lecture).
+ */
+function stepGalleries(body: string, pageTitle: string): StoryStep["files"] {
+  return [...body.matchAll(/<gallery[^>]*>[\s\S]*?<\/gallery>/gi)].flatMap((g) => {
+    const section = parseBlocks(body.slice(0, g.index), pageTitle).filter((b) => b.type === "heading").length;
+    return parseGalleries(g[0]).map((f) => ({ ...f, section }));
+  });
+}
+
 function splitSteps(guide: string, pageTitle: string): StoryStep[] {
   const steps: StoryStep[] = [];
   let current: { title: string; body: string[] } | null = null;
@@ -179,7 +190,7 @@ function splitSteps(guide: string, pageTitle: string): StoryStep[] {
     steps.push({
       title: current.title || tr(`Étape ${steps.length + 1}`, `Step ${steps.length + 1}`),
       blocks: parseBlocks(body, pageTitle),
-      files: parseGalleries(body),
+      files: stepGalleries(body, pageTitle),
     });
   };
   for (const line of guide.split("\n")) {

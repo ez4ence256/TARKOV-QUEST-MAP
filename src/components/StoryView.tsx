@@ -1,12 +1,13 @@
 // Main story : chapitres du wiki lus étape par étape (voir src/lib/story.ts et src/api/story.ts).
 // Contient les hooks de chargement, la fiche d'un chapitre (onglet Fiche quête) et la petite
 // carte de l'onglet Sélection. Aucun point sur la carte : le wiki ne donne pas de coordonnées.
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { loadStoryChapters, loadStoryPage, type StoryPageData } from "../api/story";
 import { pageUrlFor, type WikiPhoto } from "../api/wiki";
 import { getLang, tr } from "../lib/i18n";
 import { currentStepIndex, fillItems, resolveStory, stepsDone, stepText, storyStepId, type ResolvedStory, type StoryChapter } from "../lib/story";
 import type { StoryItem } from "../lib/storyPoints";
+import type { WikiBlock } from "../lib/wikiText";
 import { ConfirmButton } from "./ConfirmButton";
 import { WikiBlocks } from "./WikiBlocks";
 
@@ -68,7 +69,7 @@ export function useStoryItems(ids: string[], itemNames: Record<string, string>):
     for (const id of ids) {
       resolveChapter(id, chapters, wantFr)
         .then(({ resolved, url, title }) => {
-          const list = [...resolved.requirements, ...resolved.steps].map((s) => ({ key: s.key, title: fillItems(s.title, itemNames), text: stepText(s), photos: (s.photos ?? []).map((p) => ({ ...p, caption: fillItems(p.caption, itemNames) })), pageUrl: url, pageTitle: title }));
+          const list = [...resolved.requirements, ...resolved.steps].map((s) => ({ key: s.key, title: fillItems(s.title, itemNames), text: stepText(s), photos: (s.photos ?? []).map((p) => ({ ...p, caption: fillItems(p.caption, itemNames) })), sections: s.blocks.flatMap((b) => (b.type === "heading" ? [fillItems(b.text, itemNames)] : [])), pageUrl: url, pageTitle: title }));
           if (!cancelled) setItems((prev) => ({ ...prev, [id]: list }));
         })
         .catch(() => undefined); // wiki injoignable : pas de point, la fiche du chapitre montre l'erreur
@@ -114,6 +115,16 @@ function Photo({ photo, itemNames }: { photo: WikiPhoto; itemNames: Record<strin
 
 type Item = ResolvedStory["steps"][number];
 
+/** Texte d'une case coupé à chaque sous-titre : morceau 0 = avant le premier sous-titre. */
+function splitAtHeadings(blocks: WikiBlock[]): WikiBlock[][] {
+  const parts: WikiBlock[][] = [[]];
+  for (const b of blocks) {
+    if (b.type === "heading") parts.push([]);
+    parts[parts.length - 1].push(b);
+  }
+  return parts;
+}
+
 /** Une case de la fiche (condition ou étape) : titre, texte et photos. `n` : numéro affiché (aucun pour une condition). */
 function StoryRow({ item, n, index, done, current, itemNames, itemIcons, onChange }: { item: Item; n?: number; index: number; done: boolean; current: boolean; itemNames: Record<string, string>; itemIcons?: Record<string, string>; onChange: (done: boolean) => void }) {
   return (
@@ -128,14 +139,22 @@ function StoryRow({ item, n, index, done, current, itemNames, itemIcons, onChang
       </label>
       {(item.blocks.length > 0 || (item.photos?.length ?? 0) > 0) && (
         <div className="story-step-body">
-          <WikiBlocks blocks={item.blocks} itemNames={itemNames} itemIcons={itemIcons} />
-          {(item.photos?.length ?? 0) > 0 && (
-            <div className="story-photos">
-              {item.photos!.map((p) => (
-                <Photo key={p.file} photo={p} itemNames={itemNames} />
-              ))}
-            </div>
-          )}
+          {/* chaque photo sous le sous-titre où le wiki la place (sans sous-partie connue : à la fin) */}
+          {splitAtHeadings(item.blocks).map((part, i, parts) => {
+            const photos = (item.photos ?? []).filter((p) => Math.min(p.section ?? parts.length - 1, parts.length - 1) === i);
+            return (
+              <Fragment key={i}>
+                <WikiBlocks blocks={part} itemNames={itemNames} itemIcons={itemIcons} />
+                {photos.length > 0 && (
+                  <div className="story-photos">
+                    {photos.map((p) => (
+                      <Photo key={p.file} photo={p} itemNames={itemNames} />
+                    ))}
+                  </div>
+                )}
+              </Fragment>
+            );
+          })}
         </div>
       )}
     </li>

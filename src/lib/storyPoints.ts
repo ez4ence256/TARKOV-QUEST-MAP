@@ -37,6 +37,8 @@ export interface StoryItem {
   text: string;
   /** Photos du wiki de la case (légendes déjà dans la langue affichée) et page dont elles viennent. */
   photos?: WikiPhoto[];
+  /** Sous-titres du texte de la case, dans l'ordre (photo.section = n -> sous-titre n - 1). */
+  sections?: string[];
   pageUrl?: string;
   pageTitle?: string;
 }

@@ -1,6 +1,7 @@
 // Extraits réels des pages du wiki Escape from Tarkov (Fandom, texte sous CC BY-NC-SA), relevés
 // en octobre 2026 puis raccourcis, pour tester la lecture des chapitres de la Main story.
 import { describe, expect, it } from "vitest";
+import batyaWikitext from "./__fixtures__/batya.wikitext?raw";
 import {
   buildChapters,
   chapterOf,
@@ -899,5 +900,25 @@ describe("condition tirée de l'infobox (previous)", () => {
     expect(page.previous).toBeNull();
     expect(resolveStory(page, null, false).requirements.map((x) => x.title)).toEqual(["Do it."]);
     expect(parseStoryPage("==Guide==\n===A===\nx", "Tour")).toMatchObject({ previous: null, requirements: [] });
+  });
+});
+
+describe("photos rangées par sous-partie de l'étape", () => {
+  // Batya : « Locate the traces of the BEAR special squad » a une galerie sous chaque map (==== Customs ==== …)
+  const step = parseStoryPage(batyaWikitext, "Batya").steps.find((s) => s.title === "Locate the traces of the BEAR special squad")!;
+  const headings = step.blocks.flatMap((b) => (b.type === "heading" ? [b.text] : []));
+  const sectionOf = (file: string) => headings[step.files.find((f) => f.file === file)!.section! - 1];
+  it("chaque photo sous le sous-titre où le wiki la place", () => {
+    expect(sectionOf("Hobby Club Customs Stashing Map.png")).toBe("Customs");
+    expect(sectionOf("Bogatyrs patch Woods spawn.png")).toBe("Woods");
+    expect(sectionOf("Airspace Control Center Map.jpg")).toBe("Reserve");
+    expect(step.files.filter((f) => headings[f.section! - 1] === "Lighthouse")).toHaveLength(3);
+  });
+  it("galerie avant tout sous-titre : sous-partie 0", () => {
+    const page = parseStoryPage(["==Guide==", "===Step===", "<gallery>", "File:A.png|a", "</gallery>", "====Woods====", "<gallery>", "File:B.png|b", "</gallery>"].join("\n"), "x");
+    expect(page.steps[0].files.map((f) => [f.file, f.section])).toEqual([
+      ["A.png", 0],
+      ["B.png", 1],
+    ]);
   });
 });

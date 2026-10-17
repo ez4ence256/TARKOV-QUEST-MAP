@@ -243,10 +243,15 @@ export default function App() {
     setTab("photos");
     setPanelOpen(true);
   }, []);
-  // photos de la case en cours d'un chapitre (bulle d'un point de la Main story)
-  const showStoryPhotos = (chapter: string, stepKey: string) => {
+  // photos de la case en cours d'un chapitre (bulle d'un point de la Main story) : seulement la
+  // sous-partie de l'étape où le wiki place la carte dont vient le point (ex. « Woods »), si on la trouve
+  const showStoryPhotos = (chapter: string, stepKey: string, source?: string) => {
     const item = storyItems[chapter]?.find((i) => i.key === stepKey);
-    setPhotoStory({ title: `${storyName(chapter)} - ${item?.title ?? stepKey}`, photos: item?.photos ?? [], pageUrl: item?.pageUrl, pageTitle: item?.pageTitle });
+    const all = item?.photos ?? [];
+    const sameFile = (a: string, b: string) => a.replace(/_/g, " ").toLowerCase() === b.replace(/_/g, " ").toLowerCase();
+    const section = source ? all.find((p) => sameFile(p.file, source))?.section : undefined;
+    const photos = section === undefined ? all : all.filter((p) => p.section === section);
+    setPhotoStory({ title: `${storyName(chapter)} - ${item?.title ?? stepKey}`, photos, sections: item?.sections, pageUrl: item?.pageUrl, pageTitle: item?.pageTitle });
     setPhotoExit(null);
     setTab("photos");
     setPanelOpen(true);

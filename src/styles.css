@@ -1331,6 +1331,12 @@ kbd {
   color: var(--text);
 }
 /* Onglet Photos */
+/* sous-partie d'une étape de la Main story (Customs, Woods…) au-dessus de ses photos */
+.photo-section {
+  margin: 1rem 0 0;
+  font-size: 0.95em;
+  color: var(--accent-2);
+}
 .photo-grid {
   list-style: none;
   margin: 0.75rem 0 0;

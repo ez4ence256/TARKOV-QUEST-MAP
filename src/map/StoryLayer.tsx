@@ -13,7 +13,8 @@ export function StoryLayer(props: {
   nameOf: (chapter: string) => string;
   onDone: (chapter: string, stepKey: string) => void;
   onOpen: (chapter: string) => void;
-  onPhotos: (chapter: string, stepKey: string) => void;
+  /** `source` : carte du wiki dont vient le point (ses photos seules sont montrées). */
+  onPhotos: (chapter: string, stepKey: string, source: string) => void;
 }) {
   return (
     <>
@@ -46,7 +47,7 @@ export function StoryLayer(props: {
                 <button className="btn btn-ghost" onClick={() => props.onOpen(p.chapter)}>
                   {tr("📜 Chapitre", "📜 Chapter")}
                 </button>
-                <button className="btn btn-ghost" onClick={() => props.onPhotos(p.chapter, p.stepKey)}>
+                <button className="btn btn-ghost" onClick={() => props.onPhotos(p.chapter, p.stepKey, p.source)}>
                   {tr("📷 Photos", "📷 Photos")}
                 </button>
               </div>

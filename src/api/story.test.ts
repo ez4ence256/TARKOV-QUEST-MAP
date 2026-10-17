@@ -113,9 +113,9 @@ describe("un chapitre", () => {
 
     const again = await loadStoryPage("The Ticket", "en");
     expect(fetchMock).toHaveBeenCalledTimes(3);
-    // le cache est compact, mais la relecture redonne les mêmes photos (légende comprise)
+    // le cache est compact, mais la relecture redonne les mêmes photos (légende et sous-partie comprises)
     expect(again.steps[1].photos).toEqual([
-      { file: "Exit.png", caption: "The exit", thumbUrl: "https://img/t/exit.png", fullUrl: "https://img/exit.png", pageUrl: "https://escapefromtarkov.fandom.com/wiki/File:Exit.png" },
+      { file: "Exit.png", caption: "The exit", thumbUrl: "https://img/t/exit.png", fullUrl: "https://img/exit.png", pageUrl: "https://escapefromtarkov.fandom.com/wiki/File:Exit.png", section: 0 },
     ]);
     const stored = Object.entries(localStorage).find(([k]) => k.includes("story:en:The Ticket"))?.[1] ?? "";
     expect(stored).not.toContain("wds-tabber");

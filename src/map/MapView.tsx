@@ -66,7 +66,7 @@ interface MapViewProps {
   storyName: (chapter: string) => string;
   onStoryDone: (chapter: string, stepKey: string) => void;
   onStoryOpen: (chapter: string) => void;
-  onStoryPhotos: (chapter: string, stepKey: string) => void;
+  onStoryPhotos: (chapter: string, stepKey: string, source: string) => void;
 }
 
 /** Emprise par défaut quand une map n'a pas de calibrage : celle des points, sinon un carré. */

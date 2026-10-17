@@ -35,6 +35,8 @@ export interface WikiPhoto {
   fullUrl: string;
   /** Page du fichier sur le wiki (source). */
   pageUrl: string;
+  /** Main story : sous-partie de l'étape où le wiki place la photo (nombre de sous-titres avant elle). */
+  section?: number;
 }
 
 export interface WikiGallery {
