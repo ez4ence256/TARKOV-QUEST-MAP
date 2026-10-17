@@ -15,6 +15,7 @@ import { parseImageIndex, type ImageIndex } from "../lib/itemImage";
 import { parseInspect, type InspectIndex } from "../lib/itemInspect";
 import type { CategoryFile } from "../lib/itemCategories";
 import type { Spot } from "../lib/itemSpots";
+import type { TraderOffersFile } from "../lib/traderOffers";
 import { buildBarterIndex, buildCraftIndex, buildHideoutIndex, type Exchange, type HideoutUse } from "../lib/itemUsage";
 
 export interface ListedItem {
@@ -99,6 +100,10 @@ export function loadItemList(mode: GameMode, lang: string): Promise<ListedItem[]
   }
   return p;
 }
+
+/** Offres des marchands par niveau (src/data/trader-offers-<mode>.json, chargé à l'ouverture de la fenêtre Marchands). */
+export const loadTraderOffers = (mode: GameMode) =>
+  import(`../data/trader-offers-${mode}.json`).then((m) => m.default as unknown as TraderOffersFile);
 
 /** Meilleurs spots par objet et titres wiki qui diffèrent du nom anglais (src/data/item-where.json, chargé à part). */
 export const loadItemWhere = () =>

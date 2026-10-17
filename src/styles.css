@@ -1905,6 +1905,110 @@ kbd {
   border-radius: var(--radius);
   font-size: 0.9em;
 }
+/* fenêtre Marchands (même cadre que l'item finder) */
+.trader-window .finder-head .finder-name {
+  flex: 1;
+}
+.trader-row {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.6rem 0.75rem;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+}
+.trader-pick {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  width: 76px;
+  padding: 0.35rem 0.2rem;
+  color: var(--muted);
+  font-size: 0.78em;
+  text-align: center;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.trader-pick img,
+.trader-noimg {
+  width: 56px;
+  height: 56px;
+  border-radius: 6px;
+  background: var(--bg);
+}
+.trader-pick.active {
+  color: var(--accent-2);
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.trader-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem 1rem;
+  padding: 0.25rem 0.75rem 0;
+}
+.trader-levels {
+  border-bottom: 0;
+}
+.trader-kinds {
+  display: flex;
+  gap: 0.3rem;
+}
+.trader-req {
+  margin: 0.4rem 0.75rem 0.5rem;
+}
+/* catégories à gauche, comme l'écran marchand du jeu */
+.trader-split .finder-cats {
+  border-left: 0;
+  border-right: 1px solid var(--line);
+}
+.trader-tile {
+  position: relative;
+  cursor: default;
+}
+.trader-tile.is-new {
+  border-color: var(--accent);
+}
+.trader-ll {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  padding: 0 0.3rem;
+  font-size: 0.75em;
+  color: var(--accent-2);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+.trader-lock {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  font-size: 0.85em;
+}
+.trader-price {
+  color: var(--accent-2);
+  font-size: 0.9em;
+}
+.trader-barter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.15rem 0.35rem;
+}
+.trader-req-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  font-size: 0.8em;
+}
+.trader-limit {
+  font-size: 0.75em;
+}
 /* onglet « Où le trouver » */
 .finder-spot-map {
   margin-left: auto;

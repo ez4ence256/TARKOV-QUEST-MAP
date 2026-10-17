@@ -30,6 +30,7 @@ import { buildEventTasks, loadEventEntries, type EventEntry } from "./api/eventQ
 import { RoomControl } from "./components/RoomControl";
 import { MapPicker } from "./components/MapPicker";
 import { ItemFinder } from "./components/ItemFinder";
+import { TraderWindow } from "./components/TraderWindow";
 
 type Tab = "selection" | "quests" | "capture" | "quest" | "photos" | "custom" | "settings";
 
@@ -391,6 +392,7 @@ export default function App() {
             focusPoint(spot.key, spot.mapId);
           }}
         />
+        <TraderWindow gameMode={gameMode} lang={lang} traders={data?.traders ?? []} tasks={tasks} itemIcons={data?.itemIcons ?? NO_NAMES} />
         <MapPicker maps={maps} currentId={currentMap?.id ?? ""} counts={mapCounts} onPick={showMap} />
         <RoomControl room={room} />
         <label className="scav-check">

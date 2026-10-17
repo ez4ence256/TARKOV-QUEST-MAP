@@ -680,7 +680,7 @@ function Recipe(p: { e: Exchange; source: string; item: ListedItem; byId: Map<st
 }
 
 /** Arbre des catégories du flea : ▸ ouvre ou ferme, le nom choisit la catégorie (un second clic la retire). */
-function CategoryTree(p: { nodes: CategoryNode[]; depth: number; selected: string | null; open: Set<string>; onPick: (n: CategoryNode) => void; onToggle: (id: string) => void }) {
+export function CategoryTree(p: { nodes: CategoryNode[]; depth: number; selected: string | null; open: Set<string>; onPick: (n: CategoryNode) => void; onToggle: (id: string) => void }) {
   return (
     <ul className="finder-cat-list">
       {p.nodes.map((n) => {

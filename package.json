@@ -1,7 +1,7 @@
 {
   "name": "tarkov-quest-planner",
   "private": true,
-  "version": "0.8.12",
+  "version": "0.8.13",
   "type": "module",
   "description": "Planificateur de quêtes Escape from Tarkov sur carte (données tarkov.dev)",
   "scripts": {
@@ -15,7 +15,8 @@
     "sync:items": "node scripts/sync-item-images.mjs",
     "sync:categories": "node scripts/sync-item-categories.mjs",
     "sync:spots": "node scripts/sync-item-spots.mjs",
-    "sync:icons": "node scripts/sync-item-icons.mjs"
+    "sync:icons": "node scripts/sync-item-icons.mjs",
+    "sync:traders": "node scripts/sync-trader-offers.mjs"
   },
   "dependencies": {
     "leaflet": "^1.9.4",
