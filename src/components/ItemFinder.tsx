@@ -514,7 +514,7 @@ function Usage(p: {
                 {wikiSections.map((sec) => (
                   <section key={sec.title} className="finder-where-wiki">
                     <h3 className="finder-sub">{tr(...LOCATION_TITLE[sec.title])}</h3>
-                    <BlocksWithPhotos blocks={sec.blocks} photos={sec.photos} itemNames={{}} itemIcons={p.itemIcons} />
+                    <BlocksWithPhotos blocks={sec.blocks} photos={sec.photos} itemNames={{}} itemIcons={p.itemIcons} showCaptions />
                   </section>
                 ))}
                 {location === "!" && <p className="muted finder-empty">{tr("Le wiki ne répond pas (réseau ?).", "The wiki is not responding (network?).")}</p>}
@@ -743,6 +743,9 @@ function SpotCard(p: {
   // photos de cette map, affichées sous son texte (sous-titre retiré)
   const mapPhotos = idx > 0 ? location!.photos.filter((ph) => ph.section === idx).map((ph) => ({ ...ph, section: 0 })) : [];
   const keySections = keyLoc && keyLoc !== "!" ? keyLoc.sections.filter((s) => s.title === "Lock Location" || s.title === "Behind the Lock") : [];
+  // pas de sous-titre pour cette map : la section « Key Location » (pages de clés : aile, étage, chambre…)
+  // ou une section Location qui n'est pas découpée par map
+  const fallback = idx > 0 ? null : (p.itemLocation?.sections.find((s) => s.title === "Key Location") ?? (location && parts.length === 1 ? location : null));
 
   return (
     <li className="finder-card finder-spot">
@@ -792,16 +795,22 @@ function SpotCard(p: {
           {keySections.map((sec) => (
             <section key={sec.title}>
               <h4 className="finder-sub">{tr(...LOCATION_TITLE[sec.title])}</h4>
-              <BlocksWithPhotos blocks={sec.blocks} photos={sec.photos} itemNames={{}} itemIcons={p.itemIcons} />
+              <BlocksWithPhotos blocks={sec.blocks} photos={sec.photos} itemNames={{}} itemIcons={p.itemIcons} showCaptions />
             </section>
           ))}
           {idx > 0 && (
             <section>
               <h4 className="finder-sub">{tr(`Ce que dit le wiki pour ${p.mapLabel}`, `What the wiki says for ${p.mapLabel}`)}</h4>
-              <BlocksWithPhotos blocks={parts[idx].slice(1)} photos={mapPhotos} itemNames={{}} itemIcons={p.itemIcons} />
+              <BlocksWithPhotos blocks={parts[idx].slice(1)} photos={mapPhotos} itemNames={{}} itemIcons={p.itemIcons} showCaptions />
             </section>
           )}
-          {!p.keyItem && idx <= 0 && <p className="muted small">{tr("Pas de photo du wiki pour ce spot.", "No wiki photo for this spot.")}</p>}
+          {fallback && (
+            <section>
+              <h4 className="finder-sub">{tr(...LOCATION_TITLE[fallback.title])}</h4>
+              <BlocksWithPhotos blocks={fallback.blocks} photos={fallback.photos} itemNames={{}} itemIcons={p.itemIcons} showCaptions />
+            </section>
+          )}
+          {!p.keyItem && idx <= 0 && !fallback && <p className="muted small">{tr("Pas de photo du wiki pour ce spot.", "No wiki photo for this spot.")}</p>}
           {p.onAddPoint && (
             <div className="finder-spot-add">
               {added ? (

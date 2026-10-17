@@ -7,6 +7,7 @@ import type { Task } from "../types";
 import { matchOcrLines, type OcrMatch, type OcrMatchResult } from "../lib/ocrMatch";
 import type { OcrProgress } from "../lib/ocr";
 import { tr } from "../lib/i18n";
+import { filterQuests } from "../lib/questFilter";
 
 interface Props {
   /** Quêtes du mode actuel (seules candidates). */
@@ -40,6 +41,9 @@ export function CaptureTab({ tasks, pasted, onApply }: Props) {
   const [replace, setReplace] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
+  // quêtes ajoutées à la main sur l'écran de vérification (l'OCR rate parfois une ligne sur une photo)
+  const [added, setAdded] = useState<string[]>([]);
+  const [search, setSearch] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const tasksById = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
@@ -59,6 +63,8 @@ export function CaptureTab({ tasks, pasted, onApply }: Props) {
         tasks,
       );
       setChecked(new Set(result.recognized.map((m) => m.taskId)));
+      setAdded([]);
+      setSearch("");
       setState({ step: "review", result });
     } catch (error) {
       setState({
@@ -190,6 +196,47 @@ export function CaptureTab({ tasks, pasted, onApply }: Props) {
                   <ul className="capture-list">{state.result.uncertain.map((m) => row(m, true))}</ul>
                 </section>
               )}
+            </>
+          )}
+          <section className="capture-add">
+            <div className="subhead">{tr("Une quête manque ?", "A quest is missing?")}</div>
+            {added.length > 0 && (
+              <ul className="capture-list">
+                {added.map((id) => (
+                  <li key={id} className="capture-row">
+                    <label className="check">
+                      <input type="checkbox" checked={checked.has(id)} onChange={() => toggle(id)} />
+                      <span className="capture-name">{tasksById.get(id)?.name ?? id}</span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <input className="input" type="search" value={search} placeholder={tr("Nom de la quête (FR ou EN)…", "Quest name (FR or EN)…")} aria-label={tr("Ajouter une quête à la main", "Add a quest by hand")} onChange={(e) => setSearch(e.target.value)} />
+            {search.trim() && (
+              <ul className="capture-suggest">
+                {filterQuests(tasks, { query: search, traderId: "", mapId: "", hideCompleted: false }, {})
+                  .filter((r) => !added.includes(r.task.id) && ![...state.result.recognized, ...state.result.uncertain].some((m) => m.taskId === r.task.id))
+                  .slice(0, 5)
+                  .map((r) => (
+                    <li key={r.task.id}>
+                      <button
+                        className="btn btn-small"
+                        onClick={() => {
+                          setAdded((a) => [...a, r.task.id]);
+                          setChecked((c) => new Set(c).add(r.task.id));
+                          setSearch("");
+                        }}
+                      >
+                        + {r.task.name}
+                      </button>
+                    </li>
+                  ))}
+              </ul>
+            )}
+          </section>
+          {checked.size > 0 && (
+            <>
               <label className="check">
                 <input type="checkbox" checked={replace} onChange={(e) => setReplace(e.target.checked)} />
                 {tr("Remplacer ma sélection actuelle", "Replace my current selection")}
@@ -197,7 +244,6 @@ export function CaptureTab({ tasks, pasted, onApply }: Props) {
               <div className="btn-row">
                 <button
                   className="btn btn-primary"
-                  disabled={checked.size === 0}
                   onClick={() => {
                     setMessage(onApply([...checked], replace));
                     setState({ step: "idle" });

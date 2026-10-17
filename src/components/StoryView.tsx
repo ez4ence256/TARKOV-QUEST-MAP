@@ -104,12 +104,21 @@ export function useStoryPage(id: string, chapters: ChaptersState, wantFr: boolea
   return state;
 }
 
-function Photo({ photo, itemNames }: { photo: WikiPhoto; itemNames: Record<string, string> }) {
+function Photo({ photo, itemNames, showCaption }: { photo: WikiPhoto; itemNames: Record<string, string>; showCaption?: boolean }) {
   const caption = fillItems(photo.caption, itemNames);
-  return (
+  const link = (
     <a className="story-photo" href={photo.fullUrl} target="_blank" rel="noopener noreferrer" title={caption || tr("Voir en grand", "View full size")}>
       <img src={photo.thumbUrl} alt={caption || photo.file} width={120} height={68} loading="lazy" referrerPolicy="no-referrer" />
     </a>
+  );
+  // légende visible (ex. « First spawn: … first floor of the west wing ») : l'info est souvent là
+  return showCaption && caption ? (
+    <figure className="story-figure">
+      {link}
+      <figcaption>{caption}</figcaption>
+    </figure>
+  ) : (
+    link
   );
 }
 
@@ -126,7 +135,7 @@ export function splitAtHeadings(blocks: WikiBlock[]): WikiBlock[][] {
 }
 
 /** Texte du wiki avec chaque photo sous le sous-titre où le wiki la place (sans sous-partie connue : à la fin). */
-export function BlocksWithPhotos({ blocks, photos, itemNames, itemIcons }: { blocks: WikiBlock[]; photos: WikiPhoto[]; itemNames: Record<string, string>; itemIcons?: Record<string, string> }) {
+export function BlocksWithPhotos({ blocks, photos, itemNames, itemIcons, showCaptions }: { blocks: WikiBlock[]; photos: WikiPhoto[]; itemNames: Record<string, string>; itemIcons?: Record<string, string>; showCaptions?: boolean }) {
   return (
     <>
       {splitAtHeadings(blocks).map((part, i, parts) => {
@@ -137,7 +146,7 @@ export function BlocksWithPhotos({ blocks, photos, itemNames, itemIcons }: { blo
             {here.length > 0 && (
               <div className="story-photos">
                 {here.map((p) => (
-                  <Photo key={p.file} photo={p} itemNames={itemNames} />
+                  <Photo key={p.file} photo={p} itemNames={itemNames} showCaption={showCaptions} />
                 ))}
               </div>
             )}
