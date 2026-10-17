@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { batchTitles, isItemPage } from "../api/wiki";
-import { cellDisplay, itemColumn, itemIdOf, nameIndex, normItemName, rowOffset } from "./itemIcons";
+import { cellDisplay, iconSrc, itemColumn, itemIdOf, nameIndex, normItemName, rowOffset } from "./itemIcons";
 import { linkRefs } from "./wikiText";
 
 const ID = "5a0000000000000000000001";
@@ -58,5 +58,18 @@ describe("liens du wikitext et filtre objet / non-objet", () => {
     expect(isItemPage(["Quest items"])).toBe(true);
     expect(isItemPage([])).toBe(true);
     for (const c of ["Locations", "Traders", "Bosses", "Quests", "Category:Factions"]) expect(isItemPage(["Notes", c])).toBe(false);
+  });
+});
+
+describe("image d'un objet", () => {
+  it("adresse standard de tarkov.dev, ou celle du fichier d'objets", () => {
+    expect(iconSrc("5d1b376e86f774252519444e")).toBe("https://assets.tarkov.dev/5d1b376e86f774252519444e-icon.webp");
+    expect(iconSrc("aaaaaaaaaaaaaaaaaaaaaaaa", { aaaaaaaaaaaaaaaaaaaaaaaa: "autre-icon.webp" })).toBe("https://assets.tarkov.dev/autre-icon.webp");
+  });
+  it("objet sans image chez tarkov.dev (préréglage « Default ») : image de l'objet de base, même si le fichier d'objets dit « inconnue »", () => {
+    // Interceptor OTV body armor (Woodland) Default -> Interceptor OTV body armor (Woodland)
+    const src = iconSrc("68d690020c7e3ce5a80b8bec", { "68d690020c7e3ce5a80b8bec": "unknown-item-icon.jpg" });
+    expect(src).toMatch(/^https:\/\/assets\.tarkov\.dev\/[0-9a-f]{24}-icon\.webp$/);
+    expect(src).not.toContain("unknown");
   });
 });

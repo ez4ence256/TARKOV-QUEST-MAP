@@ -1,7 +1,11 @@
 // Images d'objets dans les tableaux et textes du wiki : correspondance nom -> identifiant tarkov.dev,
 // affichage des cellules « Find in raid ». Logique pure (voir ItemThumb.tsx pour l'affichage).
 import { iconUrl } from "../api/tarkovJson";
+import iconFix from "../data/item-icons.json";
 import { tr } from "./i18n";
+
+/** Objets sans image standard chez tarkov.dev -> bonne image (npm run sync:icons). */
+const ICON_FIX: Record<string, string> = iconFix;
 
 /** Nom comparable : sans accents, majuscules ni ponctuation. */
 export const normItemName = (s: string) =>
@@ -22,8 +26,12 @@ export function itemIdOf(cell: string, index: Map<string, string>): string | und
   return cell.match(/⟦item:([0-9a-f]{24})⟧/)?.[1] ?? index.get(normItemName(cell));
 }
 
-/** Image tarkov.dev : celle du fichier d'objets, sinon l'adresse standard de l'id (l'img se masque si elle échoue). */
-export const iconSrc = (id: string, itemIcons?: Record<string, string>) => iconUrl(itemIcons?.[id] ?? `${id}-icon.webp`);
+/**
+ * Image d'un objet : remplacement connu pour les ~130 objets sans image standard chez tarkov.dev
+ * (src/data/item-icons.json, npm run sync:icons), sinon celle du fichier d'objets, sinon l'adresse
+ * standard de l'id (l'img se masque si elle échoue).
+ */
+export const iconSrc = (id: string, itemIcons?: Record<string, string>) => iconUrl(ICON_FIX[id] ?? itemIcons?.[id] ?? `${id}-icon.webp`);
 
 /** Colonne du nom de l'objet dans un tableau (-1 si aucune). */
 export const itemColumn = (headers: string[]) => headers.findIndex((h) => /^(item name|item|name|nom de l.objet|objet|nom)$/i.test(h.trim()));
