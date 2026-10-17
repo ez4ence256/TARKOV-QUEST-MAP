@@ -5,12 +5,14 @@
 //  - hideout : fichier principal (~8 Ko compressé) + traductions.
 //  - recherche par image, au premier collage d'une image : src/data/item-images.bin (cases d'inventaire, 4,9 Mo)
 //    ou src/data/item-inspect.bin (vues d'inspection, 1,4 Mo), selon la capture.
+//  - catégories du flea : src/data/item-categories.json (145 Ko, 60 Ko compressé), à l'ouverture du finder.
 import type { GameMode } from "../types";
 import { fetchEndpoint, fetchJson, fetchTranslations } from "./tarkovJson";
 import itemImagesUrl from "../data/item-images.bin?url";
 import itemInspectUrl from "../data/item-inspect.bin?url";
 import { parseImageIndex, type ImageIndex } from "../lib/itemImage";
 import { parseInspect, type InspectIndex } from "../lib/itemInspect";
+import type { CategoryFile } from "../lib/itemCategories";
 import { buildBarterIndex, buildCraftIndex, buildHideoutIndex, type Exchange, type HideoutUse } from "../lib/itemUsage";
 
 export interface ListedItem {
@@ -61,20 +63,45 @@ export function loadItemInspect(): Promise<InspectIndex> {
   return inspect;
 }
 
+type Translations = Record<string, string>;
+const translations = new Map<string, Promise<[Translations, Translations]>>();
+/** Traductions d'objets (langue, anglais), téléchargées une fois par mode et langue : noms des objets et des catégories. */
+function itemTranslations(mode: GameMode, lang: string): Promise<[Translations, Translations]> {
+  const key = `${mode}:${lang}`;
+  let p = translations.get(key);
+  if (!p) {
+    p = Promise.all([fetchTranslations(`${mode}/items`, lang), lang === "en" ? null : fetchTranslations(`${mode}/items`, "en")]).then(([primary, en]) => [primary, en ?? primary]);
+    translations.set(key, p);
+  }
+  return p;
+}
+
 const items = new Map<string, Promise<ListedItem[]>>();
 export function loadItemList(mode: GameMode, lang: string): Promise<ListedItem[]> {
   const key = `${mode}:${lang}`;
   let p = items.get(key);
   if (!p) {
-    p = Promise.all([fetchTranslations(`${mode}/items`, lang), lang === "en" ? null : fetchTranslations(`${mode}/items`, "en")]).then(([primary, en]) => {
-      const list = parseItemList(primary, en ?? primary, lang);
+    p = itemTranslations(mode, lang).then(([primary, en]) => {
+      const list = parseItemList(primary, en, lang);
       if (list.length === 0) throw new Error("items");
       return list;
     });
-    p.catch(() => items.delete(key)); // échec : on réessaiera à la prochaine ouverture
+    // échec : on réessaiera à la prochaine ouverture (traductions comprises)
+    p.catch(() => {
+      items.delete(key);
+      translations.delete(key);
+    });
     items.set(key, p);
   }
   return p;
+}
+
+/** Catégories du flea (src/data/item-categories.json, chargé à part) et leurs noms dans la langue. */
+export async function loadItemCategories(mode: GameMode, lang: string): Promise<{ file: CategoryFile; names: Translations }> {
+  const [file, [primary, en]] = await Promise.all([import("../data/item-categories.json").then((m) => m.default as unknown as CategoryFile), itemTranslations(mode, lang)]);
+  const names: Translations = {};
+  for (const [id] of file.cats) names[id] = primary[id] ?? en[id] ?? id;
+  return { file, names };
 }
 
 export interface HideoutInfo {

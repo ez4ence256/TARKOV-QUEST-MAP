@@ -9,7 +9,9 @@ import { iconSrc } from "../lib/itemIcons";
 import { matchImage, type Rgba } from "../lib/itemImage";
 import { looksLikeInspect, matchInspect } from "../lib/itemInspect";
 import { buildUsageIndex, durationLabel, useLabel, type Exchange, type QuestUse } from "../lib/itemUsage";
-import { loadExchanges, loadHideout, loadItemImages, loadItemInspect, loadItemList, type HideoutInfo, type ListedItem } from "../api/itemList";
+import { loadExchanges, loadHideout, loadItemCategories, loadItemImages, loadItemInspect, loadItemList, type HideoutInfo, type ListedItem } from "../api/itemList";
+import { iconUrl } from "../api/tarkovJson";
+import { buildCategoryTree, OTHER, type CategoryNode } from "../lib/itemCategories";
 import { ItemThumb } from "./ItemThumb";
 
 const PAGE = 100;
@@ -83,6 +85,10 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   const [shown, setShown] = useState(PAGE);
   const [selected, setSelected] = useState<ListedItem | null>(null);
   const [ocr, setOcr] = useState<OcrState | null>(null);
+  // catégories du flea : arbre, catégorie choisie (filtre la grille), catégories ouvertes
+  const [tree, setTree] = useState<CategoryNode[] | null>(null);
+  const [cat, setCat] = useState<CategoryNode | null>(null);
+  const [open, setOpen] = useState<Set<string>>(new Set());
   const search = useRef<HTMLInputElement>(null);
   const run = useRef(0); // numéro de la dernière lecture : un résultat périmé est ignoré
   const pasteRef = useRef<(blob: Blob) => void>(() => {});
@@ -133,6 +139,17 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
     return extra.length ? [...list, ...extra].sort((a, b) => a.name.localeCompare(b.name, lang)) : list;
   }, [list, itemNames, lang]);
 
+  useEffect(() => {
+    if (!all) return;
+    let cancelled = false;
+    loadItemCategories(gameMode, lang)
+      .then(({ file, names }) => !cancelled && setTree(buildCategoryTree(file, names, all.map((i) => i.id), tr("Autres", "Other"))))
+      .catch(() => undefined); // sans catégories : la recherche seule
+    return () => {
+      cancelled = true;
+    };
+  }, [all, gameMode, lang]);
+
   pasteRef.current = async (blob) => {
     const id = ++run.current;
     if (!all) return setOcr({ step: "error" });
@@ -167,7 +184,18 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
       .sort((a, b) => b.score - a.score)
       .map((r) => r.item);
   }, [all, q]);
-  useEffect(() => setShown(PAGE), [q]);
+  const filtered = useMemo(() => (cat ? results.filter((i) => cat.items.has(i.id)) : results), [results, cat]);
+  useEffect(() => setShown(PAGE), [q, cat]);
+  const pickCategory = (node: CategoryNode) => {
+    setCat((c) => (c?.id === node.id ? null : node));
+    setOpen((o) => new Set(o).add(node.id));
+  };
+  const toggleCategory = (id: string) =>
+    setOpen((o) => {
+      const next = new Set(o);
+      if (!next.delete(id)) next.add(id);
+      return next;
+    });
   const tiles = (items: ListedItem[]) => (
     <ul className="finder-grid">
       {items.map((item) => (
@@ -186,6 +214,33 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   const usage = useMemo(() => buildUsageIndex(tasks), [tasks]);
   const tasksById = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
   const byId = useMemo(() => new Map((all ?? []).map((i) => [i.id, i])), [all]);
+
+  const banner = (
+    <>
+          {ocr && (
+            <div className="finder-ocr" role="status">
+              <span>
+                {ocr.step === "reading"
+                  ? ocr.progress === null
+                    ? tr("Lecture de la capture…", "Reading the screenshot…")
+                    : tr(`Lecture de la capture… ${Math.round(ocr.progress * 100)} %`, `Reading the screenshot… ${Math.round(ocr.progress * 100)}%`)
+                  : ocr.step === "error"
+                    ? !all
+                      ? tr("Liste des objets pas encore chargée.", "Item list not loaded yet.")
+                      : tr("Lecture impossible. La première utilisation demande une connexion (données de langue).", "Could not read the image. The first use needs a connection (language data).")
+                    : ocr.text.length + ocr.image.length
+                      ? tr("Capture lue : choisis l'objet ci-dessous.", "Screenshot read: pick the item below.")
+                      : tr("Aucun objet reconnu dans la capture.", "No item recognized in the screenshot.")}
+              </span>
+              {ocr.step !== "reading" && (
+                <button className="btn btn-small" onClick={() => setOcr(null)}>
+                  {tr("Effacer", "Clear")}
+                </button>
+              )}
+            </div>
+          )}
+    </>
+  );
 
   return (
     <div className="finder-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
@@ -213,76 +268,75 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
           </button>
         </div>
 
-        <div className="finder-body">
-          {ocr && (
-            <div className="finder-ocr" role="status">
-              <span>
-                {ocr.step === "reading"
-                  ? ocr.progress === null
-                    ? tr("Lecture de la capture…", "Reading the screenshot…")
-                    : tr(`Lecture de la capture… ${Math.round(ocr.progress * 100)} %`, `Reading the screenshot… ${Math.round(ocr.progress * 100)}%`)
-                  : ocr.step === "error"
-                    ? !all
-                      ? tr("Liste des objets pas encore chargée.", "Item list not loaded yet.")
-                      : tr("Lecture impossible. La première utilisation demande une connexion (données de langue).", "Could not read the image. The first use needs a connection (language data).")
-                    : ocr.text.length + ocr.image.length
-                      ? tr("Capture lue : choisis l'objet ci-dessous.", "Screenshot read: pick the item below.")
-                      : tr("Aucun objet reconnu dans la capture.", "No item recognized in the screenshot.")}
-              </span>
-              {ocr.step !== "reading" && (
-                <button className="btn btn-small" onClick={() => setOcr(null)}>
-                  {tr("Effacer", "Clear")}
-                </button>
-              )}
-            </div>
-          )}
+        <div className={`finder-body${all && !selected && !error ? " finder-split" : ""}`}>
           {error ? (
-            <p className="muted">{tr("Liste des objets indisponible (réseau ?).", "Item list unavailable (network?).")}</p>
+            <>
+              {banner}
+              <p className="muted">{tr("Liste des objets indisponible (réseau ?).", "Item list unavailable (network?).")}</p>
+            </>
           ) : !all ? (
-            <p className="muted" role="status">{tr("Chargement des objets…", "Loading items…")}</p>
+            <>
+              {banner}
+              <p className="muted" role="status">{tr("Chargement des objets…", "Loading items…")}</p>
+            </>
           ) : selected ? (
-            <Usage
-              key={selected.id}
-              item={selected}
-              src={iconSrc(selected.id, itemIcons)}
-              quests={usage.get(selected.id) ?? []}
-              tasksById={tasksById}
-              traders={traders}
-              maps={maps}
-              hideout={hideout}
-              barters={barters}
-              crafts={crafts}
-              byId={byId}
-              itemIcons={itemIcons}
-              onBack={() => setSelected(null)}
-              onShowQuest={(id) => {
-                onShowQuest(id);
-                onClose();
-              }}
-            />
+            <>
+              {banner}
+              <Usage
+                key={selected.id}
+                item={selected}
+                src={iconSrc(selected.id, itemIcons)}
+                quests={usage.get(selected.id) ?? []}
+                tasksById={tasksById}
+                traders={traders}
+                maps={maps}
+                hideout={hideout}
+                barters={barters}
+                crafts={crafts}
+                byId={byId}
+                itemIcons={itemIcons}
+                onBack={() => setSelected(null)}
+                onShowQuest={(id) => {
+                  onShowQuest(id);
+                  onClose();
+                }}
+              />
+            </>
           ) : (
             <>
-              {!ocr && (
-                <p className="muted finder-count" role="status">
-                  {tr(`${results.length} objet(s)`, `${results.length} item(s)`)}
-                </p>
-              )}
-              {ocr?.step === "done" ? (
-                <>
-                  {ocr.text.length > 0 && <h3 className="finder-sub">{tr("Lu dans le texte", "Read from the text")}</h3>}
-                  {ocr.text.length > 0 && tiles(ocr.text)}
-                  {ocr.image.length > 0 && <h3 className="finder-sub">{tr("Ressemble à l'image", "Looks like the image")}</h3>}
-                  {ocr.image.length > 0 && tiles(ocr.image)}
-                </>
-              ) : ocr?.step === "reading" ? null : (
-                tiles(results.slice(0, shown))
-              )}
-              {!ocr && results.length > shown && (
-                <div className="finder-more">
-                  <button className="btn btn-small" onClick={() => setShown((n) => n + PAGE)}>
-                    {tr("Afficher plus", "Show more")}
+              <div className="finder-main">
+                {banner}
+                {!ocr && (
+                  <p className="muted finder-count" role="status">
+                    {tr(`${filtered.length} objet(s)`, `${filtered.length} item(s)`)}
+                    {cat && ` · ${cat.name}`}
+                  </p>
+                )}
+                {ocr?.step === "done" ? (
+                  <>
+                    {ocr.text.length > 0 && <h3 className="finder-sub">{tr("Lu dans le texte", "Read from the text")}</h3>}
+                    {ocr.text.length > 0 && tiles(ocr.text)}
+                    {ocr.image.length > 0 && <h3 className="finder-sub">{tr("Ressemble à l'image", "Looks like the image")}</h3>}
+                    {ocr.image.length > 0 && tiles(ocr.image)}
+                  </>
+                ) : ocr?.step === "reading" ? null : (
+                  tiles(filtered.slice(0, shown))
+                )}
+                {!ocr && filtered.length > shown && (
+                  <div className="finder-more">
+                    <button className="btn btn-small" onClick={() => setShown((n) => n + PAGE)}>
+                      {tr("Afficher plus", "Show more")}
+                    </button>
+                  </div>
+                )}
+              </div>
+              {tree && !ocr && (
+                <nav className="finder-cats" aria-label={tr("Catégories", "Categories")}>
+                  <button className={`finder-cat finder-cat-all${cat ? "" : " is-selected"}`} aria-pressed={!cat} onClick={() => setCat(null)}>
+                    {tr("Tous les objets", "All items")} <span className="finder-cat-count">({all.length})</span>
                   </button>
-                </div>
+                  <CategoryTree nodes={tree} depth={0} selected={cat?.id ?? null} open={open} onPick={pickCategory} onToggle={toggleCategory} />
+                </nav>
               )}
             </>
           )}
@@ -470,5 +524,34 @@ function Recipe(p: { e: Exchange; source: string; item: ListedItem; byId: Map<st
         {outputs.map(chip)}
       </div>
     </li>
+  );
+}
+
+/** Arbre des catégories du flea : ▸ ouvre ou ferme, le nom choisit la catégorie (un second clic la retire). */
+function CategoryTree(p: { nodes: CategoryNode[]; depth: number; selected: string | null; open: Set<string>; onPick: (n: CategoryNode) => void; onToggle: (id: string) => void }) {
+  return (
+    <ul className="finder-cat-list">
+      {p.nodes.map((n) => {
+        const expanded = p.open.has(n.id);
+        return (
+          <li key={n.id}>
+            <div className={`finder-cat${p.selected === n.id ? " is-selected" : ""}`} style={{ paddingLeft: `${0.25 + p.depth * 1}rem` }}>
+              {n.children.length > 0 ? (
+                <button className="finder-cat-toggle" aria-expanded={expanded} aria-label={`${expanded ? tr("Replier", "Collapse") : tr("Déplier", "Expand")} ${n.name}`} onClick={() => p.onToggle(n.id)}>
+                  {expanded ? "▾" : "▸"}
+                </button>
+              ) : (
+                <span className="finder-cat-toggle" aria-hidden="true" />
+              )}
+              <button className="finder-cat-name" aria-pressed={p.selected === n.id} onClick={() => p.onPick(n)}>
+                {n.id !== OTHER && <img src={iconUrl(`handbook-category-${n.id}-icon.webp`)} alt="" width={18} height={18} loading="lazy" referrerPolicy="no-referrer" onError={(e) => (e.currentTarget.style.visibility = "hidden")} />}
+                <span>{n.name}</span> <span className="finder-cat-count">({n.items.size})</span>
+              </button>
+            </div>
+            {expanded && n.children.length > 0 && <CategoryTree {...p} nodes={n.children} depth={p.depth + 1} />}
+          </li>
+        );
+      })}
+    </ul>
   );
 }

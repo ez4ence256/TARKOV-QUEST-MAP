@@ -1852,8 +1852,8 @@ kbd {
 .finder {
   display: flex;
   flex-direction: column;
-  width: min(760px, 100%);
-  height: min(640px, 100%);
+  width: min(1000px, 100%);
+  height: min(680px, 100%);
   padding: 0;
   overflow: hidden;
   background: var(--bg-2);
@@ -1904,6 +1904,83 @@ kbd {
   border-left: 3px solid var(--accent);
   border-radius: var(--radius);
   font-size: 0.9em;
+}
+/* liste : grille à gauche, catégories du flea à droite, chacune défile seule */
+.finder-body.finder-split {
+  display: flex;
+  padding: 0;
+  overflow: hidden;
+}
+.finder-main {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 0.75rem;
+}
+.finder-cats {
+  flex: none;
+  width: 260px;
+  overflow-y: auto;
+  padding: 0.4rem 0.3rem;
+  background: var(--bg);
+  border-left: 1px solid var(--line);
+}
+.finder-cat-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.finder-cat {
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+}
+.finder-cat:hover {
+  background: var(--bg-3);
+}
+.finder-cat.is-selected {
+  background: var(--bg-3);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.finder-cat.is-selected .finder-cat-name {
+  color: var(--accent-2);
+}
+.finder-cat-toggle {
+  flex: none;
+  width: 1.3rem;
+  padding: 0;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  text-align: center;
+}
+.finder-cat-name,
+.finder-cat-all {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 0.3rem 0.3rem;
+  color: var(--text);
+  font-size: 0.88em;
+  text-align: left;
+  background: none;
+  border: 0;
+}
+.finder-cat-all {
+  width: 100%;
+  margin-bottom: 0.25rem;
+  padding-left: 0.5rem;
+  font-weight: 600;
+}
+.finder-cat-name img {
+  flex: none;
+}
+.finder-cat-count {
+  color: var(--muted);
+  font-size: 0.9em;
+  white-space: nowrap;
 }
 .finder-count {
   margin: 0 0 0.5rem;
@@ -2143,6 +2220,16 @@ kbd {
 }
 
 @media (max-width: 600px) {
+  .finder-body.finder-split {
+    flex-direction: column;
+  }
+  .finder-cats {
+    order: -1;
+    width: auto;
+    max-height: 38%;
+    border-left: 0;
+    border-bottom: 1px solid var(--line);
+  }
   .finder-backdrop {
     padding: calc(var(--topbar-h) + 4px) 4px 4px;
   }
