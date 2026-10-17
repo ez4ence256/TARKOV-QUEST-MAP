@@ -1909,6 +1909,38 @@ kbd {
 .finder-spot-map {
   margin-left: auto;
 }
+.finder-spot-toggle {
+  flex: none;
+  width: 1.4rem;
+  padding: 0;
+  color: var(--muted);
+  background: none;
+  border: 0;
+}
+.finder-spot-body {
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--line);
+}
+.finder-spot-keycard {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.finder-spot-keycard p {
+  margin: 0.15rem 0 0;
+}
+.finder-spot-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+  margin-top: 0.75rem;
+}
+.finder-spot-added {
+  margin: 0;
+  color: var(--ok);
+}
 .finder-spot-key {
   margin: 0.4rem 0 0;
   font-size: 0.9em;

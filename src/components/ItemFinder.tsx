@@ -13,7 +13,9 @@ import { loadExchanges, loadHideout, loadItemCategories, loadItemImages, loadIte
 import { loadItemLocation, type ItemLocation, type LocationSectionTitle } from "../api/itemLocation";
 import type { Spot } from "../lib/itemSpots";
 import type { ItemSpotMarker } from "../map/ItemSpotsLayer";
-import { BlocksWithPhotos } from "./StoryView";
+import { BlocksWithPhotos, splitAtHeadings } from "./StoryView";
+import { Icon } from "./Icon";
+import { CUSTOM_ICONS, ICON_LABELS, type IconId } from "../lib/objectiveTypes";
 import { iconUrl } from "../api/tarkovJson";
 import { buildCategoryTree, OTHER, type CategoryNode } from "../lib/itemCategories";
 import { ItemThumb } from "./ItemThumb";
@@ -64,6 +66,17 @@ interface Props {
   onShowQuest: (taskId: string) => void;
   /** « Voir sur la carte » : tous les spots de l'objet, et celui à centrer. */
   onShowSpots: (spots: ItemSpotMarker[], focus: ItemSpotMarker) => void;
+  /** « Ajouter un point perso » à l'emplacement d'un spot. */
+  onAddPoint: (point: NewPoint) => void;
+}
+
+export interface NewPoint {
+  mapId: string;
+  x: number;
+  z: number;
+  icon: IconId;
+  label: string;
+  note: string;
 }
 
 export function ItemFinder(props: Props) {
@@ -84,7 +97,7 @@ export function ItemFinder(props: Props) {
   );
 }
 
-function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIcons, onShowQuest, onShowSpots, onClose }: Props & { onClose: () => void }) {
+function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIcons, onShowQuest, onShowSpots, onAddPoint, onClose }: Props & { onClose: () => void }) {
   const [list, setList] = useState<ListedItem[] | null>(null);
   const [error, setError] = useState(false);
   const [query, setQuery] = useState("");
@@ -310,6 +323,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                   onShowSpots(spots, focus);
                   onClose();
                 }}
+                onAddPoint={onAddPoint}
               />
             </>
           ) : (
@@ -382,8 +396,10 @@ function Usage(p: {
   onBack: () => void;
   onShowQuest: (taskId: string) => void;
   onShowSpots: (spots: ItemSpotMarker[], focus: ItemSpotMarker) => void;
+  onAddPoint: (point: NewPoint) => void;
 }) {
   const [tab, setTab] = useState<Tab>("quests");
+  const [wikiTitles, setWikiTitles] = useState<Record<string, string>>({});
   // « Où le trouver » : meilleurs spots (fichier généré) puis la page wiki de l'objet
   const [spots, setSpots] = useState<Spot[] | null>(null);
   const [location, setLocation] = useState<ItemLocation | "!" | null>(null);
@@ -393,6 +409,7 @@ function Usage(p: {
       .then((where) => {
         if (cancelled) return;
         setSpots(where.spots[p.item.id] ?? []);
+        setWikiTitles(where.wiki);
         return loadItemLocation(where.wiki[p.item.id] ?? p.item.nameEn).then((loc) => !cancelled && setLocation(loc));
       })
       .catch(() => !cancelled && setLocation("!"));
@@ -521,31 +538,37 @@ function Usage(p: {
                   )}
                 </p>
                 <ul className="finder-cards">
-                  {spots.map(([mapName, , , , n, , keyId], i) => {
+                  {spots.map(([mapName, x, y, z, n, , keyId], i) => {
                     const map = p.maps.find((m) => m.normalizedName === mapName);
                     const key = keyId ? p.byId.get(keyId) : undefined;
-                    const confirmed = key && linked.has(key.nameEn.toLowerCase());
-                    const marker = markers.find((m) => m.key === `spot:${i}`);
                     return (
-                      <li key={i} className="finder-card finder-spot">
-                        <div className="finder-recipe-head">
-                          <span className="finder-badge">{i + 1}</span>
-                          <strong>{map?.name ?? mapName}</strong>
-                          <span className="finder-pill">{tr(`${n} point(s)`, `${n} point(s)`)}</span>
-                          {marker && (
-                            <button className="btn btn-small finder-spot-map" onClick={() => p.onShowSpots(markers, marker)}>
-                              {tr("📍 Voir sur la carte", "📍 Show on map")}
-                            </button>
-                          )}
-                        </div>
-                        {key && (
-                          <p className="finder-spot-key">
-                            🔑 {confirmed ? tr("Derrière la porte : ", "Behind the door: ") : tr("Porte fermée à proximité : ", "Locked door nearby: ")}
-                            <strong>{key.name}</strong>
-                            {confirmed && <span className="muted"> {tr("(confirmé par le wiki)", "(confirmed by the wiki)")}</span>}
-                          </p>
-                        )}
-                      </li>
+                      <SpotCard
+                        key={i}
+                        rank={i + 1}
+                        mapLabel={map?.name ?? mapName}
+                        mapEn={map?.nameEn ?? map?.name ?? mapName}
+                        n={n}
+                        keyItem={key}
+                        keyTitle={key ? (wikiTitles[key.id] ?? key.nameEn) : undefined}
+                        confirmed={Boolean(key && linked.has(key.nameEn.toLowerCase()))}
+                        itemLocation={location && location !== "!" ? location : null}
+                        itemIcons={p.itemIcons}
+                        marker={markers.find((m) => m.key === `spot:${i}`)}
+                        onShowMap={(marker) => p.onShowSpots(markers, marker)}
+                        onAddPoint={
+                          map
+                            ? (icon) =>
+                                p.onAddPoint({
+                                  mapId: map.id,
+                                  x,
+                                  z,
+                                  icon,
+                                  label: key ? `${p.item.name} — ${key.name}` : p.item.name,
+                                  note: tr(`Spot ${i + 1} de « ${p.item.name} » : ${n} point(s) d'apparition (y ≈ ${y})`, `Spot ${i + 1} for "${p.item.name}": ${n} spawn point(s) (y ≈ ${y})`),
+                                })
+                            : undefined
+                        }
+                      />
                     );
                   })}
                 </ul>
@@ -671,5 +694,129 @@ function CategoryTree(p: { nodes: CategoryNode[]; depth: number; selected: strin
         );
       })}
     </ul>
+  );
+}
+
+/**
+ * Un spot de l'onglet « Où le trouver » : en-tête (map, points, carte) ; déplié : la clé de la porte
+ * proche (icône, photos de sa serrure et de ce qu'il y a derrière, sur sa page wiki, chargée au
+ * dépliage), ce que la page de l'objet dit et montre pour cette map, et l'ajout d'un point perso.
+ */
+function SpotCard(p: {
+  rank: number;
+  mapLabel: string;
+  mapEn: string;
+  n: number;
+  keyItem?: ListedItem;
+  keyTitle?: string;
+  confirmed: boolean;
+  itemLocation: ItemLocation | null;
+  itemIcons: Record<string, string>;
+  marker?: ItemSpotMarker;
+  onShowMap: (marker: ItemSpotMarker) => void;
+  onAddPoint?: (icon: IconId) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [keyLoc, setKeyLoc] = useState<ItemLocation | "!" | null>(null);
+  const [picking, setPicking] = useState(false);
+  const [added, setAdded] = useState<IconId | null>(null);
+  useEffect(() => {
+    if (!open || !p.keyTitle || keyLoc) return;
+    loadItemLocation(p.keyTitle).then(setKeyLoc, () => setKeyLoc("!"));
+  }, [open]);
+
+  // ce que la page de l'objet dit pour cette map (sous-titre « Streets of Tarkov »…), photos comprises
+  const location = p.itemLocation?.sections.find((s) => s.title === "Location");
+  const parts = location ? splitAtHeadings(location.blocks) : [];
+  const idx = parts.findIndex((part, i) => i > 0 && part[0]?.type === "heading" && part[0].text.toLowerCase() === p.mapEn.toLowerCase());
+  // photos de cette map, affichées sous son texte (sous-titre retiré)
+  const mapPhotos = idx > 0 ? location!.photos.filter((ph) => ph.section === idx).map((ph) => ({ ...ph, section: 0 })) : [];
+  const keySections = keyLoc && keyLoc !== "!" ? keyLoc.sections.filter((s) => s.title === "Lock Location" || s.title === "Behind the Lock") : [];
+
+  return (
+    <li className="finder-card finder-spot">
+      <div className="finder-recipe-head">
+        <button className="finder-spot-toggle" aria-expanded={open} onClick={() => setOpen((o) => !o)} aria-label={open ? tr("Replier le spot", "Collapse the spot") : tr("Déplier le spot", "Expand the spot")}>
+          {open ? "▾" : "▸"}
+        </button>
+        <span className="finder-badge">{p.rank}</span>
+        <strong>{p.mapLabel}</strong>
+        <span className="finder-pill">{tr(`${p.n} point(s)`, `${p.n} point(s)`)}</span>
+        {p.marker && (
+          <button className="btn btn-small finder-spot-map" onClick={() => p.onShowMap(p.marker!)}>
+            {tr("📍 Voir sur la carte", "📍 Show on map")}
+          </button>
+        )}
+      </div>
+      {p.keyItem && (
+        <p className="finder-spot-key">
+          🔑 {p.confirmed ? tr("Derrière la porte : ", "Behind the door: ") : tr("Porte fermée à proximité : ", "Locked door nearby: ")}
+          <strong>{p.keyItem.name}</strong>
+          {p.confirmed && <span className="muted"> {tr("(confirmé par le wiki)", "(confirmed by the wiki)")}</span>}
+        </p>
+      )}
+      {open && (
+        <div className="finder-spot-body">
+          {p.keyItem && (
+            <div className="finder-spot-keycard">
+              <span className="finder-icon">
+                <ItemThumb src={iconSrc(p.keyItem.id, p.itemIcons)} name="" size={56} />
+              </span>
+              <div>
+                <strong>{p.keyItem.name}</strong>
+                <p className="muted small">{tr("Clé de la porte la plus proche du spot.", "Key of the door closest to the spot.")}</p>
+              </div>
+            </div>
+          )}
+          {p.keyItem && keyLoc === null && <p className="muted small" role="status">{tr("Chargement des photos de la clé…", "Loading the key's photos…")}</p>}
+          {keySections.map((sec) => (
+            <section key={sec.title}>
+              <h4 className="finder-sub">{tr(...LOCATION_TITLE[sec.title])}</h4>
+              <BlocksWithPhotos blocks={sec.blocks} photos={sec.photos} itemNames={{}} itemIcons={p.itemIcons} />
+            </section>
+          ))}
+          {idx > 0 && (
+            <section>
+              <h4 className="finder-sub">{tr(`Ce que dit le wiki pour ${p.mapLabel}`, `What the wiki says for ${p.mapLabel}`)}</h4>
+              <BlocksWithPhotos blocks={parts[idx].slice(1)} photos={mapPhotos} itemNames={{}} itemIcons={p.itemIcons} />
+            </section>
+          )}
+          {!p.keyItem && idx <= 0 && <p className="muted small">{tr("Pas de photo du wiki pour ce spot.", "No wiki photo for this spot.")}</p>}
+          {p.onAddPoint && (
+            <div className="finder-spot-add">
+              {added ? (
+                <p className="finder-spot-added" role="status">
+                  ✓ {tr("Point perso ajouté sur la carte (onglet Mes points).", "Personal point added to the map (My points tab).")}
+                </p>
+              ) : !picking ? (
+                <button className="btn btn-small" onClick={() => setPicking(true)}>
+                  {tr("📌 Ajouter un point perso", "📌 Add a personal point")}
+                </button>
+              ) : (
+                <>
+                  <span className="small">{tr("Choisis l'icône :", "Pick the icon:")}</span>
+                  <div className="icon-grid">
+                    {CUSTOM_ICONS.map((id) => (
+                      <button
+                        key={id}
+                        className="icon-choice"
+                        title={ICON_LABELS[id]}
+                        aria-label={ICON_LABELS[id]}
+                        onClick={() => {
+                          p.onAddPoint!(id);
+                          setAdded(id);
+                        }}
+                      >
+                        <Icon id={id} />
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </li>
   );
 }

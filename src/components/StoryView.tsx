@@ -116,7 +116,7 @@ function Photo({ photo, itemNames }: { photo: WikiPhoto; itemNames: Record<strin
 type Item = ResolvedStory["steps"][number];
 
 /** Texte d'une case coupé à chaque sous-titre : morceau 0 = avant le premier sous-titre. */
-function splitAtHeadings(blocks: WikiBlock[]): WikiBlock[][] {
+export function splitAtHeadings(blocks: WikiBlock[]): WikiBlock[][] {
   const parts: WikiBlock[][] = [[]];
   for (const b of blocks) {
     if (b.type === "heading") parts.push([]);

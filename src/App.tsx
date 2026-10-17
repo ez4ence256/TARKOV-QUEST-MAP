@@ -379,6 +379,7 @@ export default function App() {
           Quest Planner <span className="mode-badge">{modeLabel}</span>
         </div>
         <ItemFinder gameMode={gameMode} lang={lang} tasks={tasks} traders={data?.traders ?? []} maps={maps} itemNames={data?.itemNames ?? NO_NAMES} itemIcons={data?.itemIcons ?? NO_NAMES} onShowQuest={showQuest}
+          onAddPoint={(pt) => dispatch({ type: "addCustom", point: { ...pt, id: newId(), createdAt: Date.now() } })}
           onShowSpots={(spots, spot) => {
             setItemSpots(spots);
             focusPoint(spot.key, spot.mapId);
