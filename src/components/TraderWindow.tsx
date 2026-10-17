@@ -12,6 +12,9 @@ import { loadItemCategories, loadItemList, loadTraderOffers, type ListedItem } f
 import { CategoryTree } from "./ItemFinder";
 import { ItemThumb } from "./ItemThumb";
 
+/** Catégorie « Objets d'échange » (Barter items) du handbook du jeu. */
+const BARTER_ITEMS = "5b47574386f77428ca22b33e";
+
 interface Props {
   gameMode: GameMode;
   lang: string;
@@ -47,6 +50,8 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, onClose }: Pr
   const [level, setLevel] = useState(1);
   const [kind, setKind] = useState<OfferKind>("all");
   const [tree, setTree] = useState<CategoryNode[] | null>(null);
+  // objets de la catégorie « Objets d'échange » eux-mêmes (sans les trocs ajoutés), pour le filtre
+  const [barterOwn, setBarterOwn] = useState<Set<string>>(new Set());
   const [cat, setCat] = useState<CategoryNode | null>(null);
   const [openCats, setOpenCats] = useState<Set<string>>(new Set());
   const closeRef = useRef(onClose);
@@ -89,13 +94,29 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, onClose }: Pr
     if (!offers.length) return setTree(null);
     let cancelled = false;
     loadItemCategories(gameMode, lang)
-      .then(({ file: cats, names }) => !cancelled && setTree(buildCategoryTree(cats, names, [...new Set(offers.map((o) => o.item))], tr("Autres", "Other"))))
+      .then(({ file: cats, names }) => {
+        if (cancelled) return;
+        const built = buildCategoryTree(cats, names, [...new Set(offers.map((o) => o.item))], tr("Autres", "Other"));
+        // « Objets d'échange » réunit aussi tous les trocs du niveau (demande) : présente dès qu'il y a un troc
+        let barter = built.find((n) => n.id === BARTER_ITEMS);
+        const barterOwnItems = new Set(barter?.items ?? []);
+        setBarterOwn(barterOwnItems);
+        const trocs = offers.filter((o) => o.barter).map((o) => o.item);
+        if (trocs.length) {
+          if (!barter) built.unshift((barter = { id: BARTER_ITEMS, name: "", children: [], items: new Set() }));
+          barter.name = tr("Objets d'échange et trocs", "Barter items & trades");
+          trocs.forEach((id) => barter!.items.add(id));
+          // un même objet peut venir de deux trocs : on compte les offres affichées au clic
+          barter.count = offers.filter((o) => o.barter || barterOwnItems.has(o.item)).length;
+        }
+        setTree(built);
+      })
       .catch(() => undefined);
     return () => {
       cancelled = true;
     };
   }, [offers, gameMode, lang]);
-  const visible = cat ? offers.filter((o) => cat.items.has(o.item)) : offers;
+  const visible = !cat ? offers : cat.id === BARTER_ITEMS ? offers.filter((o) => o.barter || barterOwn.has(o.item)) : offers.filter((o) => cat.items.has(o.item));
 
   const pickTrader = (id: string) => {
     setTrader(id);

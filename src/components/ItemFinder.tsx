@@ -708,7 +708,7 @@ export function CategoryTree(p: { nodes: CategoryNode[]; depth: number; selected
               )}
               <button className="finder-cat-name" aria-pressed={p.selected === n.id} onClick={() => p.onPick(n)}>
                 {n.id !== OTHER && <img src={iconUrl(`handbook-category-${n.id}-icon.webp`)} alt="" width={18} height={18} loading="lazy" referrerPolicy="no-referrer" onError={(e) => (e.currentTarget.style.visibility = "hidden")} />}
-                <span>{n.name}</span> <span className="finder-cat-count">({n.items.size})</span>
+                <span>{n.name}</span> <span className="finder-cat-count">({n.count ?? n.items.size})</span>
               </button>
             </div>
             {expanded && n.children.length > 0 && <CategoryTree {...p} nodes={n.children} depth={p.depth + 1} />}

@@ -14,6 +14,8 @@ export interface CategoryNode {
   children: CategoryNode[];
   /** Objets de la branche (catégorie et sous-catégories), parmi ceux du finder. */
   items: Set<string>;
+  /** Nombre affiché, quand ce n'est pas le nombre d'objets (fenêtre Marchands : nombre d'offres). */
+  count?: number;
 }
 
 /** Objets sans catégorie (objets de quête hors flea…) : dernière catégorie, pour que tout soit trouvable. */
