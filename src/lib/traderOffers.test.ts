@@ -25,6 +25,10 @@ describe("offres d'un marchand", () => {
       ["ak", 2],
     ]);
   });
+  it("niveau exact : seulement les nouveautés de ce niveau", () => {
+    expect(traderOffers(file, "prapor", 2, "all", true).map((o) => o.item)).toEqual(["ak"]);
+    expect(traderOffers(file, "prapor", 1, "all", true).map((o) => o.item)).toEqual(["ammo", "grenade"]);
+  });
   it("filtre achat / barter ; détails de l'offre", () => {
     expect(traderOffers(file, "prapor", 4, "cash").map((o) => o.item)).toEqual(["ammo", "ak"]);
     const [barter] = traderOffers(file, "prapor", 4, "barter");

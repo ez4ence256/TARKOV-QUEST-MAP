@@ -27,19 +27,20 @@ export interface Offer {
 export type OfferKind = "all" | "cash" | "barter";
 
 /**
- * Offres d'un marchand disponibles au niveau `level` (celles des niveaux inférieurs comprises, comme
- * dans le jeu), triées par niveau puis dans l'ordre du fichier.
+ * Offres d'un marchand : débloquées exactement au niveau `level` (`exact`, les nouveautés du niveau), ou
+ * disponibles à ce niveau (niveaux inférieurs compris) ; triées par niveau puis dans l'ordre du fichier.
  */
-export function traderOffers(file: TraderOffersFile, trader: string, level: number, kind: OfferKind = "all"): Offer[] {
+export function traderOffers(file: TraderOffersFile, trader: string, level: number, kind: OfferKind = "all", exact = false): Offer[] {
+  const at = (lvl: number) => (exact ? lvl === level : lvl <= level);
   const out: Offer[] = [];
   if (kind !== "barter") {
     for (const [t, item, lvl, amount, currency, task, limit] of file.cash) {
-      if (t === trader && lvl <= level) out.push({ item, level: lvl, task, limit, price: { amount, currency } });
+      if (t === trader && at(lvl)) out.push({ item, level: lvl, task, limit, price: { amount, currency } });
     }
   }
   if (kind !== "cash") {
     for (const [t, item, lvl, count, req, task, limit] of file.barters) {
-      if (t === trader && lvl <= level) out.push({ item, level: lvl, task, limit, barter: { count, required: req.map(([i, c]) => ({ item: i, count: c })) } });
+      if (t === trader && at(lvl)) out.push({ item, level: lvl, task, limit, barter: { count, required: req.map(([i, c]) => ({ item: i, count: c })) } });
     }
   }
   return out.sort((a, b) => a.level - b.level);

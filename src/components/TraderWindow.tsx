@@ -1,6 +1,6 @@
 // Fenêtre « Marchands » (barre du haut, à côté d'Objets), comme l'écran marchand du jeu : portraits des
 // marchands, niveau de loyauté (et ce qu'il faut pour l'atteindre), achat / barter, catégories du flea à
-// gauche, et ce que le marchand vend à ce niveau (niveaux inférieurs compris) : prix ou objets demandés,
+// gauche, et ce que le marchand débloque à ce niveau (ou « Tout » : tous niveaux) : prix ou objets demandés,
 // niveau, quête qui débloque l'offre, limite d'achat. Données chargées à la première ouverture.
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { GameMode, Task, Trader } from "../types";
@@ -43,6 +43,7 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, onClose }: Pr
   const [items, setItems] = useState<Map<string, ListedItem> | null>(null);
   const [error, setError] = useState(false);
   const [trader, setTrader] = useState<string | null>(null);
+  // niveau choisi : ses nouveautés seulement ; 0 = onglet « Tout » (tous les niveaux)
   const [level, setLevel] = useState(1);
   const [kind, setKind] = useState<OfferKind>("all");
   const [tree, setTree] = useState<CategoryNode[] | null>(null);
@@ -77,8 +78,9 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, onClose }: Pr
   }, [file, traders]);
   const current = trader ?? shown[0]?.id ?? null;
   const levels = (current && file?.levels[current]) || [[1, 0, 0, 0] as [number, number, number, number]];
-  const lvl = Math.min(level, levels.length);
-  const offers = useMemo(() => (file && current ? traderOffers(file, current, lvl, kind) : []), [file, current, lvl, kind]);
+  const all = level === 0;
+  const lvl = all ? levels.length : Math.min(level, levels.length);
+  const offers = useMemo(() => (file && current ? traderOffers(file, current, lvl, kind, !all) : []), [file, current, lvl, kind, all]);
 
   // catégories du flea, avec seulement les objets proposés à ce niveau
   useEffect(() => {
@@ -130,10 +132,13 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, onClose }: Pr
             <div className="trader-bar">
               <div className="finder-tabs trader-levels" role="tablist" aria-label={tr("Niveau de loyauté", "Loyalty level")}>
                 {levels.map(([n]) => (
-                  <button key={n} role="tab" aria-selected={n === lvl} className={`finder-tab${n === lvl ? " active" : ""}`} onClick={() => setLevel(n)}>
+                  <button key={n} role="tab" aria-selected={!all && n === lvl} className={`finder-tab${!all && n === lvl ? " active" : ""}`} onClick={() => setLevel(n)}>
                     {tr(`Niv. ${n}`, `LL${n}`)}
                   </button>
                 ))}
+                <button role="tab" aria-selected={all} className={`finder-tab${all ? " active" : ""}`} onClick={() => setLevel(0)}>
+                  {tr("Tout", "All")}
+                </button>
               </div>
               <div className="trader-kinds" role="group" aria-label={tr("Type d'offre", "Offer type")}>
                 {(
@@ -150,7 +155,9 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, onClose }: Pr
               </div>
             </div>
             <p className="muted small trader-req">
-              {lvl === 1
+              {all
+                ? tr(`Tous les niveaux (1 à ${levels.length}).`, `All levels (1 to ${levels.length}).`)
+                : lvl === 1
                 ? tr("Niveau 1 : disponible dès le départ.", "Level 1: available from the start.")
                 : `${tr(`Niveau ${lvl} : `, `Level ${lvl}: `)}${[
                     tr(`PMC niveau ${playerLevel}`, `PMC level ${playerLevel}`),
@@ -158,7 +165,9 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, onClose }: Pr
                     // somme dépensée : 0 dans les données actuelles du jeu, alors pas affichée
                     ...(commerce > 0 ? [tr(`${formatPrice(commerce, file.currency[current!] ?? "RUB", lang)} dépensés chez ce marchand`, `${formatPrice(commerce, file.currency[current!] ?? "RUB", lang)} spent with this trader`)] : []),
                   ].join(", ")}.`}{" "}
-              {tr(`${visible.length} offre(s), niveaux inférieurs compris.`, `${visible.length} offer(s), lower levels included.`)}
+              {all
+                ? tr(`${visible.length} offre(s).`, `${visible.length} offer(s).`)
+                : tr(`${visible.length} offre(s) débloquée(s) à ce niveau.`, `${visible.length} offer(s) unlocked at this level.`)}
             </p>
             <div className="finder-body finder-split trader-split">
               {tree && (
@@ -191,7 +200,7 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, onClose }: Pr
                 ) : (
                   <ul className="finder-grid trader-grid">
                     {visible.map((o, i) => (
-                      <OfferTile key={`${o.item}-${i}`} offer={o} name={name} itemIcons={itemIcons} taskName={taskName} lang={lang} isNew={o.level === lvl && lvl > 1} />
+                      <OfferTile key={`${o.item}-${i}`} offer={o} name={name} itemIcons={itemIcons} taskName={taskName} lang={lang} />
                     ))}
                   </ul>
                 )}
@@ -205,7 +214,7 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, onClose }: Pr
 }
 
 /** Une offre : l'objet, son prix ou les objets à donner, son niveau, la quête qui la débloque, la limite. */
-function OfferTile({ offer, name, itemIcons, taskName, lang, isNew }: { offer: Offer; name: (id: string) => string; itemIcons: Record<string, string>; taskName: (id: string) => string; lang: string; isNew: boolean }) {
+function OfferTile({ offer, name, itemIcons, taskName, lang }: { offer: Offer; name: (id: string) => string; itemIcons: Record<string, string>; taskName: (id: string) => string; lang: string }) {
   const title = [
     name(offer.item),
     offer.task ? tr(`Débloqué par la quête « ${taskName(offer.task)} »`, `Unlocked by the quest "${taskName(offer.task)}"`) : "",
@@ -215,7 +224,7 @@ function OfferTile({ offer, name, itemIcons, taskName, lang, isNew }: { offer: O
     .join("\n");
   return (
     <li>
-      <div className={`finder-tile trader-tile${isNew ? " is-new" : ""}`} title={title}>
+      <div className="finder-tile trader-tile" title={title}>
         <span className="trader-ll">{tr(`Niv. ${offer.level}`, `LL${offer.level}`)}</span>
         {offer.task && (
           <span className="trader-lock" aria-label={tr(`Débloqué par une quête : ${taskName(offer.task)}`, `Unlocked by a quest: ${taskName(offer.task)}`)}>

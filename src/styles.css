@@ -1970,9 +1970,6 @@ kbd {
   position: relative;
   cursor: default;
 }
-.trader-tile.is-new {
-  border-color: var(--accent);
-}
 .trader-ll {
   position: absolute;
   top: 4px;
