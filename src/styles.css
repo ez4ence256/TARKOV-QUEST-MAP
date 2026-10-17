@@ -1909,6 +1909,9 @@ kbd {
 .finder-spot-map {
   margin-left: auto;
 }
+.finder-spot-summary {
+  cursor: pointer;
+}
 .finder-spot-toggle {
   flex: none;
   width: 1.4rem;

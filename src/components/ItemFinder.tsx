@@ -735,26 +735,35 @@ function SpotCard(p: {
 
   return (
     <li className="finder-card finder-spot">
-      <div className="finder-recipe-head">
-        <button className="finder-spot-toggle" aria-expanded={open} onClick={() => setOpen((o) => !o)} aria-label={open ? tr("Replier le spot", "Collapse the spot") : tr("Déplier le spot", "Expand the spot")}>
-          {open ? "▾" : "▸"}
-        </button>
-        <span className="finder-badge">{p.rank}</span>
-        <strong>{p.mapLabel}</strong>
-        <span className="finder-pill">{tr(`${p.n} point(s)`, `${p.n} point(s)`)}</span>
-        {p.marker && (
-          <button className="btn btn-small finder-spot-map" onClick={() => p.onShowMap(p.marker!)}>
-            {tr("📍 Voir sur la carte", "📍 Show on map")}
+      {/* tout l'en-tête déplie / replie (le clic du bouton ▸ remonte jusqu'ici) */}
+      <div className="finder-spot-summary" onClick={() => setOpen((o) => !o)}>
+        <div className="finder-recipe-head">
+          <button className="finder-spot-toggle" aria-expanded={open} aria-label={open ? tr("Replier le spot", "Collapse the spot") : tr("Déplier le spot", "Expand the spot")}>
+            {open ? "▾" : "▸"}
           </button>
+          <span className="finder-badge">{p.rank}</span>
+          <strong>{p.mapLabel}</strong>
+          <span className="finder-pill">{tr(`${p.n} point(s)`, `${p.n} point(s)`)}</span>
+          {p.marker && (
+            <button
+              className="btn btn-small finder-spot-map"
+              onClick={(e) => {
+                e.stopPropagation();
+                p.onShowMap(p.marker!);
+              }}
+            >
+              {tr("📍 Voir sur la carte", "📍 Show on map")}
+            </button>
+          )}
+        </div>
+        {p.keyItem && (
+          <p className="finder-spot-key">
+            🔑 {p.confirmed ? tr("Derrière la porte : ", "Behind the door: ") : tr("Porte fermée à proximité : ", "Locked door nearby: ")}
+            <strong>{p.keyItem.name}</strong>
+            {p.confirmed && <span className="muted"> {tr("(confirmé par le wiki)", "(confirmed by the wiki)")}</span>}
+          </p>
         )}
       </div>
-      {p.keyItem && (
-        <p className="finder-spot-key">
-          🔑 {p.confirmed ? tr("Derrière la porte : ", "Behind the door: ") : tr("Porte fermée à proximité : ", "Locked door nearby: ")}
-          <strong>{p.keyItem.name}</strong>
-          {p.confirmed && <span className="muted"> {tr("(confirmé par le wiki)", "(confirmed by the wiki)")}</span>}
-        </p>
-      )}
       {open && (
         <div className="finder-spot-body">
           {p.keyItem && (
