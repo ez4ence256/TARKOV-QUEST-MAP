@@ -81,6 +81,8 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, onClose }: Pr
   const all = level === 0;
   const lvl = all ? levels.length : Math.min(level, levels.length);
   const offers = useMemo(() => (file && current ? traderOffers(file, current, lvl, kind, !all) : []), [file, current, lvl, kind, all]);
+  // nombre d'offres par type, affiché sur les boutons
+  const kindCount = (k: OfferKind) => (file && current ? traderOffers(file, current, lvl, k, !all).length : 0);
 
   // catégories du flea, avec seulement les objets proposés à ce niveau
   useEffect(() => {
@@ -140,16 +142,17 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, onClose }: Pr
                   {tr("Tout", "All")}
                 </button>
               </div>
-              <div className="trader-kinds" role="group" aria-label={tr("Type d'offre", "Offer type")}>
+              {/* mode de paiement, à ne pas confondre avec la catégorie d'objets « Objets d'échange » (Barter items) de l'arbre */}
+              <div className="trader-kinds" role="group" aria-label={tr("Paiement", "Payment")}>
                 {(
                   [
-                    ["all", tr("Tout", "All")],
-                    ["cash", tr("Achat", "Buy")],
-                    ["barter", "Barter"],
+                    ["all", tr("Toutes les offres", "All offers")],
+                    ["cash", tr("Contre argent", "For money")],
+                    ["barter", tr("Contre objets (troc)", "Barter trades")],
                   ] as [OfferKind, string][]
                 ).map(([k, label]) => (
                   <button key={k} className={`btn btn-small${kind === k ? " btn-primary" : ""}`} aria-pressed={kind === k} onClick={() => setKind(k)}>
-                    {label}
+                    {label} <span className="finder-cat-count">({kindCount(k)})</span>
                   </button>
                 ))}
               </div>
