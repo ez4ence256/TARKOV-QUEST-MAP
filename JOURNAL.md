@@ -11,10 +11,10 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | Élément | État |
 |---|---|
 | Branche | **`main`** seule (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**, branche par défaut). |
-| Version affichée | **0.8.19** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
+| Version affichée | **0.8.20** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
 | Derniers commits | `3bc65a9` Item finder : recherche par image (0.8.2) · `78f5fb6` Ctrl+V d'une capture dans l'item finder (0.8.1) · `14c4dc9` Item finder redessiné (0.8.0) · `6800a70` journal fin de session 8 · `245ee03` Version 0.7.23 · `3a59955` Main story : ponts de l'Icebreaker pour Boreas · `2593e19` Icebreaker : calibrage corrigé · `45beb1b` positions > 100 m retirées (0.7.22) · `7acab9f` positions de The Ticket · `5447eef` bouton du panneau en icône seule sur téléphone (0.7.21) · `69ddc95` Item finder · `d81736d` infos du Labyrinthe sur la map |
 | Travail non commité | Seulement `.claude/` (non suivi, volontairement hors du dépôt : chemin propre à cette machine) |
-| Tests | **329/329** au vert (`npx vitest run`), 35 fichiers (voir « Tests ») |
+| Tests | **335/335** au vert (`npx vitest run`), 35 fichiers (voir « Tests ») |
 | Compilation | OK (`npm run build`). Avertissement Vite : le fichier principal fait **682 Ko** (198 Ko compressé) > 500 Ko. L'OCR est dans des fichiers séparés chargés à la demande (moteur 3,9 Mo, worker 111 Ko). |
 | **Production** | **https://tarkov.aprilox.fr**, déployée automatiquement à chaque push sur `main` (~1 min) par l'hébergeur, qui lance `npm start` (`server/index.mjs` : `dist/` + API des rooms sur le même port). Fichier absent = 404 sans cache (corrige l'empoisonnement du cache) ; `index.html` en `no-cache`, `/assets/*` en `immutable`. |
 | Vérifié dans le navigateur | Panneau à 400 à 720 px, téléphone, zoom 125 % simulé · sélection épinglée, ordre des sections · sorties (Douanes, Labs) · import d'une **image de synthèse** · rooms entre deux origines (création, jointure, coupure du serveur de 45 s) · Labyrinthe (marqueurs, bascule de map aux étapes) · Icebreaker après correction · voir l'historique pour le détail. |
@@ -54,7 +54,7 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | `69ddc95` | 8 | Item finder (objets du jeu, quêtes, hideout, barters, crafts) |
 | `5447eef` | 8 | Barre du haut : bouton du panneau en icône seule sur téléphone |
 
-### Tests (329, 35 fichiers)
+### Tests (335, 35 fichiers)
 
 | Fichier | Ce qui est couvert |
 |---|---|
@@ -343,6 +343,10 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
 - **Texte commun une seule fois + visionneuse de photos** (0.8.17) : les spots dont la map n'a pas de sous-titre dans la section Location (ex. les 3 spots de la clé Knossos, tous sur Shoreline) montraient le même « Où trouver la clé » ; il n'est plus affiché que dans le premier, les autres disent « Emplacements du wiki : voir le spot 1 ». **Photos** : clic sur une miniature (onglet Photos, fiche quête, Main story, item finder : liens `data-lightbox`) -> visionneuse par-dessus la page (`src/components/Lightbox.tsx`, image ≤ 80 % de la hauteur, légende, « Ouvrir l'original ») ; clic à côté ou Échap la ferme (Échap capturé : la fenêtre en dessous reste ouverte) ; Ctrl/Maj/clic molette ouvrent toujours un onglet.
 - **Marchands : badge « ⇄ Troc »** (0.8.18, l'utilisateur pensait encore les barters manquants par niveau) : Prapor a 19 / 16 / 20 / 14 barters aux niveaux 1 à 4 (dont 1 / 0 / 3 / 5 débloqués par une quête) ; la catégorie « Objets d'échange » (Barter items) de l'arbre ne contient que les objets de troc qu'il vend (Metal fuel tank, niveau 2) ; un objet reçu par troc est rangé dans sa propre catégorie (Équipement, Armes…). Badge « ⇄ Troc » sur chaque offre payée en objets.
 - **Marchands : « Objets d'échange et trocs »** (0.8.19, demande explicite, s'écarte du jeu où un troc est rangé dans la catégorie de l'objet reçu) : dans l'arbre de gauche, la catégorie Objets d'échange (Barter items) réunit ses objets **et tous les trocs du niveau** ; elle apparaît dès qu'il y a un troc (en tête), renommée « Objets d'échange et trocs » (EN : Barter items & trades), compteur = nombre d'offres affichées au clic (`CategoryNode.count`). Les trocs restent aussi dans la catégorie de l'objet reçu. Vérifié : Prapor 19/16/20/14, Peacekeeper 8/21/15/16, Mécano 36/35/15/22, Jaeger 10/20/20/12, compteur = liste.
+- **Quête terminée, filtre, clés, Work Smarter** (0.8.20) :
+  - Fiche quête : bouton **« ✓ Quête terminée »** à côté de « 📷 Photos » : coche tous les objectifs et retire la quête de la sélection ; quand tout est coché, étiquette « ✓ Terminée ». Liste des quêtes : une quête terminée est **grisée** (opacité 0,5) ; case **« Seulement les quêtes terminées »** à côté de « Masquer les quêtes terminées » (exclusives ; `QuestFilters.onlyCompleted` ; chapitres de la Main story masqués dans ce mode).
+  - Item finder, clés : bloc **« 🔑 Ce qu'elle ouvre »** en tête de « Où le trouver » : champ « usage » de l'Infobox key (`parseInfobox(wikitext, kind)`, nouveau paramètre, « quest » par défaut), « Où est la serrure » et « Derrière la serrure » (retirés du wiki replié). Cause du retour : la clé Pinewood 206 a un spot au sol, donc ses sections de serrure étaient repliées sous les spots (la clé Dorm 206, sans spot, les montrait directement).
+  - **Work Smarter sur Le Labyrinthe** : chez tarkov.dev, la zone « exit777 » de l'objectif « secret exfil on Customs » a 3 positions sur Customs **et une sur The Labyrinth** (+ map Labyrinth dans `maps`). Corrigé à la lecture (`onTaskMap`, `src/api/tarkovJson.ts`) : une quête liée à une map ne garde, pour un objectif qui a des zones sur cette map, que celles-là ; et `taskMapIds` ne compte que les maps des zones quand un objectif en a. **Cache des données passé en v10** (relecture une fois). Vérifié : filtre Labyrinthe 9 -> 8 quêtes, Work Smarter absente.
 
 ## Étude 3D (session 5, en attente de validation)
 

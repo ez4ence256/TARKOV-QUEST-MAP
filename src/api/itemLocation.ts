@@ -4,7 +4,7 @@
 // 1 page + 1 requête d'images par objet ouvert, gardées en mémoire seulement (le localStorage est
 // presque plein, et une page d'objet est vite relue).
 import { stepGalleries } from "../lib/story";
-import { parseBlocks, splitSections, wikiLinkTargets, type WikiBlock } from "../lib/wikiText";
+import { cleanInline, parseBlocks, parseInfobox, splitSections, wikiLinkTargets, type WikiBlock } from "../lib/wikiText";
 import { fetchImageInfo, fileTitle, pageUrlFor, wikiRequest, type WikiPhoto } from "./wiki";
 
 /** Sections lues, dans cet ordre (titres anglais du wiki). */
@@ -26,6 +26,8 @@ export interface ItemLocation {
   sections: LocationSection[];
   /** Pages liées depuis ces sections (ex. « Relaxation room key ») : confirme une porte. */
   links: string[];
+  /** Clé : ce qu'elle ouvre (champ « usage » de l'infobox), en texte brut. */
+  usage?: string;
 }
 
 /** Sections d'emplacement d'une page d'objet : texte et galeries rangées par map. */
@@ -59,7 +61,9 @@ async function fetchItemLocation(title: string): Promise<ItemLocation> {
   }
   const parsed = (json.parse ?? {}) as { title?: string; wikitext?: string };
   const finalTitle = parsed.title ?? title;
-  const read = parseItemLocation(String(parsed.wikitext ?? ""), finalTitle);
+  const wikitext = String(parsed.wikitext ?? "");
+  const read = parseItemLocation(wikitext, finalTitle);
+  const usage = cleanInline(parseInfobox(wikitext, "key").usage ?? "", finalTitle) || undefined;
   const files = read.flatMap((s) => s.files.map((f) => f.file));
   const info = files.length > 0 ? await fetchImageInfo(files) : new Map();
   const sections = read.map((s) => ({
@@ -72,5 +76,5 @@ async function fetchItemLocation(title: string): Promise<ItemLocation> {
       return [{ file: f.file, caption: f.caption, thumbUrl: image.thumburl ?? image.url, fullUrl: image.url, pageUrl: image.descriptionurl, section: f.section }];
     }),
   }));
-  return { pageUrl: pageUrlFor(finalTitle), exists: true, sections, links: read.flatMap((s) => s.links) };
+  return { pageUrl: pageUrlFor(finalTitle), exists: true, sections, links: read.flatMap((s) => s.links), usage };
 }

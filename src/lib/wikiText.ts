@@ -44,9 +44,9 @@ export function splitSections(wikitext: string): { intro: string; sections: Wiki
 export const findSection = (sections: WikiSection[], title: string) =>
   sections.find((s) => s.title.toLowerCase() === title.toLowerCase());
 
-/** Paramètres nommés du modèle {{Infobox quest}} (valeurs en wikitext brut, vides exclues). */
-export function parseInfobox(wikitext: string): Record<string, string> {
-  const start = wikitext.search(/\{\{\s*Infobox quest/i);
+/** Paramètres nommés du modèle {{Infobox quest}} ({{Infobox key}}… avec `kind`) (valeurs en wikitext brut, vides exclues). */
+export function parseInfobox(wikitext: string, kind = "quest"): Record<string, string> {
+  const start = wikitext.search(new RegExp(`\\{\\{\\s*Infobox ${kind}`, "i"));
   if (start === -1) return {};
   // fin du modèle : accolades équilibrées
   let depth = 0;

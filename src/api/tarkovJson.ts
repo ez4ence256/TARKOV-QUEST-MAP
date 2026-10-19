@@ -147,6 +147,16 @@ function readLocations(obj: Dict): ApiLocation[] {
   });
 }
 
+/**
+ * Quête liée à une map : un objectif qui a des zones sur cette map ne garde que celles-là. tarkov.dev
+ * met parfois la même zone sur une autre map (Work Smarter, « secret exfil on Customs » : la zone
+ * exit777 a aussi une position sur The Labyrinth).
+ */
+export function onTaskMap(locations: ApiLocation[], taskMap: string | null): ApiLocation[] {
+  if (!taskMap || !locations.some((l) => l.mapId === taskMap)) return locations;
+  return locations.filter((l) => l.mapId === taskMap);
+}
+
 /** Identifiant d'une référence, donnée soit comme chaîne, soit comme objet { id }. */
 const refId = (v: unknown): string | null => asString(v) ?? asString(asDict(v).id);
 const refIds = (v: unknown): string[] => asArray(v).map(refId).filter((id): id is string => id !== null);
@@ -266,6 +276,7 @@ function readExits(raw: Dict, t: (k: unknown) => string, tEn: (k: unknown) => st
 function readTask(raw: Dict, t: (k: unknown) => string, tEn: (k: unknown) => string): Task | null {
   const id = asString(raw.id);
   if (!id) return null;
+  const taskMap = mapRef(raw.map) ?? mapRef(asDict(raw.map).id);
   const objectives: Objective[] = values(raw.objectives)
     .map((obj, index): Objective => ({
       id: asString(obj.id) ?? `${id}-obj-${index}`,
@@ -273,7 +284,7 @@ function readTask(raw: Dict, t: (k: unknown) => string, tEn: (k: unknown) => str
       description: t(obj.description),
       optional: obj.optional === true,
       mapIds: [...new Set(asArray(obj.maps).map(mapRef).filter((m): m is string => m !== null))],
-      locations: readLocations(obj),
+      locations: onTaskMap(readLocations(obj), taskMap),
       ...readObjectiveExtras(obj),
     }));
   return {
@@ -283,7 +294,7 @@ function readTask(raw: Dict, t: (k: unknown) => string, tEn: (k: unknown) => str
     nameEn: tEn(raw.name) || id,
     normalizedName: asString(raw.normalizedName) ?? id,
     traderId: asString(raw.trader) ?? asString(asDict(raw.trader).id) ?? "",
-    mapId: mapRef(raw.map) ?? mapRef(asDict(raw.map).id),
+    mapId: taskMap,
     minPlayerLevel: typeof raw.minPlayerLevel === "number" ? raw.minPlayerLevel : null,
     kappaRequired: raw.kappaRequired === true,
     wikiLink: asString(raw.wikiLink),

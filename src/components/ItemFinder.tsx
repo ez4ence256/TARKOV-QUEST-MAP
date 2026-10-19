@@ -518,9 +518,25 @@ function Usage(p: {
       <div role="tabpanel" id={`finder-panel-${tab}`} aria-labelledby={`finder-tab-${tab}`}>
         {tab === "where" &&
           gate("where", () => {
+            // clé : ce qu'elle ouvre, toujours en tête (usage de l'infobox, serrure, ce qu'il y a derrière)
+            const lockSections = wikiSections.filter((sec) => sec.title === "Lock Location" || sec.title === "Behind the Lock");
+            const usageText = location && location !== "!" ? location.usage : undefined;
+            const opens =
+              usageText || lockSections.length ? (
+                <section className="finder-opens">
+                  <h3 className="finder-sub">{tr("🔑 Ce qu'elle ouvre", "🔑 What it opens")}</h3>
+                  {usageText && <p>{usageText}</p>}
+                  {lockSections.map((sec) => (
+                    <section key={sec.title}>
+                      <h4 className="finder-sub">{tr(...LOCATION_TITLE[sec.title])}</h4>
+                      <BlocksWithPhotos blocks={sec.blocks} photos={sec.photos} itemNames={{}} itemIcons={p.itemIcons} showCaptions />
+                    </section>
+                  ))}
+                </section>
+              ) : null;
             const wiki = (
               <>
-                {wikiSections.map((sec) => (
+                {wikiSections.filter((sec) => !lockSections.includes(sec)).map((sec) => (
                   <section key={sec.title} className="finder-where-wiki">
                     <h3 className="finder-sub">{tr(...LOCATION_TITLE[sec.title])}</h3>
                     <BlocksWithPhotos blocks={sec.blocks} photos={sec.photos} itemNames={{}} itemIcons={p.itemIcons} showCaptions />
@@ -541,9 +557,16 @@ function Usage(p: {
                 )}
               </>
             );
-            if (!spots?.length) return wiki;
+            if (!spots?.length)
+              return (
+                <>
+                  {opens}
+                  {wiki}
+                </>
+              );
             return (
               <>
+                {opens}
                 <h3 className="finder-sub">{tr("Meilleurs spots", "Best spots")}</h3>
                 <p className="muted small">
                   {tr(

@@ -60,6 +60,11 @@ describe("liste des quêtes : sélection épinglée", () => {
     expect(names(pinned)).toEqual(["Debut"]);
   });
 
+  it("« Seulement les quêtes terminées » : celles dont tous les objectifs sont cochés", () => {
+    expect(filterQuests(tasks, { ...none, onlyCompleted: true }, { "a-o": 1 }).map((r) => r.task.id)).toEqual(["a"]);
+    expect(filterQuests(tasks, { ...none, onlyCompleted: true }, {})).toEqual([]);
+  });
+
   it("sans sélection : aucune zone épinglée", () => {
     expect(pinSelected(filterQuests(tasks, none, {}), []).pinned).toEqual([]);
   });

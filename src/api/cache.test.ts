@@ -11,7 +11,7 @@ describe("writeCachedData", () => {
   });
 
   it("libère les autres entrées si le stockage est plein, puis réessaie", () => {
-    localStorage.setItem("tqp:data:v9:pve:fr", "x");
+    localStorage.setItem("tqp:data:v10:pve:fr", "x");
     localStorage.setItem("autre", "garde");
     const set = Storage.prototype.setItem;
     let first = true;
@@ -23,8 +23,8 @@ describe("writeCachedData", () => {
       set.call(this, k, v);
     });
     writeCachedData(fake("regular", "en"));
-    expect(localStorage.getItem("tqp:data:v9:pve:fr")).toBeNull();
-    expect(localStorage.getItem("tqp:data:v9:regular:en")).not.toBeNull();
+    expect(localStorage.getItem("tqp:data:v10:pve:fr")).toBeNull();
+    expect(localStorage.getItem("tqp:data:v10:regular:en")).not.toBeNull();
     expect(localStorage.getItem("autre")).toBe("garde");
   });
 

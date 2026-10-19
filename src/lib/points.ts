@@ -27,8 +27,10 @@ export function taskMapIds(task: Task): Set<string> {
   const ids = new Set<string>();
   if (task.mapId) ids.add(task.mapId);
   for (const o of task.objectives) {
-    o.mapIds.forEach((id) => ids.add(id));
-    o.locations.forEach((l) => ids.add(l.mapId));
+    // avec des zones, seules leurs maps comptent : tarkov.dev ajoute parfois une map en trop
+    // (Work Smarter : « secret exfil on Customs » aussi sur The Labyrinth, sans zone là-bas)
+    if (o.locations.length) o.locations.forEach((l) => ids.add(l.mapId));
+    else o.mapIds.forEach((id) => ids.add(id));
   }
   return ids;
 }

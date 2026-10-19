@@ -537,6 +537,10 @@ export default function App() {
               done={mode.done}
               onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })}
               onReset={(task) => dispatch({ type: "resetProgress", objectiveIds: task.objectives.map((o) => o.id) })}
+              onComplete={(task) => {
+                for (const o of task.objectives) if (!mode.done[o.id]) dispatch({ type: "setDone", objectiveId: o.id, done: true });
+                if (mode.selected.some((s) => s.taskId === task.id)) dispatch({ type: "toggleTask", taskId: task.id });
+              }}
               onPhotos={showPhotos}
             />
           )}

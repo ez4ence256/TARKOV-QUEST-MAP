@@ -822,6 +822,18 @@ kbd {
 .quest-row:hover {
   background: var(--bg-3);
 }
+/* quête terminée : grisée dans la liste */
+.quest-row.is-done {
+  opacity: 0.5;
+}
+.quest-row.is-done:hover,
+.quest-row.is-done:focus-visible {
+  opacity: 0.85;
+}
+.quest-done-tag {
+  align-self: center;
+  color: var(--ok);
+}
 .quest-row.is-selected {
   background: var(--bg-3);
   border-color: var(--q);

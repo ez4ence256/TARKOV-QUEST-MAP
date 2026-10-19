@@ -36,6 +36,7 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onCl
   const [trader, setTrader] = useState("");
   const [mapFilter, setMapFilter] = useState("");
   const [hideCompleted, setHideCompleted] = useState(false);
+  const [onlyCompleted, setOnlyCompleted] = useState(false);
 
   const tradersById = useMemo(() => new Map(traders.map((t) => [t.id, t])), [traders]);
   const selected = useMemo(() => new Map(mode.selected.map((s) => [s.taskId, s.color])), [mode.selected]);
@@ -51,13 +52,13 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onCl
   const [storyRetry, setStoryRetry] = useState(0);
   const storyChapters = useStoryChapters(true, storyRetry);
   const storySelected = mode.story?.selected ?? [];
-  const filters = useMemo(() => ({ query, traderId: trader, mapId: mapFilter, hideCompleted }), [query, trader, mapFilter, hideCompleted]);
+  const filters = useMemo(() => ({ query, traderId: trader, mapId: mapFilter, hideCompleted, onlyCompleted }), [query, trader, mapFilter, hideCompleted, onlyCompleted]);
 
   // Recherche sur le nom affiché ET le nom anglais ; meilleurs résultats en premier.
   const quests = useMemo(() => filterQuests(tasks, filters, mode.done), [tasks, filters, mode.done]);
   const rows = useMemo(
-    () => mergeRows(quests, storyChapters.chapters ? filterStory(storyChapters.chapters, filters, getLang()) : [], getLang(), Boolean(query.trim())),
-    [quests, storyChapters.chapters, filters, query],
+    () => mergeRows(quests, storyChapters.chapters && !onlyCompleted ? filterStory(storyChapters.chapters, filters, getLang()) : [], getLang(), Boolean(query.trim())),
+    [quests, storyChapters.chapters, filters, query, onlyCompleted],
   );
   // chapitres sélectionnés comptés seulement une fois la liste chargée (sinon ils paraîtraient masqués)
   const selectedKeys = useMemo(
@@ -109,10 +110,12 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onCl
     const color = selected.get(t.id);
     const isSelected = color !== undefined;
     const p = taskProgress(t, mode.done);
+    // quête terminée (tous ses objectifs cochés) : grisée
+    const finished = p.total > 0 && p.done === p.total;
     return (
       <li key={t.id} className="quest-item">
         <button
-          className={`quest-row ${isSelected ? "is-selected" : ""}`}
+          className={`quest-row ${isSelected ? "is-selected" : ""}${finished ? " is-done" : ""}`}
           onClick={() => onToggle(t.id)}
           aria-pressed={isSelected}
           title={isSelected ? tr("Cliquer pour désélectionner", "Click to deselect") : tr("Cliquer pour sélectionner", "Click to select")}
@@ -185,8 +188,26 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onCl
           />
         </div>
         <label className="check">
-          <input type="checkbox" checked={hideCompleted} onChange={(e) => setHideCompleted(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={hideCompleted}
+            onChange={(e) => {
+              setHideCompleted(e.target.checked);
+              if (e.target.checked) setOnlyCompleted(false);
+            }}
+          />
           {tr("Masquer les quêtes terminées", "Hide completed quests")}
+        </label>
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={onlyCompleted}
+            onChange={(e) => {
+              setOnlyCompleted(e.target.checked);
+              if (e.target.checked) setHideCompleted(false);
+            }}
+          />
+          {tr("Seulement les quêtes terminées", "Only completed quests")}
         </label>
         <div className="muted small">
           {tr(

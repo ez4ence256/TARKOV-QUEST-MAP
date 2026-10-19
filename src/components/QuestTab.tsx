@@ -49,6 +49,8 @@ interface Props {
   done: Record<string, number>;
   onSetDone: (objectiveId: string, done: boolean) => void;
   onReset: (task: Task) => void;
+  /** « Quête terminée » : coche tous ses objectifs et la retire de la sélection. */
+  onComplete: (task: Task) => void;
   onPhotos: (taskId: string) => void;
   /** Étapes cochées de la Main story (voir StoryState). */
   storyDone: Record<string, true>;
@@ -586,6 +588,13 @@ export function QuestTab(p: Props) {
           <button className="btn btn-small" onClick={() => p.onPhotos(task.id)}>
             📷 Photos
           </button>
+        )}
+        {checked < task.objectives.length ? (
+          <button className="btn btn-small btn-primary" onClick={() => p.onComplete(task)}>
+            {tr("✓ Quête terminée", "✓ Quest done")}
+          </button>
+        ) : (
+          <span className="tag quest-done-tag">{tr("✓ Terminée", "✓ Completed")}</span>
         )}
       </div>
 

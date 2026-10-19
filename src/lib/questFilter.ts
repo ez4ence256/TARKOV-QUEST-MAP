@@ -14,6 +14,8 @@ export interface QuestFilters {
   traderId: string;
   mapId: string;
   hideCompleted: boolean;
+  /** Seulement les quêtes terminées (tous les objectifs cochés). */
+  onlyCompleted?: boolean;
 }
 
 export interface QuestResult {
@@ -65,9 +67,10 @@ export function filterQuests(tasks: Task[], f: QuestFilters, done: Record<string
   for (const t of tasks) {
     if (f.traderId && t.traderId !== f.traderId) continue;
     if (f.mapId && !taskMapIds(t).has(f.mapId)) continue;
-    if (f.hideCompleted) {
+    if (f.hideCompleted || f.onlyCompleted) {
       const p = taskProgress(t, done);
-      if (p.total > 0 && p.done === p.total) continue;
+      const finished = p.total > 0 && p.done === p.total;
+      if (f.hideCompleted ? finished : !finished) continue;
     }
     const match = q ? questScore(q, t) : { score: 1, viaEnglish: false };
     if (match.score > 0) results.push({ task: t, ...match });

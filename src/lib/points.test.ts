@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Task } from "../types";
 import { emptyModeState } from "../state/store";
-import { buildObjectivePoints, currentObjective, manualPointKey, taskProgress } from "./points";
+import { buildObjectivePoints, currentObjective, manualPointKey, taskMapIds, taskProgress } from "./points";
 
 const task: Task = {
   id: "t",
@@ -20,6 +20,17 @@ const task: Task = {
     { id: "d", type: "shoot", description: "", optional: true, mapIds: [], locations: [] },
   ],
 };
+
+describe("maps d'une quête (filtre par map)", () => {
+  it("objectif avec zones : seulement les maps de ses zones (Work Smarter : Labyrinth en trop chez tarkov.dev)", () => {
+    const t: Task = { ...task, mapId: null, objectives: [{ id: "x", type: "visit", description: "", optional: false, mapIds: ["customs", "labyrinth"], locations: [{ mapId: "customs", position: { x: 0, y: 0, z: 0 } }] }] };
+    expect([...taskMapIds(t)]).toEqual(["customs"]);
+  });
+  it("objectif sans zone : ses maps déclarées", () => {
+    const t: Task = { ...task, mapId: null, objectives: [{ id: "y", type: "findItem", description: "", optional: false, mapIds: ["woods", "shoreline"], locations: [] }] };
+    expect([...taskMapIds(t)].sort()).toEqual(["shoreline", "woods"]);
+  });
+});
 
 describe("points", () => {
   it("ne garde que les points de la map affichée, sans les objectifs faits", () => {

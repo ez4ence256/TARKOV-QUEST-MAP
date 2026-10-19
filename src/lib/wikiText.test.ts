@@ -244,3 +244,11 @@ describe("lecture du wikitext", () => {
     expect(blocks.map((b) => b.type)).toEqual(["list", "quote"]);
   });
 });
+
+describe("infobox d'une page d'objet", () => {
+  it("Infobox key (avec ou sans espace après les accolades) : champ « usage » ; l'infobox de quête reste lue par défaut", () => {
+    const page = ["{{ Infobox key", "|usage =This key has no usage. Room 206 is always unlocked.", "|weight = 0.01 kg", "}}", "==Description=="].join("\n");
+    expect(parseInfobox(page, "key").usage).toBe("This key has no usage. Room 206 is always unlocked.");
+    expect(parseInfobox(page)).toEqual({});
+  });
+});

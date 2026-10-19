@@ -2,7 +2,7 @@
 // Le format imité ici est celui produit par tarkov-data-manager
 // (jobs/update-quests.mjs, update-maps.mjs, update-traders.mjs).
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { API_BASE, fetchTarkovData, iconUrl } from "./tarkovJson";
+import { API_BASE, fetchTarkovData, iconUrl, onTaskMap } from "./tarkovJson";
 import { filterQuests } from "../lib/questFilter";
 
 const FACTORY = "55f2d3fd4bdc2d5f408b4567";
@@ -301,5 +301,16 @@ describe("fetchTarkovData", () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response("down", { status: 503 })));
     vi.spyOn(console, "warn").mockImplementation(() => {});
     await expect(fetchTarkovData("pve", "fr")).rejects.toThrow(/HTTP 503/);
+  });
+});
+
+describe("zones d'un objectif d'une quête liée à une map", () => {
+  const at = (mapId: string) => ({ mapId, position: { x: 0, y: 0, z: 0 } });
+  it("Work Smarter : la même zone a aussi une position sur une autre map -> seules celles de la map de la quête", () => {
+    expect(onTaskMap([at("customs"), at("customs"), at("labyrinth")], "customs").map((l) => l.mapId)).toEqual(["customs", "customs"]);
+  });
+  it("aucune zone sur la map de la quête, ou quête sans map : tout est gardé", () => {
+    expect(onTaskMap([at("woods")], "customs")).toHaveLength(1);
+    expect(onTaskMap([at("woods"), at("customs")], null)).toHaveLength(2);
   });
 });
