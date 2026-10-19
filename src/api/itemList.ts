@@ -117,9 +117,42 @@ export async function loadItemCategories(mode: GameMode, lang: string): Promise<
   return { file, names };
 }
 
+/** Station de la planque : objets exigés pour chaque niveau (niveaux à partir de 1). */
+export interface HideoutStation {
+  id: string;
+  name: string;
+  levels: { level: number; items: { itemId: string; count: number; fir: boolean }[] }[];
+}
+
 export interface HideoutInfo {
   uses: Map<string, HideoutUse[]>;
   stationName: Record<string, string>;
+  /** Toutes les stations, triées par nom. */
+  stations: HideoutStation[];
+}
+
+// « foundInRaid » : objet (fichier JSON) ou liste [{ type, value }] (forme GraphQL)
+const isFir = (a: any): boolean =>
+  Array.isArray(a) ? a.some((x) => x?.type === "foundInRaid" && x.value === "true") : a?.foundInRaid === true;
+
+function readStations(data: object, t: (k: unknown) => string, lang: string): HideoutStation[] {
+  const raw = (Array.isArray(data) ? data : Object.values(data)) as any[];
+  return raw
+    .filter((s) => typeof s?.id === "string")
+    .map((s) => ({
+      id: s.id as string,
+      name: t(s.name),
+      levels: (Array.isArray(s.levels) ? s.levels : [])
+        .map((l: any) => ({
+          level: Number(l?.level) || 0,
+          items: (Array.isArray(l?.itemRequirements) ? l.itemRequirements : [])
+            .map((r: any) => ({ itemId: typeof r?.item === "string" ? r.item : r?.item?.id, count: Number(r?.count) || 1, fir: isFir(r?.attributes) }))
+            .filter((i: { itemId?: string }) => i.itemId),
+        }))
+        .filter((l: { level: number }) => l.level > 0)
+        .sort((a: { level: number }, b: { level: number }) => a.level - b.level),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name, lang));
 }
 const hideouts = new Map<string, Promise<HideoutInfo>>();
 export function loadHideout(mode: GameMode, lang: string): Promise<HideoutInfo> {
@@ -129,7 +162,7 @@ export function loadHideout(mode: GameMode, lang: string): Promise<HideoutInfo> 
     p = fetchEndpoint(`${mode}/hideout`, lang).then(({ data, t }) => {
       const stationName: Record<string, string> = {};
       for (const s of Object.values(data) as { id?: string; name?: string }[]) if (s?.id) stationName[s.id] = t(s.name);
-      return { uses: buildHideoutIndex(data), stationName };
+      return { uses: buildHideoutIndex(data), stationName, stations: readStations(data, t, lang) };
     });
     p.catch(() => hideouts.delete(key));
     hideouts.set(key, p);

@@ -121,6 +121,10 @@ export interface Task {
   /** "wiki" : quête d'événement absente de tarkov.dev, lue sur le wiki (objectifs sans position sur la carte). */
   source?: "wiki";
   objectives: Objective[];
+  /** Faction réservée à la quête (absent : les deux peuvent la faire). */
+  faction?: "BEAR" | "USEC";
+  /** Quêtes dont la fin fait échouer celle-ci (branches exclusives) ; sans elle-même. */
+  failedBy?: string[];
   /** Absent dans les anciennes données en cache et dans les tests minimaux. */
   details?: TaskDetails;
 }

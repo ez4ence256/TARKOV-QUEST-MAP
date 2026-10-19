@@ -44,6 +44,7 @@ describe("chargement", () => {
     });
     const h = await loadHideout("pve", "fr");
     expect(h.stationName.s1).toBe("Générateur");
+    expect(h.stations).toEqual([{ id: "s1", name: "Générateur", levels: [{ level: 4, items: [{ itemId: A, count: 10, fir: false }] }] }]);
     expect(h.uses.get(A)).toEqual([{ stationId: "s1", level: 4, count: 10, fir: false }]);
   });
 });

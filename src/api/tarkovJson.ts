@@ -287,8 +287,19 @@ function readTask(raw: Dict, t: (k: unknown) => string, tEn: (k: unknown) => str
       locations: onTaskMap(readLocations(obj), taskMap),
       ...readObjectiveExtras(obj),
     }));
+  const faction = raw.factionName === "BEAR" || raw.factionName === "USEC" ? raw.factionName : undefined;
+  const failedBy = [
+    ...new Set(
+      values(raw.failConditions)
+        .filter((f) => f.type === "taskStatus" && asArray(f.status).includes("complete"))
+        .map((f) => refId(f.task))
+        .filter((x): x is string => !!x && x !== id),
+    ),
+  ];
   return {
     details: readDetails(raw, t),
+    ...(faction ? { faction } : {}),
+    ...(failedBy.length ? { failedBy } : {}),
     id,
     name: t(raw.name) || id,
     nameEn: tEn(raw.name) || id,

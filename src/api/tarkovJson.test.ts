@@ -256,6 +256,8 @@ describe("fetchTarkovData", () => {
       // texte absent : la clé de traduction n'est pas affichée
       failConditions: [{ type: "taskStatus", description: "", taskId: "t9", status: ["complete"] }],
     });
+    expect(task.failedBy).toEqual(["t9"]);
+    expect(task.faction).toBeUndefined();
     expect(data.itemNames).toEqual({ qi1: "Dossier secret", key1: "Clé 306", med1: "Salewa", rub: "Roubles" });
     expect(data.itemIcons).toEqual({
       qi1: "qi1-icon.webp",
@@ -293,8 +295,23 @@ describe("fetchTarkovData", () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     const data = await fetchTarkovData("regular", "en");
     expect(data.tasks.map((t) => t.id).sort()).toEqual(["b", "h", "u"]);
+    expect(Object.fromEntries(data.tasks.map((t) => [t.id, t.faction]))).toEqual({ b: "BEAR", h: undefined, u: "USEC" });
     const f = { query: "all inclusive support", traderId: "", mapId: "", hideCompleted: false };
     expect(filterQuests(data.tasks, f, {}).map((r) => r.task.id)).toEqual(["u"]);
+  });
+
+  it("failedBy : autres quêtes dont la fin fait échouer celle-ci (soi-même ignoré, doublons retirés)", async () => {
+    const fc = (task: string, status: string[] = ["complete"]) => ({ type: "taskStatus", task, status });
+    const tasks = {
+      a: { id: "a", name: "a", trader: "tr1", failConditions: [fc("a"), fc("b"), fc("b"), fc("c", ["failed"]), { type: "kill" }] },
+      b: { id: "b", name: "b", trader: "tr1" },
+    };
+    const base = mockFetch();
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => (url.endsWith("regular/tasks") ? new Response(JSON.stringify({ data: { tasks } })) : base(url.replace(/^/, "")))));
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const data = await fetchTarkovData("regular", "en");
+    expect(data.tasks.find((t) => t.id === "a")!.failedBy).toEqual(["b"]);
+    expect(data.tasks.find((t) => t.id === "b")!.failedBy).toBeUndefined();
   });
 
   it("échoue clairement si l'API ne répond pas", async () => {
