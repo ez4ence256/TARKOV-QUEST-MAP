@@ -526,6 +526,7 @@ export default function App() {
               maps={maps}
               mode={mode}
               onToggle={toggleTask}
+              onOpen={showQuest}
               onPhotos={showPhotos}
               onClearSelection={() => dispatch({ type: "clearSelection" })}
               onShowMap={(mapId) => dispatch({ type: "setMap", mapId })}

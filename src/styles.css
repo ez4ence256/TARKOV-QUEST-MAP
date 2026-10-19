@@ -806,6 +806,21 @@ kbd {
   opacity: 1;
   background: var(--bg-3);
 }
+/* croix rouge tout à droite d'une quête sélectionnée : la désélectionne */
+.quest-unselect {
+  flex: none;
+  padding: 0.3rem 0.45rem;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--danger);
+  font-weight: 700;
+  cursor: pointer;
+}
+.quest-unselect:hover,
+.quest-unselect:focus-visible {
+  background: color-mix(in srgb, var(--danger) 18%, transparent);
+}
 .quest-row {
   flex: 1;
   min-width: 0;

@@ -19,6 +19,8 @@ interface Props {
   maps: GameMap[];
   mode: ModeState;
   onToggle: (taskId: string) => void;
+  /** Clic sur une quête sélectionnée : ouvre sa fiche (la croix rouge la désélectionne). */
+  onOpen: (taskId: string) => void;
   /** Ouvre l'onglet Photos sur une quête. */
   onPhotos: (taskId: string) => void;
   /** Vide la sélection (progression, notes et points perso gardés). */
@@ -31,7 +33,7 @@ interface Props {
   onOpenStory: (chapter: string) => void;
 }
 
-export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onClearSelection, onShowMap, onToggleStory, onOpenStory }: Props) {
+export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhotos, onClearSelection, onShowMap, onToggleStory, onOpenStory }: Props) {
   const [query, setQuery] = useState("");
   const [trader, setTrader] = useState("");
   const [mapFilter, setMapFilter] = useState("");
@@ -77,9 +79,9 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onCl
       <li key={storyIdOf(id)} className="quest-item">
         <button
           className={`quest-row ${isSelected ? "is-selected" : ""}`}
-          onClick={() => onToggleStory(id)}
+          onClick={() => (isSelected ? onOpenStory(id) : onToggleStory(id))}
           aria-pressed={isSelected}
-          title={isSelected ? tr("Cliquer pour désélectionner", "Click to deselect") : tr("Cliquer pour sélectionner", "Click to select")}
+          title={isSelected ? tr("Ouvrir la fiche du chapitre", "Open the chapter") : tr("Cliquer pour sélectionner", "Click to select")}
           style={isSelected ? { ["--q" as string]: "var(--accent)" } : undefined}
         >
           <span className="quest-check" aria-hidden="true">
@@ -100,6 +102,7 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onCl
         >
           📜
         </button>
+        {isSelected && <UnselectButton name={r.chapter.name} onClick={() => onToggleStory(id)} />}
       </li>
     );
   };
@@ -116,9 +119,9 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onCl
       <li key={t.id} className="quest-item">
         <button
           className={`quest-row ${isSelected ? "is-selected" : ""}${finished ? " is-done" : ""}`}
-          onClick={() => onToggle(t.id)}
+          onClick={() => (isSelected ? onOpen(t.id) : onToggle(t.id))}
           aria-pressed={isSelected}
-          title={isSelected ? tr("Cliquer pour désélectionner", "Click to deselect") : tr("Cliquer pour sélectionner", "Click to select")}
+          title={isSelected ? tr("Ouvrir la fiche de la quête", "Open the quest page") : tr("Cliquer pour sélectionner", "Click to select")}
           style={isSelected ? { ["--q" as string]: QUEST_COLORS[color] } : undefined}
         >
           <span className="quest-check" aria-hidden="true">
@@ -150,6 +153,7 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onCl
             📷
           </button>
         )}
+        {isSelected && <UnselectButton name={t.name} onClick={() => onToggle(t.id)} />}
       </li>
     );
   };
@@ -253,5 +257,13 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onPhotos, onCl
       {selectedCount > 0 && others.length > 0 && <div className="subhead">{tr(`Autres quêtes (${others.length})`, `Other quests (${others.length})`)}</div>}
       <ul className="quest-list">{others.map(renderRow)}</ul>
     </div>
+  );
+}
+
+function UnselectButton({ name, onClick }: { name: string; onClick: () => void }) {
+  return (
+    <button className="quest-unselect" onClick={onClick} title={tr("Désélectionner", "Deselect")} aria-label={tr(`Désélectionner ${name}`, `Deselect ${name}`)}>
+      ✕
+    </button>
   );
 }
