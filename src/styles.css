@@ -1,4 +1,117 @@
 /* Thème sombre, pensé pour être lisible à côté du jeu et sur téléphone. */
+/* Polices Barlow et Barlow Condensed (licence OFL, public/fonts/barlow/OFL.txt) */
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/barlow/barlow-latin-ext-400-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/barlow/barlow-latin-400-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("/fonts/barlow/barlow-latin-ext-500-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("/fonts/barlow/barlow-latin-500-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("/fonts/barlow/barlow-latin-ext-600-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("/fonts/barlow/barlow-latin-600-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("/fonts/barlow/barlow-latin-ext-700-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("/fonts/barlow/barlow-latin-700-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "Barlow Condensed";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("/fonts/barlow/barlow-condensed-latin-ext-500-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "Barlow Condensed";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("/fonts/barlow/barlow-condensed-latin-500-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "Barlow Condensed";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("/fonts/barlow/barlow-condensed-latin-ext-600-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "Barlow Condensed";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("/fonts/barlow/barlow-condensed-latin-600-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "Barlow Condensed";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("/fonts/barlow/barlow-condensed-latin-ext-700-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "Barlow Condensed";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("/fonts/barlow/barlow-condensed-latin-700-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
 :root {
   --bg: #0f1215;
   --bg-2: #161a1f;
@@ -15,9 +128,17 @@
   --panel-w: 440px;
   --topbar-h: 0px; /* plus de barre du haut : les fenêtres plein écran gardent leur marge de 8px */
   --rail-w: 76px;
+  /* échelle typographique */
+  --fs-xs: 12px;
+  --fs-sm: 14px;
+  --fs-md: 16px;
+  --fs-lg: 18px;
+  --fs-xl: 22px;
+  --font-title: "Barlow Condensed", "Barlow", system-ui, sans-serif;
   color-scheme: dark;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  font-size: 15px;
+  /* repli système : le sous-ensemble Barlow n'a pas tous les symboles (ex. ₽) */
+  font-family: "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: var(--fs-md);
   line-height: 1.45;
   color: var(--text);
   background: var(--bg);
@@ -293,7 +414,7 @@ button:focus-visible {
   border-left: 3px solid transparent;
   background: transparent;
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--fs-xs);
   line-height: 1.1;
   text-align: center;
   cursor: pointer;
@@ -324,7 +445,13 @@ button:focus-visible {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
+.tab-count,
+.map-picker-count,
+.level-count {
+  font-variant-numeric: tabular-nums;
+}
 .rail-label {
+  font-size: 13px;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -787,10 +914,24 @@ body.is-resizing {
 .tab-body.empty {
   align-items: flex-start;
 }
-.subhead {
-  font-size: 0.78em;
+/* titres : Barlow Condensed en capitales */
+.subhead,
+.rail-label,
+.rail-brand,
+.subswitch-btn,
+.raid-title,
+.first-help-title,
+.finder-name,
+.finder-sub,
+.quest-tab-title,
+.mode-card h1 {
+  font-family: var(--font-title);
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.03em;
+}
+.subhead {
+  font-size: var(--fs-sm);
   color: var(--muted);
   margin: 0.4rem 0 0.2rem;
 }
