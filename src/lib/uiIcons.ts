@@ -41,7 +41,8 @@ export type UiIconId =
   | "log-out"
   | "swords"
   | "shield"
-  | "user";
+  | "user"
+  | "warehouse";
 
 export const UI_ICONS: Record<UiIconId, [tag: string, attrs: Record<string, string>][]> = {
   "list-checks": [["path", {d: "M13 5h8"}], ["path", {d: "M13 12h8"}], ["path", {d: "M13 19h8"}], ["path", {d: "m3 17 2 2 4-4"}], ["path", {d: "m3 7 2 2 4-4"}]],
@@ -84,5 +85,6 @@ export const UI_ICONS: Record<UiIconId, [tag: string, attrs: Record<string, stri
   "log-out": [["path", {d: "m16 17 5-5-5-5"}], ["path", {d: "M21 12H9"}], ["path", {d: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"}]],
   "swords": [["path", {d: "m13 19 6-6"}], ["path", {d: "M14.5 17.5 3.586 6.586A2 2 0 013 5.172V3h2.172a2 2 0 011.414.586L17.5 14.5"}], ["path", {d: "m14.828 6.172 2.586-2.586A2 2 0 0118.828 3H21v2.172a2 2 0 01-.586 1.414l-2.586 2.586"}], ["path", {d: "m16 16 4 4"}], ["path", {d: "m19 21 2-2"}], ["path", {d: "m5 14 4 4"}], ["path", {d: "m5 21-2-2"}], ["path", {d: "M7.5 16.5 4 20"}]],
   "shield": [["path", {d: "M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"}]],
+  "warehouse": [["path", {d: "M18 21V10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1v11"}], ["path", {d: "M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 1.132-1.803l7.95-3.974a2 2 0 0 1 1.837 0l7.948 3.974A2 2 0 0 1 22 8z"}], ["path", {d: "M6 13h12"}], ["path", {d: "M6 17h12"}]],
   "user": [["path", {d: "M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"}], ["circle", {cx: "12", cy: "7", r: "4"}]],
 };

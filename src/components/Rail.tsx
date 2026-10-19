@@ -6,7 +6,7 @@ import { version } from "../../package.json";
 import type { UiIconId } from "../lib/uiIcons";
 
 /** Groupes de vues du panneau (App garde l'union `Tab` interne). */
-export type RailGroup = "selection" | "add" | "detail" | "custom" | "settings";
+export type RailGroup = "selection" | "add" | "detail" | "custom" | "hideout" | "settings";
 
 interface ItemProps {
   icon: UiIconId;
@@ -88,6 +88,7 @@ export function Rail(p: Props) {
         {p.traders}
         {p.room}
         <RailItem icon="map-pin" label={tr("Points", "Points")} full={tr("Mes points", "My points")} active={p.active === "custom"} onClick={group("custom")} />
+        <RailItem icon="warehouse" label={tr("Planque", "Hideout")} active={p.active === "hideout"} onClick={group("hideout")} />
         <div className="rail-spacer" />
         <div className="rail-sep" />
         <RailItem icon="settings" label={tr("Réglages", "Settings")} active={p.active === "settings"} onClick={group("settings")} />

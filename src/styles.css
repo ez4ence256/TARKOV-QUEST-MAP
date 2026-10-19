@@ -2977,3 +2977,30 @@ kbd {
   padding-left: 1.2rem;
   font-size: 0.9em;
 }
+/* onglet Planque */
+.hideout-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+.hideout-station {
+  padding: 0.6rem 0.75rem;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius, 6px);
+}
+.hideout-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.9em;
+}
+.hideout-items li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}

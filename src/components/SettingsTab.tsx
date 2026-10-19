@@ -2,7 +2,7 @@
 import { useRef, useState, type ReactNode } from "react";
 import { GAME_MODES, type GameMode, type TarkovData } from "../types";
 import { ICON_LABELS, type IconId } from "../lib/objectiveTypes";
-import { readImportFile, type AppState } from "../state/store";
+import { readImportFile, type AppState, type Faction } from "../state/store";
 import { getLang, tr } from "../lib/i18n";
 import { exitPinHtml } from "../map/exitIcons";
 import { EXIT_KIND_LABELS, type ExitIconKind } from "../lib/exits";
@@ -17,6 +17,8 @@ interface Props {
   onShowDone: (v: boolean) => void;
   oneAtATime: boolean;
   onOneAtATime: (v: boolean) => void;
+  faction: Faction | undefined;
+  onFaction: (f: Faction | null) => void;
   onChangeMode: () => void;
   onShowHelp: () => void;
   onRefresh: () => void;
@@ -87,6 +89,16 @@ export function SettingsTab(p: Props) {
         <button className="btn btn-small" onClick={p.onRefresh}>
           {tr("Recharger depuis l'API", "Reload from the API")}
         </button>
+      </section>
+
+      <section>
+        <div className="subhead">{tr("Faction", "Faction")}</div>
+        <select className="input" value={p.faction ?? ""} onChange={(e) => p.onFaction((e.target.value || null) as Faction | null)} aria-label={tr("Faction", "Faction")}>
+          <option value="">{tr("Non choisie", "Not chosen")}</option>
+          <option value="BEAR">BEAR</option>
+          <option value="USEC">USEC</option>
+        </select>
+        <p className="muted small">{tr("Les quêtes de l'autre faction ne comptent pas dans les objets à garder.", "The other faction's quests do not count in the items to keep.")}</p>
       </section>
 
       <section>

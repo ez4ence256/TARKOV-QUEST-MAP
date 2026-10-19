@@ -14,6 +14,7 @@ import { QuestList } from "./components/QuestList";
 import { SelectedQuests } from "./components/SelectedQuests";
 import { CustomPointsTab } from "./components/CustomPointsTab";
 import { SettingsTab } from "./components/SettingsTab";
+import { HideoutTab } from "./components/HideoutTab";
 import { PhotosTab, type ExitPhotosTarget, type StoryPhotosTarget } from "./components/PhotosTab";
 import { ResetProgressSection } from "./components/ResetProgressSection";
 import { QuestTab } from "./components/QuestTab";
@@ -40,12 +41,12 @@ import { TraderWindow } from "./components/TraderWindow";
 import { Lightbox } from "./components/Lightbox";
 import { UnlockToast } from "./components/UnlockToast";
 
-type Tab = "selection" | "quests" | "capture" | "quest" | "photos" | "custom" | "settings";
+type Tab = "selection" | "quests" | "capture" | "quest" | "photos" | "custom" | "hideout" | "settings";
 
-const TABS: Tab[] = ["selection", "quests", "capture", "quest", "photos", "custom", "settings"];
+const TABS: Tab[] = ["selection", "quests", "capture", "quest", "photos", "custom", "hideout", "settings"];
 /** Groupe de la barre latérale auquel appartient chaque vue du panneau. */
-const TAB_GROUP: Record<Tab, RailGroup> = { selection: "selection", quests: "add", capture: "add", quest: "detail", photos: "detail", custom: "custom", settings: "settings" };
-const GROUP_FIRST: Record<RailGroup, Tab> = { selection: "selection", add: "quests", detail: "quest", custom: "custom", settings: "settings" };
+const TAB_GROUP: Record<Tab, RailGroup> = { selection: "selection", quests: "add", capture: "add", quest: "detail", photos: "detail", custom: "custom", hideout: "hideout", settings: "settings" };
+const GROUP_FIRST: Record<RailGroup, Tab> = { selection: "selection", add: "quests", detail: "quest", custom: "custom", hideout: "hideout", settings: "settings" };
 /** Groupes à deux vues : petit sélecteur en haut du panneau. */
 const SUBS: Partial<Record<RailGroup, [Tab, [string, string]][]>> = {
   add: [["quests", ["Rechercher", "Search"]], ["capture", ["Capture (Ctrl+V)", "Capture (Ctrl+V)"]]],
@@ -362,7 +363,8 @@ export default function App() {
   // objets à garder : quêtes pas faites (+ prochains niveaux de la planque si l'option est active)
   const includeHideout = state.includeHideout === true;
   const [stationsLoad, setStationsLoad] = useState<{ stations: HideoutStation[] | null; error: boolean }>({ stations: null, error: false });
-  const wantStations = includeHideout;
+  const [stationsRetry, setStationsRetry] = useState(0);
+  const wantStations = includeHideout || tab === "hideout";
   useEffect(() => {
     if (!gameMode || !wantStations) return;
     let cancelled = false;
@@ -374,7 +376,7 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, [gameMode, lang, wantStations]);
+  }, [gameMode, lang, wantStations, stationsRetry]);
   const needs = useMemo(
     () =>
       computeNeeds({
@@ -705,6 +707,20 @@ export default function App() {
               onFocus={(p) => focusPoint(`custom:${p.id}`, p.mapId)}
             />
           )}
+          {tab === "hideout" && (
+            <HideoutTab
+              gameMode={gameMode}
+              lang={lang}
+              stations={stationsLoad.stations}
+              error={stationsLoad.error}
+              onRetry={() => setStationsRetry((n) => n + 1)}
+              levels={mode.hideout ?? {}}
+              onLevel={(stationId, level) => dispatch({ type: "setHideoutLevel", stationId, level })}
+              include={includeHideout}
+              onInclude={(value) => dispatch({ type: "setIncludeHideout", value })}
+              itemIcons={data?.itemIcons ?? NO_NAMES}
+            />
+          )}
           {tab === "settings" && (
             <SettingsTab
               gameMode={gameMode}
@@ -714,6 +730,8 @@ export default function App() {
               onShowDone={(value) => dispatch({ type: "setShowDone", value })}
               oneAtATime={oneAtATime}
               onOneAtATime={(value) => dispatch({ type: "setOneAtATime", value })}
+              faction={mode.faction}
+              onFaction={(faction) => dispatch({ type: "setFaction", faction })}
               onChangeMode={() => dispatch({ type: "setGameMode", mode: null })}
               onShowHelp={() => {
                 resetHelp();
