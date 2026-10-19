@@ -29,6 +29,7 @@ import { useRoom } from "./api/room";
 import { buildEventTasks, loadEventEntries, type EventEntry } from "./api/eventQuests";
 import { RoomControl } from "./components/RoomControl";
 import { MapPicker } from "./components/MapPicker";
+import { UiIcon } from "./components/UiIcon";
 import { ItemFinder } from "./components/ItemFinder";
 import { TraderWindow } from "./components/TraderWindow";
 import { Lightbox } from "./components/Lightbox";
@@ -393,7 +394,7 @@ export default function App() {
           aria-controls="side-panel"
           aria-label={panelOpen ? tr("Masquer le panneau", "Hide panel") : tr("Afficher les quêtes", "Show quests")}
         >
-          {panelOpen ? "◀" : "☰"}
+          <UiIcon id={panelOpen ? "panel-left-close" : "panel-left-open"} />
           <span className="panel-toggle-text">{panelOpen ? tr(" Masquer", " Hide") : tr(" Quêtes", " Quests")}</span>
         </button>
         <div className="brand">

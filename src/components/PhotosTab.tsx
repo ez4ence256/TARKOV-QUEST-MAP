@@ -166,7 +166,7 @@ export function PhotosTab({ tasks, selectedIds, taskId, onTaskChange, exit, stor
   if (!current && !exit && !story) {
     return (
       <div className="tab-body empty">
-        <p>{tr("Sélectionnez une quête, ou utilisez le bouton 📷 d'une quête dans la liste.", "Select a quest, or use the 📷 button of a quest in the list.")}</p>
+        <p>{tr("Sélectionnez une quête, ou utilisez le bouton « Photos des emplacements » d'une quête dans la liste.", "Select a quest, or use the “Location photos” button of a quest in the list.")}</p>
       </div>
     );
   }

@@ -30,6 +30,7 @@ import { ItemThumb, useItemIcons } from "./ItemThumb";
 import { WikiBlocks } from "./WikiBlocks";
 import { QUEST_SECTIONS, type QuestSectionId } from "../lib/questSections";
 import { getLang, tr } from "../lib/i18n";
+import { UiIcon } from "./UiIcon";
 import { chapterOf, isStoryId } from "../lib/story";
 import { StoryChapterView, chapterName, useStoryChapters } from "./StoryView";
 
@@ -243,7 +244,7 @@ export function QuestTab(p: Props) {
   if (!task) {
     return (
       <div className="tab-body empty">
-        <p>{tr("Sélectionnez une quête, ou ouvrez-la depuis un point de la carte (bouton 📜 Quête).", "Select a quest, or open it from a map point (📜 Quest button).")}</p>
+        <p>{tr("Sélectionnez une quête, ou ouvrez-la depuis un point de la carte (bouton « Quête »).", "Select a quest, or open it from a map point (“Quest” button).")}</p>
       </div>
     );
   }
@@ -586,15 +587,15 @@ export function QuestTab(p: Props) {
         )}
         {task.wikiLink && (
           <button className="btn btn-small" onClick={() => p.onPhotos(task.id)}>
-            📷 Photos
+            <UiIcon id="image" /> Photos
           </button>
         )}
         {checked < task.objectives.length ? (
           <button className="btn btn-small btn-primary" onClick={() => p.onComplete(task)}>
-            {tr("✓ Quête terminée", "✓ Quest done")}
+            <UiIcon id="circle-check" /> {tr("Quête terminée", "Quest done")}
           </button>
         ) : (
-          <span className="tag quest-done-tag">{tr("✓ Terminée", "✓ Completed")}</span>
+          <span className="tag quest-done-tag"><UiIcon id="check" size={12} /> {tr("Terminée", "Completed")}</span>
         )}
       </div>
 

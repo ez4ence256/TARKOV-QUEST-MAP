@@ -4,6 +4,7 @@ import type { Action, ModeState } from "../state/store";
 import { ICON_LABELS, QUEST_COLORS, categoryOf } from "../lib/objectiveTypes";
 import { currentObjective, hasApiPosition, manualPointKey, objectiveMapCounts, objectivePointKey, taskProgress } from "../lib/points";
 import { getLang, tr } from "../lib/i18n";
+import { UiIcon } from "./UiIcon";
 import { Icon } from "./Icon";
 import { StoryCard, useStoryChapters } from "./StoryView";
 
@@ -159,7 +160,7 @@ export function SelectedQuests(props: Props) {
                     (manual ? (
                       <>
                         <button className="chip" onClick={() => props.onFocus(manualPointKey(o.id), manual.mapId)}>
-                          📍 {mapName(manual.mapId)}
+                          <UiIcon id="map-pin" size={14} /> {mapName(manual.mapId)}
                         </button>
                         <button className="chip" onClick={() => props.onStartPlacing(o)}>
                           {tr("Déplacer", "Move")}
@@ -173,7 +174,7 @@ export function SelectedQuests(props: Props) {
                       </>
                     ) : (
                       <button className="chip chip-accent" onClick={() => props.onStartPlacing(o)}>
-                        📍 {tr("Placer sur la carte", "Place on the map")}
+                        <UiIcon id="map-pin" size={14} /> {tr("Placer sur la carte", "Place on the map")}
                       </button>
                     ))}
                 </div>
@@ -193,7 +194,7 @@ export function SelectedQuests(props: Props) {
                   {task.mapId ? ` · ${mapName(task.mapId)}` : ""}
                   {" · "}
                   <button className="link" onClick={() => props.onQuest(task.id)}>
-                    📜 {tr("quête", "quest")}
+                    <UiIcon id="scroll-text" size={14} /> {tr("quête", "quest")}
                   </button>
                   {task.wikiLink && (
                     <>

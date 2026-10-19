@@ -2,12 +2,13 @@
 // qu'elle débloque (Gunsmith - Partie 2 -> Partie 3…). Oui = elles rejoignent la sélection ; Non = fermée.
 import type { Task } from "../types";
 import { tr } from "../lib/i18n";
+import { UiIcon } from "./UiIcon";
 
 export function UnlockToast({ done, next, onYes, onNo }: { done: Task; next: Task[]; onYes: () => void; onNo: () => void }) {
   return (
     <div className="unlock-toast" role="alertdialog" aria-live="polite" aria-label={tr("Quête suivante", "Next quest")}>
       <p className="unlock-title">
-        ✓ {tr(`« ${done.name} » terminée.`, `"${done.name}" completed.`)}
+        <UiIcon id="circle-check" /> {tr(`« ${done.name} » terminée.`, `"${done.name}" completed.`)}
       </p>
       <p>
         {tr("Elle débloque :", "It unlocks:")}{" "}

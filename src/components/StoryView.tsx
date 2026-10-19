@@ -5,6 +5,7 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import { loadStoryChapters, loadStoryPage, type StoryPageData } from "../api/story";
 import { pageUrlFor, type WikiPhoto } from "../api/wiki";
 import { getLang, tr } from "../lib/i18n";
+import { UiIcon } from "./UiIcon";
 import { currentStepIndex, fillItems, resolveStory, stepsDone, stepText, storyStepId, type ResolvedStory, type StoryChapter } from "../lib/story";
 import type { StoryItem } from "../lib/storyPoints";
 import type { WikiBlock } from "../lib/wikiText";
@@ -382,7 +383,7 @@ export function StoryCard({
             Main story
             {" · "}
             <button className="link" onClick={onOpen}>
-              📜 {tr("ouvrir le chapitre", "open the chapter")}
+              <UiIcon id="scroll-text" size={14} /> {tr("ouvrir le chapitre", "open the chapter")}
             </button>
           </div>
         </div>

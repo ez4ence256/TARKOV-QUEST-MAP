@@ -9,6 +9,7 @@ import { useStoryChapters } from "./StoryView";
 import { QUEST_COLORS } from "../lib/objectiveTypes";
 import { taskProgress } from "../lib/points";
 import { getLang, tr } from "../lib/i18n";
+import { UiIcon } from "./UiIcon";
 import { filterQuests, filterStory, mergeRows, pinSelected, STORY_TRADER, type Row, type StoryResult } from "../lib/questFilter";
 import { storyIdOf } from "../lib/story";
 import { MapPicker } from "./MapPicker";
@@ -85,7 +86,7 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
           style={isSelected ? { ["--q" as string]: "var(--accent)" } : undefined}
         >
           <span className="quest-check" aria-hidden="true">
-            {isSelected ? "✓" : ""}
+            {isSelected && <UiIcon id="check" size={14} />}
           </span>
           <span className="quest-main">
             <span className="quest-name">{r.chapter.name}</span>
@@ -100,7 +101,7 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
           title={tr("Ouvrir la fiche du chapitre", "Open the chapter")}
           aria-label={tr(`Ouvrir ${r.chapter.name}`, `Open ${r.chapter.name}`)}
         >
-          📜
+          <UiIcon id="scroll-text" size={16} />
         </button>
         {isSelected && <UnselectButton name={r.chapter.name} onClick={() => onToggleStory(id)} />}
       </li>
@@ -125,7 +126,7 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
           style={isSelected ? { ["--q" as string]: QUEST_COLORS[color] } : undefined}
         >
           <span className="quest-check" aria-hidden="true">
-            {isSelected ? "✓" : ""}
+            {isSelected && <UiIcon id="check" size={14} />}
           </span>
           <span className="quest-main">
             <span className="quest-name">{t.name}</span>
@@ -150,7 +151,7 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
             title={tr("Photos des emplacements (wiki)", "Location photos (wiki)")}
             aria-label={tr(`Photos des emplacements de ${t.name}`, `Location photos for ${t.name}`)}
           >
-            📷
+            <UiIcon id="image" size={16} />
           </button>
         )}
         {isSelected && <UnselectButton name={t.name} onClick={() => onToggle(t.id)} />}
@@ -263,7 +264,7 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
 function UnselectButton({ name, onClick }: { name: string; onClick: () => void }) {
   return (
     <button className="quest-unselect" onClick={onClick} title={tr("Désélectionner", "Deselect")} aria-label={tr(`Désélectionner ${name}`, `Deselect ${name}`)}>
-      ✕
+      <UiIcon id="x" size={14} />
     </button>
   );
 }

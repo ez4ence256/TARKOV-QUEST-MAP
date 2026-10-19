@@ -5,6 +5,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { GameMode, Task, Trader } from "../types";
 import { tr } from "../lib/i18n";
+import { UiIcon } from "./UiIcon";
 import { iconSrc } from "../lib/itemIcons";
 import { buildCategoryTree, type CategoryNode } from "../lib/itemCategories";
 import { formatPrice, traderOffers, tradersWithOffers, type Offer, type OfferKind, type TraderOffersFile } from "../lib/traderOffers";
@@ -33,7 +34,7 @@ export function TraderWindow(props: Props) {
   return (
     <>
       <button ref={toggle} className="btn btn-small item-finder-btn" onClick={() => setOpen(true)} aria-haspopup="dialog" title={tr("Ce que vendent les marchands, par niveau", "What traders sell, by level")}>
-        <span aria-hidden="true">🛒</span>
+        <UiIcon id="store" />
         <span className="item-finder-label">{tr("Marchands", "Traders")}</span>
       </button>
       {open && <TraderDialog {...props} onClose={close} />}
@@ -133,7 +134,7 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, onClose }: Pr
         <div className="finder-head">
           <h2 className="finder-name">{tr("Marchands", "Traders")}</h2>
           <button className="btn btn-small trader-close" onClick={onClose} aria-label={tr("Fermer", "Close")}>
-            ✕
+            <UiIcon id="x" />
           </button>
         </div>
         {error ? (
@@ -252,12 +253,12 @@ function OfferTile({ offer, name, itemIcons, taskName, lang }: { offer: Offer; n
         <span className="trader-ll">{tr(`Niv. ${offer.level}`, `LL${offer.level}`)}</span>
         {offer.barter && (
           <span className="trader-troc" title={tr("Offre payée en objets (troc)", "Paid with items (barter trade)")}>
-            {tr("⇄ Troc", "⇄ Barter")}
+            <UiIcon id="arrow-left-right" size={12} /> {tr("Troc", "Barter")}
           </span>
         )}
         {offer.task && (
           <span className="trader-lock" aria-label={tr(`Débloqué par une quête : ${taskName(offer.task)}`, `Unlocked by a quest: ${taskName(offer.task)}`)}>
-            🔒
+            <UiIcon id="lock" size={14} />
           </span>
         )}
         <span className="finder-icon">

@@ -7,6 +7,7 @@ import type { Task } from "../types";
 import { matchOcrLines, type OcrMatch, type OcrMatchResult } from "../lib/ocrMatch";
 import type { OcrProgress } from "../lib/ocr";
 import { tr } from "../lib/i18n";
+import { UiIcon } from "./UiIcon";
 import { filterQuests } from "../lib/questFilter";
 
 interface Props {
@@ -151,7 +152,7 @@ export function CaptureTab({ tasks, pasted, onApply }: Props) {
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={onPick} />
         {/* téléphone seulement (CSS) : ouvre directement l'appareil photo */}
         <button className="btn btn-primary btn-small mobile-only" onClick={() => cameraRef.current?.click()}>
-          📷 {tr("Prendre une photo", "Take a photo")}
+          <UiIcon id="camera" /> {tr("Prendre une photo", "Take a photo")}
         </button>
         <input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden onChange={onPick} />
         <span className="muted small">{tr("ou glissez-déposez l'image ici.", "or drag and drop the image here.")}</span>

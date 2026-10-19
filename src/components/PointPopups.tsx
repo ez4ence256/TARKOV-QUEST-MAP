@@ -5,6 +5,7 @@ import type { CustomPoint } from "../state/store";
 import { CUSTOM_ICONS, ICON_LABELS, categoryOf } from "../lib/objectiveTypes";
 import { Icon } from "./Icon";
 import { tr } from "../lib/i18n";
+import { UiIcon } from "./UiIcon";
 
 interface ObjectivePopupProps {
   task: Task;
@@ -76,17 +77,17 @@ export function ObjectivePopup(p: ObjectivePopupProps) {
           </button>
         ) : (
           <button className="btn btn-primary" onClick={() => p.onDone(true)}>
-            {tr("✓ Fait", "✓ Done")}
+            <UiIcon id="check" /> {tr("Fait", "Done")}
           </button>
         )}
         {p.onQuest && (
           <button className="btn btn-ghost" onClick={p.onQuest}>
-            {tr("📜 Quête", "📜 Quest")}
+            <UiIcon id="scroll-text" /> {tr("Quête", "Quest")}
           </button>
         )}
         {p.onPhotos && (
           <button className="btn btn-ghost" onClick={p.onPhotos}>
-            {tr("📷 Photos", "📷 Photos")}
+            <UiIcon id="image" /> Photos
           </button>
         )}
         {p.manual && p.onRemoveManual && (

@@ -3,6 +3,7 @@
 // ferme. Ctrl / Maj / clic molette gardent le comportement du navigateur (nouvel onglet).
 import { useEffect, useState } from "react";
 import { tr } from "../lib/i18n";
+import { UiIcon } from "./UiIcon";
 
 export function Lightbox() {
   const [photo, setPhoto] = useState<{ src: string; caption: string } | null>(null);
@@ -44,7 +45,7 @@ export function Lightbox() {
         </figcaption>
       </figure>
       <button className="btn btn-small lightbox-close" onClick={() => setPhoto(null)} aria-label={tr("Fermer", "Close")}>
-        ✕
+        <UiIcon id="x" />
       </button>
     </div>
   );

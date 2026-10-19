@@ -5,6 +5,7 @@ import { gameToLatLng } from "./crs";
 import { markerIcon } from "./icons";
 import { floorLabel, type StoryMapPoint } from "../lib/storyPoints";
 import { tr } from "../lib/i18n";
+import { UiIcon } from "../components/UiIcon";
 
 export const STORY_COLOR = "#7fb2e5";
 
@@ -42,13 +43,13 @@ export function StoryLayer(props: {
               <div className="popup-spawn">{tr(`Précision : ± ${p.errorM} m`, `Accuracy: ± ${p.errorM} m`)}</div>
               <div className="popup-actions">
                 <button className="btn btn-primary" onClick={() => props.onDone(p.chapter, p.stepKey)}>
-                  {tr("✓ Fait", "✓ Done")}
+                  <UiIcon id="check" /> {tr("Fait", "Done")}
                 </button>
                 <button className="btn btn-ghost" onClick={() => props.onOpen(p.chapter)}>
-                  {tr("📜 Chapitre", "📜 Chapter")}
+                  <UiIcon id="scroll-text" /> {tr("Chapitre", "Chapter")}
                 </button>
                 <button className="btn btn-ghost" onClick={() => props.onPhotos(p.chapter, p.stepKey, p.source)}>
-                  {tr("📷 Photos", "📷 Photos")}
+                  <UiIcon id="image" /> Photos
                 </button>
               </div>
             </div>

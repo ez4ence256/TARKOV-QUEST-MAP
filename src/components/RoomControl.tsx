@@ -1,6 +1,7 @@
 // Contrôle « Room » de la barre du haut : créer, rejoindre, copier l'ID, quitter.
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { tr } from "../lib/i18n";
+import { UiIcon } from "./UiIcon";
 import type { useRoom } from "../api/room";
 
 export function RoomControl({ room }: { room: ReturnType<typeof useRoom> }) {
@@ -66,7 +67,7 @@ export function RoomControl({ room }: { room: ReturnType<typeof useRoom> }) {
         title={tr("Jouer en groupe : partager sélection et progression", "Play as a group: share selection and progress")}
         onClick={() => setOpen((o) => !o)}
       >
-        <span aria-hidden="true">👥</span>
+        <UiIcon id="users" />
         <span className="room-label">{info ? info.id : "Room"}</span>
         {info && <span className={`room-dot room-dot-${info.status}`} aria-hidden="true" />}
         <span className="sr-only">{info ? `Room ${info.id}, ${statusText}` : "Room"}</span>

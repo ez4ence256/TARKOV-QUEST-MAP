@@ -3,6 +3,7 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { GameMap, GameMode, Task, Trader } from "../types";
 import { tr } from "../lib/i18n";
+import { UiIcon } from "./UiIcon";
 import { scoreName } from "../lib/search";
 import { RECOGNIZED_MIN, matchItemLines } from "../lib/ocrMatch";
 import { iconSrc } from "../lib/itemIcons";
@@ -92,7 +93,7 @@ export function ItemFinder(props: Props) {
   return (
     <>
       <button ref={toggle} className="btn btn-small item-finder-btn" onClick={() => setOpen(true)} aria-haspopup="dialog" aria-label={tr("Item finder : chercher un objet", "Item finder: search an item")} title={tr("Chercher où sert un objet", "Find where an item is used")}>
-        <span aria-hidden="true">🔍</span>
+        <UiIcon id="search" />
         <span className="item-finder-label">{tr("Objets", "Items")}</span>
       </button>
       {open && <FinderDialog {...props} onClose={close} />}
@@ -269,7 +270,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
       <div className="finder" role="dialog" aria-modal="true" aria-label="Item finder">
         <div className="finder-head">
           <div className="finder-search-wrap">
-            <span className="finder-search-icon" aria-hidden="true">🔍</span>
+            <span className="finder-search-icon" aria-hidden="true"><UiIcon id="search" /></span>
             <input
               ref={search}
               className="input finder-search"
@@ -286,7 +287,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
             />
           </div>
           <button className="btn btn-small" onClick={onClose} aria-label={tr("Fermer", "Close")}>
-            ✕
+            <UiIcon id="x" />
           </button>
         </div>
 
@@ -524,7 +525,7 @@ function Usage(p: {
             const opens =
               usageText || lockSections.length ? (
                 <section className="finder-opens">
-                  <h3 className="finder-sub">{tr("🔑 Ce qu'elle ouvre", "🔑 What it opens")}</h3>
+                  <h3 className="finder-sub"><UiIcon id="key-round" /> {tr("Ce qu'elle ouvre", "What it opens")}</h3>
                   {usageText && <p>{usageText}</p>}
                   {lockSections.map((sec) => (
                     <section key={sec.title}>
@@ -636,7 +637,7 @@ function Usage(p: {
                       <span className="finder-quest-main">
                         <strong>
                           {r.task.name}
-                          {finished && <span className="tag finder-done-tag">{tr("✓ Terminée", "✓ Completed")}</span>}
+                          {finished && <span className="tag finder-done-tag"><UiIcon id="check" size={12} /> {tr("Terminée", "Completed")}</span>}
                         </strong>
                         <span className="muted finder-quest-meta">{[trader?.name, map].filter(Boolean).join(" · ")}</span>
                         <span className="finder-pills">
@@ -702,7 +703,7 @@ function Recipe(p: { e: Exchange; source: string; item: ListedItem; byId: Map<st
       <div className="finder-recipe-head">
         <strong>{p.source}</strong>
         <span className="finder-pill">{`${tr("niv.", "lvl")} ${e.level}`}</span>
-        {e.duration ? <span className="muted finder-right">⏱ {durationLabel(e.duration)}</span> : null}
+        {e.duration ? <span className="muted finder-right"><UiIcon id="timer" size={14} /> {durationLabel(e.duration)}</span> : null}
       </div>
       <div className="finder-recipe">
         {inputs.map(chip)}
@@ -803,13 +804,13 @@ function SpotCard(p: {
                 p.onShowMap(p.marker!);
               }}
             >
-              {tr("📍 Voir sur la carte", "📍 Show on map")}
+              <UiIcon id="map-pin" /> {tr("Voir sur la carte", "Show on map")}
             </button>
           )}
         </div>
         {p.keyItem && (
           <p className="finder-spot-key">
-            🔑 {p.confirmed ? tr("Derrière la porte : ", "Behind the door: ") : tr("Porte fermée à proximité : ", "Locked door nearby: ")}
+            <UiIcon id="key-round" /> {p.confirmed ? tr("Derrière la porte : ", "Behind the door: ") : tr("Porte fermée à proximité : ", "Locked door nearby: ")}
             <strong>{p.keyItem.name}</strong>
             {p.confirmed && <span className="muted"> {tr("(confirmé par le wiki)", "(confirmed by the wiki)")}</span>}
           </p>
@@ -853,11 +854,11 @@ function SpotCard(p: {
             <div className="finder-spot-add">
               {added ? (
                 <p className="finder-spot-added" role="status">
-                  ✓ {tr("Point perso ajouté sur la carte (onglet Mes points).", "Personal point added to the map (My points tab).")}
+                  <UiIcon id="check" /> {tr("Point perso ajouté sur la carte (onglet Mes points).", "Personal point added to the map (My points tab).")}
                 </p>
               ) : !picking ? (
                 <button className="btn btn-small" onClick={() => setPicking(true)}>
-                  {tr("📌 Ajouter un point perso", "📌 Add a personal point")}
+                  <UiIcon id="pin" /> {tr("Ajouter un point perso", "Add a personal point")}
                 </button>
               ) : (
                 <>
