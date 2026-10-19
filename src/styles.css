@@ -927,6 +927,29 @@ kbd {
   justify-content: space-between;
   align-items: center;
 }
+/* Aide de première visite : au-dessus des contrôles Leaflet (1000), sous les fenêtres (finder 1300, lightbox 2000) */
+.first-help {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 2.5rem;
+  z-index: 1100;
+  width: min(300px, calc(100% - 1.5rem));
+  padding: 0.7rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+.first-help p {
+  margin: 0;
+}
+.first-help-title {
+  margin: 0;
+  font-size: 1rem;
+}
 .selection-maps {
   align-items: center;
   margin: 0 0 0.5rem;

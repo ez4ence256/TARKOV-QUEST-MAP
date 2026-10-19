@@ -18,6 +18,7 @@ interface Props {
   oneAtATime: boolean;
   onOneAtATime: (v: boolean) => void;
   onChangeMode: () => void;
+  onShowHelp: () => void;
   onRefresh: () => void;
   onExport: () => void;
   onImport: (state: AppState) => void;
@@ -67,6 +68,9 @@ export function SettingsTab(p: Props) {
         </div>
         <p className="muted small">{tr("Chaque mode a sa propre progression, ses notes et ses points.", "Each mode has its own progress, notes and points.")}</p>
         <p className="muted small">Version {version}</p>
+        <button className="btn btn-small" onClick={p.onShowHelp}>
+          {tr("Revoir l'aide", "Show the help again")}
+        </button>
       </section>
 
       <section>

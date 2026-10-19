@@ -30,6 +30,7 @@ import { buildEventTasks, loadEventEntries, type EventEntry } from "./api/eventQ
 import { RoomControl } from "./components/RoomControl";
 import { MapPicker } from "./components/MapPicker";
 import { UiIcon } from "./components/UiIcon";
+import { FirstVisitHelp, helpWanted, resetHelp } from "./components/FirstVisitHelp";
 import { ItemFinder } from "./components/ItemFinder";
 import { TraderWindow } from "./components/TraderWindow";
 import { Lightbox } from "./components/Lightbox";
@@ -307,6 +308,7 @@ export default function App() {
 
   // Sélection d'une quête : si rien d'elle n'est sur la map affichée mais qu'il y en a ailleurs, on y va.
   const [mapNotice, setMapNotice] = useState<string | null>(null);
+  const [showHelp, setShowHelp] = useState(helpWanted);
   const toggleTask = (taskId: string) => {
     dispatch({ type: "toggleTask", taskId });
     const task = tasksById.get(taskId);
@@ -644,6 +646,10 @@ export default function App() {
               oneAtATime={oneAtATime}
               onOneAtATime={(value) => dispatch({ type: "setOneAtATime", value })}
               onChangeMode={() => dispatch({ type: "setGameMode", mode: null })}
+              onShowHelp={() => {
+                resetHelp();
+                setShowHelp(true);
+              }}
               onRefresh={() => setReloadToken((n) => n + 1)}
               onExport={() => exportState(state)}
               onImport={(imported) => dispatch({ type: "import", state: imported })}
@@ -698,6 +704,7 @@ export default function App() {
           ) : (
             <div className="map-empty muted">{load.status === "loading" ? tr("Chargement…", "Loading…") : tr("Aucune map.", "No map.")}</div>
           )}
+          {showHelp && <FirstVisitHelp onClose={() => setShowHelp(false)} />}
           {placing && (
             <button className="btn cancel-placing" onClick={() => setPlacing(null)}>
               {tr("Annuler le placement", "Cancel placement")}
