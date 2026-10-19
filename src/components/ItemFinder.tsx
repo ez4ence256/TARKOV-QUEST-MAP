@@ -72,6 +72,8 @@ interface Props {
   onAddPoint: (point: NewPoint) => void;
   /** Objectifs cochés (objectiveId -> date) : quêtes terminées grisées dans l'onglet Quêtes. */
   done: Record<string, number>;
+  /** « rail » : bouton de la barre latérale (icône au-dessus du libellé). */
+  variant?: "rail";
 }
 
 export interface NewPoint {
@@ -92,9 +94,9 @@ export function ItemFinder(props: Props) {
   };
   return (
     <>
-      <button ref={toggle} className="btn btn-small item-finder-btn" onClick={() => setOpen(true)} aria-haspopup="dialog" aria-label={tr("Item finder : chercher un objet", "Item finder: search an item")} title={tr("Chercher où sert un objet", "Find where an item is used")}>
-        <UiIcon id="search" />
-        <span className="item-finder-label">{tr("Objets", "Items")}</span>
+      <button ref={toggle} className={props.variant === "rail" ? "rail-item" : "btn btn-small item-finder-btn"} onClick={() => setOpen(true)} aria-haspopup="dialog" aria-label={tr("Item finder : chercher un objet", "Item finder: search an item")} title={tr("Chercher où sert un objet", "Find where an item is used")}>
+        <UiIcon id="search" size={props.variant === "rail" ? 22 : 18} />
+        <span className={props.variant === "rail" ? "rail-label" : "item-finder-label"}>{tr("Objets", "Items")}</span>
       </button>
       {open && <FinderDialog {...props} onClose={close} />}
     </>

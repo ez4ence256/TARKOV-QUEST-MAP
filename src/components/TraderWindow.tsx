@@ -22,6 +22,8 @@ interface Props {
   traders: Trader[];
   tasks: Task[];
   itemIcons: Record<string, string>;
+  /** « rail » : bouton de la barre latérale (icône au-dessus du libellé). */
+  variant?: "rail";
 }
 
 export function TraderWindow(props: Props) {
@@ -33,9 +35,9 @@ export function TraderWindow(props: Props) {
   };
   return (
     <>
-      <button ref={toggle} className="btn btn-small item-finder-btn" onClick={() => setOpen(true)} aria-haspopup="dialog" title={tr("Ce que vendent les marchands, par niveau", "What traders sell, by level")}>
-        <UiIcon id="store" />
-        <span className="item-finder-label">{tr("Marchands", "Traders")}</span>
+      <button ref={toggle} className={props.variant === "rail" ? "rail-item" : "btn btn-small item-finder-btn"} onClick={() => setOpen(true)} aria-haspopup="dialog" aria-label={tr("Marchands", "Traders")} title={tr("Ce que vendent les marchands, par niveau", "What traders sell, by level")}>
+        <UiIcon id="store" size={props.variant === "rail" ? 22 : 18} />
+        <span className={props.variant === "rail" ? "rail-label" : "item-finder-label"}>{tr("Marchands", "Traders")}</span>
       </button>
       {open && <TraderDialog {...props} onClose={close} />}
     </>

@@ -29,7 +29,7 @@ import { useRoom } from "./api/room";
 import { buildEventTasks, loadEventEntries, type EventEntry } from "./api/eventQuests";
 import { RoomControl } from "./components/RoomControl";
 import { MapPicker } from "./components/MapPicker";
-import { UiIcon } from "./components/UiIcon";
+import { Rail, type RailGroup } from "./components/Rail";
 import { FirstVisitHelp, helpWanted, resetHelp } from "./components/FirstVisitHelp";
 import { ItemFinder } from "./components/ItemFinder";
 import { TraderWindow } from "./components/TraderWindow";
@@ -38,20 +38,23 @@ import { UnlockToast } from "./components/UnlockToast";
 
 type Tab = "selection" | "quests" | "capture" | "quest" | "photos" | "custom" | "settings";
 
-/**
- * Onglets du panneau. `label` : texte visible sur ordinateur (au plus deux mots courts,
- * pour tenir sur deux lignes sans couper de mot) ; `full` : nom complet (lecteur d'écran,
- * infobulle) ; `logo` : seul affiché sur téléphone.
- */
-const TABS: { id: Tab; label: [string, string]; full?: [string, string]; logo: string }[] = [
-  { id: "selection", label: ["Sélection", "Selection"], logo: "📌" },
-  { id: "quests", label: ["Quêtes", "Quests"], full: ["Toutes les quêtes", "All quests"], logo: "📋" },
-  { id: "capture", label: ["Capture", "Capture"], full: ["Importer une capture", "Import a screenshot"], logo: "📥" },
-  { id: "quest", label: ["Fiche quête", "Quest page"], full: ["Quête sélectionnée", "Selected quest"], logo: "📜" },
-  { id: "photos", label: ["Photos", "Photos"], logo: "📷" },
-  { id: "custom", label: ["Mes points", "My points"], logo: "📍" },
-  { id: "settings", label: ["Réglages", "Settings"], logo: "⚙️" },
-];
+const TABS: Tab[] = ["selection", "quests", "capture", "quest", "photos", "custom", "settings"];
+/** Groupe de la barre latérale auquel appartient chaque vue du panneau. */
+const TAB_GROUP: Record<Tab, RailGroup> = { selection: "selection", quests: "add", capture: "add", quest: "detail", photos: "detail", custom: "custom", settings: "settings" };
+const GROUP_FIRST: Record<RailGroup, Tab> = { selection: "selection", add: "quests", detail: "quest", custom: "custom", settings: "settings" };
+/** Groupes à deux vues : petit sélecteur en haut du panneau. */
+const SUBS: Partial<Record<RailGroup, [Tab, [string, string]][]>> = {
+  add: [["quests", ["Rechercher", "Search"]], ["capture", ["Capture (Ctrl+V)", "Capture (Ctrl+V)"]]],
+  detail: [["quest", ["Infos", "Info"]], ["photos", ["Photos", "Photos"]]],
+};
+const readTab = (): Tab => {
+  try {
+    const t = localStorage.getItem("tqp:tab");
+    return TABS.find((x) => x === t) ?? "selection";
+  } catch {
+    return "selection";
+  }
+};
 type LoadState =
   | { status: "loading"; data: TarkovData | null }
   | { status: "ready"; data: TarkovData; source: "cache" | "network" | "stale"; error?: string }
@@ -94,7 +97,17 @@ export default function App() {
     }
   };
   const [calibration, setCalibration] = useState(BUNDLED_CALIBRATION);
-  const [tab, setTab] = useState<Tab>("quests");
+  const [tab, setTab] = useState<Tab>(readTab);
+  // dernière vue utilisée dans chaque groupe de la barre latérale ; la vue courante est retenue entre deux visites
+  const lastTab = useRef<Partial<Record<RailGroup, Tab>>>({});
+  useEffect(() => {
+    lastTab.current[TAB_GROUP[tab]] = tab;
+    try {
+      localStorage.setItem("tqp:tab", tab);
+    } catch {
+      /* préférence non retenue */
+    }
+  }, [tab]);
   /** Quête affichée dans l'onglet Photos. */
   const [tabTaskId, setTabTaskId] = useState<string | null>(null);
   // sortie cliquée sur la carte : l'onglet Photos montre la sienne plutôt que celles d'une quête
@@ -393,129 +406,53 @@ export default function App() {
   return (
     <div className="app" style={{ ["--panel-user-w" as string]: `${panelWidth}px` }}>
       <Lightbox />
-      <header className="topbar">
-        <button
-          className="btn btn-small panel-toggle"
-          onClick={() => setPanelOpen((o) => !o)}
-          aria-expanded={panelOpen}
-          aria-controls="side-panel"
-          aria-label={panelOpen ? tr("Masquer le panneau", "Hide panel") : tr("Afficher les quêtes", "Show quests")}
-        >
-          <UiIcon id={panelOpen ? "panel-left-close" : "panel-left-open"} />
-          <span className="panel-toggle-text">{panelOpen ? tr(" Masquer", " Hide") : tr(" Quêtes", " Quests")}</span>
-        </button>
-        <div className="brand">
-          Quest Planner{" "}
-          <button className="mode-badge" onClick={() => dispatch({ type: "setGameMode", mode: null })} title={tr("Changer de mode de jeu", "Change game mode")}>
-            {modeLabel}
-          </button>
-        </div>
-        <ItemFinder gameMode={gameMode} lang={lang} tasks={tasks} traders={data?.traders ?? []} maps={maps} itemNames={data?.itemNames ?? NO_NAMES} itemIcons={data?.itemIcons ?? NO_NAMES} onShowQuest={showQuest}
-          done={mode.done}
-          onAddPoint={(pt) => {
-            const point = { ...pt, id: newId(), createdAt: Date.now() };
-            dispatch({ type: "addCustom", point });
-            // en fond, la carte passe sur la map du point et le centre (le finder reste ouvert)
-            focusPoint(`custom:${point.id}`, point.mapId);
-          }}
-          onShowSpots={(spots, spot) => {
-            setItemSpots(spots);
-            focusPoint(spot.key, spot.mapId);
-          }}
-        />
-        <TraderWindow gameMode={gameMode} lang={lang} traders={data?.traders ?? []} tasks={tasks} itemIcons={data?.itemIcons ?? NO_NAMES} />
-        <MapPicker maps={maps} currentId={currentMap?.id ?? ""} counts={mapCounts} onPick={showMap} />
-        <RoomControl room={room} />
-        <label className="scav-check">
-          <input type="checkbox" checked={showScavExits} onChange={(e) => changeScavExits(e.target.checked)} />
-          <span className="scav-check-long">{tr("Extracts Scav", "Scav extracts")}</span>
-          <span className="scav-check-short" aria-hidden="true">Scav</span>
-        </label>
-        <select
-          className="input lang-select"
-          value={lang}
-          onChange={(e) => changeLang(e.target.value === "en" ? "en" : "fr")}
-          aria-label={tr("Langue", "Language")}
-          title={tr("Langue de l'interface et des noms de quêtes, maps et objets", "Language of the interface and of quest, map and item names")}
-        >
-          <option value="fr">FR</option>
-          <option value="en">EN</option>
-        </select>
-      </header>
-
-      {unlockOffer && (
-        <UnlockToast
-          done={unlockOffer.done}
-          next={unlockOffer.next}
-          onYes={() => {
-            dispatch({ type: "selectTasks", taskIds: unlockOffer.next.map((t) => t.id), replace: false });
-            // la fiche quête montre la (première) quête débloquée
-            setTabTaskId(unlockOffer.next[0].id);
-            setUnlockOffer(null);
-          }}
-          onNo={() => setUnlockOffer(null)}
-        />
-      )}
-      {mapNotice && (
-        <div className="alert" role="status">
-          {mapNotice}{" "}
-          <button className="link" onClick={() => setMapNotice(null)}>
-            OK
-          </button>
-        </div>
-      )}
-
-      {room.notice && (
-        <div className="alert" role="status">
-          {room.notice}{" "}
-          <button className="link" onClick={room.dismissNotice}>
-            OK
-          </button>
-        </div>
-      )}
-
-      {load.status === "ready" && load.source === "stale" && (
-        <div className="alert">
-          {tr(
-            "L'API tarkov.dev ne répond pas : affichage de la dernière version en cache.",
-            "The tarkov.dev API is not responding: showing the last cached version.",
-          )}{" "}
-          <button className="link" onClick={() => setReloadToken((n) => n + 1)}>
-            {tr("Réessayer", "Retry")}
-          </button>
-        </div>
-      )}
+      <Rail
+        modeLabel={modeLabel}
+        onModeBadge={() => dispatch({ type: "setGameMode", mode: null })}
+        active={panelOpen ? TAB_GROUP[tab] : null}
+        selectedCount={mode.selected.length + (mode.story?.selected.length ?? 0)}
+        onGroup={(g) => {
+          if (panelOpen && TAB_GROUP[tab] === g) setPanelOpen(false); // comme VS Code : reclic = fermer
+          else {
+            setTab(lastTab.current[g] ?? GROUP_FIRST[g]);
+            setPanelOpen(true);
+          }
+        }}
+        lang={lang}
+        onLang={changeLang}
+        panelOpen={panelOpen}
+        onTogglePanel={() => setPanelOpen((o) => !o)}
+        finder={
+          <ItemFinder variant="rail" gameMode={gameMode} lang={lang} tasks={tasks} traders={data?.traders ?? []} maps={maps} itemNames={data?.itemNames ?? NO_NAMES} itemIcons={data?.itemIcons ?? NO_NAMES} onShowQuest={showQuest}
+            done={mode.done}
+            onAddPoint={(pt) => {
+              const point = { ...pt, id: newId(), createdAt: Date.now() };
+              dispatch({ type: "addCustom", point });
+              // en fond, la carte passe sur la map du point et le centre (le finder reste ouvert)
+              focusPoint(`custom:${point.id}`, point.mapId);
+            }}
+            onShowSpots={(spots, spot) => {
+              setItemSpots(spots);
+              focusPoint(spot.key, spot.mapId);
+            }}
+          />
+        }
+        traders={<TraderWindow variant="rail" gameMode={gameMode} lang={lang} traders={data?.traders ?? []} tasks={tasks} itemIcons={data?.itemIcons ?? NO_NAMES} />}
+        room={<RoomControl variant="rail" room={room} />}
+      />
 
       {/* key : recrée tout l'arbre (popups Leaflet comprises) dans la nouvelle langue */}
       <div className="layout" key={lang}>
         <aside id="side-panel" className={`panel ${panelOpen ? "is-open" : ""}`}>
-          <nav className="tabs" role="tablist">
-            {TABS.map(({ id, label: labelPair, full: fullPair, logo }) => {
-              const label = tr(...labelPair);
-              const full = fullPair && tr(...fullPair);
-              const selectedCount = mode.selected.length + (mode.story?.selected.length ?? 0);
-              const count = id === "selection" && selectedCount > 0 ? selectedCount : null;
-              const name = `${full ?? label}${count ? ` (${count})` : ""}`;
-              return (
-                <button
-                  key={id}
-                  role="tab"
-                  aria-selected={tab === id}
-                  aria-label={name}
-                  title={name}
-                  className={`tab ${tab === id ? "is-active" : ""}`}
-                  onClick={() => setTab(id)}
-                >
-                  {/* ordinateur : texte (deux lignes au plus, sans couper de mot) ; téléphone : logo seul */}
-                  <span className="tab-logo" aria-hidden="true">
-                    {logo}
-                  </span>
-                  <span className="tab-text">{label}</span>
-                  {count && <span className="tab-count">({count})</span>}
+          {SUBS[TAB_GROUP[tab]] && (
+            <div className="subswitch" role="tablist">
+              {SUBS[TAB_GROUP[tab]]!.map(([id, label]) => (
+                <button key={id} role="tab" aria-selected={tab === id} className={`subswitch-btn${tab === id ? " is-active" : ""}`} onClick={() => setTab(id)}>
+                  {tr(...label)}
                 </button>
-              );
-            })}
-          </nav>
+              ))}
+            </div>
+          )}
 
           {load.status === "loading" && !data && <div className="tab-body notice muted">{tr("Chargement des quêtes…", "Loading quests…")}</div>}
           {load.status === "error" && (
@@ -671,7 +608,59 @@ export default function App() {
         </aside>
         {panelOpen && <PanelResizer width={panelWidth} onChange={setPanelWidth} />}
 
-        <main className="map-area">
+<main className="map-area">
+          <div className="map-floating">
+            <MapPicker maps={maps} currentId={currentMap?.id ?? ""} counts={mapCounts} onPick={showMap} />
+            <label className="scav-check">
+              <input type="checkbox" checked={showScavExits} onChange={(e) => changeScavExits(e.target.checked)} />
+              <span className="scav-check-long">{tr("Extracts Scav", "Scav extracts")}</span>
+              <span className="scav-check-short" aria-hidden="true">Scav</span>
+            </label>
+          </div>
+          <div className="map-alerts">
+          {unlockOffer && (
+            <UnlockToast
+              done={unlockOffer.done}
+              next={unlockOffer.next}
+              onYes={() => {
+                dispatch({ type: "selectTasks", taskIds: unlockOffer.next.map((t) => t.id), replace: false });
+                // la fiche quête montre la (première) quête débloquée
+                setTabTaskId(unlockOffer.next[0].id);
+                setUnlockOffer(null);
+              }}
+              onNo={() => setUnlockOffer(null)}
+            />
+          )}
+          {mapNotice && (
+            <div className="alert" role="status">
+              {mapNotice}{" "}
+              <button className="link" onClick={() => setMapNotice(null)}>
+                OK
+              </button>
+            </div>
+          )}
+
+          {room.notice && (
+            <div className="alert" role="status">
+              {room.notice}{" "}
+              <button className="link" onClick={room.dismissNotice}>
+                OK
+              </button>
+            </div>
+          )}
+
+          {load.status === "ready" && load.source === "stale" && (
+            <div className="alert">
+              {tr(
+                "L'API tarkov.dev ne répond pas : affichage de la dernière version en cache.",
+                "The tarkov.dev API is not responding: showing the last cached version.",
+              )}{" "}
+              <button className="link" onClick={() => setReloadToken((n) => n + 1)}>
+                {tr("Réessayer", "Retry")}
+              </button>
+            </div>
+          )}
+          </div>
           {currentMap ? (
             <MapView
               // une carte = un système de coordonnées : on recrée Leaflet à chaque changement

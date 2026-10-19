@@ -67,7 +67,7 @@ export function SettingsTab(p: Props) {
           </button>
         </div>
         <p className="muted small">{tr("Chaque mode a sa propre progression, ses notes et ses points.", "Each mode has its own progress, notes and points.")}</p>
-        <p className="muted small">Version {version}</p>
+        <p className="muted small">Version {version} · Option B</p>
         <button className="btn btn-small" onClick={p.onShowHelp}>
           {tr("Revoir l'aide", "Show the help again")}
         </button>

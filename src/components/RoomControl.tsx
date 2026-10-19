@@ -4,7 +4,8 @@ import { tr } from "../lib/i18n";
 import { UiIcon } from "./UiIcon";
 import type { useRoom } from "../api/room";
 
-export function RoomControl({ room }: { room: ReturnType<typeof useRoom> }) {
+export function RoomControl({ room, variant }: { room: ReturnType<typeof useRoom>; variant?: "rail" }) {
+  const rail = variant === "rail";
   const { info, error, busy, offer } = room;
   const [open, setOpen] = useState(false);
   const [joinId, setJoinId] = useState("");
@@ -58,22 +59,22 @@ export function RoomControl({ room }: { room: ReturnType<typeof useRoom> }) {
   };
 
   return (
-    <div className="room" ref={wrap}>
+    <div className={rail ? "room room-rail" : "room"} ref={wrap}>
       <button
         ref={toggle}
-        className={`btn btn-small room-toggle ${info ? "is-active" : ""}`}
+        className={`${rail ? "rail-item" : "btn btn-small room-toggle"} ${info ? "is-active" : ""}`}
         aria-expanded={open}
         aria-controls="room-popover"
         title={tr("Jouer en groupe : partager sélection et progression", "Play as a group: share selection and progress")}
         onClick={() => setOpen((o) => !o)}
       >
-        <UiIcon id="users" />
-        <span className="room-label">{info ? info.id : "Room"}</span>
+        <UiIcon id="users" size={rail ? 22 : 18} />
+        <span className={rail ? "rail-label" : "room-label"}>{info ? info.id : "Room"}</span>
         {info && <span className={`room-dot room-dot-${info.status}`} aria-hidden="true" />}
         <span className="sr-only">{info ? `Room ${info.id}, ${statusText}` : "Room"}</span>
       </button>
       {open && (
-        <div id="room-popover" className="room-popover" role="dialog" aria-label="Room">
+        <div id="room-popover" className={`room-popover${rail ? " room-popover-rail" : ""}`} role="dialog" aria-label="Room">
           {info ? (
             <>
               <div className="room-id-row">

@@ -13,7 +13,8 @@
   --radius: 8px;
   /* largeur par défaut du panneau ; la poignée la remplace par --panel-user-w */
   --panel-w: 440px;
-  --topbar-h: 52px;
+  --topbar-h: 0px; /* plus de barre du haut : les fenêtres plein écran gardent leur marge de 8px */
+  --rail-w: 76px;
   color-scheme: dark;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   font-size: 15px;
@@ -255,25 +256,113 @@ button:focus-visible {
 .app {
   height: 100%;
   display: flex;
-  flex-direction: column;
 }
-.topbar {
-  height: var(--topbar-h);
+/* --- Barre latérale --- */
+.rail {
+  width: var(--rail-w);
   flex: none;
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0 0.75rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  padding: 0.5rem 0;
   background: var(--bg-2);
-  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 1150;
 }
-.brand {
-  font-weight: 600;
+.rail-brand {
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   color: var(--accent-2);
+}
+.rail > .mode-badge {
+  align-self: center;
+  margin: 0.25rem 0 0.5rem;
+}
+.rail-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0.45rem 0.15rem;
+  border: 0;
+  border-left: 3px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.1;
+  text-align: center;
+  cursor: pointer;
+}
+.rail-item:hover {
+  background: var(--bg-3);
+  color: var(--text);
+}
+.rail-item.is-active {
+  color: var(--accent-2);
+  border-left-color: var(--accent);
+  background: var(--bg-3);
+}
+.rail-icon {
+  position: relative;
+  display: inline-flex;
+}
+.rail-count {
+  position: absolute;
+  top: -5px;
+  right: -9px;
+  min-width: 1.35em;
+  padding: 0 0.3em;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #1a1a1a;
+  font-size: 0.85em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.rail-label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
+.rail-sep {
+  height: 1px;
+  margin: 0.4rem 0.75rem;
+  background: var(--line);
+}
+.rail-more {
+  display: contents;
+}
+.rail-spacer {
+  flex: 1;
+}
+.rail-plus {
+  display: none;
+}
+.rail-version {
+  text-align: center;
+  font-size: 10px;
+  color: var(--muted);
+  opacity: 0.7;
+}
+.room-rail {
+  display: flex;
+  flex-direction: column;
+}
+.room-rail .rail-item {
+  width: 100%;
+}
+.room-rail .room-dot {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.9rem;
+}
 .mode-badge {
-  margin-left: 0.4rem;
   font-family: inherit;
   cursor: pointer;
   font-size: 0.75rem;
@@ -285,7 +374,6 @@ button:focus-visible {
 }
 .map-picker {
   position: relative;
-  margin-left: auto;
   min-width: 0;
   max-width: 50%;
 }
@@ -414,12 +502,54 @@ button:focus-visible {
   flex: none;
 }
 .alert {
-  flex: none;
   padding: 0.5rem 0.9rem;
   background: #3a2d12;
   color: #f5dfa8;
-  border-bottom: 1px solid #5a4620;
+  border: 1px solid #5a4620;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   font-size: 0.9em;
+}
+/* alertes en haut au centre de la carte, empilées, au-dessus de Leaflet (contrôles : 1000) */
+.map-alerts {
+  position: absolute;
+  top: 3.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1060;
+  width: min(520px, calc(100% - 1.5rem));
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  pointer-events: none;
+}
+.map-alerts > * {
+  pointer-events: auto;
+}
+.map-alerts .unlock-toast {
+  position: static;
+  width: auto;
+}
+/* choix de la map et Scav : flottent en haut à gauche, à droite du zoom Leaflet */
+.map-floating {
+  position: absolute;
+  top: 10px;
+  left: 56px;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: calc(100% - 56px - 9rem);
+}
+.map-floating .map-picker-list {
+  left: 0;
+  right: auto;
+}
+.map-floating .scav-check {
+  padding: 0.3rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(15, 18, 21, 0.9);
 }
 .layout {
   flex: 1;
@@ -443,54 +573,29 @@ button:focus-visible {
 .panel.is-open {
   display: flex;
 }
-.tabs {
+/* choix entre les deux vues d'un groupe (Rechercher / Capture, Infos / Photos) */
+.subswitch {
   display: flex;
-  border-bottom: 1px solid var(--line);
+  gap: 2px;
+  margin: 0.5rem 0.75rem 0;
+  padding: 2px;
   flex: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
 }
-/* Onglets : jamais de mot coupé. Chaque libellé a au plus deux mots courts, donc au plus
-   deux lignes ; la largeur minimale du panneau (lib/panelWidth.ts) est choisie pour ça. */
-.tab {
-  flex: 1 1 auto;
+.subswitch-btn {
+  flex: 1;
+  padding: 0.3rem 0.4rem;
   border: 0;
+  border-radius: 6px;
   background: transparent;
-  padding: 0.55rem 0.3rem;
   color: var(--muted);
-  border-bottom: 2px solid transparent;
-  font-size: 0.86em;
-  line-height: 1.2;
-  white-space: normal;
-  hyphens: manual;
-  overflow-wrap: normal;
-  word-break: normal;
+  font-size: 0.9em;
 }
-.tab-count {
-  margin-left: 0.25em;
-}
-/* logos : seulement si le panneau est assez large pour logo + texte */
-.tab-logo {
-  display: none;
-  margin-right: 0.3em;
-}
-@container (min-width: 520px) {
-  .tab-logo {
-    display: inline;
-  }
-}
-/* téléphone : logos seuls (le nombre de quêtes sélectionnées reste visible) */
-@media (max-width: 480px) {
-  .tab-text {
-    display: none;
-  }
-  .tab-logo {
-    display: inline;
-    margin-right: 0;
-    font-size: 1.15em;
-  }
-  .tab-count {
-    margin-left: 0.1em;
-    font-size: 0.85em;
-  }
+.subswitch-btn.is-active {
+  background: var(--bg-3);
+  color: var(--accent-2);
 }
 /* poignée entre le panneau et la carte (ordinateur) */
 .panel-resizer {
@@ -668,10 +773,6 @@ body.is-resizing {
 .pre-line {
   white-space: pre-line;
 }
-.tab.is-active {
-  color: var(--text);
-  border-bottom-color: var(--accent);
-}
 .tab-body {
   flex: 1;
   overflow-y: auto;
@@ -847,7 +948,7 @@ kbd {
 /* proposition d'activer les quêtes débloquées (components/UnlockToast.tsx) : en haut à droite */
 .unlock-toast {
   position: fixed;
-  top: calc(var(--topbar-h) + 10px);
+  top: 10px;
   right: 12px;
   z-index: 1250;
   width: min(320px, calc(100vw - 24px));
@@ -1644,7 +1745,7 @@ kbd {
 }
 .room-popover {
   position: fixed;
-  top: calc(var(--topbar-h) + 4px);
+  top: 8px;
   right: 8px;
   z-index: 1200;
   width: min(320px, calc(100vw - 16px));
@@ -1676,6 +1777,13 @@ kbd {
   letter-spacing: 0.15em;
   user-select: all;
 }
+/* depuis la barre latérale : s'ouvre à droite de la barre, vers la carte */
+.room-popover.room-popover-rail {
+  top: auto;
+  right: auto;
+  left: calc(var(--rail-w) + 8px);
+  bottom: 1rem;
+}
 .room-error {
   color: var(--danger);
 }
@@ -1689,25 +1797,91 @@ kbd {
     z-index: 1100; /* au-dessus des contrôles Leaflet (z-index 1000) */
     border-right: 0;
   }
-  .brand {
+  /* la barre latérale devient une barre en bas ; la carte est décalée d'autant */
+  .app {
+    flex-direction: column-reverse;
+  }
+  .rail {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    overflow: visible;
+    border-right: 0;
+    border-top: 1px solid var(--line);
+  }
+  .rail-brand,
+  .rail > .mode-badge,
+  .rail-sep,
+  .rail-spacer,
+  .rail-version,
+  .rail-collapse {
     display: none;
   }
-  .panel-toggle-text {
-    display: none; /* téléphone : icône seule, place pour le choix de la map */
+  .rail > .rail-item {
+    flex: 1;
+    border-left: 0;
+    border-top: 3px solid transparent;
+  }
+  .rail-item.is-active {
+    border-left-color: transparent;
+    border-top-color: var(--accent);
+  }
+  .rail-plus {
+    display: flex;
+  }
+  /* menu « Plus » : fenêtre au-dessus de la barre */
+  .rail-more.is-open {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    position: fixed;
+    right: 8px;
+    bottom: 64px;
+    z-index: 1200;
+    width: min(260px, calc(100vw - 16px));
+    padding: 0.4rem;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  }
+  .rail-more:not(.is-open) > .rail-item,
+  .rail-more:not(.is-open) > .room-rail > .rail-item {
+    display: none;
+  }
+  .rail-more > .rail-item,
+  .room-rail .rail-item {
+    border-left: 0;
+  }
+  .room-popover.room-popover-rail {
+    left: 8px;
+    right: 8px;
+    bottom: 64px;
+    width: auto;
+  }
+  .map-floating {
+    max-width: calc(100% - 56px - 45%);
+  }
+  .map-floating .map-picker {
+    position: static;
   }
   .map-picker {
     max-width: none;
     flex: 1;
-    position: static;
+    min-width: 0;
   }
-  .topbar {
-    position: relative;
-  }
-  .map-picker-list {
+  .map-floating .map-picker-list {
+    position: fixed;
+    top: 56px;
     left: 8px;
     right: 8px;
     width: auto;
     grid-template-columns: repeat(2, 1fr);
+  }
+  .map-alerts {
+    top: 3.75rem;
   }
   .scav-check-long {
     display: none;
@@ -1717,9 +1891,6 @@ kbd {
   }
   .room-label {
     display: none;
-  }
-  .tab {
-    font-size: 0.85em;
   }
   .panel-resizer {
     display: none;
