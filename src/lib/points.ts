@@ -41,7 +41,14 @@ export function currentObjective(task: Task, done: Record<string, number>): Obje
   return todo.find((o) => !o.optional) ?? todo[0];
 }
 
-/** Objectifs d'une quête à montrer sur la carte (les faits suivent `showDone`). */
+/** Maps d'un objectif : celles de ses zones s'il en a, sinon celles annoncées par tarkov.dev. */
+const objectiveMaps = (o: Objective) => (o.locations.length ? o.locations.map((l) => l.mapId) : o.mapIds);
+
+/**
+ * Objectifs d'une quête à montrer sur la carte (les faits suivent `showDone`).
+ * « Un raid à la fois » : l'objectif en cours et tous les autres non faits de la même map,
+ * pour tout faire dans le même raid (Ill-Wisher, Soins privés…) ; les autres maps attendent.
+ */
 export function shownObjectives(
   task: Task,
   done: Record<string, number>,
@@ -49,7 +56,9 @@ export function shownObjectives(
   oneAtATime: boolean,
 ): Objective[] {
   const current = oneAtATime ? currentObjective(task, done) : undefined;
-  return task.objectives.filter((o) => (done[o.id] ? showDone : !oneAtATime || o === current));
+  const raidMaps = new Set(current ? objectiveMaps(current) : []);
+  const sameRaid = (o: Objective) => o === current || objectiveMaps(o).some((m) => raidMaps.has(m));
+  return task.objectives.filter((o) => (done[o.id] ? showDone : !oneAtATime || sameRaid(o)));
 }
 
 /** Points des quêtes sélectionnées + points placés à la main, pour une map. */

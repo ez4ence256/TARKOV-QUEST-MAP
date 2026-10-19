@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Task } from "../types";
 import { emptyModeState } from "../state/store";
-import { buildObjectivePoints, currentObjective, manualPointKey, questsUnlockedBy, taskMapIds, taskProgress } from "./points";
+import { buildObjectivePoints, currentObjective, manualPointKey, questsUnlockedBy, shownObjectives, taskMapIds, taskProgress } from "./points";
 
 const task: Task = {
   id: "t",
@@ -87,6 +87,17 @@ describe("un objectif à la fois", () => {
     expect(ids({}, "m2")).toEqual([]);
     expect(ids({ a: 1 }, "m1")).toEqual([]);
     expect(ids({ a: 1 }, "m2")).toEqual(["b"]);
+  });
+
+  it("montre d'un coup tous les objectifs non faits de la map de l'objectif en cours (Ill-Wisher, Soins privés)", () => {
+    const at = (id: string, mapId: string) => ({ id, type: "mark", description: "", optional: false, mapIds: [mapId], locations: [{ mapId, position: { x: 0, y: 0, z: 0 } }] });
+    const t: Task = { ...task, objectives: [at("s1", "m1"), at("s2", "m1"), at("l1", "m2"), at("s3", "m1"), task.objectives[2]] };
+    const shown = (done: Record<string, number>) => shownObjectives(t, done, false, true).map((o) => o.id);
+    expect(shown({})).toEqual(["s1", "s2", "s3"]);
+    expect(shown({ s1: 1 })).toEqual(["s2", "s3"]);
+    expect(shown({ s1: 1, s2: 1, s3: 1 })).toEqual(["l1"]);
+    // objectif en cours sans map (remise d'objets) : lui seul
+    expect(shown({ s1: 1, s2: 1, s3: 1, l1: 1 })).toEqual(["c"]);
   });
 
   it("préfère un objectif obligatoire restant à un optionnel", () => {

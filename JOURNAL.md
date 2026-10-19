@@ -11,7 +11,8 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | Élément | État |
 |---|---|
 | Branche | **`main`** seule (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**, branche par défaut). |
-| Version affichée | **0.8.23** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
+| Version affichée | **0.8.24** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
+| **Nouveau design** | depuis la **0.8.23** (commit `e189862` : barre latérale, mode raid, Barlow, icônes SVG). Dernière version avec l'**ancien design** : **0.8.22** (commit `a562131`). Pour revenir en arrière sur un point précis, comparer avec `git diff a562131 e189862 -- <fichier>`. |
 | Derniers commits | `3bc65a9` Item finder : recherche par image (0.8.2) · `78f5fb6` Ctrl+V d'une capture dans l'item finder (0.8.1) · `14c4dc9` Item finder redessiné (0.8.0) · `6800a70` journal fin de session 8 · `245ee03` Version 0.7.23 · `3a59955` Main story : ponts de l'Icebreaker pour Boreas · `2593e19` Icebreaker : calibrage corrigé · `45beb1b` positions > 100 m retirées (0.7.22) · `7acab9f` positions de The Ticket · `5447eef` bouton du panneau en icône seule sur téléphone (0.7.21) · `69ddc95` Item finder · `d81736d` infos du Labyrinthe sur la map |
 | Travail non commité | Seulement `.claude/` (non suivi, volontairement hors du dépôt : chemin propre à cette machine) |
 | Tests | **338/338** au vert (`npx vitest run`), 35 fichiers (voir « Tests ») |
@@ -54,7 +55,7 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | `69ddc95` | 8 | Item finder (objets du jeu, quêtes, hideout, barters, crafts) |
 | `5447eef` | 8 | Barre du haut : bouton du panneau en icône seule sur téléphone |
 
-### Tests (341, 35 fichiers)
+### Tests (342, 35 fichiers)
 
 | Fichier | Ce qui est couvert |
 |---|---|
@@ -356,6 +357,7 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
   - **Polices** : Barlow (texte, 16 px) et Barlow Condensed (titres, colonne, en majuscules), fichiers dans `public/fonts/barlow/` (OFL), repli sur les polices système (₽). Panneau par défaut 380 px, minimum 320 (`panelWidth.ts`, la colonne est déduite du maximum).
   - **Sauvegardes** : `tqp:state:v1`, export/import, séparation par mode et rooms inchangés ; les nouvelles préférences ont leurs propres clés.
   - Vérifié (navigateur) : bureau 1600 x 900 et téléphone 375 px, FR/EN, Ctrl+V -> Ajouter › Capture, Objets, Marchands, room créée puis quittée, mode raid (coché puis décoché), Terminer sur Gunsmith Master - Part 2 -> propose Part 3 -> Oui. **Non vérifié** : room entre deux navigateurs, bulle photo des sorties en 16 px.
+- **Un raid à la fois** (0.8.24, retour : Ill-Wisher et Soins privés - Partie 1 montraient leurs objectifs un par un alors qu'ils sont tous sur Littoral) : le réglage « un objectif à la fois » montre maintenant l'objectif en cours **et tous les autres non faits de la même map** (`shownObjectives`, `src/lib/points.ts` : maps des zones, sinon `mapIds`) ; les objectifs d'une autre map attendent (Soins privés - Partie 6 : Usine puis Labo). Objectif en cours sans map (remise d'objets) : lui seul, comme avant. Libellé du réglage : « Un raid à la fois : tous les objectifs de la map en cours, les autres maps ensuite ». Vérifié : Ill-Wisher 4 objectifs et Soins privés - Partie 1 4 ambulances d'un coup sur Littoral (carte Mode raid). +1 test.
 
 ## Étude 3D (session 5, en attente de validation)
 
