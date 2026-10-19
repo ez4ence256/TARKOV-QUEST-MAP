@@ -398,7 +398,10 @@ export default function App() {
           <span className="panel-toggle-text">{panelOpen ? tr(" Masquer", " Hide") : tr(" Quêtes", " Quests")}</span>
         </button>
         <div className="brand">
-          Quest Planner <span className="mode-badge">{modeLabel}</span>
+          Quest Planner{" "}
+          <button className="mode-badge" onClick={() => dispatch({ type: "setGameMode", mode: null })} title={tr("Changer de mode de jeu", "Change game mode")}>
+            {modeLabel}
+          </button>
         </div>
         <ItemFinder gameMode={gameMode} lang={lang} tasks={tasks} traders={data?.traders ?? []} maps={maps} itemNames={data?.itemNames ?? NO_NAMES} itemIcons={data?.itemIcons ?? NO_NAMES} onShowQuest={showQuest}
           done={mode.done}

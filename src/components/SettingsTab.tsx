@@ -7,6 +7,7 @@ import { getLang, tr } from "../lib/i18n";
 import { exitPinHtml } from "../map/exitIcons";
 import { EXIT_KIND_LABELS, type ExitIconKind } from "../lib/exits";
 import { Icon } from "./Icon";
+import { version } from "../../package.json";
 
 interface Props {
   gameMode: GameMode;
@@ -65,6 +66,7 @@ export function SettingsTab(p: Props) {
           </button>
         </div>
         <p className="muted small">{tr("Chaque mode a sa propre progression, ses notes et ses points.", "Each mode has its own progress, notes and points.")}</p>
+        <p className="muted small">Version {version}</p>
       </section>
 
       <section>

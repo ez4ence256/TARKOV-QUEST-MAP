@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import type { Task } from "../types";
-import { emptyModeState, reducer, sanitizeState, type Action, type AppState, type ModeState } from "./store";
+import { emptyModeState, loadState, reducer, sanitizeState, type Action, type AppState, type ModeState } from "./store";
 import { orphanDoneCount, tasksWithProgress } from "../lib/points";
 
 // « Signal - Partie 3 » (« Signal - Part 3 ») : identifiants réels de l'API tarkov.dev,
@@ -175,5 +175,24 @@ describe("Main story (chapitres du wiki)", () => {
     expect("story" in sanitizeState(saved).modes.regular!).toBe(false);
     delete saved.modes.regular.story; // sauvegarde d'avant la Main story
     expect("story" in sanitizeState(saved).modes.regular!).toBe(false);
+  });
+});
+
+describe("reprise du dernier mode de jeu", () => {
+  afterEach(() => localStorage.clear());
+
+  it("rouvre le dernier mode joué", () => {
+    localStorage.setItem("tqp:lastMode", "pve");
+    expect(loadState().gameMode).toBe("pve");
+  });
+
+  it("ignore une valeur inconnue", () => {
+    localStorage.setItem("tqp:lastMode", "n'importe quoi");
+    expect(loadState().gameMode).toBeNull();
+  });
+
+  it("sanitizeState (import) ne choisit jamais de mode", () => {
+    localStorage.setItem("tqp:lastMode", "pve");
+    expect(sanitizeState({ gameMode: "regular", modes: {} }).gameMode).toBeNull();
   });
 });

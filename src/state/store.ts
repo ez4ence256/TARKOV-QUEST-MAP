@@ -3,7 +3,7 @@
 // chaque mode de jeu (la progression PvE n'est pas celle du PvP).
 
 import { useEffect, useReducer } from "react";
-import type { GameMode } from "../types";
+import { GAME_MODES, type GameMode } from "../types";
 import { tr } from "../lib/i18n";
 import { QUEST_COLORS, type IconId } from "../lib/objectiveTypes";
 import { storyStepId } from "../lib/story";
@@ -117,7 +117,7 @@ export function sanitizeState(raw: unknown): AppState {
   }
   return {
     version: STATE_VERSION,
-    // le mode est redemandé à chaque ouverture : on ne garde que le dernier choisi comme suggestion
+    // jamais de mode venant d'un fichier : loadState() remet le dernier mode joué, l'import garde l'actuel
     gameMode: null,
     showDone: r.showDone === true,
     oneAtATime: r.oneAtATime !== false,
@@ -330,9 +330,12 @@ export function reducer(state: AppState, action: Action): AppState {
   }
 }
 
-function loadState(): AppState {
+export function loadState(): AppState {
   try {
-    return sanitizeState(JSON.parse(localStorage.getItem(STATE_KEY) ?? "null"));
+    const state = sanitizeState(JSON.parse(localStorage.getItem(STATE_KEY) ?? "null"));
+    // on reprend le dernier mode joué (sanitizeState reste à null pour l'import) ; « Changer » rouvre le choix
+    const last = getLastMode();
+    return GAME_MODES.some((m) => m.id === last) ? { ...state, gameMode: last } : state;
   } catch {
     return initialState();
   }
