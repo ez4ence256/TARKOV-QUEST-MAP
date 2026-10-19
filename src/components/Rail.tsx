@@ -37,6 +37,8 @@ interface Props {
   active: RailGroup | null;
   selectedCount: number;
   onGroup: (g: RailGroup) => void;
+  raid: boolean;
+  onRaid: () => void;
   lang: Lang;
   onLang: (l: Lang) => void;
   panelOpen: boolean;
@@ -88,6 +90,7 @@ export function Rail(p: Props) {
         <div className="rail-spacer" />
         <div className="rail-sep" />
         <RailItem icon="settings" label={tr("Réglages", "Settings")} active={p.active === "settings"} onClick={group("settings")} />
+        <RailItem icon="crosshair" label={tr("Raid", "Raid")} full={tr("Mode raid", "Raid mode")} active={p.raid} onClick={() => { setMore(false); p.onRaid(); }} />
         <button
           className="rail-item"
           aria-label={tr("Langue", "Language")}

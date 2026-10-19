@@ -30,6 +30,7 @@ import { buildEventTasks, loadEventEntries, type EventEntry } from "./api/eventQ
 import { RoomControl } from "./components/RoomControl";
 import { MapPicker } from "./components/MapPicker";
 import { Rail, type RailGroup } from "./components/Rail";
+import { RaidCard } from "./components/RaidCard";
 import { FirstVisitHelp, helpWanted, resetHelp } from "./components/FirstVisitHelp";
 import { ItemFinder } from "./components/ItemFinder";
 import { TraderWindow } from "./components/TraderWindow";
@@ -62,6 +63,13 @@ type LoadState =
 
 const NO_NAMES: Record<string, string> = {};
 const NO_DONE: Record<string, true> = {};
+const raidSaved = () => {
+  try {
+    return localStorage.getItem("tqp:raid") === "1";
+  } catch {
+    return false;
+  }
+};
 const isMobile = () => window.matchMedia("(max-width: 800px)").matches;
 const newId = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -113,7 +121,7 @@ export default function App() {
   // sortie cliquée sur la carte : l'onglet Photos montre la sienne plutôt que celles d'une quête
   const [photoExit, setPhotoExit] = useState<ExitPhotosTarget | null>(null);
   const [photoStory, setPhotoStory] = useState<StoryPhotosTarget | null>(null);
-  const [panelOpen, setPanelOpen] = useState(() => !isMobile());
+  const [panelOpen, setPanelOpen] = useState(() => !isMobile() && !raidSaved());
   /** Largeur du panneau sur ordinateur (poignée de redimensionnement, enregistrée). */
   const [panelWidth, setPanelWidth] = useState(() => readPanelWidth(window.innerWidth));
   // fenêtre réduite : la largeur reste dans les bornes (sans écraser la valeur enregistrée)
@@ -122,6 +130,17 @@ export default function App() {
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
+  // mode raid : carte flottante des objectifs de la map, panneau fermé ; retenu dans le navigateur
+  const [raid, setRaid] = useState(raidSaved);
+  const changeRaid = (on: boolean) => {
+    setRaid(on);
+    if (on) setPanelOpen(false);
+    try {
+      localStorage.setItem("tqp:raid", on ? "1" : "0");
+    } catch {
+      /* préférence non retenue */
+    }
+  };
   const [placing, setPlacing] = useState<Placing>(null);
   const [focus, setFocus] = useState<{ key: string; n: number } | null>(null);
   // meilleurs spots d'un objet (item finder) affichés sur la carte, jusqu'à ce qu'on les retire
@@ -418,6 +437,8 @@ export default function App() {
             setPanelOpen(true);
           }
         }}
+        raid={raid}
+        onRaid={() => changeRaid(!raid)}
         lang={lang}
         onLang={changeLang}
         panelOpen={panelOpen}
@@ -693,7 +714,23 @@ export default function App() {
           ) : (
             <div className="map-empty muted">{load.status === "loading" ? tr("Chargement…", "Loading…") : tr("Aucune map.", "No map.")}</div>
           )}
-          {showHelp && <FirstVisitHelp onClose={() => setShowHelp(false)} />}
+          {raid && currentMap && (
+            <RaidCard
+              key={currentMap.id}
+              mapName={currentMap.name}
+              points={points}
+              tasksById={tasksById}
+              objectivesById={objectivesById}
+              colorOf={colorOf}
+              done={mode.done}
+              onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })}
+              storyPoints={storyPoints}
+              storyName={storyName}
+              onStoryDone={(chapter, stepKey) => setStoryStep(chapter, stepKey, true)}
+              onQuit={() => changeRaid(false)}
+            />
+          )}
+          {showHelp && !raid && <FirstVisitHelp onClose={() => setShowHelp(false)} />}
           {placing && (
             <button className="btn cancel-placing" onClick={() => setPlacing(null)}>
               {tr("Annuler le placement", "Cancel placement")}

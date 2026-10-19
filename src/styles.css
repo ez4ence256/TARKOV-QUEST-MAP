@@ -1784,6 +1784,80 @@ kbd {
   left: calc(var(--rail-w) + 8px);
   bottom: 1rem;
 }
+/* mode raid : carte des objectifs de la map, en bas à gauche (hors zoom, étages et Sorties) */
+.raid-card {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 4.5rem;
+  z-index: 1055;
+  width: min(420px, calc(100% - 1.5rem));
+  max-height: calc(100% - 9rem);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-2);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+.raid-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.6rem;
+}
+.raid-title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 1rem;
+  color: var(--accent-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.raid-body {
+  overflow-y: auto;
+  padding: 0 0.6rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.raid-body p {
+  margin: 0;
+}
+.raid-quest {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 600;
+  color: var(--accent-2);
+}
+.raid-dot {
+  flex: none;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+}
+.raid-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.35rem 0.2rem;
+  font-size: 17px;
+  line-height: 1.3;
+  cursor: pointer;
+}
+.raid-line input {
+  flex: none;
+  width: 1.35rem;
+  height: 1.35rem;
+  margin: 0.1rem 0 0;
+  accent-color: var(--accent);
+}
+.raid-line.is-done span {
+  text-decoration: line-through;
+  opacity: 0.55;
+}
 .room-error {
   color: var(--danger);
 }
