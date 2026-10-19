@@ -2957,3 +2957,23 @@ kbd {
     grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
   }
 }
+/* objets à garder : pastille des tuiles, bloc « À garder » de la fiche, filtre */
+.finder-need {
+  font-size: 0.72em;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+}
+.finder-need.is-need {
+  color: var(--accent-2);
+  font-weight: 600;
+}
+.finder-only-need {
+  flex: none;
+  max-width: 12rem;
+  line-height: 1.2;
+}
+.finder-keep-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.9em;
+}

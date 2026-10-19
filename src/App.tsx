@@ -27,6 +27,8 @@ import { chaptersWithPositions, currentStoryPoints, pointsOnMap } from "./lib/st
 import { chapterName, useStoryItems } from "./components/StoryView";
 import { inRoom, useRoom } from "./api/room";
 import { branchFailures, prerequisiteChanges } from "./lib/questChain";
+import { computeNeeds } from "./lib/itemNeeds";
+import { loadHideout, type HideoutStation } from "./api/itemList";
 import { buildEventTasks, loadEventEntries, type EventEntry } from "./api/eventQuests";
 import { RoomControl } from "./components/RoomControl";
 import { MapPicker } from "./components/MapPicker";
@@ -357,6 +359,33 @@ export default function App() {
   const [mapNotice, setMapNotice] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(helpWanted);
   const failed = mode.failed ?? NO_DONE;
+  // objets à garder : quêtes pas faites (+ prochains niveaux de la planque si l'option est active)
+  const includeHideout = state.includeHideout === true;
+  const [stationsLoad, setStationsLoad] = useState<{ stations: HideoutStation[] | null; error: boolean }>({ stations: null, error: false });
+  const wantStations = includeHideout;
+  useEffect(() => {
+    if (!gameMode || !wantStations) return;
+    let cancelled = false;
+    setStationsLoad({ stations: null, error: false });
+    loadHideout(gameMode, lang).then(
+      (h) => !cancelled && setStationsLoad({ stations: h.stations, error: false }),
+      () => !cancelled && setStationsLoad({ stations: null, error: true }),
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [gameMode, lang, wantStations]);
+  const needs = useMemo(
+    () =>
+      computeNeeds({
+        tasks,
+        done: mode.done,
+        failed: mode.failed,
+        faction: mode.faction,
+        ...(includeHideout && stationsLoad.stations ? { stations: stationsLoad.stations, hideoutLevels: mode.hideout ?? {} } : {}),
+      }),
+    [tasks, mode.done, mode.failed, mode.faction, mode.hideout, includeHideout, stationsLoad.stations],
+  );
   // information avec « Annuler » après un grisage automatique (prérequis, branches exclusives)
   const [chainNotice, setChainNotice] = useState<{ text: string; undo?: () => void } | null>(null);
   useEffect(() => setChainNotice(null), [gameMode]);
@@ -521,6 +550,7 @@ export default function App() {
           <ItemFinder variant="rail" gameMode={gameMode} lang={lang} tasks={tasks} traders={data?.traders ?? []} maps={maps} itemNames={data?.itemNames ?? NO_NAMES} itemIcons={data?.itemIcons ?? NO_NAMES} onShowQuest={showQuest}
             done={mode.done}
             failed={failed}
+            needs={needs}
             onAddPoint={(pt) => {
               const point = { ...pt, id: newId(), createdAt: Date.now() };
               dispatch({ type: "addCustom", point });

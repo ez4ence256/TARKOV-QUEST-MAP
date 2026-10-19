@@ -22,6 +22,7 @@ import { buildCategoryTree, OTHER, type CategoryNode } from "../lib/itemCategori
 import { ItemThumb } from "./ItemThumb";
 import { isTaskFinished } from "../lib/points";
 import { isGreyed } from "../lib/questChain";
+import type { ItemNeed } from "../lib/itemNeeds";
 
 const PAGE = 100;
 
@@ -75,6 +76,8 @@ interface Props {
   done: Record<string, number>;
   /** Quêtes échouées : grisées comme les terminées. */
   failed?: Record<string, true>;
+  /** Objets à garder (quêtes pas faites, planque si incluse) : badges BESOIN / VENDABLE et « À garder ». */
+  needs: Map<string, ItemNeed>;
   /** « rail » : bouton de la barre latérale (icône au-dessus du libellé). */
   variant?: "rail";
 }
@@ -106,7 +109,7 @@ export function ItemFinder(props: Props) {
   );
 }
 
-function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIcons, onShowQuest, onShowSpots, onAddPoint, done, failed, onClose }: Props & { onClose: () => void }) {
+function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIcons, onShowQuest, onShowSpots, onAddPoint, done, failed, needs, onClose }: Props & { onClose: () => void }) {
   const [list, setList] = useState<ListedItem[] | null>(null);
   const [error, setError] = useState(false);
   const [query, setQuery] = useState("");
@@ -116,6 +119,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   // catégories du flea : arbre, catégorie choisie (filtre la grille), catégories ouvertes
   const [tree, setTree] = useState<CategoryNode[] | null>(null);
   const [cat, setCat] = useState<CategoryNode | null>(null);
+  const [onlyNeeded, setOnlyNeeded] = useState(false);
   const [open, setOpen] = useState<Set<string>>(new Set());
   const search = useRef<HTMLInputElement>(null);
   const run = useRef(0); // numéro de la dernière lecture : un résultat périmé est ignoré
@@ -212,8 +216,11 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
       .sort((a, b) => b.score - a.score)
       .map((r) => r.item);
   }, [all, q]);
-  const filtered = useMemo(() => (cat ? results.filter((i) => cat.items.has(i.id)) : results), [results, cat]);
-  useEffect(() => setShown(PAGE), [q, cat]);
+  const filtered = useMemo(
+    () => results.filter((i) => (!cat || cat.items.has(i.id)) && (!onlyNeeded || needs.has(i.id))),
+    [results, cat, onlyNeeded, needs],
+  );
+  useEffect(() => setShown(PAGE), [q, cat, onlyNeeded]);
   const pickCategory = (node: CategoryNode) => {
     setCat((c) => (c?.id === node.id ? null : node));
     setOpen((o) => new Set(o).add(node.id));
@@ -233,6 +240,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
               <ItemThumb src={iconSrc(item.id, itemIcons)} name="" size={56} />
             </span>
             <span className="finder-tile-name">{item.name}</span>
+            <NeedBadge need={needs.get(item.id)} />
           </button>
         </li>
       ))}
@@ -291,6 +299,10 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
               }}
             />
           </div>
+          <label className="check finder-only-need">
+            <input type="checkbox" checked={onlyNeeded} onChange={(e) => setOnlyNeeded(e.target.checked)} />
+            {tr("Afficher seulement les objets nécessaires", "Show only the needed items")}
+          </label>
           <button className="btn btn-small" onClick={onClose} aria-label={tr("Fermer", "Close")}>
             <UiIcon id="x" />
           </button>
@@ -335,6 +347,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                 onAddPoint={onAddPoint}
                 done={done}
                 failed={failed}
+                need={needs.get(selected.id)}
               />
             </>
           ) : (
@@ -381,6 +394,15 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   );
 }
 
+/** Pastille d'une tuile : BESOIN (accent) ou VENDABLE (discret). */
+function NeedBadge({ need }: { need?: ItemNeed }) {
+  if (!need) return <span className="finder-need">{tr("VENDABLE", "SELLABLE")}</span>;
+  const parts = [need.count > 0 ? tr(`BESOIN ×${need.count}`, `NEED ×${need.count}`) : tr("BESOIN", "NEED")];
+  if (need.firCount > 0) parts.push("FIR");
+  if (need.anyOf) parts.push(tr("au choix", "any of"));
+  return <span className="finder-need is-need">{parts.join(" · ")}</span>;
+}
+
 type Tab = "quests" | "hideout" | "barters" | "crafts" | "where";
 
 /** Titres des sections d'emplacement du wiki (pages d'objets et de clés). */
@@ -410,6 +432,7 @@ function Usage(p: {
   onAddPoint: (point: NewPoint) => void;
   done: Record<string, number>;
   failed?: Record<string, true>;
+  need?: ItemNeed;
 }) {
   const [tab, setTab] = useState<Tab>("quests");
   const [wikiTitles, setWikiTitles] = useState<Record<string, string>>({});
@@ -515,6 +538,31 @@ function Usage(p: {
         </span>
         <h2 className="finder-name">{p.item.name}</h2>
       </div>
+      <section className="finder-keep" aria-label={tr("À garder", "To keep")}>
+        <h3 className="finder-sub">{tr("À garder", "To keep")}</h3>
+        {!p.need ? (
+          <p className="muted small">{tr("Aucune quête ni station ne le demande : vendable.", "No quest or station needs it: sellable.")}</p>
+        ) : (
+          <ul className="finder-keep-list">
+            {p.need.sources.map((s, i) => (
+              <li key={i}>
+                {s.kind === "quest" ? (
+                  <button className="link" onClick={() => p.onShowQuest(s.taskId)}>
+                    {p.tasksById.get(s.taskId)?.name ?? s.taskId}
+                  </button>
+                ) : (
+                  <>
+                    {p.hideout.data?.stationName[s.stationId] ?? s.stationId} · {tr("niv.", "lvl")} {s.level}
+                  </>
+                )}{" "}
+                ×{s.count}
+                {s.fir && " FIR"}
+                {s.kind === "quest" && s.anyOf && ` · ${tr("au choix", "any of")}`}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
       <div role="tablist" className="finder-tabs" aria-label={tr("Utilisations", "Uses")}>
         {tabs.map(([t, label]) => (
           <button key={t} role="tab" id={`finder-tab-${t}`} aria-selected={tab === t} aria-controls={`finder-panel-${t}`} className={`finder-tab${tab === t ? " active" : ""}${counts[t] === 0 ? " dim" : ""}`} onClick={() => setTab(t)}>
