@@ -1,9 +1,11 @@
 // Onglet "Sélection" : quêtes choisies, progression, objectifs à cocher.
+import { useState } from "react";
 import type { GameMap, Objective, Task, Trader } from "../types";
 import type { Action, ModeState } from "../state/store";
 import { ICON_LABELS, QUEST_COLORS, categoryOf } from "../lib/objectiveTypes";
 import { currentObjective, hasApiPosition, manualPointKey, objectiveMapCounts, objectivePointKey, taskProgress } from "../lib/points";
 import { getLang, tr } from "../lib/i18n";
+import { storyIdOf } from "../lib/story";
 import { UiIcon } from "./UiIcon";
 import { Icon } from "./Icon";
 import { StoryCard, useStoryChapters } from "./StoryView";
@@ -21,6 +23,8 @@ interface Props {
   onShowMap: (mapId: string) => void;
   /** Nombre de points par map pour la sélection (même décompte que le sélecteur de map). */
   mapCounts: Map<string, number>;
+  /** Quêtes (id) et chapitres (story:<chapitre>) qui ont ces points, par map. */
+  questsOnMap: Map<string, Set<string>>;
   /** Termine la quête : tous ses objectifs faits, retirée de la sélection. */
   onComplete: (task: Task) => void;
   onFocus: (pointKey: string, mapId: string) => void;
@@ -54,6 +58,11 @@ export function SelectedQuests(props: Props) {
   ].sort((a, b) => a.name.localeCompare(b.name, lang));
 
   const mapsWithPoints = [...props.mapCounts].filter(([id, n]) => n > 0 && props.maps.some((m) => m.id === id));
+  // « Mes maps » : un clic montre la map et ne garde que ses quêtes ; plus de points sur cette map = filtre oublié
+  const [mapFilter, setMapFilter] = useState<string | null>(null);
+  const filterId = mapsWithPoints.some(([id]) => id === mapFilter) ? mapFilter : null;
+  const onFilterMap = (item: (typeof items)[number]) =>
+    !filterId || Boolean(props.questsOnMap.get(filterId)?.has(item.chapter !== null ? storyIdOf(item.chapter) : item.sel!.taskId));
 
   if (items.length === 0) {
     return (
@@ -71,8 +80,20 @@ export function SelectedQuests(props: Props) {
       {mapsWithPoints.length > 0 && (
         <div className="objective-links selection-maps">
           <span className="muted small">{tr("Mes maps :", "My maps:")}</span>
+          <button className={`chip ${filterId ? "" : "is-current"}`} aria-pressed={!filterId} onClick={() => setMapFilter(null)}>
+            {tr("Toutes", "All")}
+          </button>
           {mapsWithPoints.map(([mapId, n]) => (
-            <button key={mapId} className={`chip ${mapId === props.currentMapId ? "is-current" : ""}`} onClick={() => props.onShowMap(mapId)}>
+            <button
+              key={mapId}
+              className={`chip ${mapId === filterId ? "is-current" : ""}`}
+              aria-pressed={mapId === filterId}
+              title={tr("Afficher cette map et seulement ses quêtes", "Show this map and only its quests")}
+              onClick={() => {
+                setMapFilter(mapId);
+                props.onShowMap(mapId);
+              }}
+            >
               {mapName(mapId)} ({n})
             </button>
           ))}
@@ -90,7 +111,7 @@ export function SelectedQuests(props: Props) {
         </div>
       )}
 
-      {items.map((item) => {
+      {items.filter(onFilterMap).map((item) => {
         if (item.chapter !== null) {
           const chapter = item.chapter;
           return (

@@ -222,16 +222,21 @@ export default function App() {
     [selectedTasks, mode, currentMap, state.showDone, oneAtATime],
   );
 
-  // Nombre de points restants par map (affiché dans le sélecteur de map)
-  const pointsPerMap = useMemo(() => {
+  // Nombre de points restants par map (affiché dans le sélecteur de map), et quêtes qui y ont ces points
+  const { pointsPerMap, questsPerMap } = useMemo(() => {
     const counts = new Map<string, number>();
+    const quests = new Map<string, Set<string>>();
+    const add = (mapId: string, taskId: string) => {
+      counts.set(mapId, (counts.get(mapId) ?? 0) + 1);
+      quests.set(mapId, (quests.get(mapId) ?? new Set()).add(taskId));
+    };
     for (const t of selectedTasks)
       for (const o of shownObjectives(t, mode.done, false, oneAtATime)) {
-        for (const l of o.locations) counts.set(l.mapId, (counts.get(l.mapId) ?? 0) + 1);
+        for (const l of o.locations) add(l.mapId, t.id);
         const manual = mode.manual[o.id];
-        if (o.locations.length === 0 && manual) counts.set(manual.mapId, (counts.get(manual.mapId) ?? 0) + 1);
+        if (o.locations.length === 0 && manual) add(manual.mapId, t.id);
       }
-    return counts;
+    return { pointsPerMap: counts, questsPerMap: quests };
   }, [selectedTasks, mode.done, mode.manual, oneAtATime]);
 
   // Main story : case en cours des chapitres choisis qui ont une position relevée sur le wiki
@@ -241,14 +246,17 @@ export default function App() {
   const storyPointsAll = useMemo(() => storyIds.flatMap((c) => currentStoryPoints(c, storyItems[c] ?? [], storyDone)), [storyIds, storyItems, storyDone]);
   const storyPoints = useMemo(() => pointsOnMap(storyPointsAll, currentMap?.normalizedName), [storyPointsAll, currentMap]);
   // la case en cours de la Main story compte aussi dans le sélecteur de map
-  const mapCounts = useMemo(() => {
+  const { mapCounts, questsOnMap } = useMemo(() => {
     const counts = new Map(pointsPerMap);
+    const onMap = new Map([...questsPerMap].map(([id, s]) => [id, new Set(s)]));
     for (const p of storyPointsAll) {
       const id = maps.find((m) => m.normalizedName === p.map)?.id;
-      if (id) counts.set(id, (counts.get(id) ?? 0) + 1);
+      if (!id) continue;
+      counts.set(id, (counts.get(id) ?? 0) + 1);
+      onMap.set(id, (onMap.get(id) ?? new Set()).add(storyIdOf(p.chapter)));
     }
-    return counts;
-  }, [pointsPerMap, storyPointsAll, maps]);
+    return { mapCounts: counts, questsOnMap: onMap };
+  }, [pointsPerMap, questsPerMap, storyPointsAll, maps]);
   const storyName = useCallback((chapter: string) => chapterName(storyChapters, chapter), [storyChapters]);
   const setStoryStep = (chapter: string, stepKey: string, value: boolean) => dispatch({ type: "setStoryStep", chapter, stepKey, done: value });
 
@@ -513,6 +521,7 @@ export default function App() {
               dispatch={dispatch}
               onShowMap={showMap}
               mapCounts={mapCounts}
+              questsOnMap={questsOnMap}
               onComplete={completeTask}
               onFocus={focusPoint}
               onStartPlacing={(o) =>
