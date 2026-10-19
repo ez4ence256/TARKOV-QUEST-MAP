@@ -2076,8 +2076,12 @@ kbd {
     bottom: 64px;
     width: auto;
   }
+  /* téléphone : map + Scav prennent la première ligne, l'étage passe en dessous à droite */
   .map-floating {
-    max-width: calc(100% - 56px - 45%);
+    max-width: calc(100% - 66px);
+  }
+  .level-select {
+    top: 3.4rem;
   }
   .map-floating .map-picker {
     position: static;
