@@ -3,16 +3,17 @@
 // garde de la place.
 
 export const PANEL_WIDTH_KEY = "tqp:panelWidth";
-export const PANEL_DEFAULT = 440;
-/** En dessous, les libellés d'onglets ne tiennent plus sur deux lignes sans couper de mot. */
-export const PANEL_MIN = 400;
+export const PANEL_DEFAULT = 380;
+export const PANEL_MIN = 320;
+/** Largeur de la barre latérale (--rail-w dans styles.css) : la fenêtre utile en est diminuée. */
+export const RAIL_WIDTH = 76;
 export const PANEL_MAX = 720;
 /** Part maximale de la fenêtre occupée par le panneau. */
 const PANEL_MAX_RATIO = 0.6;
 
-/** Largeur bornée : entre PANEL_MIN et PANEL_MAX, et au plus 60 % de la fenêtre. */
+/** Largeur bornée : entre PANEL_MIN et PANEL_MAX, et au plus 60 % de la fenêtre (hors barre latérale). */
 export function clampPanelWidth(width: number, viewportWidth: number): number {
-  const max = Math.max(PANEL_MIN, Math.min(PANEL_MAX, Math.floor(viewportWidth * PANEL_MAX_RATIO)));
+  const max = Math.max(PANEL_MIN, Math.min(PANEL_MAX, Math.floor((viewportWidth - RAIL_WIDTH) * PANEL_MAX_RATIO)));
   if (!Number.isFinite(width)) return Math.min(PANEL_DEFAULT, max);
   return Math.round(Math.min(max, Math.max(PANEL_MIN, width)));
 }

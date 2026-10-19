@@ -125,7 +125,7 @@
   --ok: #6fcf97;
   --radius: 8px;
   /* largeur par défaut du panneau ; la poignée la remplace par --panel-user-w */
-  --panel-w: 440px;
+  --panel-w: 380px;
   --topbar-h: 0px; /* plus de barre du haut : les fenêtres plein écran gardent leur marge de 8px */
   --rail-w: 76px;
   /* échelle typographique */
