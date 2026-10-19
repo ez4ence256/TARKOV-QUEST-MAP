@@ -57,7 +57,15 @@ export interface ModeState {
   customPoints: CustomPoint[];
   /** Facultatif : absent tant qu'aucun chapitre n'a été choisi. */
   story?: StoryState;
+  /** Quêtes marquées échouées (grisées comme les terminées). Personnel : jamais partagé en room. */
+  failed?: Record<string, true>;
+  /** Niveau construit par station de la planque (0 = pas construite). Personnel. */
+  hideout?: Record<string, number>;
+  /** Faction du joueur : les quêtes de l'autre ne comptent pas dans les objets à garder. Personnel. */
+  faction?: Faction;
 }
+
+export type Faction = "BEAR" | "USEC";
 
 export interface AppState {
   version: number;
@@ -65,6 +73,8 @@ export interface AppState {
   showDone: boolean;
   /** Un seul objectif affiché par quête (absent = oui). */
   oneAtATime?: boolean;
+  /** Compter les objets des prochains niveaux de la planque dans les objets à garder (absent = non). */
+  includeHideout?: boolean;
   modes: Partial<Record<GameMode, ModeState>>;
 }
 
@@ -95,6 +105,20 @@ function sanitizeStory(raw: unknown): StoryState | undefined {
   return { selected, done };
 }
 
+function sanitizeFailed(raw: unknown): Record<string, true> | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const out: Record<string, true> = {};
+  for (const [id, value] of Object.entries(raw)) if (id && value === true) out[id] = true;
+  return Object.keys(out).length ? out : undefined;
+}
+
+function sanitizeHideout(raw: unknown): Record<string, number> | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const out: Record<string, number> = {};
+  for (const [id, level] of Object.entries(raw)) if (id && Number.isInteger(level) && level >= 0 && level <= 20) out[id] = level;
+  return Object.keys(out).length ? out : undefined;
+}
+
 /** Valide grossièrement un état lu (localStorage ou import) et complète les champs manquants. */
 export function sanitizeState(raw: unknown): AppState {
   const base = initialState();
@@ -114,6 +138,11 @@ export function sanitizeState(raw: unknown): AppState {
     };
     const story = sanitizeStory(v.story);
     if (story) modes[mode as GameMode]!.story = story;
+    const failed = sanitizeFailed(v.failed);
+    if (failed) modes[mode as GameMode]!.failed = failed;
+    const hideout = sanitizeHideout(v.hideout);
+    if (hideout) modes[mode as GameMode]!.hideout = hideout;
+    if (v.faction === "BEAR" || v.faction === "USEC") modes[mode as GameMode]!.faction = v.faction;
   }
   return {
     version: STATE_VERSION,
@@ -121,6 +150,7 @@ export function sanitizeState(raw: unknown): AppState {
     gameMode: null,
     showDone: r.showDone === true,
     oneAtATime: r.oneAtATime !== false,
+    includeHideout: r.includeHideout === true,
     modes,
   };
 }
@@ -144,10 +174,21 @@ export type Action =
   | { type: "removeCustom"; id: string }
   | { type: "setShowDone"; value: boolean }
   | { type: "setOneAtATime"; value: boolean }
+  | { type: "setIncludeHideout"; value: boolean }
+  | { type: "setHideoutLevel"; stationId: string; level: number }
+  | { type: "setFaction"; faction: Faction | null }
+  /**
+   * Statut de plusieurs quêtes d'un coup (prérequis grisés, marquage manuel, annulation) :
+   * done/undone = objectifs à cocher/décocher, failed/unfailed = quêtes, select/deselect = sélection.
+   */
+  | { type: "applyQuestStatus"; done: string[]; undone?: string[]; failed: string[]; unfailed?: string[]; deselect?: string[]; select?: string[] }
   | { type: "import"; state: AppState }
-  /** Remet à "pas fait" les objectifs donnés (une quête), dans le mode courant seulement. */
-  | { type: "resetProgress"; objectiveIds: string[] }
-  /** Remet à "pas fait" tous les objectifs du mode courant (notes et points perso gardés). */
+  /** Remet à "pas fait" les objectifs donnés (une quête, retirée aussi des échouées si taskId), dans le mode courant seulement. */
+  | { type: "resetProgress"; objectiveIds: string[]; taskId?: string }
+  /**
+   * Remet à "pas fait" tous les objectifs du mode courant et vide les quêtes échouées
+   * (notes et points perso gardés). Niveaux de planque et faction sont gardés : ce n'est pas de la progression de quêtes.
+   */
   | { type: "resetAllProgress" }
   /** Ajoute des quêtes à la sélection (import par capture) ; replace = vide d'abord la sélection. */
   | { type: "selectTasks"; taskIds: string[]; replace: boolean }
@@ -301,16 +342,43 @@ export function reducer(state: AppState, action: Action): AppState {
       return { ...state, showDone: action.value };
     case "setOneAtATime":
       return { ...state, oneAtATime: action.value };
+    case "setIncludeHideout":
+      return { ...state, includeHideout: action.value };
+    case "setHideoutLevel":
+      return updateMode(state, (m) => ({ ...m, hideout: { ...m.hideout, [action.stationId]: Math.max(0, Math.min(20, Math.trunc(action.level) || 0)) } }));
+    case "setFaction":
+      return updateMode(state, (m) => {
+        const { faction: _old, ...rest } = m;
+        return action.faction ? { ...rest, faction: action.faction } : rest;
+      });
+    case "applyQuestStatus":
+      return updateMode(state, (m) => {
+        const now = Date.now();
+        const done = { ...m.done };
+        for (const id of action.done) done[id] ??= now;
+        for (const id of action.undone ?? []) delete done[id];
+        const failed = { ...m.failed };
+        for (const id of action.failed) failed[id] = true;
+        for (const id of action.unfailed ?? []) delete failed[id];
+        const drop = new Set(action.deselect ?? []);
+        const selected = m.selected.filter((s) => !drop.has(s.taskId));
+        for (const taskId of action.select ?? []) if (!selected.some((s) => s.taskId === taskId)) selected.push({ taskId, color: nextColor(selected) });
+        return { ...m, done, failed, selected };
+      });
     case "import":
       return { ...action.state, gameMode: state.gameMode };
     case "resetProgress":
       return updateMode(state, (m) => {
         const done = { ...m.done };
         for (const id of action.objectiveIds) delete done[id];
+        if (action.taskId && m.failed?.[action.taskId]) {
+          const { [action.taskId]: _f, ...failed } = m.failed;
+          return { ...m, done, failed };
+        }
         return { ...m, done };
       });
     case "resetAllProgress":
-      return updateMode(state, (m) => ({ ...m, done: {}, ...(m.story ? { story: { ...m.story, done: {} } } : {}) }));
+      return updateMode(state, (m) => ({ ...m, done: {}, failed: {}, ...(m.story ? { story: { ...m.story, done: {} } } : {}) }));
     case "selectTasks":
       return updateMode(state, (m) => {
         const selected = action.replace ? [] : [...m.selected];

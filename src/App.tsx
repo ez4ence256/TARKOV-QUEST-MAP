@@ -548,7 +548,7 @@ export default function App() {
               onStoryReset={(chapter) => dispatch({ type: "resetStory", chapter })}
               done={mode.done}
               onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })}
-              onReset={(task) => dispatch({ type: "resetProgress", objectiveIds: task.objectives.map((o) => o.id) })}
+              onReset={(task) => dispatch({ type: "resetProgress", objectiveIds: task.objectives.map((o) => o.id), taskId: task.id })}
               onComplete={completeTask}
               onPhotos={showPhotos}
             />
@@ -627,7 +627,7 @@ export default function App() {
                   storyDone={Object.keys(mode.story?.done ?? {}).length}
                   modeLabel={modeLabel ?? ""}
                   onResetTask={(task) =>
-                    dispatch({ type: "resetProgress", objectiveIds: task.objectives.map((o) => o.id) })
+                    dispatch({ type: "resetProgress", objectiveIds: task.objectives.map((o) => o.id), taskId: task.id })
                   }
                   onResetAll={() => dispatch({ type: "resetAllProgress" })}
                   onExport={() => exportState(state)}

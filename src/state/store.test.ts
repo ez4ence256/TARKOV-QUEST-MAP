@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import type { Task } from "../types";
 import { emptyModeState, loadState, reducer, sanitizeState, type Action, type AppState, type ModeState } from "./store";
+import { roomStateOf } from "../lib/roomSync";
 import { orphanDoneCount, tasksWithProgress } from "../lib/points";
 
 // « Signal - Partie 3 » (« Signal - Part 3 ») : identifiants réels de l'API tarkov.dev,
@@ -112,6 +113,60 @@ describe("réinitialisation de la progression", () => {
     expect(tasksWithProgress([otherTask, signal3], done).map((t) => t.name)).toEqual(["Autre", "Signal - Partie 3"]);
     expect(tasksWithProgress([signal3], {})).toEqual([]);
     expect(orphanDoneCount([signal3], done)).toBe(1); // "o-autre" n'est pas dans la liste fournie
+  });
+});
+
+describe("quêtes échouées, planque, faction", () => {
+  const extra: Partial<ModeState> = { failed: { q1: true }, hideout: { s1: 2 }, faction: "BEAR", done: { o1: 1 } };
+  it("aller-retour JSON : mêmes valeurs", () => {
+    const s = { ...stateWith(extra, {}), includeHideout: true };
+    const back = sanitizeState(JSON.parse(JSON.stringify(s)));
+    expect(back.modes.regular).toMatchObject({ failed: { q1: true }, hideout: { s1: 2 }, faction: "BEAR" });
+    expect(back.includeHideout).toBe(true);
+  });
+  it("valeurs invalides écartées", () => {
+    const bad = { modes: { regular: { failed: { a: 1, "": true, b: true }, hideout: { s1: 99, s2: 1.5, s3: "x", s4: -1, s5: 3 }, faction: "scav" } }, includeHideout: "oui" };
+    const m = sanitizeState(bad).modes.regular!;
+    expect(m.failed).toEqual({ b: true });
+    expect(m.hideout).toEqual({ s5: 3 });
+    expect(m.faction).toBeUndefined();
+    expect(sanitizeState(bad).includeHideout).toBe(false);
+  });
+  it("room : snapshot, ops et restauration gardent le personnel ; l'état partagé ne l'inclut pas", () => {
+    const s = stateWith(extra, {});
+    const a = reducer(s, { type: "roomSnapshot", mode: "regular", state: { selected: ["x"], done: [], storySelected: [], storyDone: [] }, replace: true });
+    const b = reducer(a, { type: "roomOps", mode: "regular", ops: [{ kind: "task", id: "y", on: true }] });
+    const c = reducer(b, { type: "restoreMode", mode: "regular", state: emptyModeState() });
+    for (const x of [a, b, c]) expect(x.modes.regular).toMatchObject({ failed: { q1: true }, hideout: { s1: 2 }, faction: "BEAR" });
+    expect(JSON.stringify(roomStateOf(s.modes.regular))).not.toMatch(/q1|hideout|BEAR/);
+  });
+  it("« Tout réinitialiser » vide les échouées mais garde planque et faction", () => {
+    const m = reducer(stateWith(extra, {}), { type: "resetAllProgress" }).modes.regular!;
+    expect(m.failed).toEqual({});
+    expect(m.hideout).toEqual({ s1: 2 });
+    expect(m.faction).toBe("BEAR");
+  });
+  it("applyQuestStatus : coche, échoue, désélectionne puis annule", () => {
+    const s = stateWith({ selected: [{ taskId: "q1", color: 0 }] }, {});
+    const a = reducer(s, { type: "applyQuestStatus", done: ["o1"], failed: ["q2"], deselect: ["q1"] }).modes.regular!;
+    expect(a.done.o1).toBeTypeOf("number");
+    expect(a.failed).toEqual({ q2: true });
+    expect(a.selected).toEqual([]);
+    const b = reducer({ ...s, modes: { ...s.modes, regular: a } }, { type: "applyQuestStatus", done: [], undone: ["o1"], failed: [], unfailed: ["q2"], select: ["q1"] }).modes.regular!;
+    expect(b.done).toEqual({});
+    expect(b.failed).toEqual({});
+    expect(b.selected.map((x) => x.taskId)).toEqual(["q1"]);
+  });
+  it("resetProgress d'une quête la retire des échouées", () => {
+    const m = reducer(stateWith(extra, {}), { type: "resetProgress", objectiveIds: ["o1"], taskId: "q1" }).modes.regular!;
+    expect(m.failed).toEqual({});
+    expect(m.done).toEqual({});
+  });
+  it("setHideoutLevel / setFaction", () => {
+    let s = reducer(stateWith({}, {}), { type: "setHideoutLevel", stationId: "s1", level: 3 });
+    s = reducer(s, { type: "setFaction", faction: "USEC" });
+    expect(s.modes.regular).toMatchObject({ hideout: { s1: 3 }, faction: "USEC" });
+    expect(reducer(s, { type: "setFaction", faction: null }).modes.regular!.faction).toBeUndefined();
   });
 });
 
