@@ -11,10 +11,10 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | Élément | État |
 |---|---|
 | Branche | **`main`** seule (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**, branche par défaut). |
-| Version affichée | **0.8.20** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
+| Version affichée | **0.8.21** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
 | Derniers commits | `3bc65a9` Item finder : recherche par image (0.8.2) · `78f5fb6` Ctrl+V d'une capture dans l'item finder (0.8.1) · `14c4dc9` Item finder redessiné (0.8.0) · `6800a70` journal fin de session 8 · `245ee03` Version 0.7.23 · `3a59955` Main story : ponts de l'Icebreaker pour Boreas · `2593e19` Icebreaker : calibrage corrigé · `45beb1b` positions > 100 m retirées (0.7.22) · `7acab9f` positions de The Ticket · `5447eef` bouton du panneau en icône seule sur téléphone (0.7.21) · `69ddc95` Item finder · `d81736d` infos du Labyrinthe sur la map |
 | Travail non commité | Seulement `.claude/` (non suivi, volontairement hors du dépôt : chemin propre à cette machine) |
-| Tests | **335/335** au vert (`npx vitest run`), 35 fichiers (voir « Tests ») |
+| Tests | **338/338** au vert (`npx vitest run`), 35 fichiers (voir « Tests ») |
 | Compilation | OK (`npm run build`). Avertissement Vite : le fichier principal fait **682 Ko** (198 Ko compressé) > 500 Ko. L'OCR est dans des fichiers séparés chargés à la demande (moteur 3,9 Mo, worker 111 Ko). |
 | **Production** | **https://tarkov.aprilox.fr**, déployée automatiquement à chaque push sur `main` (~1 min) par l'hébergeur, qui lance `npm start` (`server/index.mjs` : `dist/` + API des rooms sur le même port). Fichier absent = 404 sans cache (corrige l'empoisonnement du cache) ; `index.html` en `no-cache`, `/assets/*` en `immutable`. |
 | Vérifié dans le navigateur | Panneau à 400 à 720 px, téléphone, zoom 125 % simulé · sélection épinglée, ordre des sections · sorties (Douanes, Labs) · import d'une **image de synthèse** · rooms entre deux origines (création, jointure, coupure du serveur de 45 s) · Labyrinthe (marqueurs, bascule de map aux étapes) · Icebreaker après correction · voir l'historique pour le détail. |
@@ -54,7 +54,7 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | `69ddc95` | 8 | Item finder (objets du jeu, quêtes, hideout, barters, crafts) |
 | `5447eef` | 8 | Barre du haut : bouton du panneau en icône seule sur téléphone |
 
-### Tests (335, 35 fichiers)
+### Tests (338, 35 fichiers)
 
 | Fichier | Ce qui est couvert |
 |---|---|
@@ -347,6 +347,7 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
   - Fiche quête : bouton **« ✓ Quête terminée »** à côté de « 📷 Photos » : coche tous les objectifs et retire la quête de la sélection ; quand tout est coché, étiquette « ✓ Terminée ». Liste des quêtes : une quête terminée est **grisée** (opacité 0,5) ; case **« Seulement les quêtes terminées »** à côté de « Masquer les quêtes terminées » (exclusives ; `QuestFilters.onlyCompleted` ; chapitres de la Main story masqués dans ce mode).
   - Item finder, clés : bloc **« 🔑 Ce qu'elle ouvre »** en tête de « Où le trouver » : champ « usage » de l'Infobox key (`parseInfobox(wikitext, kind)`, nouveau paramètre, « quest » par défaut), « Où est la serrure » et « Derrière la serrure » (retirés du wiki replié). Cause du retour : la clé Pinewood 206 a un spot au sol, donc ses sections de serrure étaient repliées sous les spots (la clé Dorm 206, sans spot, les montrait directement).
   - **Work Smarter sur Le Labyrinthe** : chez tarkov.dev, la zone « exit777 » de l'objectif « secret exfil on Customs » a 3 positions sur Customs **et une sur The Labyrinth** (+ map Labyrinth dans `maps`). Corrigé à la lecture (`onTaskMap`, `src/api/tarkovJson.ts`) : une quête liée à une map ne garde, pour un objectif qui a des zones sur cette map, que celles-là ; et `taskMapIds` ne compte que les maps des zones quand un objectif en a. **Cache des données passé en v10** (relecture une fois). Vérifié : filtre Labyrinthe 9 -> 8 quêtes, Work Smarter absente.
+- **Proposer la quête suivante** (0.8.21) : quand une quête devient terminée (bouton « Quête terminée » ou dernier objectif coché), petite fenêtre en haut à droite (`src/components/UnlockToast.tsx`) : « ✓ <quête> terminée. Elle débloque : … L'activer ? Oui / Non ». Quêtes proposées (`questsUnlockedBy`, `src/lib/points.ts`) : celles qui la demandent « complete » (`taskRequirements` de tarkov.dev), pas déjà terminées, dont toutes les autres quêtes demandées « complete » sont terminées (niveau PMC et réputation non suivis : ne bloquent pas), et pas déjà sélectionnées. Oui : ajoutées à la sélection et la fiche quête montre la première. Détection dans `App` (quêtes terminées avant / après) : rien au chargement, au changement de mode, ni quand plusieurs quêtes se terminent d'un coup (import, room). Vérifié : Gunsmith Master - Part 2 -> propose Part 3 -> Oui : sélectionnée, fiche ouverte (puis remis à zéro).
 
 ## Étude 3D (session 5, en attente de validation)
 

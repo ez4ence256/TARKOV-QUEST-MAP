@@ -8,7 +8,7 @@ import { MapView, type Placing } from "./map/MapView";
 import type { ItemSpotMarker } from "./map/ItemSpotsLayer";
 import { exportState, getLastMode, useAppState, type CustomPoint } from "./state/store";
 import { QUEST_COLORS } from "./lib/objectiveTypes";
-import { buildObjectivePoints, manualPointKey, shownObjectives, taskMapIds } from "./lib/points";
+import { buildObjectivePoints, isTaskFinished, manualPointKey, questsUnlockedBy, shownObjectives, taskMapIds } from "./lib/points";
 import { ModePicker } from "./components/ModePicker";
 import { QuestList } from "./components/QuestList";
 import { SelectedQuests } from "./components/SelectedQuests";
@@ -32,6 +32,7 @@ import { MapPicker } from "./components/MapPicker";
 import { ItemFinder } from "./components/ItemFinder";
 import { TraderWindow } from "./components/TraderWindow";
 import { Lightbox } from "./components/Lightbox";
+import { UnlockToast } from "./components/UnlockToast";
 
 type Tab = "selection" | "quests" | "capture" | "quest" | "photos" | "custom" | "settings";
 
@@ -143,6 +144,23 @@ export default function App() {
   const tasks = useMemo(() => (data ? [...data.tasks, ...buildEventTasks(eventEntries, data)] : []), [data, eventEntries]);
   const maps = useMemo(() => data?.maps ?? [], [data]);
   const tasksById = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
+
+  // une quête vient d'être terminée -> proposer celles qu'elle débloque (petite fenêtre en haut à droite)
+  const finishedIds = useMemo(() => new Set(tasks.filter((t) => isTaskFinished(t, mode.done)).map((t) => t.id)), [tasks, mode.done]);
+  const prevFinished = useRef<{ key: string; ids: Set<string> } | null>(null);
+  const [unlockOffer, setUnlockOffer] = useState<{ done: Task; next: Task[] } | null>(null);
+  useEffect(() => {
+    const key = `${gameMode}|${tasks.length}`;
+    const prev = prevFinished.current;
+    prevFinished.current = { key, ids: finishedIds };
+    // premier calcul (chargement, autre mode) : rien à proposer ; plusieurs d'un coup (import, room) : non plus
+    if (!prev || prev.key !== key) return;
+    const newly = tasks.filter((t) => finishedIds.has(t.id) && !prev.ids.has(t.id));
+    if (newly.length !== 1) return;
+    const selected = new Set(mode.selected.map((s) => s.taskId));
+    const next = questsUnlockedBy(newly[0], tasks, mode.done).filter((t) => !selected.has(t.id));
+    setUnlockOffer(next.length ? { done: newly[0], next } : null);
+  }, [finishedIds]);
   const objectivesById = useMemo(() => {
     const m = new Map<string, Objective>();
     for (const t of tasks) for (const o of t.objectives) m.set(o.id, o);
@@ -414,6 +432,19 @@ export default function App() {
         </select>
       </header>
 
+      {unlockOffer && (
+        <UnlockToast
+          done={unlockOffer.done}
+          next={unlockOffer.next}
+          onYes={() => {
+            dispatch({ type: "selectTasks", taskIds: unlockOffer.next.map((t) => t.id), replace: false });
+            // la fiche quête montre la (première) quête débloquée
+            setTabTaskId(unlockOffer.next[0].id);
+            setUnlockOffer(null);
+          }}
+          onNo={() => setUnlockOffer(null)}
+        />
+      )}
       {mapNotice && (
         <div className="alert" role="status">
           {mapNotice}{" "}

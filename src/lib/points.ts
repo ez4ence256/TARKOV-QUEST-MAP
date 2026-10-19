@@ -107,6 +107,29 @@ export function taskProgress(task: Task, done: Record<string, number>) {
   return { done: list.filter((o) => done[o.id]).length, total: list.length };
 }
 
+/** Quête terminée : tous ses objectifs comptés (voir taskProgress) sont cochés. */
+export const isTaskFinished = (task: Task, done: Record<string, number>) => {
+  const p = taskProgress(task, done);
+  return p.total > 0 && p.done === p.total;
+};
+
+/**
+ * Quêtes que la fin de `task` débloque : elles la demandent terminée (« complete » chez tarkov.dev), ne
+ * sont pas déjà terminées, et toutes leurs autres quêtes demandées terminées le sont aussi. Les
+ * conditions de niveau ou de marchand ne sont pas suivies par l'app : elles ne bloquent pas.
+ */
+export function questsUnlockedBy(task: Task, tasks: Task[], done: Record<string, number>): Task[] {
+  const byId = new Map(tasks.map((t) => [t.id, t]));
+  return tasks.filter((t) => {
+    const reqs = t.details?.taskRequirements ?? [];
+    if (!reqs.some((r) => r.taskId === task.id && r.status.includes("complete")) || isTaskFinished(t, done)) return false;
+    return reqs.every((r) => {
+      const other = byId.get(r.taskId);
+      return !r.status.includes("complete") || !other || isTaskFinished(other, done);
+    });
+  });
+}
+
 /** Quêtes ayant au moins un objectif coché (optionnels compris), dans l'ordre de `tasks`. */
 export function tasksWithProgress(tasks: Task[], done: Record<string, number>): Task[] {
   return tasks.filter((t) => t.objectives.some((o) => done[o.id]));

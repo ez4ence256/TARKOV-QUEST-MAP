@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Task } from "../types";
 import { emptyModeState } from "../state/store";
-import { buildObjectivePoints, currentObjective, manualPointKey, taskMapIds, taskProgress } from "./points";
+import { buildObjectivePoints, currentObjective, manualPointKey, questsUnlockedBy, taskMapIds, taskProgress } from "./points";
 
 const task: Task = {
   id: "t",
@@ -99,5 +99,32 @@ describe("un objectif à la fois", () => {
   it("les objectifs faits suivent « afficher les faits », réglage désactivé = tout", () => {
     expect(ids({ a: 1 }, "m1", true, true)).toEqual(["a"]);
     expect(ids({}, "m2", false)).toEqual(["b"]);
+  });
+});
+
+describe("quêtes débloquées par une quête terminée", () => {
+  const q = (id: string, reqs: { taskId: string; status: string[] }[] = []): Task => ({
+    ...task,
+    id,
+    name: id,
+    nameEn: id,
+    objectives: [{ id: `${id}-o`, type: "mark", description: "", optional: false, mapIds: [], locations: [] }],
+    details: { taskRequirements: reqs, traderRequirements: [], neededKeys: [] } as unknown as Task["details"],
+  });
+  const gs2 = q("gs2");
+  const gs3 = q("gs3", [{ taskId: "gs2", status: ["complete"] }]);
+  const other = q("other");
+  const signal = q("signal", [{ taskId: "gs3", status: ["complete"] }, { taskId: "other", status: ["complete"] }]);
+  const whileActive = q("side", [{ taskId: "gs3", status: ["active"] }]);
+  const tasks = [gs2, gs3, other, signal, whileActive];
+  it("Gunsmith 2 terminée -> Gunsmith 3", () => {
+    expect(questsUnlockedBy(gs2, tasks, { "gs2-o": 1 }).map((t) => t.id)).toEqual(["gs3"]);
+  });
+  it("une autre quête demandée pas encore terminée : pas proposée ; terminée : proposée", () => {
+    expect(questsUnlockedBy(gs3, tasks, { "gs2-o": 1, "gs3-o": 1 }).map((t) => t.id)).toEqual([]);
+    expect(questsUnlockedBy(gs3, tasks, { "gs2-o": 1, "gs3-o": 1, "other-o": 1 }).map((t) => t.id)).toEqual(["signal"]);
+  });
+  it("demandée seulement « active » ou déjà terminée : pas proposée", () => {
+    expect(questsUnlockedBy(gs2, tasks, { "gs2-o": 1, "gs3-o": 1 })).toEqual([]);
   });
 });
