@@ -145,6 +145,7 @@ export function SettingsTab(p: Props) {
             tarkov-dev-svg-maps
           </a>{" "}
           (CC BY-NC-SA 4.0).{" "}
+          {tr("Icônes", "Icons")}: <a href="https://lucide.dev" target="_blank" rel="noreferrer">Lucide</a> ({tr("licence ISC", "ISC license")}).{" "}
           {tr(
             "Escape from Tarkov est une marque de Battlestate Games ; ce projet n'y est pas affilié.",
             "Escape from Tarkov is a trademark of Battlestate Games; this project is not affiliated with it.",

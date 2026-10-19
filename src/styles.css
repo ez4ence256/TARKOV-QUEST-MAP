@@ -201,6 +201,11 @@ button:focus-visible {
   flex: none;
 }
 
+.ui-icon {
+  flex: none;
+  vertical-align: -0.2em;
+}
+
 /* --- Écran de choix du mode --- */
 .mode-picker {
   min-height: 100%;
