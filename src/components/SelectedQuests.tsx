@@ -19,6 +19,10 @@ interface Props {
   currentMapId: string | null;
   dispatch: (a: Action) => void;
   onShowMap: (mapId: string) => void;
+  /** Nombre de points par map pour la sélection (même décompte que le sélecteur de map). */
+  mapCounts: Map<string, number>;
+  /** Termine la quête : tous ses objectifs faits, retirée de la sélection. */
+  onComplete: (task: Task) => void;
   onFocus: (pointKey: string, mapId: string) => void;
   onStartPlacing: (objective: Objective) => void;
   onBrowse: () => void;
@@ -49,6 +53,8 @@ export function SelectedQuests(props: Props) {
     }),
   ].sort((a, b) => a.name.localeCompare(b.name, lang));
 
+  const mapsWithPoints = [...props.mapCounts].filter(([id, n]) => n > 0 && props.maps.some((m) => m.id === id));
+
   if (items.length === 0) {
     return (
       <div className="tab-body empty">
@@ -62,6 +68,16 @@ export function SelectedQuests(props: Props) {
 
   return (
     <div className="tab-body">
+      {mapsWithPoints.length > 0 && (
+        <div className="objective-links selection-maps">
+          <span className="muted small">{tr("Mes maps :", "My maps:")}</span>
+          {mapsWithPoints.map(([mapId, n]) => (
+            <button key={mapId} className={`chip ${mapId === props.currentMapId ? "is-current" : ""}`} onClick={() => props.onShowMap(mapId)}>
+              {mapName(mapId)} ({n})
+            </button>
+          ))}
+        </div>
+      )}
       {items.length > 0 && (
         <div className="selection-head">
           <span className="muted small">
@@ -228,6 +244,13 @@ export function SelectedQuests(props: Props) {
             <div className="progress-bar">
               <span style={{ width: `${progress.total ? (progress.done / progress.total) * 100 : 0}%` }} />
             </div>
+            {task.objectives.some((o) => !mode.done[o.id]) && (
+              <div className="btn-row">
+                <button className="btn btn-small btn-primary" onClick={() => props.onComplete(task)}>
+                  <UiIcon id="circle-check" /> {tr("Terminer", "Complete")}
+                </button>
+              </div>
+            )}
 
             {positioned.length === 0 && (
               <div className="objective-note">

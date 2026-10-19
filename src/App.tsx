@@ -318,6 +318,11 @@ export default function App() {
     const name = maps.find((m) => m.id === target)?.name ?? "";
     setMapNotice(tr(`Map affichée : ${name} (les points de « ${task.name} » s'y trouvent).`, `Displayed map: ${name} (the points of "${task.name}" are there).`));
   };
+  // marque tous les objectifs faits, puis retire la quête de la sélection (l'UnlockToast propose la suite)
+  const completeTask = (task: Task) => {
+    for (const o of task.objectives) if (!mode.done[o.id]) dispatch({ type: "setDone", objectiveId: o.id, done: true });
+    if (mode.selected.some((s) => s.taskId === task.id)) dispatch({ type: "toggleTask", taskId: task.id });
+  };
   const showMap = (mapId: string) => {
     dispatch({ type: "setMap", mapId });
     if (isMobile()) setPanelOpen(false);
@@ -547,6 +552,8 @@ export default function App() {
               currentMapId={currentMap?.id ?? null}
               dispatch={dispatch}
               onShowMap={showMap}
+              mapCounts={mapCounts}
+              onComplete={completeTask}
               onFocus={focusPoint}
               onStartPlacing={(o) =>
                 startPlacing({ kind: "manual", objectiveId: o.id, label: o.description || tr("objectif", "objective") })
@@ -573,10 +580,7 @@ export default function App() {
               done={mode.done}
               onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })}
               onReset={(task) => dispatch({ type: "resetProgress", objectiveIds: task.objectives.map((o) => o.id) })}
-              onComplete={(task) => {
-                for (const o of task.objectives) if (!mode.done[o.id]) dispatch({ type: "setDone", objectiveId: o.id, done: true });
-                if (mode.selected.some((s) => s.taskId === task.id)) dispatch({ type: "toggleTask", taskId: task.id });
-              }}
+              onComplete={completeTask}
               onPhotos={showPhotos}
             />
           )}

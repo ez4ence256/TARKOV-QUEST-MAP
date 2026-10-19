@@ -927,6 +927,10 @@ kbd {
   justify-content: space-between;
   align-items: center;
 }
+.selection-maps {
+  align-items: center;
+  margin: 0 0 0.5rem;
+}
 .task-card {
   border: 1px solid var(--line);
   border-left: 4px solid var(--q, var(--line));
