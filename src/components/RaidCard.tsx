@@ -1,4 +1,4 @@
-// Mode raid (Option B) : carte flottante avec les objectifs des quêtes sélectionnées sur la map affichée.
+// Mode raid : carte flottante avec les objectifs des quêtes sélectionnées sur la map affichée.
 import { useState } from "react";
 import type { MapPoint, Objective, Task } from "../types";
 import type { StoryMapPoint } from "../lib/storyPoints";

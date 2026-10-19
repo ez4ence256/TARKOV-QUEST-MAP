@@ -1,7 +1,8 @@
-// Barre latérale (Option B) : accès aux vues du panneau, aux outils et aux réglages.
+// Barre latérale : accès aux vues du panneau, aux outils et aux réglages.
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { tr, type Lang } from "../lib/i18n";
 import { UiIcon } from "./UiIcon";
+import { version } from "../../package.json";
 import type { UiIconId } from "../lib/uiIcons";
 
 /** Groupes de vues du panneau (App garde l'union `Tab` interne). */
@@ -109,7 +110,7 @@ export function Rail(p: Props) {
         </span>
         <span className="rail-label">{tr("Plus", "More")}</span>
       </button>
-      <div className="rail-version">Option B</div>
+      <div className="rail-version">v{version}</div>
       <button className="rail-item rail-collapse" aria-expanded={p.panelOpen} aria-controls="side-panel" aria-label={panelName} title={panelName} onClick={p.onTogglePanel}>
         <span className="rail-icon">
           <UiIcon id={p.panelOpen ? "panel-left-close" : "panel-left-open"} size={22} />
