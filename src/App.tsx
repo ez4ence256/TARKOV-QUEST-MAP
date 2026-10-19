@@ -25,7 +25,8 @@ import { clampPanelWidth, readPanelWidth } from "./lib/panelWidth";
 import { storyIdOf, storyStepId } from "./lib/story";
 import { chaptersWithPositions, currentStoryPoints, pointsOnMap } from "./lib/storyPoints";
 import { chapterName, useStoryItems } from "./components/StoryView";
-import { useRoom } from "./api/room";
+import { inRoom, useRoom } from "./api/room";
+import { branchFailures, prerequisiteChanges } from "./lib/questChain";
 import { buildEventTasks, loadEventEntries, type EventEntry } from "./api/eventQuests";
 import { RoomControl } from "./components/RoomControl";
 import { MapPicker } from "./components/MapPicker";
@@ -181,12 +182,18 @@ export default function App() {
 
   // une quête vient d'être terminée -> proposer celles qu'elle débloque (petite fenêtre en haut à droite)
   const finishedIds = useMemo(() => new Set(tasks.filter((t) => isTaskFinished(t, mode.done)).map((t) => t.id)), [tasks, mode.done]);
+  const muteUnlock = useRef(false);
   const prevFinished = useRef<{ key: string; ids: Set<string> } | null>(null);
   const [unlockOffer, setUnlockOffer] = useState<{ done: Task; next: Task[] } | null>(null);
   useEffect(() => {
     const key = `${gameMode}|${tasks.length}`;
     const prev = prevFinished.current;
     prevFinished.current = { key, ids: finishedIds };
+    // prérequis grisés par l'app (activation d'une quête) : jamais de proposition
+    if (muteUnlock.current) {
+      muteUnlock.current = false;
+      return;
+    }
     // premier calcul (chargement, autre mode) : rien à proposer ; plusieurs d'un coup (import, room) : non plus
     if (!prev || prev.key !== key) return;
     const newly = tasks.filter((t) => finishedIds.has(t.id) && !prev.ids.has(t.id));
@@ -349,10 +356,58 @@ export default function App() {
   // Sélection d'une quête : si rien d'elle n'est sur la map affichée mais qu'il y en a ailleurs, on y va.
   const [mapNotice, setMapNotice] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(helpWanted);
+  const failed = mode.failed ?? NO_DONE;
+  // information avec « Annuler » après un grisage automatique (prérequis, branches exclusives)
+  const [chainNotice, setChainNotice] = useState<{ text: string; undo?: () => void } | null>(null);
+  useEffect(() => setChainNotice(null), [gameMode]);
+  /**
+   * Une seule action : coche les objectifs des quêtes `complete`, marque `fail` échouées, les sort de la sélection.
+   * `replace` : la sélection est remplacée (rien à retirer ni à rétablir). Retourne rien si rien ne change.
+   */
+  const applyGrey = (complete: string[], fail: string[], text: (k: number, f: number) => string, replace = false) => {
+    const ticks = complete.flatMap((id) => (tasksById.get(id)?.objectives ?? []).filter((o) => !mode.done[o.id]).map((o) => o.id));
+    const newFail = fail.filter((id) => !failed[id]);
+    const sel = new Set(replace ? [] : mode.selected.map((s) => s.taskId));
+    const deselect = [...new Set([...complete, ...newFail])].filter((id) => sel.has(id));
+    if (!ticks.length && !newFail.length) return;
+    if (ticks.length) muteUnlock.current = true;
+    dispatch({ type: "applyQuestStatus", done: ticks, failed: newFail, deselect });
+    setChainNotice({
+      text: text(complete.length, newFail.length),
+      undo: () => dispatch({ type: "applyQuestStatus", done: [], undone: ticks, failed: [], unfailed: newFail, select: deselect }),
+    });
+  };
+  // Grise les prérequis des quêtes qu'on vient d'activer. Actions locales seulement (jamais au chargement,
+  // à l'import ni via une room : les cases cochées y seraient envoyées à tout le groupe).
+  const greyPrerequisites = (added: Task[], replace = false) => {
+    const addedIds = new Set(added.map((t) => t.id));
+    const complete = new Set<string>();
+    const fail = new Set<string>();
+    for (const t of added) {
+      const c = prerequisiteChanges(t.id, tasks, mode.done, failed);
+      c.complete.forEach((id) => complete.add(id));
+      c.failed.forEach((id) => fail.add(id));
+    }
+    for (const id of [...addedIds, ...complete]) fail.delete(id);
+    for (const id of addedIds) complete.delete(id);
+    if (!complete.size && !fail.size) return;
+    if (inRoom()) {
+      setChainNotice({
+        text: tr(
+          "Room en cours : les prérequis ne sont pas grisés automatiquement (tes quêtes resteraient mélangées avec celles du groupe).",
+          "Room in progress: prerequisites are not greyed out automatically (your quests would get mixed with the group's).",
+        ),
+      });
+      return;
+    }
+    applyGrey([...complete], [...fail], (k, f) => tr(`${k + f} quête(s) prérequise(s) grisée(s) (${k} terminée(s), ${f} échouée(s)).`, `${k + f} prerequisite quest(s) greyed out (${k} completed, ${f} failed).`), replace);
+  };
   const toggleTask = (taskId: string) => {
+    const adding = !mode.selected.some((s) => s.taskId === taskId);
     dispatch({ type: "toggleTask", taskId });
     const task = tasksById.get(taskId);
-    if (!task || mode.selected.some((s) => s.taskId === taskId) || !currentMap) return;
+    if (task && adding) greyPrerequisites([task]);
+    if (!task || !adding || !currentMap) return;
     const shown = { objectives: shownObjectives(task, mode.done, false, oneAtATime) };
     const target = dominantMap([shown], 0);
     if (!target || target === currentMap.id || shown.objectives.some((o) => o.locations.some((l) => l.mapId === currentMap.id))) return;
@@ -361,10 +416,21 @@ export default function App() {
     setMapNotice(tr(`Map affichée : ${name} (les points de « ${task.name} » s'y trouvent).`, `Displayed map: ${name} (the points of "${task.name}" are there).`));
   };
   // marque tous les objectifs faits, puis retire la quête de la sélection (l'UnlockToast propose la suite)
+  // (et fait échouer ses branches exclusives, hors room : la sélection y est partagée)
   const completeTask = (task: Task) => {
-    for (const o of task.objectives) if (!mode.done[o.id]) dispatch({ type: "setDone", objectiveId: o.id, done: true });
-    if (mode.selected.some((s) => s.taskId === task.id)) dispatch({ type: "toggleTask", taskId: task.id });
+    const ticks = task.objectives.filter((o) => !mode.done[o.id]).map((o) => o.id);
+    const branch = inRoom() ? [] : branchFailures([task.id], tasks, mode.done, failed, new Set([task.id]));
+    const sel = new Set(mode.selected.map((s) => s.taskId));
+    const deselect = [task.id, ...branch].filter((id) => sel.has(id));
+    dispatch({ type: "applyQuestStatus", done: ticks, failed: branch, deselect });
+    if (branch.length)
+      setChainNotice({
+        text: tr(`${branch.length} quête(s) de branche exclusive marquée(s) échouée(s).`, `${branch.length} quest(s) of an exclusive branch marked as failed.`),
+        undo: () => dispatch({ type: "applyQuestStatus", done: [], undone: ticks, failed: [], unfailed: branch, select: deselect }),
+      });
   };
+  const failTask = (task: Task) =>
+    dispatch({ type: "applyQuestStatus", done: [], failed: [task.id], deselect: mode.selected.some((s) => s.taskId === task.id) ? [task.id] : [] });
   const showMap = (mapId: string) => {
     dispatch({ type: "setMap", mapId });
     if (isMobile()) setPanelOpen(false);
@@ -454,6 +520,7 @@ export default function App() {
         finder={
           <ItemFinder variant="rail" gameMode={gameMode} lang={lang} tasks={tasks} traders={data?.traders ?? []} maps={maps} itemNames={data?.itemNames ?? NO_NAMES} itemIcons={data?.itemIcons ?? NO_NAMES} onShowQuest={showQuest}
             done={mode.done}
+            failed={failed}
             onAddPoint={(pt) => {
               const point = { ...pt, id: newId(), createdAt: Date.now() };
               dispatch({ type: "addCustom", point });
@@ -547,6 +614,10 @@ export default function App() {
               onStoryStep={setStoryStep}
               onStoryReset={(chapter) => dispatch({ type: "resetStory", chapter })}
               done={mode.done}
+              failed={failed}
+              onActivate={(task) => toggleTask(task.id)}
+              onDeactivate={(task) => dispatch({ type: "toggleTask", taskId: task.id })}
+              onFail={failTask}
               onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })}
               onReset={(task) => dispatch({ type: "resetProgress", objectiveIds: task.objectives.map((o) => o.id), taskId: task.id })}
               onComplete={completeTask}
@@ -560,6 +631,7 @@ export default function App() {
               onApply={(taskIds, replace) => {
                 dispatch({ type: "selectTasks", taskIds, replace });
                 const added = taskIds.map((id) => tasksById.get(id)).filter((t): t is Task => Boolean(t));
+                greyPrerequisites(added.filter((t) => replace || !mode.selected.some((s) => s.taskId === t.id)), replace);
                 const mapId = dominantMap(added);
                 const k = added.length;
                 const n = tr(
@@ -656,10 +728,30 @@ export default function App() {
                 dispatch({ type: "selectTasks", taskIds: unlockOffer.next.map((t) => t.id), replace: false });
                 // la fiche quête montre la (première) quête débloquée
                 setTabTaskId(unlockOffer.next[0].id);
+                greyPrerequisites(unlockOffer.next);
                 setUnlockOffer(null);
               }}
               onNo={() => setUnlockOffer(null)}
             />
+          )}
+          {chainNotice && (
+            <div className="alert" role="status">
+              {chainNotice.text}{" "}
+              {chainNotice.undo && (
+                <button
+                  className="link"
+                  onClick={() => {
+                    chainNotice.undo!();
+                    setChainNotice(null);
+                  }}
+                >
+                  {tr("Annuler", "Undo")}
+                </button>
+              )}{" "}
+              <button className="link" onClick={() => setChainNotice(null)}>
+                OK
+              </button>
+            </div>
           )}
           {mapNotice && (
             <div className="alert" role="status">

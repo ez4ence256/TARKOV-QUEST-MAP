@@ -20,7 +20,8 @@ import { CUSTOM_ICONS, ICON_LABELS, type IconId } from "../lib/objectiveTypes";
 import { iconUrl } from "../api/tarkovJson";
 import { buildCategoryTree, OTHER, type CategoryNode } from "../lib/itemCategories";
 import { ItemThumb } from "./ItemThumb";
-import { taskProgress } from "../lib/points";
+import { isTaskFinished } from "../lib/points";
+import { isGreyed } from "../lib/questChain";
 
 const PAGE = 100;
 
@@ -72,6 +73,8 @@ interface Props {
   onAddPoint: (point: NewPoint) => void;
   /** Objectifs cochés (objectiveId -> date) : quêtes terminées grisées dans l'onglet Quêtes. */
   done: Record<string, number>;
+  /** Quêtes échouées : grisées comme les terminées. */
+  failed?: Record<string, true>;
   /** « rail » : bouton de la barre latérale (icône au-dessus du libellé). */
   variant?: "rail";
 }
@@ -103,7 +106,7 @@ export function ItemFinder(props: Props) {
   );
 }
 
-function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIcons, onShowQuest, onShowSpots, onAddPoint, done, onClose }: Props & { onClose: () => void }) {
+function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIcons, onShowQuest, onShowSpots, onAddPoint, done, failed, onClose }: Props & { onClose: () => void }) {
   const [list, setList] = useState<ListedItem[] | null>(null);
   const [error, setError] = useState(false);
   const [query, setQuery] = useState("");
@@ -331,6 +334,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                 }}
                 onAddPoint={onAddPoint}
                 done={done}
+                failed={failed}
               />
             </>
           ) : (
@@ -405,6 +409,7 @@ function Usage(p: {
   onShowSpots: (spots: ItemSpotMarker[], focus: ItemSpotMarker) => void;
   onAddPoint: (point: NewPoint) => void;
   done: Record<string, number>;
+  failed?: Record<string, true>;
 }) {
   const [tab, setTab] = useState<Tab>("quests");
   const [wikiTitles, setWikiTitles] = useState<Record<string, string>>({});
@@ -629,9 +634,8 @@ function Usage(p: {
               {rows.map((r) => {
                 const trader = p.traders.find((t) => t.id === r.task.traderId);
                 const map = p.maps.find((m) => m.id === r.task.mapId)?.name;
-                // quête terminée (tous ses objectifs cochés, comme « Masquer les quêtes terminées ») : grisée, toujours cliquable
-                const progress = taskProgress(r.task, p.done);
-                const finished = progress.total > 0 && progress.done === progress.total;
+                // quête terminée ou échouée (comme « Masquer les quêtes terminées ») : grisée, toujours cliquable
+                const finished = isGreyed(r.task, p.done, p.failed);
                 return (
                   <li key={r.taskId}>
                     <button className={`finder-card finder-quest${finished ? " is-done" : ""}`} onClick={() => p.onShowQuest(r.taskId)}>
@@ -639,7 +643,7 @@ function Usage(p: {
                       <span className="finder-quest-main">
                         <strong>
                           {r.task.name}
-                          {finished && <span className="tag finder-done-tag"><UiIcon id="check" size={12} /> {tr("Terminée", "Completed")}</span>}
+                          {finished && <span className="tag finder-done-tag"><UiIcon id="check" size={12} /> {isTaskFinished(r.task, p.done) ? tr("Terminée", "Completed") : tr("Échouée", "Failed")}</span>}
                         </strong>
                         <span className="muted finder-quest-meta">{[trader?.name, map].filter(Boolean).join(" · ")}</span>
                         <span className="finder-pills">

@@ -8,6 +8,7 @@ import { pageUrlFor } from "../api/wiki";
 import { useStoryChapters } from "./StoryView";
 import { QUEST_COLORS } from "../lib/objectiveTypes";
 import { taskProgress } from "../lib/points";
+import { isGreyed } from "../lib/questChain";
 import { getLang, tr } from "../lib/i18n";
 import { UiIcon } from "./UiIcon";
 import { filterQuests, filterStory, mergeRows, pinSelected, STORY_TRADER, type Row, type StoryResult } from "../lib/questFilter";
@@ -58,7 +59,7 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
   const filters = useMemo(() => ({ query, traderId: trader, mapId: mapFilter, hideCompleted, onlyCompleted }), [query, trader, mapFilter, hideCompleted, onlyCompleted]);
 
   // Recherche sur le nom affiché ET le nom anglais ; meilleurs résultats en premier.
-  const quests = useMemo(() => filterQuests(tasks, filters, mode.done), [tasks, filters, mode.done]);
+  const quests = useMemo(() => filterQuests(tasks, filters, mode.done, mode.failed), [tasks, filters, mode.done, mode.failed]);
   const rows = useMemo(
     () => mergeRows(quests, storyChapters.chapters && !onlyCompleted ? filterStory(storyChapters.chapters, filters, getLang()) : [], getLang(), Boolean(query.trim())),
     [quests, storyChapters.chapters, filters, query, onlyCompleted],
@@ -114,22 +115,26 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
     const color = selected.get(t.id);
     const isSelected = color !== undefined;
     const p = taskProgress(t, mode.done);
-    // quête terminée (tous ses objectifs cochés) : grisée
-    const finished = p.total > 0 && p.done === p.total;
+    // quête terminée (tous ses objectifs cochés) ou échouée : grisée, un clic ouvre sa fiche au lieu de l'activer
+    const finished = isGreyed(t, mode.done, mode.failed);
+    const failedTag = mode.failed?.[t.id] && !(p.total > 0 && p.done === p.total);
     return (
       <li key={t.id} className="quest-item">
         <button
           className={`quest-row ${isSelected ? "is-selected" : ""}${finished ? " is-done" : ""}`}
-          onClick={() => (isSelected ? onOpen(t.id) : onToggle(t.id))}
+          onClick={() => (isSelected || finished ? onOpen(t.id) : onToggle(t.id))}
           aria-pressed={isSelected}
-          title={isSelected ? tr("Ouvrir la fiche de la quête", "Open the quest page") : tr("Cliquer pour sélectionner", "Click to select")}
+          title={isSelected || finished ? tr("Ouvrir la fiche de la quête", "Open the quest page") : tr("Activer : je fais cette quête", "Activate: I'm doing this quest")}
           style={isSelected ? { ["--q" as string]: QUEST_COLORS[color] } : undefined}
         >
           <span className="quest-check" aria-hidden="true">
             {isSelected && <UiIcon id="check" size={14} />}
           </span>
           <span className="quest-main">
-            <span className="quest-name">{t.name}</span>
+            <span className="quest-name">
+              {t.name}
+              {failedTag && <span className="tag">{tr("Échouée", "Failed")}</span>}
+            </span>
             {viaEnglish && <span className="quest-alt">EN : {t.nameEn}</span>}
             <span className="quest-meta">
               {tradersById.get(t.traderId)?.name ?? "?"}

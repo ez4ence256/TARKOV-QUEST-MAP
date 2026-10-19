@@ -2,7 +2,8 @@
 // épinglées en tête. Fonctions pures, testées dans questFilter.test.ts.
 
 import type { Task } from "../types";
-import { taskMapIds, taskProgress } from "./points";
+import { taskMapIds } from "./points";
+import { isGreyed } from "./questChain";
 import { questScore } from "./search";
 import { storyIdOf, type StoryChapter } from "./story";
 
@@ -14,7 +15,7 @@ export interface QuestFilters {
   traderId: string;
   mapId: string;
   hideCompleted: boolean;
-  /** Seulement les quêtes terminées (tous les objectifs cochés). */
+  /** Seulement les quêtes terminées (tous les objectifs cochés) ou échouées. */
   onlyCompleted?: boolean;
 }
 
@@ -61,16 +62,15 @@ export function mergeRows(quests: QuestResult[], stories: StoryResult[], lang: s
 }
 
 /** Quêtes qui passent les filtres ; avec une recherche, les meilleurs résultats d'abord. */
-export function filterQuests(tasks: Task[], f: QuestFilters, done: Record<string, number>): QuestResult[] {
+export function filterQuests(tasks: Task[], f: QuestFilters, done: Record<string, number>, failed?: Record<string, true>): QuestResult[] {
   const q = f.query.trim();
   const results: QuestResult[] = [];
   for (const t of tasks) {
     if (f.traderId && t.traderId !== f.traderId) continue;
     if (f.mapId && !taskMapIds(t).has(f.mapId)) continue;
     if (f.hideCompleted || f.onlyCompleted) {
-      const p = taskProgress(t, done);
-      const finished = p.total > 0 && p.done === p.total;
-      if (f.hideCompleted ? finished : !finished) continue;
+      const greyed = isGreyed(t, done, failed);
+      if (f.hideCompleted ? greyed : !greyed) continue;
     }
     const match = q ? questScore(q, t) : { score: 1, viaEnglish: false };
     if (match.score > 0) results.push({ task: t, ...match });

@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import type { GameMap, Task, Trader } from "../types";
 import { ICON_LABELS, categoryOf } from "../lib/objectiveTypes";
 import { taskProgress } from "../lib/points";
+import { isGreyed } from "../lib/questChain";
 import { iconUrl } from "../api/tarkovJson";
 import { loadQuestPhotos, loadWikiPage, type WikiPage, type WikiPhoto } from "../api/wiki";
 import {
@@ -48,7 +49,16 @@ interface Props {
   /** Change la quête affichée (liste, ou quête préalable / suivante cliquée). */
   onTaskChange: (taskId: string) => void;
   done: Record<string, number>;
+  /** Quêtes marquées échouées. */
+  failed: Record<string, true>;
+  /** « Activer » : je fais cette quête (ajoutée à la sélection, prérequis grisés). */
+  onActivate: (task: Task) => void;
+  /** « ✓ Active » : retire de la sélection (ne dégrise rien). */
+  onDeactivate: (task: Task) => void;
+  /** « Marquer échouée ». */
+  onFail: (task: Task) => void;
   onSetDone: (objectiveId: string, done: boolean) => void;
+  /** Remet les objectifs à faire et retire des échouées (aussi « Dé-griser »). */
   onReset: (task: Task) => void;
   /** « Quête terminée » : coche tous ses objectifs et la retire de la sélection. */
   onComplete: (task: Task) => void;
@@ -252,6 +262,8 @@ export function QuestTab(p: Props) {
   const ctx = { tasks: p.tasks, traders: p.traders };
   const progress = taskProgress(task, p.done);
   const checked = task.objectives.filter((o) => p.done[o.id]).length;
+  const greyed = isGreyed(task, p.done, p.failed);
+  const active = p.selectedIds.includes(task.id);
   const traderName = (id: string) => p.traders.find((t) => t.id === id)?.name ?? "?";
   const prereq = comparePrerequisites(task, wiki, ctx);
   const pack = packingList(task, p.itemNames, p.maps);
@@ -590,12 +602,34 @@ export function QuestTab(p: Props) {
             <UiIcon id="image" /> Photos
           </button>
         )}
-        {checked < task.objectives.length ? (
-          <button className="btn btn-small btn-primary" onClick={() => p.onComplete(task)}>
-            <UiIcon id="circle-check" /> {tr("Quête terminée", "Quest done")}
+        {(!greyed || active) && (
+          <button
+            className={`btn btn-small${active ? " btn-primary" : ""}`}
+            aria-pressed={active}
+            onClick={() => (active ? p.onDeactivate(task) : p.onActivate(task))}
+            title={tr("Activer : je fais cette quête", "Activate: I'm doing this quest")}
+          >
+            {active ? tr("✓ Active", "✓ Active") : tr("Activer", "Activate")}
           </button>
+        )}
+        {!greyed ? (
+          <>
+            <button className="btn btn-small btn-primary" onClick={() => p.onComplete(task)}>
+              <UiIcon id="circle-check" /> {tr("Quête terminée", "Quest done")}
+            </button>
+            <button className="btn btn-small" onClick={() => p.onFail(task)}>
+              {tr("Marquer échouée", "Mark as failed")}
+            </button>
+          </>
         ) : (
-          <span className="tag quest-done-tag"><UiIcon id="check" size={12} /> {tr("Terminée", "Completed")}</span>
+          <>
+            <span className="tag quest-done-tag">
+              {p.failed[task.id] && checked < task.objectives.length ? tr("✗ Échouée", "✗ Failed") : tr("✓ Terminée", "✓ Completed")}
+            </span>
+            <button className="btn btn-small" onClick={() => p.onReset(task)}>
+              {tr("Dé-griser", "Un-grey")}
+            </button>
+          </>
         )}
       </div>
 
