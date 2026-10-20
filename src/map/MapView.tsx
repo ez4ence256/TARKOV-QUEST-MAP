@@ -11,6 +11,7 @@ import { markerIcon } from "./icons";
 import { BaseLayer, type BaseStatus } from "./BaseLayer";
 import { ExitsLayer } from "./ExitsLayer";
 import { StoryLayer } from "./StoryLayer";
+import { TeamLayer, type TeamMarker, type TeamPlayer } from "./TeamLayer";
 import { ItemSpotsLayer, type ItemSpotMarker } from "./ItemSpotsLayer";
 import { LabyrinthLayer } from "./LabyrinthLayer";
 import { labyrinthFor } from "../lib/labyrinth";
@@ -74,6 +75,8 @@ interface MapViewProps {
   onClearItemSpots: () => void;
   /** Dernière position envoyée par le Monitor, si elle est sur cette map. */
   player?: PlayerPosition | null;
+  /** Coéquipiers de la room (lecture seule) : objectifs en cours sur cette map et positions. Jamais comptés dans les totaux. */
+  team?: { markers: TeamMarker[]; players: TeamPlayer[] };
 }
 
 /** Emprise par défaut quand une map n'a pas de calibrage : celle des points, sinon un carré. */
@@ -363,6 +366,7 @@ function MapViewInner(props: MapViewProps) {
           );
         })}
 
+        {props.team && <TeamLayer markers={props.team.markers} players={props.team.players} coordinateRotation={calibration?.coordinateRotation ?? 0} />}
         {player && <PlayerMarker player={player} coordinateRotation={calibration?.coordinateRotation ?? 0} />}
 
         {customPoints.map((cp) => (

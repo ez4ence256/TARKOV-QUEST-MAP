@@ -5,6 +5,7 @@ import { Marker, Popup } from "react-leaflet";
 import { tr } from "../lib/i18n";
 import { arrowAngle, playerOpacity } from "../lib/playerMarker";
 import { gameToLatLng } from "./crs";
+import { TEAM_PLAYER_COLOR, teamPlayerIcon } from "./teamIcons";
 
 export interface PlayerPosition {
   x: number;
@@ -15,7 +16,8 @@ export interface PlayerPosition {
   at: number;
 }
 
-export function PlayerMarker({ player, coordinateRotation }: { player: PlayerPosition; coordinateRotation: number }) {
+/** `name` : position d'un coéquipier (room) au lieu de la mienne ; le pseudo n'est jamais interprété comme du HTML. */
+export function PlayerMarker({ player, coordinateRotation, name }: { player: PlayerPosition; coordinateRotation: number; name?: string }) {
   const [now, setNow] = useState(Date.now);
   useEffect(() => {
     setNow(Date.now());
@@ -25,14 +27,16 @@ export function PlayerMarker({ player, coordinateRotation }: { player: PlayerPos
   const angle = arrowAngle(player.rotation, coordinateRotation);
   const icon = useMemo(
     () =>
-      L.divIcon({
+      name !== undefined
+        ? teamPlayerIcon(angle, name, TEAM_PLAYER_COLOR)
+        : L.divIcon({
         className: "player-marker",
         html: `<svg width="28" height="28" viewBox="-14 -14 28 28" style="transform:rotate(${angle}deg)"><path d="M0 -12 L8 10 L0 5 L-8 10 Z" fill="#35d07f" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg>`,
         iconSize: [28, 28],
         iconAnchor: [14, 14],
         popupAnchor: [0, -12],
       }),
-    [angle],
+    [angle, name],
   );
   const age = now - player.at;
   const opacity = playerOpacity(age);
@@ -40,7 +44,11 @@ export function PlayerMarker({ player, coordinateRotation }: { player: PlayerPos
   const min = Math.max(0, Math.floor(age / 60000));
   return (
     <Marker position={gameToLatLng(player)} icon={icon} opacity={opacity} zIndexOffset={5000}>
-      <Popup>{tr(`Ta position (capture d'écran, il y a ${min} min)`, `Your position (screenshot, ${min} min ago)`)}</Popup>
+      <Popup>
+        {name !== undefined
+          ? tr(`Position de ${name} (il y a ${min} min)`, `${name}'s position (${min} min ago)`)
+          : tr(`Ta position (capture d'écran, il y a ${min} min)`, `Your position (screenshot, ${min} min ago)`)}
+      </Popup>
     </Marker>
   );
 }

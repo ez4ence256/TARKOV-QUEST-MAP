@@ -368,7 +368,8 @@ export function StoryCard({
   chapters: ChaptersState;
   done: Record<string, true>;
   onOpen: () => void;
-  onRemove: () => void;
+  /** Absent = lecture seule (chapitre d'un coéquipier) : pas de bouton pour le retirer. */
+  onRemove?: () => void;
 }) {
   // seule la page anglaise sert au décompte (les clés de progression viennent d'elle)
   const page = useStoryPage(chapterId, chapters, false);
@@ -394,9 +395,11 @@ export function StoryCard({
         ) : (
           <span className="muted small">{page.status === "loading" ? "…" : tr("wiki ?", "wiki?")}</span>
         )}
-        <button className="icon-btn" onClick={onRemove} aria-label={tr(`Retirer ${name}`, `Remove ${name}`)} title={tr("Retirer", "Remove")}>
-          ×
-        </button>
+        {onRemove && (
+          <button className="icon-btn" onClick={onRemove} aria-label={tr(`Retirer ${name}`, `Remove ${name}`)} title={tr("Retirer", "Remove")}>
+            ×
+          </button>
+        )}
       </div>
     </section>
   );

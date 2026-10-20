@@ -36,6 +36,10 @@ import { loadHideout, type HideoutStation } from "./api/itemList";
 import { buildEventTasks, loadEventEntries, type EventEntry } from "./api/eventQuests";
 import { RoomControl } from "./components/RoomControl";
 import { LegacyRoomPrompt } from "./components/LegacyRoomPrompt";
+import { TeammatePanel } from "./components/TeammatePanel";
+import { viewModeOf, teammateTasks } from "./lib/roomView";
+import { STORY_COLOR } from "./map/StoryLayer";
+import type { TeamMarker, TeamPlayer } from "./map/TeamLayer";
 import { MapPicker } from "./components/MapPicker";
 import { Rail, type RailGroup } from "./components/Rail";
 import { RaidCard } from "./components/RaidCard";
@@ -502,6 +506,40 @@ export default function App() {
   };
   const [player, setPlayer] = useState<(PlayerPosition & { mapId: string; gameMode: GameMode }) | null>(null);
   const room = useRoom(state, dispatch, { tasksById, position: player });
+
+  // Coéquipiers (room) : leurs objectifs en cours et leurs positions, calculés comme les miens (même réglage « un raid à la fois »)
+  // mais en lecture seule, hors de mes totaux (« Mes maps », sélecteur de map) et sans toucher à mon état.
+  const [viewedId, setViewedId] = useState<string | null>(null);
+  const teamLive = useMemo(
+    () => room.members.filter((m) => m.connected && m.snapshot).map((m) => ({ m, view: viewModeOf(m.snapshot!, tasksById) })),
+    [room.members, tasksById],
+  );
+  const teamStoryIds = useMemo(
+    () => [...new Set(teamLive.flatMap(({ view }) => view.story?.selected ?? []))].filter((c) => chaptersWithPositions().includes(c)),
+    [teamLive],
+  );
+  const { items: teamStoryItems } = useStoryItems(teamStoryIds, data?.itemNames ?? NO_NAMES);
+  const team = useMemo(() => {
+    if (!currentMap || teamLive.length === 0) return undefined;
+    const markers: TeamMarker[] = [];
+    const players: TeamPlayer[] = [];
+    for (const { m, view } of teamLive) {
+      for (const pt of buildObjectivePoints(teammateTasks(view, tasksById), view, currentMap.id, state.showDone, oneAtATime)) {
+        const task = pt.taskId ? tasksById.get(pt.taskId) : undefined;
+        const objective = pt.objectiveId ? objectivesById.get(pt.objectiveId) : undefined;
+        if (!task || !objective) continue;
+        const color = QUEST_COLORS[(view.selected.find((s) => s.taskId === task.id)?.color ?? 0) % QUEST_COLORS.length];
+        markers.push({ key: `${m.id}:${pt.key}`, owner: m.name, x: pt.x, z: pt.z, outline: pt.outline, color, text: `${task.name} — ${objective.description}` });
+      }
+      for (const c of view.story?.selected ?? []) {
+        const mine = pointsOnMap(currentStoryPoints(c, teamStoryItems[c] ?? [], view.story?.done ?? NO_DONE), currentMap.normalizedName);
+        for (const p of mine) markers.push({ key: `${m.id}:${p.id}`, owner: m.name, x: p.x, z: p.z, color: STORY_COLOR, text: `${storyName(c)} — ${p.stepTitle}` });
+      }
+      const pos = m.snapshot!.position;
+      if (pos && pos.map === currentMap.id) players.push({ id: m.id, name: m.name, position: pos });
+    }
+    return { markers, players };
+  }, [teamLive, teamStoryItems, currentMap, tasksById, objectivesById, state.showDone, oneAtATime, storyName]);
   const monitorEvent = useRef((_e: MonitorEvent) => {});
   monitorEvent.current = (e) => {
     if (e.type === "task") {
@@ -588,8 +626,37 @@ export default function App() {
             )
       : "";
 
+  // Mes quêtes (colonne de droite en room, seule colonne sinon)
+  const mySelection = data ? (
+    <SelectedQuests
+      tasks={tasks}
+      traders={data.traders}
+      maps={maps}
+      mode={mode}
+      currentMapId={currentMap?.id ?? null}
+      dispatch={dispatch}
+      onShowMap={showMap}
+      mapCounts={mapCounts}
+      questsOnMap={questsOnMap}
+      onComplete={completeTask}
+      onFocus={focusPoint}
+      onStartPlacing={(o) =>
+        startPlacing({ kind: "manual", objectiveId: o.id, label: o.description || tr("objectif", "objective") })
+      }
+      onBrowse={() => setTab("quests")}
+      onPhotos={showPhotos}
+      onQuest={showQuest}
+      onStory={(chapter) => showQuest(storyIdOf(chapter))}
+    />
+  ) : null;
+
+  // En room, la sélection passe sur deux colonnes (coéquipier | moi) : le panneau s'élargit le temps de la vue,
+  // sans toucher à la largeur enregistrée (tqp:panelWidth).
+  const twoColumns = panelOpen && tab === "selection" && Boolean(data) && room.members.length > 0;
+  const shownPanelWidth = twoColumns ? Math.max(panelWidth, clampPanelWidth(2 * 360, window.innerWidth)) : panelWidth;
+
   return (
-    <div className="app" style={{ ["--panel-user-w" as string]: `${panelWidth}px` }}>
+    <div className="app" style={{ ["--panel-user-w" as string]: `${shownPanelWidth}px` }}>
       <Lightbox />
       <Rail
         modeLabel={modeLabel}
@@ -672,26 +739,25 @@ export default function App() {
             />
           )}
           {data && tab === "selection" && (
-            <SelectedQuests
-              tasks={tasks}
-              traders={data.traders}
-              maps={maps}
-              mode={mode}
-              currentMapId={currentMap?.id ?? null}
-              dispatch={dispatch}
-              onShowMap={showMap}
-              mapCounts={mapCounts}
-              questsOnMap={questsOnMap}
-              onComplete={completeTask}
-              onFocus={focusPoint}
-              onStartPlacing={(o) =>
-                startPlacing({ kind: "manual", objectiveId: o.id, label: o.description || tr("objectif", "objective") })
-              }
-              onBrowse={() => setTab("quests")}
-              onPhotos={showPhotos}
-              onQuest={showQuest}
-              onStory={(chapter) => showQuest(storyIdOf(chapter))}
-            />
+            room.members.length > 0 ? (
+              <div className="room-cols">
+                <TeammatePanel
+                  members={room.members}
+                  viewedId={viewedId}
+                  onView={setViewedId}
+                  tasks={tasks}
+                  traders={data.traders}
+                  maps={maps}
+                  currentMapId={currentMap?.id ?? null}
+                  onPhotos={showPhotos}
+                  onQuest={showQuest}
+                  onStory={(chapter) => showQuest(storyIdOf(chapter))}
+                />
+                <div className="room-col room-col-mine">{mySelection}</div>
+              </div>
+            ) : (
+              mySelection
+            )
           )}
           {data && tab === "quest" && (
             <QuestTab
@@ -818,7 +884,7 @@ export default function App() {
             />
           )}
         </aside>
-        {panelOpen && <PanelResizer width={panelWidth} onChange={setPanelWidth} />}
+        {panelOpen && <PanelResizer width={shownPanelWidth} onChange={setPanelWidth} />}
 
 <main className="map-area">
           <div className="map-floating">
@@ -929,6 +995,7 @@ export default function App() {
               onStoryOpen={(chapter) => showQuest(storyIdOf(chapter))}
               onStoryPhotos={showStoryPhotos}
               player={player && player.mapId === currentMap.id ? player : null}
+              team={team}
               itemSpots={itemSpots}
               onClearItemSpots={() => setItemSpots([])}
               onPhotos={showPhotos}

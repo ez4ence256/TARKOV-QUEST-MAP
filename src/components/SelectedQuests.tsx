@@ -36,6 +36,8 @@ interface Props {
   onQuest: (taskId: string) => void;
   /** Ouvre la fiche d'un chapitre de la Main story. */
   onStory: (chapter: string) => void;
+  /** Lecture seule (quêtes d'un coéquipier en room) : rien à cocher, terminer, retirer, placer ; pas de bouton qui change de map. */
+  readOnly?: boolean;
 }
 
 export function SelectedQuests(props: Props) {
@@ -68,16 +70,18 @@ export function SelectedQuests(props: Props) {
     return (
       <div className="tab-body empty">
         <p>{tr("Aucune quête sélectionnée.", "No quest selected.")}</p>
-        <button className="btn btn-primary" onClick={props.onBrowse}>
-          {tr("Choisir des quêtes", "Choose quests")}
-        </button>
+        {!props.readOnly && (
+          <button className="btn btn-primary" onClick={props.onBrowse}>
+            {tr("Choisir des quêtes", "Choose quests")}
+          </button>
+        )}
       </div>
     );
   }
 
   return (
     <div className="tab-body">
-      {mapsWithPoints.length > 0 && (
+      {!props.readOnly && mapsWithPoints.length > 0 && (
         <div className="objective-links selection-maps">
           <span className="muted small">{tr("Mes maps :", "My maps:")}</span>
           <button className={`chip ${filterId ? "" : "is-current"}`} aria-pressed={!filterId} onClick={() => setMapFilter(null)}>
@@ -105,9 +109,11 @@ export function SelectedQuests(props: Props) {
             {tr(`${mode.selected.length} quête(s) sur la carte`, `${mode.selected.length} quest(s) on the map`)}
             {storySelected.length > 0 && ` · ${storySelected.length} Main story`}
           </span>
-          <button className="btn btn-ghost btn-small" onClick={() => dispatch({ type: "clearSelection" })}>
-            {tr("Tout désélectionner", "Deselect all")}
-          </button>
+          {!props.readOnly && (
+            <button className="btn btn-ghost btn-small" onClick={() => dispatch({ type: "clearSelection" })}>
+              {tr("Tout désélectionner", "Deselect all")}
+            </button>
+          )}
         </div>
       )}
 
@@ -121,12 +127,13 @@ export function SelectedQuests(props: Props) {
               chapters={chapters}
               done={mode.story?.done ?? {}}
               onOpen={() => props.onStory(chapter)}
-              onRemove={() => dispatch({ type: "toggleStory", chapter })}
+              onRemove={props.readOnly ? undefined : () => dispatch({ type: "toggleStory", chapter })}
             />
           );
         }
         const { taskId, color } = item.sel!;
         const task = tasksById.get(taskId);
+        if (!task && props.readOnly) return null; // quête inconnue ici (autre version des données) : ignorée
         if (!task) {
           // Quête disparue de l'API (retirée du jeu, ou autre mode de jeu)
           return (
@@ -160,7 +167,8 @@ export function SelectedQuests(props: Props) {
                 <input
                   type="checkbox"
                   checked={done}
-                  onChange={(e) => dispatch({ type: "setDone", objectiveId: o.id, done: e.target.checked })}
+                  disabled={props.readOnly}
+                  onChange={(e) => !props.readOnly && dispatch({ type: "setDone", objectiveId: o.id, done: e.target.checked })}
                   aria-label={done ? tr("Marquer comme non fait", "Mark as not done") : tr("Marquer comme fait", "Mark as done")}
                 />
               </label>
@@ -176,6 +184,7 @@ export function SelectedQuests(props: Props) {
                 {!hasApiPosition(o) && LOOT_TYPES.has(o.type) && (
                   <div className="objective-note">{tr("L'API ne donne pas d'emplacement pour cet objet.", "The API gives no location for this item.")}</div>
                 )}
+                {!props.readOnly && (
                 <div className="objective-links">
                   {[...counts.entries()].map(([mapId, n]) => (
                     <button
@@ -215,6 +224,7 @@ export function SelectedQuests(props: Props) {
                       </button>
                     ))}
                 </div>
+                )}
               </div>
             </li>
           );
@@ -253,19 +263,21 @@ export function SelectedQuests(props: Props) {
               >
                 {progress.done}/{progress.total}
               </span>
-              <button
-                className="icon-btn"
-                onClick={() => dispatch({ type: "toggleTask", taskId })}
-                aria-label={tr(`Retirer ${task.name}`, `Remove ${task.name}`)}
-                title={tr("Retirer de la carte", "Remove from the map")}
-              >
-                ×
-              </button>
+              {!props.readOnly && (
+                <button
+                  className="icon-btn"
+                  onClick={() => dispatch({ type: "toggleTask", taskId })}
+                  aria-label={tr(`Retirer ${task.name}`, `Remove ${task.name}`)}
+                  title={tr("Retirer de la carte", "Remove from the map")}
+                >
+                  ×
+                </button>
+              )}
             </div>
             <div className="progress-bar">
               <span style={{ width: `${progress.total ? (progress.done / progress.total) * 100 : 0}%` }} />
             </div>
-            {task.objectives.some((o) => !mode.done[o.id]) && (
+            {!props.readOnly && task.objectives.some((o) => !mode.done[o.id]) && (
               <div className="btn-row">
                 <button className="btn btn-small btn-primary" onClick={() => props.onComplete(task)}>
                   <UiIcon id="circle-check" /> {tr("Terminer", "Complete")}
@@ -273,7 +285,7 @@ export function SelectedQuests(props: Props) {
               </div>
             )}
 
-            {positioned.length === 0 && (
+            {!props.readOnly && positioned.length === 0 && (
               <div className="objective-note">
                 {tr("Aucune position connue pour cette quête : rien à afficher sur la carte (placez les objectifs à la main).", "No known position for this quest: nothing to show on the map (place objectives by hand).")}
               </div>

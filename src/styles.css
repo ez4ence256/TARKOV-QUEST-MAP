@@ -2012,8 +2012,108 @@ kbd {
   color: var(--danger);
 }
 
+/* --- Room : quêtes d'un coéquipier (lecture seule) à côté des miennes --- */
+.room-cols {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.room-col {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.room-col-team {
+  border-right: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg) 40%, var(--bg-2));
+}
+.room-team-head {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding: 0.6rem 0.9rem 0;
+}
+.room-team-pick {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.room-team-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.room-readonly {
+  margin: 0.5rem 0.9rem 0;
+}
+.room-collapse {
+  display: none;
+}
+/* coéquipier sur la carte : pastille au contour en tirets avec l'initiale du pseudo */
+.team-marker {
+  background: none;
+  border: 0;
+}
+.team-pin {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(17, 17, 17, 0.85);
+  border: 2px dashed var(--pin);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+}
+.team-pin-initial {
+  color: var(--pin);
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1;
+}
+.team-player {
+  position: relative;
+}
+.team-player-label {
+  position: absolute;
+  left: 50%;
+  top: 28px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 0 4px;
+  border-radius: 3px;
+  background: rgba(17, 17, 17, 0.8);
+  color: #fff;
+  font-size: 11px;
+}
+
 /* --- Téléphone : le panneau passe par-dessus la carte --- */
 @media (max-width: 800px) {
+  /* room : le coéquipier s'empile au-dessus des miennes, repliable */
+  .room-cols {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .room-col {
+    flex: none;
+  }
+  .room-col-team {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .room-col-team.is-collapsed .room-team-body {
+    display: none;
+  }
+  .room-collapse {
+    display: inline-flex;
+  }
+  .room-cols .tab-body {
+    overflow-y: visible;
+  }
   .panel {
     width: 100%;
     position: absolute;
