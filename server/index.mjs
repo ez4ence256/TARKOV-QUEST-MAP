@@ -8,6 +8,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
 import { handleRooms } from "./rooms.mjs";
 import { handleMonitor } from "./monitor.mjs";
+import { handlePhone } from "./phone.mjs";
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -74,7 +75,7 @@ async function serveStatic(req, res, dist) {
 export function createAppServer(dist = DEFAULT_DIST) {
   const root = path.resolve(dist);
   return createServer((req, res) => {
-    if (handleRooms(req, res) || handleMonitor(req, res)) return;
+    if (handleRooms(req, res) || handleMonitor(req, res) || handlePhone(req, res)) return;
     serveStatic(req, res, root).catch(() => {
       if (!res.headersSent) plain(res, 500, "Server error");
       else res.destroy();
