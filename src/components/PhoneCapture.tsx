@@ -29,6 +29,18 @@ export function PhoneCapture({ onPhotos }: { onPhotos: (photos: Blob[]) => void 
   latest.current = onPhotos; // le gestionnaire du flux voit toujours les quêtes du mode actuel
   const code = state.step === "waiting" ? state.code : null;
 
+  // test en local : le serveur donne l'adresse réseau du PC, plus besoin de la taper (reste modifiable)
+  useEffect(() => {
+    if (!local || typed) return;
+    fetch("/api/phone/lan")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { origins?: unknown } | null) => {
+        const first = Array.isArray(d?.origins) ? d.origins.find((o): o is string => typeof o === "string") : undefined;
+        if (first) setTyped((t) => t || first);
+      })
+      .catch(() => undefined);
+  }, [local, typed]);
+
   const start = async () => {
     setState({ step: "starting" });
     try {
@@ -121,7 +133,11 @@ export function PhoneCapture({ onPhotos }: { onPhotos: (photos: Blob[]) => void 
       )}
       {qr && origin ? (
         <>
-          <p className="small">{tr("Scanne ce QR code avec ton téléphone (même réseau Wi-Fi que ce PC) :", "Scan this QR code with your phone (same Wi-Fi network as this PC):")}</p>
+          <p className="small">
+            {local
+              ? tr("Scanne ce QR code avec ton téléphone (en Wi-Fi sur le même réseau que ce PC : en 5G, il ne peut pas joindre un site local) :", "Scan this QR code with your phone (on the same Wi-Fi as this PC: on mobile data it cannot reach a local site):")
+              : tr("Scanne ce QR code avec ton téléphone (Wi-Fi ou 4G/5G) :", "Scan this QR code with your phone (Wi-Fi or mobile data):")}
+          </p>
           <img className="phone-qr" src={qr} alt={tr("QR code à scanner avec le téléphone", "QR code to scan with the phone")} width={220} height={220} />
           <p className="muted small phone-url">{phoneUrl(origin, state.code)}</p>
         </>

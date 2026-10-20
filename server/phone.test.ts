@@ -150,3 +150,25 @@ describe("photos", () => {
     expect(status).toBe(503);
   });
 });
+
+describe("adresse réseau du PC (QR code en local)", () => {
+  const lan = (host: string) =>
+    new Promise<{ origins: string[] }>((resolve, reject) => {
+      const url = new URL(`${base}/api/phone/lan`);
+      http
+        .get({ hostname: url.hostname, port: url.port, path: url.pathname, headers: { Host: host } }, (r) => {
+          let body = "";
+          r.setEncoding("utf8");
+          r.on("data", (c) => (body += c));
+          r.on("end", () => resolve(JSON.parse(body)));
+        })
+        .on("error", reject);
+    });
+
+  it("donnée à une page ouverte en localhost sur le PC, jamais derrière un nom de domaine", async () => {
+    const local = await lan(`localhost:${new URL(base).port}`);
+    expect(Array.isArray(local.origins)).toBe(true);
+    for (const o of local.origins) expect(o).toMatch(new RegExp(String.raw`^http://\d+\.\d+\.\d+\.\d+:` + new URL(base).port + "$"));
+    expect((await lan("tarkov.aprilox.fr")).origins).toEqual([]);
+  });
+});

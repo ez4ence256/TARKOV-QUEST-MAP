@@ -4,6 +4,7 @@
 // Protocole : POST /api/phone → {code} ; PC : GET .../events (SSE) ; téléphone : POST .../photo, DELETE .../photo/:id,
 // POST .../done ; PC : GET .../photo/:id (lecture unique, l'image est effacée).
 import { randomBytes } from "node:crypto";
+import { networkInterfaces } from "node:os";
 
 export const LIMITS = {
   maxPhotoBytes: 3 * 1024 * 1024,
@@ -166,6 +167,21 @@ async function upload(req, res, s) {
   json(res, 200, { id });
 }
 
+const LOOPBACK = new Set(["127.0.0.1", "::1", "::ffff:127.0.0.1"]);
+/** Page ouverte en localhost sur la machine du serveur (derrière un proxy, l'hôte est le domaine public : refusé). */
+function isLocalRequest(req) {
+  const host = String(req.headers.host ?? "").replace(/:\d+$/, "").replace(/^\[|\]$/g, "");
+  return LOOPBACK.has(req.socket.remoteAddress ?? "") && ["localhost", "127.0.0.1", "::1"].includes(host);
+}
+/** Adresses IPv4 du PC sur le réseau local, avec le port de la page. */
+function lanOrigins(req) {
+  const port = /:(\d+)$/.exec(String(req.headers.host ?? ""))?.[1];
+  const out = [];
+  for (const list of Object.values(networkInterfaces()))
+    for (const a of list ?? []) if (a.family === "IPv4" && !a.internal && !a.address.startsWith("169.254.")) out.push(`http://${a.address}${port ? `:${port}` : ""}`);
+  return out;
+}
+
 /** Gestionnaire HTTP pour /api/phone/... ; renvoie false si l'URL n'est pas la sienne. */
 export function handlePhone(req, res) {
   const url = new URL(req.url ?? "/", "http://localhost");
@@ -185,6 +201,11 @@ export function handlePhone(req, res) {
   if (parts.length === 2) {
     if (m === "POST") create(req, res);
     else reply(404, { error: "not-found" });
+    return true;
+  }
+  // test en local : le PC ne peut pas deviner son adresse réseau, le serveur la donne pour le QR code
+  if (parts.length === 3 && code === "lan" && m === "GET") {
+    reply(200, { origins: isLocalRequest(req) ? lanOrigins(req) : [] });
     return true;
   }
   if (!CODE.test(code)) {
