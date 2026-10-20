@@ -681,6 +681,8 @@ export default function App() {
             done={mode.done}
             failed={failed}
             needs={needs}
+            hideoutIncluded={includeHideout}
+            onIncludeHideout={() => dispatch({ type: "setIncludeHideout", value: true })}
             onAddPoint={(pt) => {
               const point = { ...pt, id: newId(), createdAt: Date.now() };
               dispatch({ type: "addCustom", point });

@@ -4,13 +4,34 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import qrcode from "qrcode-generator";
 import { tr } from "../lib/i18n";
 import { isLocalOrigin, normalizeOrigin, phoneUrl, PHONE_ORIGIN_KEY } from "../lib/phoneCapture";
+import { isStaleBuildError, staleBuildMessage } from "../lib/staleBuild";
+
+/** Photos arrivées juste après une mise à jour du site : on recharge la page puis on les récupère (lecture unique). */
+const RESUME_KEY = "tqp:phoneResume";
+/** Le module OCR est-il chargeable ? (page ouverte avant une mise à jour : non) */
+const ocrReady = () => import("../lib/ocr").then(
+  () => true,
+  (e: unknown) => {
+    if (isStaleBuildError(e)) return false;
+    throw e;
+  },
+);
+async function fetchPhotos(code: string, ids: string[]): Promise<Blob[]> {
+  const blobs: Blob[] = [];
+  for (const id of ids) {
+    const res = await fetch(`/api/phone/${code}/photo/${id}`);
+    if (!res.ok) throw new Error(String(res.status));
+    blobs.push(await res.blob());
+  }
+  return blobs;
+}
 
 type State =
   | { step: "idle" }
   | { step: "starting" }
   | { step: "waiting"; code: string; count: number }
   | { step: "fetching" }
-  | { step: "error"; message: string };
+  | { step: "error"; message: string; stale?: boolean };
 
 function savedOrigin(): string {
   try {
@@ -41,8 +62,30 @@ export function PhoneCapture({ onPhotos }: { onPhotos: (photos: Blob[]) => void 
       .catch(() => undefined);
   }, [local, typed]);
 
+  // retour après le rechargement automatique : les photos attendent encore sur le serveur (10 min)
+  useEffect(() => {
+    let pending: { code?: unknown; ids?: unknown } | null = null;
+    try {
+      pending = JSON.parse(sessionStorage.getItem(RESUME_KEY) ?? "null");
+      sessionStorage.removeItem(RESUME_KEY);
+    } catch {
+      return;
+    }
+    if (!pending || typeof pending.code !== "string" || !Array.isArray(pending.ids)) return;
+    const ids = pending.ids.filter((id): id is string => typeof id === "string");
+    setState({ step: "fetching" });
+    fetchPhotos(pending.code, ids)
+      .then((blobs) => {
+        setState({ step: "idle" });
+        latest.current(blobs);
+      })
+      .catch(() => setState({ step: "error", message: tr("Photos non récupérées (session expirée ?). Recommence.", "Could not fetch the photos (session expired?). Start again.") }));
+  }, []);
+
   const start = async () => {
     setState({ step: "starting" });
+    // page restée ouverte pendant une mise à jour : on le dit AVANT les photos plutôt qu'après
+    if (!(await ocrReady().catch(() => true))) return setState({ step: "error", message: staleBuildMessage(), stale: true });
     try {
       const res = await fetch("/api/phone", { method: "POST" });
       // un hébergement statique répond en HTML (ou refuse le POST) : seul le vrai serveur répond en JSON
@@ -69,12 +112,13 @@ export function PhoneCapture({ onPhotos }: { onPhotos: (photos: Blob[]) => void 
       setState({ step: "fetching" });
       try {
         const ids = (JSON.parse((m as MessageEvent).data).ids as unknown[]).filter((id): id is string => typeof id === "string");
-        const blobs: Blob[] = [];
-        for (const id of ids) {
-          const res = await fetch(`/api/phone/${code}/photo/${id}`);
-          if (!res.ok) throw new Error(String(res.status));
-          blobs.push(await res.blob());
+        // site mis à jour entre-temps : les photos restent sur le serveur, on recharge et on les reprend
+        if (!(await ocrReady().catch(() => true))) {
+          sessionStorage.setItem(RESUME_KEY, JSON.stringify({ code, ids }));
+          window.location.reload();
+          return;
         }
+        const blobs = await fetchPhotos(code, ids);
         setState({ step: "idle" });
         latest.current(blobs);
       } catch {
@@ -103,6 +147,11 @@ export function PhoneCapture({ onPhotos }: { onPhotos: (photos: Blob[]) => void 
           {tr("Capturer avec ton téléphone", "Capture with your phone")}
         </button>
         {state.step === "error" && <span className="error small">{state.message}</span>}
+        {state.step === "error" && state.stale && (
+          <button className="btn btn-small" onClick={() => window.location.reload()}>
+            {tr("Recharger", "Reload")}
+          </button>
+        )}
       </div>
     );
   }

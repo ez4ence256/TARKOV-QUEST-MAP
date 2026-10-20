@@ -23,11 +23,16 @@ import { ItemThumb } from "./ItemThumb";
 import { isTaskFinished } from "../lib/points";
 import { isGreyed } from "../lib/questChain";
 import type { ItemNeed } from "../lib/itemNeeds";
+import { isStaleBuildError, staleBuildMessage } from "../lib/staleBuild";
 
 const PAGE = 100;
 
 /** Lecture d'une capture collée (Ctrl+V) : null = recherche normale. */
-type OcrState = { step: "reading"; progress: number | null } | { step: "done"; text: ListedItem[]; image: ListedItem[] } | { step: "error" };
+/** Filtre « À garder pour » : la planque, à côté des identifiants de marchands. */
+const HIDEOUT = "hideout";
+const KAPPA = "kappa";
+
+type OcrState = { step: "reading"; progress: number | null } | { step: "done"; text: ListedItem[]; image: ListedItem[] } | { step: "error"; stale?: boolean };
 
 /** Image collée -> pixels, à sa taille d'origine (la réduction se fait dans lib/itemImage). */
 async function blobPixels(blob: Blob): Promise<Rgba> {
@@ -78,6 +83,9 @@ interface Props {
   failed?: Record<string, true>;
   /** Objets à garder (quêtes pas faites, planque si incluse) : badges À GARDER / VENDABLE et bloc « À garder ». */
   needs: Map<string, ItemNeed>;
+  /** La planque compte-t-elle dans les objets à garder ? (sinon le filtre « Planque » propose de l'inclure) */
+  hideoutIncluded?: boolean;
+  onIncludeHideout?: () => void;
   /** « rail » : bouton de la barre latérale (icône au-dessus du libellé). */
   variant?: "rail";
 }
@@ -109,7 +117,7 @@ export function ItemFinder(props: Props) {
   );
 }
 
-function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIcons, onShowQuest, onShowSpots, onAddPoint, done, failed, needs, onClose }: Props & { onClose: () => void }) {
+function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIcons, onShowQuest, onShowSpots, onAddPoint, done, failed, needs, hideoutIncluded, onIncludeHideout, onClose }: Props & { onClose: () => void }) {
   const [list, setList] = useState<ListedItem[] | null>(null);
   const [error, setError] = useState(false);
   const [query, setQuery] = useState("");
@@ -120,6 +128,8 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   const [tree, setTree] = useState<CategoryNode[] | null>(null);
   const [cat, setCat] = useState<CategoryNode | null>(null);
   const [onlyNeeded, setOnlyNeeded] = useState(false);
+  // « Kappa seulement » : objets à remettre pour les quêtes demandées pour la Kappa
+  const [kappaOnly, setKappaOnly] = useState(false);
   // marchand choisi sous les catégories : objets qui restent à remettre pour ses quêtes (aucun au départ)
   const [trader, setTrader] = useState<string | null>(null);
   const [open, setOpen] = useState<Set<string>>(new Set());
@@ -197,7 +207,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
       ),
     ]);
     if (id !== run.current) return;
-    if (text.status === "rejected" && image.status === "rejected") return setOcr({ step: "error" });
+    if (text.status === "rejected" && image.status === "rejected") return setOcr({ step: "error", stale: isStaleBuildError(text.reason) });
     const byText = text.status === "fulfilled" ? matchItemLines(text.value.map((l) => l.text), all) : [];
     const byImage = image.status === "fulfilled" ? image.value.map((m) => byId.get(m.id)).filter((i): i is ListedItem => Boolean(i)) : [];
     const sure = byText.filter((m) => m.score >= RECOGNIZED_MIN);
@@ -220,23 +230,30 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   }, [all, q]);
   // marchand -> objets à lui remettre (quêtes pas grisées, mêmes sources que les badges « À garder »)
   const traderItems = useMemo(() => {
-    const traderOf = new Map(tasks.map((t) => [t.id, t.traderId]));
+    const byTask = new Map(tasks.map((t) => [t.id, t]));
     const out = new Map<string, Set<string>>();
+    const add = (id: string, itemId: string) => out.set(id, (out.get(id) ?? new Set()).add(itemId));
     for (const [itemId, need] of needs)
       for (const s of need.sources) {
-        const id = s.kind === "quest" ? traderOf.get(s.taskId) : undefined;
-        if (id) out.set(id, (out.get(id) ?? new Set()).add(itemId));
+        // la planque est rangée sous la clé HIDEOUT, la Kappa sous KAPPA, à côté des marchands
+        if (s.kind !== "quest") add(HIDEOUT, itemId);
+        else {
+          const t = byTask.get(s.taskId);
+          if (t) add(t.traderId, itemId);
+          if (t?.kappaRequired) add(KAPPA, itemId);
+        }
       }
     return out;
   }, [needs, tasks]);
   const filtered = useMemo(
     () =>
       results.filter(
-        (i) => (!cat || cat.items.has(i.id)) && (!onlyNeeded || needs.has(i.id)) && (!trader || Boolean(traderItems.get(trader)?.has(i.id))),
+        (i) => (!cat || cat.items.has(i.id)) && (!onlyNeeded || needs.has(i.id)) && (!trader || Boolean(traderItems.get(trader)?.has(i.id))) &&
+          (!kappaOnly || Boolean(traderItems.get(KAPPA)?.has(i.id))),
       ),
-    [results, cat, onlyNeeded, needs, trader, traderItems],
+    [results, cat, onlyNeeded, needs, trader, traderItems, kappaOnly],
   );
-  useEffect(() => setShown(PAGE), [q, cat, onlyNeeded, trader]);
+  useEffect(() => setShown(PAGE), [q, cat, onlyNeeded, trader, kappaOnly]);
   const pickCategory = (node: CategoryNode) => {
     setCat((c) => (c?.id === node.id ? null : node));
     setOpen((o) => new Set(o).add(node.id));
@@ -279,7 +296,9 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                   : ocr.step === "error"
                     ? !all
                       ? tr("Liste des objets pas encore chargée.", "Item list not loaded yet.")
-                      : tr("Lecture impossible. La première utilisation demande une connexion (données de langue).", "Could not read the image. The first use needs a connection (language data).")
+                      : ocr.stale
+                        ? staleBuildMessage()
+                        : tr("Lecture impossible. La première utilisation demande une connexion (données de langue).", "Could not read the image. The first use needs a connection (language data).")
                     : ocr.text.length + ocr.image.length
                       ? tr("Capture lue : choisis l'objet ci-dessous.", "Screenshot read: pick the item below.")
                       : tr("Aucun objet reconnu dans la capture.", "No item recognized in the screenshot.")}
@@ -318,6 +337,10 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
           <label className="check finder-only-need">
             <input type="checkbox" checked={onlyNeeded} onChange={(e) => setOnlyNeeded(e.target.checked)} />
             {tr("Afficher seulement les objets nécessaires", "Show only the needed items")}
+          </label>
+          <label className="check finder-only-need">
+            <input type="checkbox" checked={kappaOnly} onChange={(e) => setKappaOnly(e.target.checked)} />
+            {tr("Kappa seulement", "Kappa only")}
           </label>
           <button className="btn btn-small" onClick={onClose} aria-label={tr("Fermer", "Close")}>
             <UiIcon id="x" />
@@ -400,9 +423,23 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                     {tr("Tous les objets", "All items")} <span className="finder-cat-count">({all.length})</span>
                   </button>
                   <CategoryTree nodes={tree} depth={0} selected={cat?.id ?? null} open={open} onPick={pickCategory} onToggle={toggleCategory} />
-                  <div className="subhead finder-traders-head">{tr("À remettre à un marchand", "To hand over to a trader")}</div>
+                  <div className="subhead finder-traders-head">{tr("À garder pour", "To keep for")}</div>
                   <button className={`finder-cat finder-cat-all${trader ? "" : " is-selected"}`} aria-pressed={!trader} onClick={() => setTrader(null)}>
-                    {tr("Aucun marchand", "No trader")}
+                    {tr("Tout le monde", "Everyone")}
+                  </button>
+                  <button
+                    className={`finder-cat finder-trader${trader === HIDEOUT ? " is-selected" : ""}`}
+                    aria-pressed={trader === HIDEOUT}
+                    title={hideoutIncluded ? undefined : tr("Ajoute les objets de la planque aux objets à garder", "Adds the hideout items to the items to keep")}
+                    onClick={() => {
+                      if (!hideoutIncluded) onIncludeHideout?.();
+                      setTrader((x) => (x === HIDEOUT ? null : HIDEOUT));
+                    }}
+                  >
+                    <span className="finder-cat-name">{tr("Planque", "Hideout")}</span>{" "}
+                    <span className="finder-cat-count">
+                      {hideoutIncluded ? `(${traderItems.get(HIDEOUT)?.size ?? 0})` : tr("(l'inclure)", "(include it)")}
+                    </span>
                   </button>
                   {traders
                     .filter((t) => traderItems.has(t.id))

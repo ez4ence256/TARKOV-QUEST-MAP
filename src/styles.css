@@ -947,6 +947,13 @@ body.is-resizing {
   flex-direction: column;
   gap: 0.5rem;
 }
+/* cases « terminées » à gauche, « Kappa seulement » à droite */
+.filter-checks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.2rem 1.2rem;
+}
 .filter-row {
   display: grid;
   grid-template-columns: 1fr 1fr;

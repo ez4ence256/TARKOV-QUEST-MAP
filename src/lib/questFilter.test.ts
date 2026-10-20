@@ -65,6 +65,12 @@ describe("liste des quêtes : sélection épinglée", () => {
     expect(filterQuests(tasks, { ...none, onlyCompleted: true }, {})).toEqual([]);
   });
 
+  it("« Kappa seulement » : seulement les quêtes demandées pour la Kappa, sans chapitres de la Main story", () => {
+    const kappa = [{ ...tasks[0], kappaRequired: true }, ...tasks.slice(1)];
+    expect(filterQuests(kappa, { ...none, kappaOnly: true }, {}).map((r) => r.task.id)).toEqual(["a"]);
+    expect(filterStory([{ id: "Tour", nameEn: "Tour", name: "Excursion", frTitle: null }], { ...none, kappaOnly: true }, "fr")).toEqual([]);
+  });
+
   it("sans sélection : aucune zone épinglée", () => {
     expect(pinSelected(filterQuests(tasks, none, {}), []).pinned).toEqual([]);
   });

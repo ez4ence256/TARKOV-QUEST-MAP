@@ -41,6 +41,7 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
   const [mapFilter, setMapFilter] = useState("");
   const [hideCompleted, setHideCompleted] = useState(false);
   const [onlyCompleted, setOnlyCompleted] = useState(false);
+  const [kappaOnly, setKappaOnly] = useState(false);
 
   const tradersById = useMemo(() => new Map(traders.map((t) => [t.id, t])), [traders]);
   const selected = useMemo(() => new Map(mode.selected.map((s) => [s.taskId, s.color])), [mode.selected]);
@@ -56,7 +57,7 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
   const [storyRetry, setStoryRetry] = useState(0);
   const storyChapters = useStoryChapters(true, storyRetry);
   const storySelected = mode.story?.selected ?? [];
-  const filters = useMemo(() => ({ query, traderId: trader, mapId: mapFilter, hideCompleted, onlyCompleted }), [query, trader, mapFilter, hideCompleted, onlyCompleted]);
+  const filters = useMemo(() => ({ query, traderId: trader, mapId: mapFilter, hideCompleted, onlyCompleted, kappaOnly }), [query, trader, mapFilter, hideCompleted, onlyCompleted, kappaOnly]);
 
   // Recherche sur le nom affiché ET le nom anglais ; meilleurs résultats en premier.
   const quests = useMemo(() => filterQuests(tasks, filters, mode.done, mode.failed), [tasks, filters, mode.done, mode.failed]);
@@ -197,6 +198,8 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
             }}
           />
         </div>
+        <div className="filter-checks">
+        <div>
         <label className="check">
           <input
             type="checkbox"
@@ -219,6 +222,12 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
           />
           {tr("Seulement les quêtes terminées", "Only completed quests")}
         </label>
+        </div>
+        <label className="check">
+          <input type="checkbox" checked={kappaOnly} onChange={(e) => setKappaOnly(e.target.checked)} />
+          {tr("Kappa seulement", "Kappa only")}
+        </label>
+        </div>
         <div className="muted small">
           {tr(
             `${quests.length} quête${quests.length > 1 ? "s" : ""} sur ${tasks.length}`,

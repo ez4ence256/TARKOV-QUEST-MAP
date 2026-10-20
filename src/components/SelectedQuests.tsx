@@ -65,6 +65,10 @@ export function SelectedQuests(props: Props) {
   const filterId = mapsWithPoints.some(([id]) => id === mapFilter) ? mapFilter : null;
   const onFilterMap = (item: (typeof items)[number]) =>
     !filterId || Boolean(props.questsOnMap.get(filterId)?.has(item.chapter !== null ? storyIdOf(item.chapter) : item.sel!.taskId));
+  // « Kappa seulement » : quêtes demandées pour la Kappa (les chapitres de la Main story n'en font pas partie)
+  const [kappaOnly, setKappaOnly] = useState(false);
+  const onFilterKappa = (item: (typeof items)[number]) =>
+    !kappaOnly || (item.chapter === null && Boolean(tasksById.get(item.sel!.taskId)?.kappaRequired));
 
   if (items.length === 0) {
     return (
@@ -110,6 +114,12 @@ export function SelectedQuests(props: Props) {
             {storySelected.length > 0 && ` · ${storySelected.length} Main story`}
           </span>
           {!props.readOnly && (
+            <label className="check small">
+              <input type="checkbox" checked={kappaOnly} onChange={(e) => setKappaOnly(e.target.checked)} />
+              {tr("Kappa seulement", "Kappa only")}
+            </label>
+          )}
+          {!props.readOnly && (
             <button className="btn btn-ghost btn-small" onClick={() => dispatch({ type: "clearSelection" })}>
               {tr("Tout désélectionner", "Deselect all")}
             </button>
@@ -117,7 +127,7 @@ export function SelectedQuests(props: Props) {
         </div>
       )}
 
-      {items.filter(onFilterMap).map((item) => {
+      {items.filter((i) => onFilterMap(i) && onFilterKappa(i)).map((item) => {
         if (item.chapter !== null) {
           const chapter = item.chapter;
           return (

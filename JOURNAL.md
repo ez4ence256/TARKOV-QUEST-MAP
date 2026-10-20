@@ -11,7 +11,7 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | Élément | État |
 |---|---|
 | Branche | **`main`** seule (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**, branche par défaut). |
-| Version affichée | **0.8.28** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
+| Version affichée | **0.8.29** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
 | **Nouveau design** | depuis la **0.8.23** (commit `e189862` : barre latérale, mode raid, Barlow, icônes SVG). Dernière version avec l'**ancien design** : **0.8.22** (commit `a562131`). Pour revenir en arrière sur un point précis, comparer avec `git diff a562131 e189862 -- <fichier>`. |
 | Derniers commits | `3bc65a9` Item finder : recherche par image (0.8.2) · `78f5fb6` Ctrl+V d'une capture dans l'item finder (0.8.1) · `14c4dc9` Item finder redessiné (0.8.0) · `6800a70` journal fin de session 8 · `245ee03` Version 0.7.23 · `3a59955` Main story : ponts de l'Icebreaker pour Boreas · `2593e19` Icebreaker : calibrage corrigé · `45beb1b` positions > 100 m retirées (0.7.22) · `7acab9f` positions de The Ticket · `5447eef` bouton du panneau en icône seule sur téléphone (0.7.21) · `69ddc95` Item finder · `d81736d` infos du Labyrinthe sur la map |
 | Travail non commité | Seulement `.claude/` (non suivi, volontairement hors du dépôt : chemin propre à cette machine) |
@@ -55,7 +55,7 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | `69ddc95` | 8 | Item finder (objets du jeu, quêtes, hideout, barters, crafts) |
 | `5447eef` | 8 | Barre du haut : bouton du panneau en icône seule sur téléphone |
 
-### Tests (423, 45 fichiers)
+### Tests (425, 46 fichiers)
 
 | Fichier | Ce qui est couvert |
 |---|---|
@@ -367,6 +367,10 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
   - **Room v2** (voir section Rooms v2) : chacun garde ses quêtes ; la room ne fait que montrer celles des autres en lecture seule (colonne « Coéquipier », points sur la carte, positions du Monitor avec le pseudo) ; plus de fusion ni de « garder / restaurer » ; invite unique pour restaurer une sauvegarde mélangée par l'ancienne room (`tqp:beforeRoom:<mode>`). Vérifié avec deux origines (localhost / 127.0.0.1) : la sauvegarde de l'un ne change jamais quand l'autre coche.
   - **Capture téléphone** (`server/phone.mjs`, `src/components/PhoneCapture.tsx`, `src/components/PhonePage.tsx`, dépendance `qrcode-generator` 2.0.4 MIT) : QR code -> page photo sur le téléphone (plusieurs photos, réduites à 1600 px) -> relais en mémoire (lecture unique, 10 min) -> OCR de toutes les photos et un seul écran de vérification. En local, l'adresse réseau du PC est donnée par `/api/phone/lan` (seulement pour une page localhost). Vérifié dans le navigateur (2 photos -> 5 quêtes) ; **sur le vrai téléphone, le site de test local n'était pas joignable** (box qui isole probablement le téléphone) : à tester en ligne, en Wi-Fi ou 4G/5G.
 - **Objets : filtre par marchand** (0.8.28, demande) : sous les catégories de la fenêtre Objets, liste « À remettre à un marchand » (marchands ayant au moins un objet à remettre, avec le nombre) ; aucun choisi au départ, un clic en choisit un (re-clic ou « Aucun marchand » pour retirer) et la grille ne montre que les objets qui restent à lui remettre (mêmes sources que les badges « À garder » : quêtes non grisées, faction, objectifs giveItem non cochés). Se combine avec la recherche, la catégorie et « seulement les objets nécessaires ». Vérifié : Prapor 98 objets.
+- **Mise à jour du site pendant une capture, filtres Kappa et Planque** (0.8.29).
+  - **Retour d'usage** : 11 photos prises au téléphone, puis « Could not read the image: Failed to fetch dynamically imported module …/assets/ocr-DdHdfv1C.js » et aucune quête. Cause : la page était ouverte depuis avant le déploiement, son fichier OCR n'existait plus (404 ; le site en ligne utilisait `ocr-ZsTwrBKM.js`). Correction (`src/lib/staleBuild.ts`) : la capture téléphone vérifie que le module OCR se charge AVANT d'afficher le QR code (sinon « Le site a été mis à jour… recharge la page » + bouton Recharger) ; si la mise à jour tombe entre les photos et leur lecture, le PC garde code + identifiants dans `sessionStorage` (`tqp:phoneResume`), recharge la page et récupère les photos (encore sur le serveur, lecture unique, 10 min). Message clair aussi dans Capture et l'item finder. Vérifié : reprise après rechargement -> photo lue.
+  - **Kappa seulement** : case dans Ajouter (à droite des cases « terminées ») et dans Mes quêtes ; dans Objets, à côté de « seulement les objets nécessaires » (objets à remettre pour les quêtes Kappa). Données tarkov.dev d'octobre 2026 : **seulement 13 quêtes `kappaRequired`** (Chimie 1-3, Collector, Le tireur de Tarkov 1-4, Sew it Good 1-2, Pat le coursier 1-2, Shooter Born in Heaven) -> 13 quêtes, 49 objets.
+  - **Objets › À garder pour** : « Tout le monde », **Planque** (objets des niveaux non construits, stations non ignorées ; si la planque n'est pas incluse, « (l'inclure) » l'active d'un clic), puis les marchands. Vérifié : Planque 119 objets.
 
 ## Étude 3D (session 5, en attente de validation)
 

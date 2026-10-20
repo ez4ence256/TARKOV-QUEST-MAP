@@ -5,6 +5,7 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import type { Task } from "../types";
 import { PhoneCapture } from "./PhoneCapture";
+import { isStaleBuildError, staleBuildMessage } from "../lib/staleBuild";
 import { mergeOcrResults } from "../lib/phoneCapture";
 import { matchOcrLines, type OcrMatch, type OcrMatchResult } from "../lib/ocrMatch";
 import type { OcrProgress } from "../lib/ocr";
@@ -80,10 +81,12 @@ export function CaptureTab({ tasks, pasted, onApply }: Props) {
     } catch (error) {
       setState({
         step: "error",
-        message: tr(
-          `Lecture impossible : ${(error as Error).message}. La première utilisation demande une connexion (données de langue).`,
-          `Could not read the image: ${(error as Error).message}. The first use needs a connection (language data).`,
-        ),
+        message: isStaleBuildError(error)
+          ? staleBuildMessage()
+          : tr(
+              `Lecture impossible : ${(error as Error).message}. La première utilisation demande une connexion (données de langue).`,
+              `Could not read the image: ${(error as Error).message}. The first use needs a connection (language data).`,
+            ),
       });
     }
   };
