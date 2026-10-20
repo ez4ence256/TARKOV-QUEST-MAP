@@ -4,6 +4,7 @@ import { useMemo, useState, type ComponentProps } from "react";
 import type { RoomMember } from "../api/room";
 import { tr } from "../lib/i18n";
 import { viewModeOf } from "../lib/roomView";
+import { questsByMap } from "../lib/points";
 import { SelectedQuests } from "./SelectedQuests";
 
 type QuestProps = Pick<ComponentProps<typeof SelectedQuests>, "tasks" | "traders" | "maps" | "currentMapId" | "onPhotos" | "onQuest" | "onStory" | "itemIcons" | "itemNames">;
@@ -12,12 +13,21 @@ const noop = () => {};
 const NO_COUNTS = new Map<string, number>();
 const NO_QUESTS = new Map<string, Set<string>>();
 
-export function TeammatePanel({ members, viewedId, onView, ...quest }: { members: RoomMember[]; viewedId: string | null; onView: (id: string) => void } & QuestProps) {
+export function TeammatePanel({
+  members,
+  viewedId,
+  onView,
+  mapFilter,
+  oneAtATime,
+  ...quest
+}: { members: RoomMember[]; viewedId: string | null; onView: (id: string) => void; mapFilter: string | null; oneAtATime: boolean } & QuestProps) {
   // téléphone : la colonne s'empile au-dessus des miennes et peut être repliée (le CSS ne montre le bouton que là)
   const [collapsed, setCollapsed] = useState(false);
   const viewed = members.find((m) => m.id === viewedId) ?? members[0];
   const tasksById = useMemo(() => new Map(quest.tasks.map((t) => [t.id, t])), [quest.tasks]);
   const view = useMemo(() => (viewed?.snapshot ? viewModeOf(viewed.snapshot, tasksById) : null), [viewed?.snapshot, tasksById]);
+  // « Douanes » cliqué dans ma colonne : ses quêtes qui ont des points sur Douanes
+  const onMap = useMemo(() => (view ? questsByMap(quest.tasks, view, oneAtATime) : NO_QUESTS), [view, quest.tasks, oneAtATime]);
   if (!viewed) return null;
   return (
     <section className={`room-col room-col-team${collapsed ? " is-collapsed" : ""}`} aria-label={tr("Quêtes d'un coéquipier", "A teammate's quests")}>
@@ -46,7 +56,8 @@ export function TeammatePanel({ members, viewedId, onView, ...quest }: { members
             dispatch={noop}
             onShowMap={noop}
             mapCounts={NO_COUNTS}
-            questsOnMap={NO_QUESTS}
+            questsOnMap={onMap}
+            mapFilter={mapFilter}
             onComplete={noop}
             onFocus={noop}
             onStartPlacing={noop}

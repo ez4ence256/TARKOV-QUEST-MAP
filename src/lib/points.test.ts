@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Task } from "../types";
 import { emptyModeState } from "../state/store";
-import { buildObjectivePoints, currentObjective, manualPointKey, questsUnlockedBy, shownObjectives, spawnGroups, taskMapIds, taskProgress } from "./points";
+import { buildObjectivePoints, currentObjective, manualPointKey, questsUnlockedBy, questsByMap, shownObjectives, spawnGroups, taskMapIds, taskProgress } from "./points";
 
 const task: Task = {
   id: "t",
@@ -149,5 +149,14 @@ describe("emplacements possibles regroupés", () => {
   });
   it("un seul emplacement sur la map : pas de groupe", () => {
     expect(spawnGroups([sp("a", 0, 0)]).size).toBe(0);
+  });
+});
+
+describe("quêtes par map (filtre « Mes maps » partagé en room)", () => {
+  it("une quête compte sur les maps de ses objectifs affichés", () => {
+    const m = { ...emptyModeState(), selected: [{ taskId: task.id, color: 0 }] };
+    expect([...(questsByMap([task], m, false).get("m2") ?? [])]).toEqual([task.id]);
+    // « un raid à la fois » : seulement la map de l'objectif en cours
+    expect(questsByMap([task], m, true).has("m2")).toBe(false);
   });
 });

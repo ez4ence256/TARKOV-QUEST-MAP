@@ -1636,6 +1636,24 @@ kbd {
   font: 700 10px/14px system-ui, sans-serif;
   text-align: center;
 }
+/* point d'un coéquipier qui regroupe plusieurs emplacements possibles */
+.team-pin {
+  position: relative;
+}
+.team-pin-count {
+  position: absolute;
+  top: -7px;
+  right: -8px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--pin);
+  color: var(--text);
+  font: 700 9px/13px system-ui, sans-serif;
+  text-align: center;
+}
 /* objectif optionnel sur la carte */
 .tqp-pin.is-optional {
   border-style: dashed;

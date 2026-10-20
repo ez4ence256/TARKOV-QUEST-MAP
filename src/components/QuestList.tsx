@@ -33,9 +33,12 @@ interface Props {
   onToggleStory: (chapter: string) => void;
   /** Main story : ouvre la fiche d'un chapitre. */
   onOpenStory: (chapter: string) => void;
+  /** En room : « Seulement mes quêtes » (carte sans les points des coéquipiers) ; absent hors room. */
+  onlyMine?: boolean;
+  onOnlyMine?: (value: boolean) => void;
 }
 
-export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhotos, onClearSelection, onShowMap, onToggleStory, onOpenStory }: Props) {
+export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhotos, onClearSelection, onShowMap, onToggleStory, onOpenStory, onlyMine, onOnlyMine }: Props) {
   const [query, setQuery] = useState("");
   const [trader, setTrader] = useState("");
   const [mapFilter, setMapFilter] = useState("");
@@ -227,6 +230,12 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
           <input type="checkbox" checked={kappaOnly} onChange={(e) => setKappaOnly(e.target.checked)} />
           {tr("Kappa seulement", "Kappa only")}
         </label>
+        {onlyMine !== undefined && (
+          <label className="check" title={tr("Masque sur la carte les points des quêtes de tes coéquipiers", "Hides your teammates' quest points on the map")}>
+            <input type="checkbox" checked={onlyMine} onChange={(e) => onOnlyMine?.(e.target.checked)} />
+            {tr("Seulement mes quêtes", "Only my quests")}
+          </label>
+        )}
         </div>
         <div className="muted small">
           {tr(

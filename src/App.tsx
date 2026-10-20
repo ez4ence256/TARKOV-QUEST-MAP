@@ -8,7 +8,7 @@ import { MapView, type Placing } from "./map/MapView";
 import type { ItemSpotMarker } from "./map/ItemSpotsLayer";
 import { exportState, getLastMode, useAppState, type CustomPoint } from "./state/store";
 import { QUEST_COLORS } from "./lib/objectiveTypes";
-import { buildObjectivePoints, isTaskFinished, manualPointKey, questsUnlockedBy, shownObjectives, taskMapIds } from "./lib/points";
+import { buildObjectivePoints, isTaskFinished, manualPointKey, questsUnlockedBy, shownObjectives, spawnGroups, taskMapIds } from "./lib/points";
 import { ModePicker } from "./components/ModePicker";
 import { QuestList } from "./components/QuestList";
 import { SelectedQuests } from "./components/SelectedQuests";
@@ -263,6 +263,10 @@ export default function App() {
   const storyPointsAll = useMemo(() => storyIds.flatMap((c) => currentStoryPoints(c, storyItems[c] ?? [], storyDone)), [storyIds, storyItems, storyDone]);
   const storyPoints = useMemo(() => pointsOnMap(storyPointsAll, currentMap?.normalizedName), [storyPointsAll, currentMap]);
   // la case en cours de la Main story compte aussi dans le sélecteur de map
+  // filtre « Mes maps » de la Sélection, partagé avec la colonne du coéquipier en room
+  const [selectionMap, setSelectionMap] = useState<string | null>(null);
+  // room : « Seulement mes quêtes » cache sur la carte les points des quêtes des coéquipiers (leurs positions restent)
+  const [onlyMine, setOnlyMine] = useState(false);
   const { mapCounts, questsOnMap } = useMemo(() => {
     const counts = new Map(pointsPerMap);
     const onMap = new Map([...questsPerMap].map(([id, s]) => [id, new Set(s)]));
@@ -524,12 +528,25 @@ export default function App() {
     const markers: TeamMarker[] = [];
     const players: TeamPlayer[] = [];
     for (const { m, view } of teamLive) {
-      for (const pt of buildObjectivePoints(teammateTasks(view, tasksById), view, currentMap.id, state.showDone, oneAtATime)) {
+      const pts = buildObjectivePoints(teammateTasks(view, tasksById), view, currentMap.id, state.showDone, oneAtATime);
+      // ses emplacements possibles d'un même objet : un seul point aussi, déplié au clic (de mon côté)
+      const groups = spawnGroups(pts);
+      for (const pt of pts) {
         const task = pt.taskId ? tasksById.get(pt.taskId) : undefined;
         const objective = pt.objectiveId ? objectivesById.get(pt.objectiveId) : undefined;
         if (!task || !objective) continue;
         const color = QUEST_COLORS[(view.selected.find((s) => s.taskId === task.id)?.color ?? 0) % QUEST_COLORS.length];
-        markers.push({ key: `${m.id}:${pt.key}`, owner: m.name, x: pt.x, z: pt.z, outline: pt.outline, color, text: `${task.name} — ${objective.description}` });
+        const g = groups.get(objective.id);
+        markers.push({
+          key: `${m.id}:${pt.key}`,
+          owner: m.name,
+          x: pt.x,
+          z: pt.z,
+          outline: pt.outline,
+          color,
+          text: `${task.name} — ${objective.description}`,
+          ...(g ? { group: { id: `${m.id}:${objective.id}`, rep: g.rep === pt.key, count: g.keys.length } } : {}),
+        });
       }
       for (const c of view.story?.selected ?? []) {
         const mine = pointsOnMap(currentStoryPoints(c, teamStoryItems[c] ?? [], view.story?.done ?? NO_DONE), currentMap.normalizedName);
@@ -638,6 +655,10 @@ export default function App() {
       onShowMap={showMap}
       mapCounts={mapCounts}
       questsOnMap={questsOnMap}
+      mapFilter={selectionMap}
+      onMapFilter={setSelectionMap}
+      onlyMine={room.members.length > 0 ? onlyMine : undefined}
+      onOnlyMine={setOnlyMine}
       onComplete={completeTask}
       onFocus={focusPoint}
       onStartPlacing={(o) =>
@@ -740,6 +761,8 @@ export default function App() {
               onShowMap={(mapId) => dispatch({ type: "setMap", mapId })}
               onToggleStory={(chapter) => dispatch({ type: "toggleStory", chapter })}
               onOpenStory={(chapter) => showQuest(storyIdOf(chapter))}
+              onlyMine={room.members.length > 0 ? onlyMine : undefined}
+              onOnlyMine={setOnlyMine}
             />
           )}
           {data && tab === "selection" && (
@@ -758,6 +781,9 @@ export default function App() {
                   onStory={(chapter) => showQuest(storyIdOf(chapter))}
                   itemIcons={data.itemIcons ?? {}}
                   itemNames={data.itemNames ?? {}}
+                  // le filtre ne vaut que si la map a encore de mes points (comme dans ma colonne)
+                  mapFilter={selectionMap && (mapCounts.get(selectionMap) ?? 0) > 0 ? selectionMap : null}
+                  oneAtATime={oneAtATime}
                 />
                 <div className="room-col room-col-mine">{mySelection}</div>
               </div>
@@ -1002,7 +1028,7 @@ export default function App() {
               onStoryOpen={(chapter) => showQuest(storyIdOf(chapter))}
               onStoryPhotos={showStoryPhotos}
               player={player && player.mapId === currentMap.id ? player : null}
-              team={team}
+              team={team && onlyMine ? { ...team, markers: [] } : team}
               itemSpots={itemSpots}
               onClearItemSpots={() => setItemSpots([])}
               onPhotos={showPhotos}

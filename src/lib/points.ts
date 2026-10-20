@@ -171,3 +171,20 @@ export function spawnGroups(points: MapPoint[]): Map<string, { rep: string; keys
   }
   return out;
 }
+
+/** Quêtes choisies qui ont des points sur chaque map (mêmes objectifs que la carte : « un raid à la fois », positions manuelles). */
+export function questsByMap(tasks: Task[], mode: ModeState, oneAtATime: boolean): Map<string, Set<string>> {
+  const byId = new Map(tasks.map((t) => [t.id, t]));
+  const out = new Map<string, Set<string>>();
+  const add = (mapId: string, taskId: string) => out.set(mapId, (out.get(mapId) ?? new Set()).add(taskId));
+  for (const { taskId } of mode.selected) {
+    const t = byId.get(taskId);
+    if (!t) continue;
+    for (const o of shownObjectives(t, mode.done, false, oneAtATime)) {
+      for (const l of o.locations) add(l.mapId, t.id);
+      const manual = mode.manual[o.id];
+      if (o.locations.length === 0 && manual) add(manual.mapId, t.id);
+    }
+  }
+  return out;
+}

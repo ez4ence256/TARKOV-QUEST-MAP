@@ -39,6 +39,12 @@ interface Props {
   onStory: (chapter: string) => void;
   /** Lecture seule (quêtes d'un coéquipier en room) : rien à cocher, terminer, retirer, placer ; pas de bouton qui change de map. */
   readOnly?: boolean;
+  /** Filtre « Mes maps » partagé (room : il s'applique aussi à la colonne du coéquipier). */
+  mapFilter?: string | null;
+  onMapFilter?: (mapId: string | null) => void;
+  /** En room : « Seulement mes quêtes » (carte sans les points des coéquipiers). */
+  onlyMine?: boolean;
+  onOnlyMine?: (value: boolean) => void;
   itemIcons: Record<string, string>;
   itemNames: Record<string, string>;
 }
@@ -64,8 +70,11 @@ export function SelectedQuests(props: Props) {
 
   const mapsWithPoints = [...props.mapCounts].filter(([id, n]) => n > 0 && props.maps.some((m) => m.id === id));
   // « Mes maps » : un clic montre la map et ne garde que ses quêtes ; plus de points sur cette map = filtre oublié
-  const [mapFilter, setMapFilter] = useState<string | null>(null);
-  const filterId = mapsWithPoints.some(([id]) => id === mapFilter) ? mapFilter : null;
+  const [localFilter, setLocalFilter] = useState<string | null>(null);
+  const mapFilter = props.mapFilter !== undefined ? props.mapFilter : localFilter;
+  const setMapFilter = props.onMapFilter ?? setLocalFilter;
+  // lecture seule (coéquipier) : le filtre vient de ma colonne, appliqué tel quel à ses quêtes
+  const filterId = props.readOnly ? (mapFilter ?? null) : mapsWithPoints.some(([id]) => id === mapFilter) ? mapFilter : null;
   const onFilterMap = (item: (typeof items)[number]) =>
     !filterId || Boolean(props.questsOnMap.get(filterId)?.has(item.chapter !== null ? storyIdOf(item.chapter) : item.sel!.taskId));
   // « Kappa seulement » : quêtes demandées pour la Kappa (les chapitres de la Main story n'en font pas partie)
@@ -120,6 +129,12 @@ export function SelectedQuests(props: Props) {
             <label className="check small">
               <input type="checkbox" checked={kappaOnly} onChange={(e) => setKappaOnly(e.target.checked)} />
               {tr("Kappa seulement", "Kappa only")}
+            </label>
+          )}
+          {!props.readOnly && props.onlyMine !== undefined && (
+            <label className="check small" title={tr("Masque sur la carte les points des quêtes de tes coéquipiers", "Hides your teammates' quest points on the map")}>
+              <input type="checkbox" checked={props.onlyMine} onChange={(e) => props.onOnlyMine?.(e.target.checked)} />
+              {tr("Seulement mes quêtes", "Only my quests")}
             </label>
           )}
           {!props.readOnly && (

@@ -278,6 +278,13 @@ function MapViewInner(props: MapViewProps) {
   // emplacements possibles d'un objet : un seul point par objectif tant que le groupe n'est pas déplié
   const groups = useMemo(() => spawnGroups(points), [points]);
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+  // quête désélectionnée (ses points quittent la carte) : son groupe redevient un seul point
+  useEffect(() => {
+    setOpenGroups((s) => {
+      const kept = [...s].filter((id) => groups.has(id));
+      return kept.length === s.size ? s : new Set(kept);
+    });
+  }, [groups]);
   const toggleGroup = (objectiveId: string, open: boolean) =>
     setOpenGroups((s) => {
       const next = new Set(s);

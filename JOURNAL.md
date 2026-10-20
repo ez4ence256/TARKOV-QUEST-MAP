@@ -11,7 +11,7 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | Élément | État |
 |---|---|
 | Branche | **`main`** seule (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**, branche par défaut). |
-| Version affichée | **0.8.34** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
+| Version affichée | **0.8.35** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
 | **Nouveau design** | depuis la **0.8.23** (commit `e189862` : barre latérale, mode raid, Barlow, icônes SVG). Dernière version avec l'**ancien design** : **0.8.22** (commit `a562131`). Pour revenir en arrière sur un point précis, comparer avec `git diff a562131 e189862 -- <fichier>`. |
 | Derniers commits | `3bc65a9` Item finder : recherche par image (0.8.2) · `78f5fb6` Ctrl+V d'une capture dans l'item finder (0.8.1) · `14c4dc9` Item finder redessiné (0.8.0) · `6800a70` journal fin de session 8 · `245ee03` Version 0.7.23 · `3a59955` Main story : ponts de l'Icebreaker pour Boreas · `2593e19` Icebreaker : calibrage corrigé · `45beb1b` positions > 100 m retirées (0.7.22) · `7acab9f` positions de The Ticket · `5447eef` bouton du panneau en icône seule sur téléphone (0.7.21) · `69ddc95` Item finder · `d81736d` infos du Labyrinthe sur la map |
 | Travail non commité | Seulement `.claude/` (non suivi, volontairement hors du dépôt : chemin propre à cette machine) |
@@ -55,7 +55,7 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | `69ddc95` | 8 | Item finder (objets du jeu, quêtes, hideout, barters, crafts) |
 | `5447eef` | 8 | Barre du haut : bouton du panneau en icône seule sur téléphone |
 
-### Tests (442, 48 fichiers)
+### Tests (443, 48 fichiers)
 
 | Fichier | Ce qui est couvert |
 |---|---|
@@ -378,6 +378,11 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
 - **Objectifs optionnels repérables sur la carte** (0.8.32, demande) : un point d'objectif optionnel a un contour pointillé et une petite pastille « OPT » en bas à gauche (`markerIcon(…, { optional })`, `.tqp-pin-opt`), et « (optionnel) » dans son infobulle. Vérifié : Système pyramidal (Pyramid Scheme, Rues de Tarkov) -> 10 points « œil » optionnels marqués, seul le marqueur à poser sur un distributeur de la rue Klimov ne l'est pas.
 - **Images des objets demandés, prérequis dans la quête dépliée** (0.8.33, demande) : `objectiveItemRefs` (`src/lib/objectiveItems.ts`) + composant `ObjectiveItems` : vignettes des objets d'un objectif (objets à remettre/trouver/poser, objet de quête, marqueur, objets à utiliser, arme à monter, clés), « ×N », FIR ; listes « au choix » de plus de 6 objets : 5 vignettes + « +N » (liste complète au survol). Affichées dans la quête dépliée de l'item finder (refaite : étiquettes niveau / Kappa / map, section « Prérequis » avec statut et ✓ si déjà fait, conditions de marchand, puis « Objectifs »), dans Détails › Infos et dans les cartes de Mes quêtes (et la colonne du coéquipier). Vérifié : Moonshine › Une victoire au goût amer -> prérequis Saving Private Roman (terminée), vignettes gnôle, saucisse Salty Dog, croûtons, vodka.
 - **Emplacements possibles regroupés** (0.8.34, demande « trop de points ») : les emplacements possibles d'un même objet (`spawn`) sont affichés en UN point (l'emplacement le plus proche du centre du groupe, `spawnGroups` dans `src/lib/points.ts`) avec le nombre d'emplacements en pastille ; un clic le déplie (tous les emplacements), « Regrouper en un seul point » dans leur bulle le replie. Le point replié est enregistré sous toutes les clés du groupe (« voir » depuis Mes quêtes le trouve). Vérifié : Graves accusations (Littoral) -> 1 point « 13 », clic -> 13 emplacements, Regrouper -> 1.
+- **Room : filtre de map partagé, points des coéquipiers regroupés, « Seulement mes quêtes »** (0.8.35, demandes).
+  - Groupe d'emplacements possibles déplié : il se replie dès que la quête quitte la carte (désélectionnée) ; vérifié 1 -> 13 -> 0 -> 1.
+  - « Mes maps » (Douanes…) filtre aussi la colonne du coéquipier : ses quêtes qui ont des points sur cette map (`questsByMap`, même règle « un raid à la fois » ; filtre remonté dans `App`, `SelectedQuests` contrôlable par `mapFilter` / `onMapFilter`). Vérifié avec deux origines : Douanes -> Appâtage | Mauvaise réputation ; Littoral -> Graves accusations + Ill-Wisher | Soins privés 1.
+  - Points des coéquipiers : leurs emplacements possibles d'un même objet en un point (pastille du nombre, `teamPinHtml(…, count)`), déplié au clic de MON côté, « Regrouper » dans la bulle. Vérifié : 5 points d'Alpha dont « 13 » -> 17 -> 5.
+  - En room, case « Seulement mes quêtes » (Ajouter et Mes quêtes) : la carte n'affiche plus les points des quêtes des coéquipiers (leurs positions restent). Vérifié : 5 -> 0 -> 5 dans les deux vues. Note : le serveur de dev Vite a encore servi une version intermédiaire d'un fichier écrit en deux fois (corrigé en relançant le serveur).
 
 ## Étude 3D (session 5, en attente de validation)
 
