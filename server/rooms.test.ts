@@ -105,6 +105,10 @@ describe("validation", () => {
     expect(validateSnapshot(snap({ position: { ...position, gameMode: "x" } }))).toBeNull();
     expect(validateSnapshot(snap({ position: { ...position, y: Infinity } }))).toBeNull();
     expect(validateSnapshot(snap({ position: { ...position, map: "A B" } }))).toBeNull();
+    // heure de capture bornée : jamais dans le futur ni négative
+    const future = validateSnapshot(snap({ position: { ...position, at: Date.now() + 3_600_000 } }))?.position as { at: number };
+    expect(future.at).toBeLessThanOrEqual(Date.now());
+    expect((validateSnapshot(snap({ position: { ...position, at: -5 } }))?.position as { at: number }).at).toBe(0);
   });
   it("pseudo : rogné, 20 caractères, sans caractères de contrôle, « Joueur » si vide", () => {
     expect(cleanName("  Alice  ")).toBe("Alice");
@@ -136,7 +140,10 @@ describe("rooms (serveur réel)", () => {
     const id = await create();
     expect(await (await fetch(`${base}/api/rooms/${id}`)).json()).toEqual(protocol); // GET sans v
     expect(await (await fetch(`${base}/api/rooms/${id}/events?client=c1`)).json()).toEqual(protocol);
-    expect((await post(`/api/rooms/${id}/ops`, { client: "c1", ops: [] })).status).toBe(404); // ancienne route
+    const ops = await post(`/api/rooms/${id}/ops`, { client: "c1", ops: [] }); // ancienne route
+    expect(ops.status).toBe(400);
+    expect(await ops.json()).toEqual(protocol);
+    expect(await (await post("/api/rooms/ABCDEF/ops", { client: "c1", ops: [] })).json()).toEqual(protocol); // même pour une room inconnue
     const old = await post(`/api/rooms/${id}/publish`, { client: "c1", snapshot: snap() });
     expect(await old.json()).toEqual(protocol);
     const a = sse(id, "c2");
@@ -255,6 +262,7 @@ describe("rooms (serveur réel)", () => {
     expect(await r.json()).toEqual({ error: "room-full" });
     expect((await publish(id, "extra", snap())).status).toBe(429);
     expect((await publish(id, "c0", snap())).status).toBe(200); // un membre existant reste accepté
+    open.forEach((c) => c.close());
   });
 
   it("PUT recrée la room avec le même ID, sans écraser une room existante", async () => {

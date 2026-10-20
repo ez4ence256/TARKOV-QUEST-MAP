@@ -82,7 +82,9 @@ export function validateSnapshot(s) {
     const p = position;
     if (typeof p !== "object" || typeof p.map !== "string" || !MAP_ID.test(p.map) || !MODES.includes(p.gameMode)) return null;
     if (![p.x, p.y, p.z, p.rotation].every(num) || typeof p.at !== "number" || !Number.isFinite(p.at)) return null;
-    out.position = { map: p.map, x: p.x, y: p.y, z: p.z, rotation: p.rotation, gameMode: p.gameMode, at: p.at };
+    // heure de capture ramenée dans [0, maintenant] : une horloge en avance ne rend pas le marqueur éternel chez les autres
+    const at = Math.min(Math.max(p.at, 0), Date.now());
+    out.position = { map: p.map, x: p.x, y: p.y, z: p.z, rotation: p.rotation, gameMode: p.gameMode, at };
   }
   return out;
 }
@@ -242,6 +244,11 @@ export function handleRooms(req, res) {
   if (req.method === "PUT" && !action) {
     if (!ROOM_ID.test(id)) sendJson(res, 400, { error: "bad-id" });
     else createOrRestore(req, res, id).catch(fail);
+    return true;
+  }
+  // route v1 (opérations de fusion) : erreur de protocole claire, que la room existe ou non
+  if (action === "ops") {
+    sendJson(res, 400, PROTOCOL_ERROR);
     return true;
   }
   // GET (info, événements) : la version est dans l'URL ; un ancien client reçoit une erreur claire
