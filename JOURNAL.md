@@ -11,7 +11,7 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | Élément | État |
 |---|---|
 | Branche | **`main`** seule (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**, branche par défaut). |
-| Version affichée | **0.8.26** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
+| Version affichée | **0.8.27** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
 | **Nouveau design** | depuis la **0.8.23** (commit `e189862` : barre latérale, mode raid, Barlow, icônes SVG). Dernière version avec l'**ancien design** : **0.8.22** (commit `a562131`). Pour revenir en arrière sur un point précis, comparer avec `git diff a562131 e189862 -- <fichier>`. |
 | Derniers commits | `3bc65a9` Item finder : recherche par image (0.8.2) · `78f5fb6` Ctrl+V d'une capture dans l'item finder (0.8.1) · `14c4dc9` Item finder redessiné (0.8.0) · `6800a70` journal fin de session 8 · `245ee03` Version 0.7.23 · `3a59955` Main story : ponts de l'Icebreaker pour Boreas · `2593e19` Icebreaker : calibrage corrigé · `45beb1b` positions > 100 m retirées (0.7.22) · `7acab9f` positions de The Ticket · `5447eef` bouton du panneau en icône seule sur téléphone (0.7.21) · `69ddc95` Item finder · `d81736d` infos du Labyrinthe sur la map |
 | Travail non commité | Seulement `.claude/` (non suivi, volontairement hors du dépôt : chemin propre à cette machine) |
@@ -55,7 +55,7 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | `69ddc95` | 8 | Item finder (objets du jeu, quêtes, hideout, barters, crafts) |
 | `5447eef` | 8 | Barre du haut : bouton du panneau en icône seule sur téléphone |
 
-### Tests (362, 37 fichiers)
+### Tests (423, 45 fichiers)
 
 | Fichier | Ce qui est couvert |
 |---|---|
@@ -362,6 +362,10 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
   - **Objets à garder** (`src/lib/itemNeeds.ts`) : objectifs `giveItem` non cochés des quêtes non grisées (faction choisie dans Réglages ; findItem, objets de quête et plantItem exclus), plus, si « Inclure la planque », tous les niveaux non construits des stations non ignorées. Item finder : badge **À GARDER ×N** (FIR, « au choix ») ou VENDABLE, bloc « À garder » (quêtes et stations, quantités), filtre « seulement les objets nécessaires » ; ×N n'additionne que les objectifs à objet unique.
   - **Planque** (`src/components/HideoutTab.tsx`, onglet de la colonne) : les 26 stations lues dans l'API, niveau actuel de « Ignorer » (-1) / 0 au maximum, objets du niveau suivant, interrupteur « Inclure la planque ».
   - **État** (par mode, personnel, hors rooms) : `failed`, `hideout`, `faction` ; `includeHideout` global. Validés dans `sanitizeState`, gardés par les actions de room ; « Tout réinitialiser » efface `failed`, garde planque et faction.
+- **Tarkov AprilOx Monitor, room v2, capture téléphone** (0.8.27, poussé à la demande de l'utilisateur sans test sur vrai téléphone ni avec le jeu : il testera en ligne).
+  - **Liaison Monitor** (`server/monitor.mjs`, `src/api/monitor.ts`, `src/lib/monitorQuests.ts`, `src/lib/playerMarker.ts`, `src/map/PlayerMarker.tsx`) : l'application de bureau « Tarkov AprilOx Monitor » (fork GPL-3.0 de the-hideout/TarkovMonitor, dossier local `M:\TarkovAprilOxMonitor`, branche `aprilox`) envoie `POST /api/monitor/:code` (code de liaison de 16 caractères, collé dans Réglages ou via `?monitor=` avec confirmation, gardé dans `tqp:monitor`, hors export et rooms) ; le navigateur écoute en SSE. Événements v1 : `task` (started -> activer, finished -> terminer, failed -> échouée ; regroupés 1,5 s, un message, Annuler ; mode de jeu différent ignoré avec un message), `map` (change la map affichée), `position` (point fléché à la position de la capture, sur la map, s'efface en 5 min ; vérifié au pixel près sur Douanes et Brise-glace), `tasks` (lot « Read past logs » jusqu'à 1000 quêtes, 64 Ko). Relais en mémoire, limites par code et par IP, jamais de journalisation du code. **Production : nécessite `npm start`** ; SSE derrière Cloudflare non vérifié.
+  - **Room v2** (voir section Rooms v2) : chacun garde ses quêtes ; la room ne fait que montrer celles des autres en lecture seule (colonne « Coéquipier », points sur la carte, positions du Monitor avec le pseudo) ; plus de fusion ni de « garder / restaurer » ; invite unique pour restaurer une sauvegarde mélangée par l'ancienne room (`tqp:beforeRoom:<mode>`). Vérifié avec deux origines (localhost / 127.0.0.1) : la sauvegarde de l'un ne change jamais quand l'autre coche.
+  - **Capture téléphone** (`server/phone.mjs`, `src/components/PhoneCapture.tsx`, `src/components/PhonePage.tsx`, dépendance `qrcode-generator` 2.0.4 MIT) : QR code -> page photo sur le téléphone (plusieurs photos, réduites à 1600 px) -> relais en mémoire (lecture unique, 10 min) -> OCR de toutes les photos et un seul écran de vérification. En local, l'adresse réseau du PC est donnée par `/api/phone/lan` (seulement pour une page localhost). Vérifié dans le navigateur (2 photos -> 5 quêtes) ; **sur le vrai téléphone, le site de test local n'était pas joignable** (box qui isole probablement le téléphone) : à tester en ligne, en Wi-Fi ou 4G/5G.
 
 ## Étude 3D (session 5, en attente de validation)
 
