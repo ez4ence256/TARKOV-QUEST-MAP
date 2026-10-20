@@ -7,6 +7,7 @@ import { stat } from "node:fs/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
 import { handleRooms } from "./rooms.mjs";
+import { handleMonitor } from "./monitor.mjs";
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -73,7 +74,7 @@ async function serveStatic(req, res, dist) {
 export function createAppServer(dist = DEFAULT_DIST) {
   const root = path.resolve(dist);
   return createServer((req, res) => {
-    if (handleRooms(req, res)) return;
+    if (handleRooms(req, res) || handleMonitor(req, res)) return;
     serveStatic(req, res, root).catch(() => {
       if (!res.headersSent) plain(res, 500, "Server error");
       else res.destroy();
@@ -84,5 +85,5 @@ export function createAppServer(dist = DEFAULT_DIST) {
 // Lancé directement (`node server/index.mjs`) et non importé par les tests.
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const port = Number(process.env.PORT) || 3000;
-  createAppServer().listen(port, () => console.log(`Quest Planner : http://localhost:${port} (dist/ + rooms)`));
+  createAppServer().listen(port, () => console.log(`Quest Planner : http://localhost:${port} (dist/ + rooms + monitor)`));
 }

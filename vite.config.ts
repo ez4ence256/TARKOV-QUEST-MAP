@@ -2,16 +2,17 @@ import { defineConfig } from "vitest/config";
 import type { Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import { handleRooms } from "./server/rooms.mjs";
+import { handleMonitor } from "./server/monitor.mjs";
 
 // Rooms (partage de sélection) : le même gestionnaire que `npm start`, monté dans Vite
-// (dev et preview) pour que `npm run dev` serve aussi /api/rooms sur le même port.
+// (dev et preview) pour que `npm run dev` serve aussi /api/rooms et /api/monitor sur le même port.
 const roomsPlugin: Plugin = {
   name: "tqp-rooms",
   configureServer(server) {
-    server.middlewares.use((req, res, next) => void (handleRooms(req, res) || next()));
+    server.middlewares.use((req, res, next) => void (handleRooms(req, res) || handleMonitor(req, res) || next()));
   },
   configurePreviewServer(server) {
-    server.middlewares.use((req, res, next) => void (handleRooms(req, res) || next()));
+    server.middlewares.use((req, res, next) => void (handleRooms(req, res) || handleMonitor(req, res) || next()));
   },
 };
 
