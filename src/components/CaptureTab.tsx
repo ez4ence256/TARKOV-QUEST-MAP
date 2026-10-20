@@ -4,6 +4,8 @@
 // Rien n'est jamais ajouté sans passer par l'écran de vérification.
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import type { Task } from "../types";
+import { PhoneCapture } from "./PhoneCapture";
+import { mergeOcrResults } from "../lib/phoneCapture";
 import { matchOcrLines, type OcrMatch, type OcrMatchResult } from "../lib/ocrMatch";
 import type { OcrProgress } from "../lib/ocr";
 import { tr } from "../lib/i18n";
@@ -21,7 +23,7 @@ interface Props {
 
 type State =
   | { step: "idle" }
-  | { step: "reading"; progress: OcrProgress | null }
+  | { step: "reading"; progress: OcrProgress | null; photo?: [number, number] }
   | { step: "review"; result: OcrMatchResult }
   | { step: "error"; message: string };
 
@@ -49,20 +51,28 @@ export function CaptureTab({ tasks, pasted, onApply }: Props) {
   const cameraRef = useRef<HTMLInputElement>(null);
   const tasksById = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
 
-  const handleImage = async (blob: Blob) => {
+  // une ou plusieurs images (photos du téléphone) : lecture une à une, puis un seul écran de vérification
+  const handleImages = async (blobs: Blob[]) => {
     setMessage(null);
     setPreview((old) => {
       if (old) URL.revokeObjectURL(old);
-      return URL.createObjectURL(blob);
+      return blobs.length === 1 ? URL.createObjectURL(blobs[0]) : null;
     });
     setState({ step: "reading", progress: null });
     try {
       const { readImageLines } = await import("../lib/ocr");
-      const lines = await readImageLines(blob, (progress) => setState({ step: "reading", progress }));
-      const result = matchOcrLines(
-        lines.map((l) => l.text),
-        tasks,
-      );
+      const results: OcrMatchResult[] = [];
+      for (const [i, blob] of blobs.entries()) {
+        const photo: [number, number] | undefined = blobs.length > 1 ? [i + 1, blobs.length] : undefined;
+        const lines = await readImageLines(blob, (progress) => setState({ step: "reading", progress, photo }));
+        results.push(
+          matchOcrLines(
+            lines.map((l) => l.text),
+            tasks,
+          ),
+        );
+      }
+      const result = mergeOcrResults(results);
       setChecked(new Set(result.recognized.map((m) => m.taskId)));
       setAdded([]);
       setSearch("");
@@ -77,6 +87,7 @@ export function CaptureTab({ tasks, pasted, onApply }: Props) {
       });
     }
   };
+  const handleImage = (blob: Blob) => handleImages([blob]);
   const onPick = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) void handleImage(file);
@@ -157,10 +168,11 @@ export function CaptureTab({ tasks, pasted, onApply }: Props) {
         <input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden onChange={onPick} />
         <span className="muted small">{tr("ou glissez-déposez l'image ici.", "or drag and drop the image here.")}</span>
       </div>
+      <PhoneCapture onPhotos={(photos) => void handleImages(photos)} />
       <p className="muted small">
         {tr(
-          "La lecture se fait dans votre navigateur : l'image n'est envoyée nulle part. La première fois, environ 4 Mo de données de langue (français + anglais) sont téléchargés, puis gardés en cache.",
-          "Reading happens in your browser: the image is not sent anywhere. The first time, about 4 MB of language data (French + English) is downloaded, then cached.",
+          "La lecture se fait dans votre navigateur : l'image n'est envoyée nulle part (avec le téléphone, les photos transitent par ce serveur, en mémoire, puis sont effacées). La première fois, environ 4 Mo de données de langue (français + anglais) sont téléchargés, puis gardés en cache.",
+          "Reading happens in your browser: the image is not sent anywhere (with the phone, photos pass through this server, in memory only, then are deleted). The first time, about 4 MB of language data (French + English) is downloaded, then cached.",
         )}
       </p>
 
@@ -168,7 +180,10 @@ export function CaptureTab({ tasks, pasted, onApply }: Props) {
 
       {state.step === "reading" && (
         <div className="capture-progress" role="status">
-          <div>{tr(...(STATUS_LABELS[progress?.status ?? ""] ?? ["Préparation…", "Preparing…"]))}</div>
+          <div>
+            {state.photo && tr(`Photo ${state.photo[0]}/${state.photo[1]} : `, `Photo ${state.photo[0]}/${state.photo[1]}: `)}
+            {tr(...(STATUS_LABELS[progress?.status ?? ""] ?? ["Préparation…", "Preparing…"]))}
+          </div>
           <progress max={1} value={progress?.progress ?? 0} />
         </div>
       )}
