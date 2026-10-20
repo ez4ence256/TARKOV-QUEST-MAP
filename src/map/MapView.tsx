@@ -332,10 +332,11 @@ function MapViewInner(props: MapViewProps) {
               key={pt.key}
               point={pt}
               color={color}
-              title={`${task.name} — ${objective.description}${pt.spawn ? ` (${tr("emplacement possible", "possible location")} ${pt.spawn.index}/${pt.spawn.count})` : ""}`}
+              title={`${task.name} — ${objective.description}${objective.optional ? ` (${tr("optionnel", "optional")})` : ""}${pt.spawn ? ` (${tr("emplacement possible", "possible location")} ${pt.spawn.index}/${pt.spawn.count})` : ""}`}
               icon={markerIcon(categoryOf(objective.type), color, {
                 faded: done,
                 offLevel,
+                optional: objective.optional,
                 badge: upper !== null && calibration ? levelBadge(calibration, upper) || undefined : undefined,
               })}
               offLevel={offLevel}

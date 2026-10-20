@@ -1636,6 +1636,22 @@ kbd {
   font: 700 10px/14px system-ui, sans-serif;
   text-align: center;
 }
+/* objectif optionnel sur la carte */
+.tqp-pin.is-optional {
+  border-style: dashed;
+}
+.tqp-pin-opt {
+  position: absolute;
+  bottom: -7px;
+  left: -8px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px dashed var(--pin);
+  color: var(--muted);
+  font: 700 9px/13px system-ui, sans-serif;
+  text-transform: uppercase;
+}
 .level-tooltip {
   background: rgba(15, 18, 21, 0.95);
   border: 1px solid var(--line);
