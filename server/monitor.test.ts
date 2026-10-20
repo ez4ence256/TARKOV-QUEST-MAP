@@ -70,7 +70,8 @@ describe("validation", () => {
     expect(validateEvent({ ...task, status: "modified" })).toBeNull();
     expect(validateEvent({ ...task, taskId: "ABC" })).toBeNull();
     expect(validateEvent({ ...task, gameMode: undefined })).toBeNull();
-    expect(validateEvent({ ...task, gameMode: "pvp-season" })).toBeNull();
+    expect(validateEvent({ ...task, gameMode: "pvp-season" })).toBeTruthy();
+    expect(validateEvent({ ...task, gameMode: "season" })).toBeNull();
     expect(validateEvent({ ...pos, map: "Customs" })).toBeNull();
     expect(validateEvent({ ...pos, x: Infinity })).toBeNull();
     expect(validateEvent({ ...pos, y: 100000 })).toBeNull();

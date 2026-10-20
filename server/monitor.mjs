@@ -18,7 +18,7 @@ const CODE = /^[A-Za-z0-9]{16}$/;
 const TASK_ID = /^[0-9a-f]{24}$/;
 const MAP_ID = /^[a-z0-9-]{1,40}$/;
 const STATUSES = ["started", "finished", "failed"];
-const GAME_MODES = ["regular", "pve"];
+const GAME_MODES = ["regular", "pve", "pvp-season"];
 
 /** @type {Map<string, {listeners: Set<any>, map: any, position: any, lastAt: number, hits: {start: number, n: number}}>} */
 const codes = new Map();

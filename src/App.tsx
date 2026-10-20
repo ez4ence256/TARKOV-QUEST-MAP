@@ -27,7 +27,8 @@ import { storyIdOf, storyStepId } from "./lib/story";
 import { chaptersWithPositions, currentStoryPoints, pointsOnMap } from "./lib/storyPoints";
 import { chapterName, useStoryItems } from "./components/StoryView";
 import { inRoom, useRoom } from "./api/room";
-import { maskCode, useMonitor } from "./api/monitor";
+import { maskCode, useMonitor, type MonitorEvent } from "./api/monitor";
+import { planMonitorBatch } from "./lib/monitorQuests";
 import { branchFailures, prerequisiteChanges } from "./lib/questChain";
 import { computeNeeds } from "./lib/itemNeeds";
 import { loadHideout, type HideoutStation } from "./api/itemList";
@@ -85,7 +86,6 @@ export default function App() {
   const { state, modeState: mode, dispatch } = useAppState();
   const gameMode = state.gameMode;
   const room = useRoom(state, dispatch);
-  const monitor = useMonitor(() => {});
   const [load, setLoad] = useState<LoadState>({ status: "loading", data: null });
   const [reloadToken, setReloadToken] = useState(0);
   const [lang, setLang] = useState<Lang>(getLang);
@@ -476,6 +476,48 @@ export default function App() {
   };
   const failTask = (task: Task) =>
     dispatch({ type: "applyQuestStatus", done: [], failed: [task.id], deselect: mode.selected.some((s) => s.taskId === task.id) ? [task.id] : [] });
+  // Monitor : les événements de quêtes sont regroupés ~1,5 s puis appliqués en UNE action avec UNE information « Annuler ».
+  // (La proposition de quêtes débloquées reste muette pour ces lots.)
+  const monitorQueue = useRef<Extract<MonitorEvent, { type: "task" }>[]>([]);
+  const monitorTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const flushMonitor = useRef(() => {});
+  useEffect(() => () => clearTimeout(monitorTimer.current), []);
+  flushMonitor.current = () => {
+    monitorTimer.current = undefined;
+    const events = monitorQueue.current.splice(0);
+    if (!gameMode || !events.length) return;
+    const plan = planMonitorBatch(events, { gameMode, tasks, done: mode.done, failed, selected: mode.selected.map((s) => s.taskId), inRoom: inRoom() });
+    const c = plan.counts;
+    const modeName = (m: string) => (m === "regular" ? "PvP" : m === "pve" ? "PvE" : tr("PvP Saison", "PvP Season"));
+    const other = events.find((e) => e.gameMode !== gameMode);
+    const parts = [
+      c.started && tr(`${c.started} quête(s) commencée(s)`, `${c.started} quest(s) started`),
+      c.finished && tr(`${c.finished} terminée(s)`, `${c.finished} completed`),
+      c.failed && tr(`${c.failed} échouée(s)`, `${c.failed} failed`),
+      c.prereq && tr(`${c.prereq} prérequis grisé(s)`, `${c.prereq} prerequisite(s) greyed out`),
+      c.branch && tr(`${c.branch} branche(s) exclusive(s) échouée(s)`, `${c.branch} exclusive branch quest(s) failed`),
+      c.started && inRoom() && tr("room en cours : prérequis non grisés", "room in progress: prerequisites not greyed out"),
+      other && tr(`événement ${modeName(other.gameMode)} ignoré (le site affiche ${modeName(gameMode)})`, `${modeName(other.gameMode)} event ignored (the site shows ${modeName(gameMode)})`),
+    ].filter(Boolean);
+    if (plan.action) {
+      if (plan.action.done.length) muteUnlock.current = true;
+      dispatch({ type: "applyQuestStatus", ...plan.action });
+    }
+    if (!parts.length) return;
+    const undo = plan.undo;
+    setChainNotice({ text: `Monitor : ${parts.join(" · ")}`, undo: undo ? () => dispatch({ type: "applyQuestStatus", ...undo }) : undefined });
+  };
+  const monitorEvent = useRef((_e: MonitorEvent) => {});
+  monitorEvent.current = (e) => {
+    if (e.type === "task") {
+      monitorQueue.current.push(e);
+      monitorTimer.current ??= setTimeout(() => flushMonitor.current(), 1500);
+    } else if ((e.type === "map" || e.type === "position") && e.gameMode === gameMode) {
+      const target = maps.find((m) => m.normalizedName === e.map);
+      if (target && target.id !== currentMap?.id) dispatch({ type: "setMap", mapId: target.id });
+    }
+  };
+  const monitor = useMonitor((e) => monitorEvent.current(e));
   const showMap = (mapId: string) => {
     dispatch({ type: "setMap", mapId });
     if (isMobile()) setPanelOpen(false);

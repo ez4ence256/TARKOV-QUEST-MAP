@@ -27,7 +27,7 @@ export function parseMonitorEvent(raw: unknown): MonitorEvent | null {
   if (!b || typeof b !== "object" || b.v !== 1) return null;
   const at = typeof b.at === "number" && Number.isFinite(b.at) && b.at > 0 ? b.at : Date.now();
   if (b.type === "hello") return { type: "hello", at };
-  const gameMode = b.gameMode === "regular" || b.gameMode === "pve" ? b.gameMode : null;
+  const gameMode = b.gameMode === "regular" || b.gameMode === "pve" || b.gameMode === "pvp-season" ? b.gameMode : null;
   if (!gameMode) return null;
   if (b.type === "task") {
     const status = b.status;
