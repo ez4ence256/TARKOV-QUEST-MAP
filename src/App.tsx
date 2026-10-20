@@ -884,7 +884,8 @@ export default function App() {
             />
           )}
         </aside>
-        {panelOpen && <PanelResizer width={shownPanelWidth} onChange={setPanelWidth} />}
+        {/* pas de poignée pendant l'affichage à deux colonnes : elle enregistrerait la largeur temporaire */}
+        {panelOpen && !twoColumns && <PanelResizer width={shownPanelWidth} onChange={setPanelWidth} />}
 
 <main className="map-area">
           <div className="map-floating">

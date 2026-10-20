@@ -81,6 +81,11 @@ describe("parseSnapshot / parseMembers (données du serveur non fiables)", () =>
     expect(parseSnapshot({ ...ok, done: undefined })).toBeNull();
     expect(parseSnapshot(null)).toBeNull();
   });
+  it("position : heure de capture ramenée à maintenant si elle est dans le futur", () => {
+    const pos = { map: "m", x: 1, y: 2, z: 3, rotation: 0, gameMode: "pve", at: Date.now() + 3_600_000 };
+    expect(parseSnapshot({ ...ok, position: pos })?.position?.at).toBeLessThanOrEqual(Date.now());
+    expect(parseSnapshot({ ...ok, position: { ...pos, at: -1 } })?.position?.at).toBe(0);
+  });
   it("membres : pseudo nettoyé, identifiant vérifié", () => {
     expect(parseMembers([{ id: "a1", name: "  Bob\u0007  ", connected: true }])).toEqual([{ id: "a1", name: "Bob", connected: true }]);
     expect(parseMembers([{ id: "a b", name: "x", connected: true }])).toBeNull();

@@ -114,7 +114,9 @@ export function parseSnapshot(raw: unknown): RoomSnapshot | null {
   if (p) {
     if (typeof p.map !== "string" || !MAP_ID.test(p.map) || !MODES.includes(p.gameMode as GameMode)) return null;
     if (![p.x, p.y, p.z, p.rotation].every(num) || typeof p.at !== "number" || !Number.isFinite(p.at)) return null;
-    out.position = { map: p.map, x: p.x as number, y: p.y as number, z: p.z as number, rotation: p.rotation as number, gameMode: p.gameMode as GameMode, at: p.at };
+    // jamais dans le futur (horloge en avance chez l'autre) : sinon le marqueur ne s'effacerait jamais
+    const at = Math.min(Math.max(p.at, 0), Date.now());
+    out.position = { map: p.map, x: p.x as number, y: p.y as number, z: p.z as number, rotation: p.rotation as number, gameMode: p.gameMode as GameMode, at };
   }
   return out;
 }

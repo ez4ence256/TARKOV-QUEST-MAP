@@ -287,6 +287,7 @@ export function useRoom(state: AppState, dispatch: Dispatch<Action>, ctx: RoomCo
       setError(null);
       writeSaved({ id, creator, mode });
       setInfo({ id, creator, status: "connecting", members: 1 });
+      let firstHello = true;
       const c = new RoomClient(id, creator, mode, {
         getPublish: (m) => {
           const { tasksById, position } = ctxRef.current;
@@ -297,6 +298,9 @@ export function useRoom(state: AppState, dispatch: Dispatch<Action>, ctx: RoomCo
         },
         onMode: (m) => {
           writeSaved({ id, creator, mode: m });
+          // une seule fois, à la jointure : une reconnexion ne ramène pas de force sur le mode de la room
+          if (!firstHello) return;
+          firstHello = false;
           const cur = stateRef.current;
           if (cur.gameMode === m) return;
           // seul l'affichage change de mode : aucune quête locale n'est touchée
