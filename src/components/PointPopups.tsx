@@ -17,6 +17,8 @@ interface ObjectivePopupProps {
   manual: boolean;
   /** Emplacement possible d'un objet de quête (numéro / total). */
   spawn?: { index: number; count: number };
+  /** Groupe d'emplacements déplié : le replier en un seul point. */
+  onGroup?: () => void;
   /** Ouvre la galerie de photos du wiki pour cette quête. */
   onPhotos?: () => void;
   /** Ouvre l'onglet Quête (tous les objectifs, à cocher). */
@@ -48,6 +50,11 @@ export function ObjectivePopup(p: ObjectivePopupProps) {
       {p.spawn && (
         <div className="popup-spawn">
           {tr("Emplacement possible", "Possible location")} <strong>{p.spawn.index}</strong> {tr("sur", "of")} {p.spawn.count}
+          {p.onGroup && (
+            <button className="btn btn-ghost btn-small" onClick={p.onGroup}>
+              {tr("Regrouper en un seul point", "Fold into a single point")}
+            </button>
+          )}
         </div>
       )}
       {p.levelLabel && (

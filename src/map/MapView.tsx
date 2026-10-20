@@ -18,6 +18,7 @@ import { labyrinthFor } from "../lib/labyrinth";
 import type { StoryMapPoint } from "../lib/storyPoints";
 import type { ExitPhotosTarget } from "../components/PhotosTab";
 import { floorFromText } from "../lib/floorText";
+import { spawnGroups } from "../lib/points";
 import {
   displayLevelOf,
   isShownOnLevel,
@@ -274,6 +275,16 @@ function MapViewInner(props: MapViewProps) {
     if (m) markers.current.set(key, m);
     else markers.current.delete(key);
   };
+  // emplacements possibles d'un objet : un seul point par objectif tant que le groupe n'est pas déplié
+  const groups = useMemo(() => spawnGroups(points), [points]);
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+  const toggleGroup = (objectiveId: string, open: boolean) =>
+    setOpenGroups((s) => {
+      const next = new Set(s);
+      if (open) next.add(objectiveId);
+      else next.delete(objectiveId);
+      return next;
+    });
 
   const spotsHere = useMemo(() => props.itemSpots.filter((s) => s.mapId === props.map.id), [props.itemSpots, props.map.id]);
   const allFocusable = useMemo(
@@ -327,22 +338,34 @@ function MapViewInner(props: MapViewProps) {
           const offLevel = !isShownOnLevel(pt, calibration, level);
           const upper = upperLevelOf(pt, calibration);
           const textFloor = manual ? null : floorFromText(objective.description);
+          const group = groups.get(objective.id);
+          const folded = Boolean(group) && !openGroups.has(objective.id);
+          if (folded && pt.key !== group!.rep) return null;
           return (
             <MarkerWithOutline
               key={pt.key}
               point={pt}
               color={color}
-              title={`${task.name} — ${objective.description}${objective.optional ? ` (${tr("optionnel", "optional")})` : ""}${pt.spawn ? ` (${tr("emplacement possible", "possible location")} ${pt.spawn.index}/${pt.spawn.count})` : ""}`}
+              title={`${task.name} — ${objective.description}${objective.optional ? ` (${tr("optionnel", "optional")})` : ""}${
+                folded
+                  ? ` (${tr(`${group!.keys.length} emplacements possibles : clic pour les voir`, `${group!.keys.length} possible locations: click to show them`)})`
+                  : pt.spawn
+                    ? ` (${tr("emplacement possible", "possible location")} ${pt.spawn.index}/${pt.spawn.count})`
+                    : ""
+              }`}
               icon={markerIcon(categoryOf(objective.type), color, {
                 faded: done,
                 offLevel,
                 optional: objective.optional,
-                badge: upper !== null && calibration ? levelBadge(calibration, upper) || undefined : undefined,
+                // groupe replié : le nombre d'emplacements à la place du numéro d'étage
+                badge: folded ? String(group!.keys.length) : upper !== null && calibration ? levelBadge(calibration, upper) || undefined : undefined,
               })}
               offLevel={offLevel}
               dimmed={Boolean(props.focusTaskId) && props.focusTaskId !== task.id}
               tooltip={upper !== null && calibration ? <UpperLevelTooltip point={pt} calibration={calibration} level={upper} /> : null}
-              register={registerMarker(pt.key)}
+              // replié : le point représente tout le groupe (un « voir » sur n'importe quel emplacement le trouve)
+              register={folded ? (m) => group!.keys.forEach((k) => registerMarker(k)(m)) : registerMarker(pt.key)}
+              onClick={folded ? () => toggleGroup(objective.id, true) : undefined}
               draggable={manual}
               onDragEnd={(p) =>
                 dispatch({ type: "setManual", objectiveId: objective.id, position: { mapId: pt.mapId, ...p } })
@@ -356,7 +379,8 @@ function MapViewInner(props: MapViewProps) {
                 note={mode.notes[pt.key] ?? ""}
                 done={done}
                 manual={manual}
-                spawn={pt.spawn}
+                spawn={folded ? undefined : pt.spawn}
+                onGroup={group && !folded ? () => toggleGroup(objective.id, false) : undefined}
                 onPhotos={task.wikiLink ? () => props.onPhotos(task.id) : undefined}
                 onQuest={() => props.onQuest(task.id)}
                 levelLabel={textFloor ?? (layers.length > 0 && !manual ? levelName(calibration, pointLevel) : undefined)}
@@ -510,6 +534,8 @@ function MarkerWithOutline(props: {
   icon: L.DivIcon;
   register: (m: L.Marker | null) => void;
   draggable: boolean;
+  /** Clic sur le point (groupe d'emplacements replié : le déplier). */
+  onClick?: () => void;
   offLevel: boolean;
   /** Autre quête que celle ouverte dans Détails : estompée. */
   dimmed?: boolean;
@@ -542,11 +568,10 @@ function MarkerWithOutline(props: {
         zIndexOffset={props.offLevel ? -1000 : props.dimmed ? -500 : 0}
         opacity={props.dimmed ? 0.3 : 1}
         draggable={props.draggable}
-        eventHandlers={
-          props.draggable
-            ? { dragend: (e) => props.onDragEnd(latLngToGame((e.target as L.Marker).getLatLng())) }
-            : undefined
-        }
+        eventHandlers={{
+          ...(props.draggable ? { dragend: (e: L.DragEndEvent) => props.onDragEnd(latLngToGame((e.target as L.Marker).getLatLng())) } : {}),
+          ...(props.onClick ? { click: props.onClick } : {}),
+        }}
       >
         {props.tooltip && (
           <Tooltip direction="top" offset={[0, -14]} className="level-tooltip">

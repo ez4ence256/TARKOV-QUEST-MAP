@@ -153,3 +153,21 @@ export function orphanDoneCount(tasks: Task[], done: Record<string, number>): nu
 /** Recherche insensible à la casse et aux accents. */
 export const normalizeSearch = (s: string) =>
   s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+/**
+ * Emplacements possibles d'un même objet (points `spawn`) regroupés : un seul point affiché tant que
+ * le groupe n'est pas déplié — celui le plus proche du centre du groupe (un vrai emplacement).
+ */
+export function spawnGroups(points: MapPoint[]): Map<string, { rep: string; keys: string[] }> {
+  const byObjective = new Map<string, MapPoint[]>();
+  for (const p of points) if (p.spawn && p.objectiveId) byObjective.set(p.objectiveId, [...(byObjective.get(p.objectiveId) ?? []), p]);
+  const out = new Map<string, { rep: string; keys: string[] }>();
+  for (const [id, list] of byObjective) {
+    if (list.length < 2) continue;
+    const cx = list.reduce((s, p) => s + p.x, 0) / list.length;
+    const cz = list.reduce((s, p) => s + p.z, 0) / list.length;
+    const rep = list.reduce((best, p) => ((p.x - cx) ** 2 + (p.z - cz) ** 2 < (best.x - cx) ** 2 + (best.z - cz) ** 2 ? p : best));
+    out.set(id, { rep: rep.key, keys: list.map((p) => p.key) });
+  }
+  return out;
+}

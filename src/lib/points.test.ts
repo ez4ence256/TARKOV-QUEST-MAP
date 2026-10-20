@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Task } from "../types";
 import { emptyModeState } from "../state/store";
-import { buildObjectivePoints, currentObjective, manualPointKey, questsUnlockedBy, shownObjectives, taskMapIds, taskProgress } from "./points";
+import { buildObjectivePoints, currentObjective, manualPointKey, questsUnlockedBy, shownObjectives, spawnGroups, taskMapIds, taskProgress } from "./points";
 
 const task: Task = {
   id: "t",
@@ -137,5 +137,17 @@ describe("quêtes débloquées par une quête terminée", () => {
   });
   it("demandée seulement « active » ou déjà terminée : pas proposée", () => {
     expect(questsUnlockedBy(gs2, tasks, { "gs2-o": 1, "gs3-o": 1 })).toEqual([]);
+  });
+});
+
+describe("emplacements possibles regroupés", () => {
+  const sp = (key: string, x: number, z: number, objectiveId = "o", index = 1, count = 3) => ({ key, kind: "objective" as const, mapId: "m", x, z, objectiveId, spawn: { index, count } });
+  it("un groupe par objectif, représenté par l'emplacement le plus proche du centre", () => {
+    const g = spawnGroups([sp("a", 0, 0), sp("b", 10, 0), sp("c", 4, 1), { key: "x", kind: "objective" as const, mapId: "m", x: 1, z: 1, objectiveId: "p" }]);
+    expect(g.get("o")).toEqual({ rep: "c", keys: ["a", "b", "c"] });
+    expect(g.has("p")).toBe(false); // pas un emplacement possible
+  });
+  it("un seul emplacement sur la map : pas de groupe", () => {
+    expect(spawnGroups([sp("a", 0, 0)]).size).toBe(0);
   });
 });
