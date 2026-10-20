@@ -120,6 +120,8 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   const [tree, setTree] = useState<CategoryNode[] | null>(null);
   const [cat, setCat] = useState<CategoryNode | null>(null);
   const [onlyNeeded, setOnlyNeeded] = useState(false);
+  // marchand choisi sous les catégories : objets qui restent à remettre pour ses quêtes (aucun au départ)
+  const [trader, setTrader] = useState<string | null>(null);
   const [open, setOpen] = useState<Set<string>>(new Set());
   const search = useRef<HTMLInputElement>(null);
   const run = useRef(0); // numéro de la dernière lecture : un résultat périmé est ignoré
@@ -216,11 +218,25 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
       .sort((a, b) => b.score - a.score)
       .map((r) => r.item);
   }, [all, q]);
+  // marchand -> objets à lui remettre (quêtes pas grisées, mêmes sources que les badges « À garder »)
+  const traderItems = useMemo(() => {
+    const traderOf = new Map(tasks.map((t) => [t.id, t.traderId]));
+    const out = new Map<string, Set<string>>();
+    for (const [itemId, need] of needs)
+      for (const s of need.sources) {
+        const id = s.kind === "quest" ? traderOf.get(s.taskId) : undefined;
+        if (id) out.set(id, (out.get(id) ?? new Set()).add(itemId));
+      }
+    return out;
+  }, [needs, tasks]);
   const filtered = useMemo(
-    () => results.filter((i) => (!cat || cat.items.has(i.id)) && (!onlyNeeded || needs.has(i.id))),
-    [results, cat, onlyNeeded, needs],
+    () =>
+      results.filter(
+        (i) => (!cat || cat.items.has(i.id)) && (!onlyNeeded || needs.has(i.id)) && (!trader || Boolean(traderItems.get(trader)?.has(i.id))),
+      ),
+    [results, cat, onlyNeeded, needs, trader, traderItems],
   );
-  useEffect(() => setShown(PAGE), [q, cat, onlyNeeded]);
+  useEffect(() => setShown(PAGE), [q, cat, onlyNeeded, trader]);
   const pickCategory = (node: CategoryNode) => {
     setCat((c) => (c?.id === node.id ? null : node));
     setOpen((o) => new Set(o).add(node.id));
@@ -384,6 +400,23 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                     {tr("Tous les objets", "All items")} <span className="finder-cat-count">({all.length})</span>
                   </button>
                   <CategoryTree nodes={tree} depth={0} selected={cat?.id ?? null} open={open} onPick={pickCategory} onToggle={toggleCategory} />
+                  <div className="subhead finder-traders-head">{tr("À remettre à un marchand", "To hand over to a trader")}</div>
+                  <button className={`finder-cat finder-cat-all${trader ? "" : " is-selected"}`} aria-pressed={!trader} onClick={() => setTrader(null)}>
+                    {tr("Aucun marchand", "No trader")}
+                  </button>
+                  {traders
+                    .filter((t) => traderItems.has(t.id))
+                    .map((t) => (
+                      <button
+                        key={t.id}
+                        className={`finder-cat finder-trader${trader === t.id ? " is-selected" : ""}`}
+                        aria-pressed={trader === t.id}
+                        onClick={() => setTrader((x) => (x === t.id ? null : t.id))}
+                      >
+                        {t.imageLink && <img className="finder-trader-img" src={t.imageLink} alt="" width={22} height={22} loading="lazy" />}
+                        <span className="finder-cat-name">{t.name}</span> <span className="finder-cat-count">({traderItems.get(t.id)!.size})</span>
+                      </button>
+                    ))}
                 </nav>
               )}
             </>
