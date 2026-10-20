@@ -22,6 +22,8 @@ import { buildCategoryTree, OTHER, type CategoryNode } from "../lib/itemCategori
 import { ItemThumb } from "./ItemThumb";
 import { isTaskFinished } from "../lib/points";
 import { isGreyed } from "../lib/questChain";
+import { STATUS_LABELS } from "../lib/questWiki";
+import { ObjectiveItems } from "./ObjectiveItems";
 import type { ItemNeed } from "../lib/itemNeeds";
 import { isStaleBuildError, staleBuildMessage } from "../lib/staleBuild";
 
@@ -374,6 +376,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                 crafts={crafts}
                 byId={byId}
                 itemIcons={itemIcons}
+                itemNames={itemNames}
                 onBack={() => setSelected(null)}
                 onShowQuest={(id) => {
                   onShowQuest(id);
@@ -496,6 +499,7 @@ function Usage(p: {
   crafts: Lazy<Map<string, Exchange[]>>;
   byId: Map<string, ListedItem>;
   itemIcons: Record<string, string>;
+  itemNames: Record<string, string>;
   onBack: () => void;
   onShowQuest: (taskId: string) => void;
   onShowSpots: (spots: ItemSpotMarker[], focus: ItemSpotMarker) => void;
@@ -783,22 +787,53 @@ function Usage(p: {
                     </button>
                     {expanded && (
                       <div className="finder-quest-detail">
+                        <div className="finder-quest-tags">
+                          {r.task.minPlayerLevel ? <span className="tag">{tr(`Niveau ${r.task.minPlayerLevel}`, `Level ${r.task.minPlayerLevel}`)}</span> : null}
+                          {r.task.kappaRequired && <span className="tag">Kappa</span>}
+                          {map && <span className="tag">{map}</span>}
+                        </div>
+                        <div className="subhead">{tr("Prérequis", "Prerequisites")}</div>
+                        {(() => {
+                          const reqs = r.task.details?.taskRequirements ?? [];
+                          const traderReqs = r.task.details?.traderRequirements ?? [];
+                          if (reqs.length === 0 && traderReqs.length === 0 && !r.task.minPlayerLevel) return <p className="muted small">{tr("Aucun prérequis", "No prerequisites")}</p>;
+                          return (
+                            <ul className="finder-quest-reqs">
+                              {r.task.minPlayerLevel ? <li><UiIcon id="chevron-right" size={14} /> {tr(`Niveau ${r.task.minPlayerLevel} minimum`, `Level ${r.task.minPlayerLevel} minimum`)}</li> : null}
+                              {reqs.map((q) => {
+                                const t = p.tasksById.get(q.taskId);
+                                const ok = t ? isGreyed(t, p.done, p.failed) : false;
+                                return (
+                                  <li key={q.taskId} className={ok ? "is-done" : undefined}>
+                                    <UiIcon id={ok ? "circle-check" : "chevron-right"} size={14} /> {t?.name ?? q.taskId}
+                                    {q.status.length > 0 && <span className="muted"> ({q.status.map((s) => STATUS_LABELS[s] ?? s).join(tr(" ou ", " or "))})</span>}
+                                  </li>
+                                );
+                              })}
+                              {traderReqs.map((q, i) => (
+                                <li key={`t${i}`}>
+                                  <UiIcon id="chevron-right" size={14} /> {p.traders.find((t) => t.id === q.traderId)?.name ?? "?"}{" "}
+                                  {q.type === "level" ? tr("niv.", "lvl") : tr("réputation", "standing")} {q.compare} {q.value}
+                                </li>
+                              ))}
+                            </ul>
+                          );
+                        })()}
+                        <div className="subhead">{tr("Objectifs", "Objectives")}</div>
                         <ul className="finder-quest-objectives">
                           {r.task.objectives.map((o) => (
                             <li key={o.id} className={p.done[o.id] ? "is-done" : undefined}>
-                              <UiIcon id={p.done[o.id] ? "circle-check" : "chevron-right"} size={14} /> {o.description || tr("(sans description)", "(no description)")}
-                              {o.optional && <span className="tag">{tr("optionnel", "optional")}</span>}
+                              <UiIcon id={p.done[o.id] ? "circle-check" : "chevron-right"} size={14} />
+                              <span className="finder-quest-obj-body">
+                                <span className="finder-quest-obj-text">
+                                  {o.description || tr("(sans description)", "(no description)")}
+                                  {o.optional && <span className="tag">{tr("optionnel", "optional")}</span>}
+                                </span>
+                                <ObjectiveItems objective={o} itemIcons={p.itemIcons} itemNames={p.itemNames} />
+                              </span>
                             </li>
                           ))}
                         </ul>
-                        <div className="muted small">
-                          {[
-                            r.task.minPlayerLevel ? tr(`Niveau ${r.task.minPlayerLevel}`, `Level ${r.task.minPlayerLevel}`) : null,
-                            r.task.kappaRequired ? "Kappa" : null,
-                          ]
-                            .filter(Boolean)
-                            .join(" · ")}
-                        </div>
                         <button className="btn btn-small" onClick={() => p.onShowQuest(r.taskId)}>
                           <UiIcon id="scroll-text" size={14} /> {tr("Ouvrir la fiche complète", "Open the full quest page")}
                         </button>

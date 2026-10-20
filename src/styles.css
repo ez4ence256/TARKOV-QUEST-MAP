@@ -3047,13 +3047,49 @@ kbd {
 .finder-quest-detail .btn {
   justify-self: start;
 }
-.finder-quest-objectives {
+.finder-quest-detail .subhead {
+  margin: 0.3rem 0 0;
+}
+.finder-quest-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.finder-quest-objectives,
+.finder-quest-reqs {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.25rem;
+  gap: 0.35rem;
   font-size: 0.9em;
+}
+.finder-quest-objectives li,
+.finder-quest-reqs li {
+  display: flex;
+  gap: 0.4rem;
+  align-items: flex-start;
+}
+.finder-quest-obj-body {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+/* images des objets d'un objectif (aussi sous les objectifs des autres onglets) */
+.objective-items {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.2rem;
+}
+.objective-items .item-icon {
+  margin-right: 0;
+  background: var(--bg-2);
+  border-radius: 4px;
+}
+.objective-items-count {
+  font-weight: 600;
 }
 .finder-quest-objectives li.is-done {
   color: var(--muted);

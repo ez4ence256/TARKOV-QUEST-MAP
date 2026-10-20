@@ -27,6 +27,7 @@ import {
 } from "../lib/questWiki";
 import { Icon } from "./Icon";
 import { ConfirmButton } from "./ConfirmButton";
+import { ObjectiveItems } from "./ObjectiveItems";
 import { ItemThumb, useItemIcons } from "./ItemThumb";
 import { WikiBlocks } from "./WikiBlocks";
 import { QUEST_SECTIONS, type QuestSectionId } from "../lib/questSections";
@@ -582,6 +583,7 @@ export function QuestTab(p: Props) {
                   {o.description || <em className="muted">{tr("(sans description)", "(no description)")}</em>}
                   {o.optional && <span className="tag">{tr("optionnel", "optional")}</span>}
                 </div>
+                <ObjectiveItems objective={o} itemIcons={p.itemIcons} itemNames={p.itemNames} />
                 {spawns > 1 && <div className="objective-note">{tr(`${spawns} emplacements possibles sur la carte`, `${spawns} possible locations on the map`)}</div>}
               </div>
             </li>

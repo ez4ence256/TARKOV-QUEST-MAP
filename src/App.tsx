@@ -647,6 +647,8 @@ export default function App() {
       onPhotos={showPhotos}
       onQuest={showQuest}
       onStory={(chapter) => showQuest(storyIdOf(chapter))}
+      itemIcons={data.itemIcons ?? {}}
+      itemNames={data.itemNames ?? {}}
     />
   ) : null;
 
@@ -754,6 +756,8 @@ export default function App() {
                   onPhotos={showPhotos}
                   onQuest={showQuest}
                   onStory={(chapter) => showQuest(storyIdOf(chapter))}
+                  itemIcons={data.itemIcons ?? {}}
+                  itemNames={data.itemNames ?? {}}
                 />
                 <div className="room-col room-col-mine">{mySelection}</div>
               </div>

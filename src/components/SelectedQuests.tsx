@@ -8,6 +8,7 @@ import { getLang, tr } from "../lib/i18n";
 import { storyIdOf } from "../lib/story";
 import { UiIcon } from "./UiIcon";
 import { Icon } from "./Icon";
+import { ObjectiveItems } from "./ObjectiveItems";
 import { StoryCard, useStoryChapters } from "./StoryView";
 
 /** Objectifs d'objets à trouver ou remettre : on signale quand l'API n'en donne aucun emplacement. */
@@ -38,6 +39,8 @@ interface Props {
   onStory: (chapter: string) => void;
   /** Lecture seule (quêtes d'un coéquipier en room) : rien à cocher, terminer, retirer, placer ; pas de bouton qui change de map. */
   readOnly?: boolean;
+  itemIcons: Record<string, string>;
+  itemNames: Record<string, string>;
 }
 
 export function SelectedQuests(props: Props) {
@@ -191,6 +194,7 @@ export function SelectedQuests(props: Props) {
                   {o.optional && <span className="tag">{tr("optionnel", "optional")}</span>}
                   {o === current && <span className="tag">▶ {tr("en cours", "current")}</span>}
                 </div>
+                <ObjectiveItems objective={o} itemIcons={props.itemIcons} itemNames={props.itemNames} />
                 {!hasApiPosition(o) && LOOT_TYPES.has(o.type) && (
                   <div className="objective-note">{tr("L'API ne donne pas d'emplacement pour cet objet.", "The API gives no location for this item.")}</div>
                 )}

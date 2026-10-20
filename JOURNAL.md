@@ -11,7 +11,7 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | Élément | État |
 |---|---|
 | Branche | **`main`** seule (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**, branche par défaut). |
-| Version affichée | **0.8.32** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
+| Version affichée | **0.8.33** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
 | **Nouveau design** | depuis la **0.8.23** (commit `e189862` : barre latérale, mode raid, Barlow, icônes SVG). Dernière version avec l'**ancien design** : **0.8.22** (commit `a562131`). Pour revenir en arrière sur un point précis, comparer avec `git diff a562131 e189862 -- <fichier>`. |
 | Derniers commits | `3bc65a9` Item finder : recherche par image (0.8.2) · `78f5fb6` Ctrl+V d'une capture dans l'item finder (0.8.1) · `14c4dc9` Item finder redessiné (0.8.0) · `6800a70` journal fin de session 8 · `245ee03` Version 0.7.23 · `3a59955` Main story : ponts de l'Icebreaker pour Boreas · `2593e19` Icebreaker : calibrage corrigé · `45beb1b` positions > 100 m retirées (0.7.22) · `7acab9f` positions de The Ticket · `5447eef` bouton du panneau en icône seule sur téléphone (0.7.21) · `69ddc95` Item finder · `d81736d` infos du Labyrinthe sur la map |
 | Travail non commité | Seulement `.claude/` (non suivi, volontairement hors du dépôt : chemin propre à cette machine) |
@@ -55,7 +55,7 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | `69ddc95` | 8 | Item finder (objets du jeu, quêtes, hideout, barters, crafts) |
 | `5447eef` | 8 | Barre du haut : bouton du panneau en icône seule sur téléphone |
 
-### Tests (435, 47 fichiers)
+### Tests (440, 48 fichiers)
 
 | Fichier | Ce qui est couvert |
 |---|---|
@@ -376,6 +376,7 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
   - **Kappa** : `npm run sync:kappa` (`scripts/sync-kappa.mjs`) lit le champ `reqkappa` de l'infobox des 495 pages de quêtes (lots de 50, 1 requête/s) -> `src/data/kappa-wiki.json` (**194 quêtes**, contre 13 chez tarkov.dev). `withWikiKappa` (`src/api/cache.ts`) fait l'union au chargement des données (le cache garde les quêtes brutes : pas de changement de version de cache). Fiche quête : « Kappa : requise (tarkov.dev + wiki) ». Contrôles : Pénurie et Collector requises, Debut et Chimie 4 non.
 - **Quête ouverte mise en avant, quêtes dépliables dans Objets** (0.8.31, demandes) : quand le panneau montre Détails sur une quête, les points des AUTRES quêtes sur la carte passent à 30 % d'opacité (et leurs zones aussi) — `focusTaskId` de `MapView`, prop `dimmed` de `MarkerWithOutline`. Dans la fiche d'un objet (Objets › onglet Quêtes), un clic sur une quête la **déplie sur place** (objectifs avec ✓ si faits, niveau, Kappa) au lieu d'ouvrir la fiche quête ; un bouton « Ouvrir la fiche complète » garde l'ancien chemin. Vérifié : Ill-Wisher ouverte -> points de Soins privés 1 à 0,3 ; Moonshine -> « Une victoire au goût amer » dépliée, fenêtre Objets restée ouverte.
 - **Objectifs optionnels repérables sur la carte** (0.8.32, demande) : un point d'objectif optionnel a un contour pointillé et une petite pastille « OPT » en bas à gauche (`markerIcon(…, { optional })`, `.tqp-pin-opt`), et « (optionnel) » dans son infobulle. Vérifié : Système pyramidal (Pyramid Scheme, Rues de Tarkov) -> 10 points « œil » optionnels marqués, seul le marqueur à poser sur un distributeur de la rue Klimov ne l'est pas.
+- **Images des objets demandés, prérequis dans la quête dépliée** (0.8.33, demande) : `objectiveItemRefs` (`src/lib/objectiveItems.ts`) + composant `ObjectiveItems` : vignettes des objets d'un objectif (objets à remettre/trouver/poser, objet de quête, marqueur, objets à utiliser, arme à monter, clés), « ×N », FIR ; listes « au choix » de plus de 6 objets : 5 vignettes + « +N » (liste complète au survol). Affichées dans la quête dépliée de l'item finder (refaite : étiquettes niveau / Kappa / map, section « Prérequis » avec statut et ✓ si déjà fait, conditions de marchand, puis « Objectifs »), dans Détails › Infos et dans les cartes de Mes quêtes (et la colonne du coéquipier). Vérifié : Moonshine › Une victoire au goût amer -> prérequis Saving Private Roman (terminée), vignettes gnôle, saucisse Salty Dog, croûtons, vodka.
 
 ## Étude 3D (session 5, en attente de validation)
 

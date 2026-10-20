@@ -6,7 +6,7 @@ import { tr } from "../lib/i18n";
 import { viewModeOf } from "../lib/roomView";
 import { SelectedQuests } from "./SelectedQuests";
 
-type QuestProps = Pick<ComponentProps<typeof SelectedQuests>, "tasks" | "traders" | "maps" | "currentMapId" | "onPhotos" | "onQuest" | "onStory">;
+type QuestProps = Pick<ComponentProps<typeof SelectedQuests>, "tasks" | "traders" | "maps" | "currentMapId" | "onPhotos" | "onQuest" | "onStory" | "itemIcons" | "itemNames">;
 
 const noop = () => {};
 const NO_COUNTS = new Map<string, number>();
