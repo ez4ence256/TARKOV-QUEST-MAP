@@ -1,72 +1,88 @@
-// Service de rooms (partage de sélection et de progression entre joueurs).
+// Service de rooms (v2) : chaque joueur publie un instantané de ce qu'il affiche, les autres le voient en lecture seule.
+// Rien n'est fusionné : le serveur ne garde que, par membre, un pseudo et le dernier instantané reçu.
 // JavaScript simple (pas de TypeScript) : le Node de production ne sait pas importer src/*.ts.
-// Protocole : POST pour créer / envoyer des opérations, Server-Sent Events pour recevoir.
-// Tout est en mémoire : un redémarrage vide les rooms (le créateur les recrée avec PUT).
-// AUCUNE authentification : qui connaît l'identifiant peut modifier la room.
+// Protocole : POST pour créer / publier, Server-Sent Events pour recevoir. Toute requête porte v = 2.
+// Tout est en mémoire : un redémarrage vide les rooms (le créateur la recrée avec PUT, chacun republie son instantané).
+// AUCUNE authentification : qui connaît l'identifiant peut lire les instantanés. Ni pseudos ni instantanés ne sont journalisés.
 
 import { randomBytes } from "node:crypto";
+
+export const PROTOCOL = 2;
 
 export const LIMITS = {
   maxBody: 256 * 1024,
   maxRooms: 500,
   maxMembers: 20,
-  maxIds: 20_000,
-  maxOps: 1000,
   emptyTtlMs: 30 * 60 * 1000,
+  goneTtlMs: 5 * 60 * 1000, // un membre déconnecté disparaît de la liste après ce délai
   heartbeatMs: 25_000,
+  maxSelected: 200,
+  maxDone: 5000,
+  maxManual: 500,
+  maxStorySelected: 50,
+  maxStoryDone: 2000,
+  maxName: 20,
+  publishPerSec: 10,
+  maxCoord: 100_000,
 };
 
 export const MODES = ["regular", "pve", "pvp-season"];
+export const DEFAULT_NAME = "Joueur";
 // sans 0 O 1 I L (lisibles à l'oral)
 const ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
 const ROOM_ID = /^[23456789ABCDEFGHJKMNPQRSTUVWXYZ]{6}$/;
 const TASK_ID = /^[A-Za-z0-9_\-:.]{1,100}$/;
+const MAP_ID = /^[a-z0-9-]{1,40}$/;
 const CLIENT_ID = /^[A-Za-z0-9_-]{1,64}$/;
 // eslint-disable-next-line no-control-regex
 const STORY_ID = /^[^\u0000-\u001f\u007f]{1,200}$/;
 
-/** op.kind -> champ de l'état de la room */
-const FIELD = { task: "selected", done: "done", story: "storySelected", step: "storyDone" };
-const FIELDS = Object.values(FIELD);
+const PROTOCOL_ERROR = { error: "protocol", message: "Recharge la page : la room a été mise à jour." };
 
-/** @type {Map<string, Room>} */
+/** @type {Map<string, any>} */
 const rooms = new Map();
 
 /** Vide toutes les rooms (tests). */
 export function resetRooms() {
-  for (const room of rooms.values()) for (const c of room.clients) c.res.end();
+  for (const room of rooms.values()) for (const m of room.members.values()) for (const c of m.conns) c.res.end();
   rooms.clear();
 }
 export const roomCount = () => rooms.size;
 
-const validId = (kind, id) =>
-  typeof id === "string" && (kind === "task" || kind === "done" ? TASK_ID.test(id) : STORY_ID.test(id));
-
-/** Valide une liste d'opérations ; renvoie la liste nettoyée ou null. */
-export function validateOps(ops) {
-  if (!Array.isArray(ops) || ops.length > LIMITS.maxOps) return null;
-  const out = [];
-  for (const op of ops) {
-    if (!op || typeof op !== "object" || !(op.kind in FIELD) || typeof op.on !== "boolean" || !validId(op.kind, op.id)) return null;
-    out.push({ kind: op.kind, id: op.id, on: op.on });
-  }
-  return out;
+/** Pseudo propre : sans caractères de contrôle, espaces rognés, 20 caractères max ; "Joueur" si vide ; null si ce n'est pas du texte. */
+export function cleanName(raw) {
+  if (typeof raw !== "string") return null;
+  // eslint-disable-next-line no-control-regex
+  const name = [...raw.replace(/[\u0000-\u001f\u007f-\u009f]/g, "").trim()].slice(0, LIMITS.maxName).join("").trim();
+  return name || DEFAULT_NAME;
 }
 
-/** Valide un état complet { selected, done, storySelected, storyDone } ; renvoie des Set par champ ou null. */
-export function validateState(state) {
-  if (state === undefined || state === null) state = {};
-  if (typeof state !== "object") return null;
-  const kinds = { selected: "task", done: "done", storySelected: "story", storyDone: "step" };
-  const out = {};
-  let total = 0;
-  for (const field of FIELDS) {
-    const list = state[field] ?? [];
-    if (!Array.isArray(list)) return null;
-    total += list.length;
-    if (total > LIMITS.maxIds) return null;
-    for (const id of list) if (!validId(kinds[field], id)) return null;
-    out[field] = new Set(list);
+const list = (v, max) => Array.isArray(v) && v.length <= max;
+const num = (v) => typeof v === "number" && Number.isFinite(v) && Math.abs(v) <= LIMITS.maxCoord;
+
+/** Valide un instantané ; renvoie sa version nettoyée (champs inconnus écartés) ou null. */
+export function validateSnapshot(s) {
+  if (!s || typeof s !== "object") return null;
+  const { selected, done, manual, storySelected, storyDone, position } = s;
+  if (!list(selected, LIMITS.maxSelected) || !list(done, LIMITS.maxDone) || !list(manual, LIMITS.maxManual)) return null;
+  if (!list(storySelected, LIMITS.maxStorySelected) || !list(storyDone, LIMITS.maxStoryDone)) return null;
+  const out = { selected: [], done, manual: [], storySelected, storyDone };
+  for (const t of selected) {
+    if (!t || typeof t.taskId !== "string" || !TASK_ID.test(t.taskId) || !Number.isInteger(t.color) || t.color < 0 || t.color > 63) return null;
+    out.selected.push({ taskId: t.taskId, color: t.color });
+  }
+  for (const id of done) if (typeof id !== "string" || !TASK_ID.test(id)) return null;
+  for (const m of manual) {
+    if (!m || typeof m.objectiveId !== "string" || !TASK_ID.test(m.objectiveId) || typeof m.mapId !== "string" || !MAP_ID.test(m.mapId) || !num(m.x) || !num(m.z)) return null;
+    out.manual.push({ objectiveId: m.objectiveId, mapId: m.mapId, x: m.x, z: m.z });
+  }
+  for (const id of storySelected) if (typeof id !== "string" || !STORY_ID.test(id)) return null;
+  for (const id of storyDone) if (typeof id !== "string" || !STORY_ID.test(id)) return null;
+  if (position !== undefined && position !== null) {
+    const p = position;
+    if (typeof p !== "object" || typeof p.map !== "string" || !MAP_ID.test(p.map) || !MODES.includes(p.gameMode)) return null;
+    if (![p.x, p.y, p.z, p.rotation].every(num) || typeof p.at !== "number" || !Number.isFinite(p.at)) return null;
+    out.position = { map: p.map, x: p.x, y: p.y, z: p.z, rotation: p.rotation, gameMode: p.gameMode, at: p.at };
   }
   return out;
 }
@@ -80,27 +96,44 @@ function newRoomId() {
   }
 }
 
-function createRoom(id, mode, sets) {
-  const room = { id, mode, ...sets, clients: new Set(), emptySince: Date.now() };
-  rooms.set(id, room);
-  return room;
-}
-
-const stateOf = (room) => Object.fromEntries(FIELDS.map((f) => [f, [...room[f]]]));
-const idCount = (room) => FIELDS.reduce((n, f) => n + room[f].size, 0);
-
 function sendJson(res, status, body) {
   res.writeHead(status, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
   res.end(JSON.stringify(body));
 }
 
-function send(client, message) {
-  if (client.res.writableEnded || client.res.destroyed) return; // connexion déjà fermée : jamais d'exception
-  client.res.write(`data: ${JSON.stringify(message)}\n\n`);
+function send(conn, message) {
+  if (conn.res.writableEnded || conn.res.destroyed) return; // connexion déjà fermée : jamais d'exception
+  conn.res.write(`data: ${JSON.stringify(message)}\n\n`);
 }
 
 function broadcast(room, message, exceptClient) {
-  for (const c of room.clients) if (c.client !== exceptClient) send(c, message);
+  for (const [client, m] of room.members) if (client !== exceptClient) for (const c of m.conns) send(c, message);
+}
+
+const membersOf = (room) => [...room.members].map(([id, m]) => ({ id, name: m.name, connected: m.conns.size > 0 }));
+const connectedCount = (room) => [...room.members.values()].filter((m) => m.conns.size > 0).length;
+
+/** Retire les membres déconnectés depuis trop longtemps (force : un seul, pour faire de la place) ; vrai si la liste a changé. */
+function sweepMembers(room, now, force = false) {
+  let changed = false;
+  for (const [id, m] of room.members) {
+    if (m.conns.size === 0 && (force || now - m.goneAt > LIMITS.goneTtlMs)) {
+      room.members.delete(id);
+      changed = true;
+      if (force) break;
+    }
+  }
+  return changed;
+}
+
+/** Renvoie le membre (le crée si besoin) ou null si la room est pleine. */
+function memberOf(room, client) {
+  let m = room.members.get(client);
+  if (m) return m;
+  if (room.members.size >= LIMITS.maxMembers && !sweepMembers(room, Date.now(), true)) return null;
+  m = { name: DEFAULT_NAME, snapshot: null, at: 0, conns: new Set(), goneAt: Date.now(), hits: { start: 0, n: 0 } };
+  room.members.set(client, m);
+  return m;
 }
 
 /** Lit le corps JSON (taille limitée) ; rejette avec { status, error }. */
@@ -134,8 +167,9 @@ function readJson(req) {
 }
 
 function openEvents(req, res, room, clientParam) {
-  const client = clientParam && CLIENT_ID.test(clientParam) ? clientParam : "";
-  if (room.clients.size >= LIMITS.maxMembers) return sendJson(res, 429, { error: "room-full" });
+  if (!clientParam || !CLIENT_ID.test(clientParam)) return sendJson(res, 400, { error: "bad-client" });
+  const member = memberOf(room, clientParam);
+  if (!member) return sendJson(res, 429, { error: "room-full" });
   res.writeHead(200, {
     "Content-Type": "text/event-stream",
     "Cache-Control": "no-cache, no-transform",
@@ -143,49 +177,51 @@ function openEvents(req, res, room, clientParam) {
     "X-Accel-Buffering": "no",
   });
   res.flushHeaders();
-  const entry = { res, client };
+  const conn = { res };
   res.on("error", () => {}); // coupure brutale du client : géré par « close »
-  room.clients.add(entry);
+  member.conns.add(conn);
   res.write("retry: 3000\n\n");
-  send(entry, { type: "snapshot", mode: room.mode, state: stateOf(room), members: room.clients.size });
-  broadcast(room, { type: "members", members: room.clients.size }, client || undefined);
+  send(conn, { type: "hello", mode: room.mode, members: membersOf(room) });
+  for (const [id, m] of room.members) if (id !== clientParam && m.snapshot) send(conn, { type: "member", id, name: m.name, snapshot: m.snapshot, at: m.at });
+  broadcast(room, { type: "members", members: membersOf(room) }, clientParam);
   const beat = setInterval(() => res.write(": ping\n\n"), LIMITS.heartbeatMs);
   req.on("close", () => {
     clearInterval(beat);
-    room.clients.delete(entry);
-    if (room.clients.size === 0) room.emptySince = Date.now();
-    else broadcast(room, { type: "members", members: room.clients.size });
+    member.conns.delete(conn);
+    if (member.conns.size === 0) member.goneAt = Date.now();
+    if (connectedCount(room) === 0) room.emptySince = Date.now();
+    broadcast(room, { type: "members", members: membersOf(room) });
   });
 }
 
-async function applyOps(req, res, room) {
+async function publish(req, res, room) {
   const body = await readJson(req);
-  const ops = validateOps(body?.ops);
-  if (!ops || typeof body.client !== "string" || !CLIENT_ID.test(body.client)) return sendJson(res, 400, { error: "invalid-ops" });
-  // on travaille sur des copies : tout ou rien si une limite est dépassée
-  const next = Object.fromEntries(FIELDS.map((f) => [f, new Set(room[f])]));
-  let total = idCount(room);
-  for (const { kind, id, on } of ops) {
-    const set = next[FIELD[kind]];
-    if (on && !set.has(id)) total++;
-    if (!on && set.has(id)) total--;
-    if (on) set.add(id);
-    else set.delete(id);
-  }
-  if (total > LIMITS.maxIds) return sendJson(res, 413, { error: "room-limit" });
-  Object.assign(room, next);
-  broadcast(room, { type: "op", ops, from: body.client }, body.client);
+  if (body?.v !== PROTOCOL) return sendJson(res, 400, PROTOCOL_ERROR);
+  const name = cleanName(body.name ?? DEFAULT_NAME);
+  const snapshot = validateSnapshot(body.snapshot);
+  if (!name || !snapshot || typeof body.client !== "string" || !CLIENT_ID.test(body.client)) return sendJson(res, 400, { error: "invalid-snapshot" });
+  const member = memberOf(room, body.client);
+  if (!member) return sendJson(res, 429, { error: "room-full" });
+  const now = Date.now();
+  if (now - member.hits.start >= 1000) member.hits = { start: now, n: 0 };
+  if (++member.hits.n > LIMITS.publishPerSec) return sendJson(res, 429, { error: "rate" });
+  const renamed = member.name !== name;
+  member.name = name;
+  member.snapshot = snapshot;
+  member.at = now;
+  if (renamed) broadcast(room, { type: "members", members: membersOf(room) }, body.client);
+  broadcast(room, { type: "member", id: body.client, name, snapshot, at: now }, body.client);
   sendJson(res, 200, { ok: true });
 }
 
 async function createOrRestore(req, res, id) {
   const body = await readJson(req);
-  const sets = validateState(body?.state);
-  if (!body || !MODES.includes(body.mode) || !sets) return sendJson(res, 400, { error: "invalid-room" });
+  if (body?.v !== PROTOCOL) return sendJson(res, 400, PROTOCOL_ERROR);
+  if (!MODES.includes(body.mode)) return sendJson(res, 400, { error: "invalid-room" });
   if (id && rooms.has(id)) return sendJson(res, 200, { id, existed: true });
   if (rooms.size >= LIMITS.maxRooms) return sendJson(res, 503, { error: "too-many-rooms" });
   const roomId = id ?? newRoomId();
-  createRoom(roomId, body.mode, sets);
+  rooms.set(roomId, { id: roomId, mode: body.mode, members: new Map(), emptySince: Date.now() });
   sendJson(res, id ? 200 : 201, { id: roomId });
 }
 
@@ -208,19 +244,27 @@ export function handleRooms(req, res) {
     else createOrRestore(req, res, id).catch(fail);
     return true;
   }
+  // GET (info, événements) : la version est dans l'URL ; un ancien client reçoit une erreur claire
+  if (req.method === "GET" && url.searchParams.get("v") !== String(PROTOCOL)) {
+    sendJson(res, 400, PROTOCOL_ERROR);
+    return true;
+  }
   if (!room) {
     sendJson(res, 404, { error: "unknown-room" });
     return true;
   }
-  if (req.method === "GET" && !action) sendJson(res, 200, { id, mode: room.mode, members: room.clients.size });
+  if (req.method === "GET" && !action) sendJson(res, 200, { id, mode: room.mode, members: connectedCount(room) });
   else if (req.method === "GET" && action === "events") openEvents(req, res, room, url.searchParams.get("client"));
-  else if (req.method === "POST" && action === "ops") applyOps(req, res, room).catch(fail);
+  else if (req.method === "POST" && action === "publish") publish(req, res, room).catch(fail);
   else sendJson(res, 404, { error: "not-found" });
   return true;
 }
 
-// Nettoyage des rooms restées vides trop longtemps.
+// Nettoyage : rooms restées vides trop longtemps, membres partis depuis trop longtemps.
 setInterval(() => {
   const now = Date.now();
-  for (const [id, room] of rooms) if (room.clients.size === 0 && now - room.emptySince > LIMITS.emptyTtlMs) rooms.delete(id);
+  for (const [id, room] of rooms) {
+    if (connectedCount(room) === 0 && now - room.emptySince > LIMITS.emptyTtlMs) rooms.delete(id);
+    else if (sweepMembers(room, now)) broadcast(room, { type: "members", members: membersOf(room) });
+  }
 }, 60_000).unref();
