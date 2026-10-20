@@ -60,6 +60,8 @@ interface MapViewProps {
   onExit: (target: ExitPhotosTarget) => void;
   /** Ouvre l'onglet Quête sur une quête. */
   onQuest: (taskId: string) => void;
+  /** Quête affichée dans Détails : les points des autres quêtes sont estompés. */
+  focusTaskId?: string | null;
   /** Point à centrer / ouvrir (ex. clic dans le panneau) ; n change à chaque demande. */
   focus: { key: string; n: number } | null;
   /** Case « Extracts Scav » de la barre du haut. */
@@ -337,6 +339,7 @@ function MapViewInner(props: MapViewProps) {
                 badge: upper !== null && calibration ? levelBadge(calibration, upper) || undefined : undefined,
               })}
               offLevel={offLevel}
+              dimmed={Boolean(props.focusTaskId) && props.focusTaskId !== task.id}
               tooltip={upper !== null && calibration ? <UpperLevelTooltip point={pt} calibration={calibration} level={upper} /> : null}
               register={registerMarker(pt.key)}
               draggable={manual}
@@ -507,6 +510,8 @@ function MarkerWithOutline(props: {
   register: (m: L.Marker | null) => void;
   draggable: boolean;
   offLevel: boolean;
+  /** Autre quête que celle ouverte dans Détails : estompée. */
+  dimmed?: boolean;
   /** Infobulle au survol (étage des points des étages supérieurs). */
   tooltip: React.ReactNode;
   onDragEnd: (p: { x: number; z: number }) => void;
@@ -521,8 +526,8 @@ function MarkerWithOutline(props: {
           pathOptions={{
             color: props.color,
             weight: 1,
-            opacity: props.offLevel ? 0.25 : 0.7,
-            fillOpacity: props.offLevel ? 0.04 : 0.12,
+            opacity: props.offLevel || props.dimmed ? 0.25 : 0.7,
+            fillOpacity: props.offLevel || props.dimmed ? 0.04 : 0.12,
             dashArray: "4 3",
           }}
           interactive={false}
@@ -533,7 +538,8 @@ function MarkerWithOutline(props: {
         position={gameToLatLng(point)}
         icon={props.icon}
         title={props.title}
-        zIndexOffset={props.offLevel ? -1000 : 0}
+        zIndexOffset={props.offLevel ? -1000 : props.dimmed ? -500 : 0}
+        opacity={props.dimmed ? 0.3 : 1}
         draggable={props.draggable}
         eventHandlers={
           props.draggable

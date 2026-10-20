@@ -1004,6 +1004,7 @@ export default function App() {
               onPhotos={showPhotos}
               onExit={showExitPhotos}
               onQuest={showQuest}
+              focusTaskId={panelOpen && tab === "quest" ? tabTaskId : null}
             />
           ) : (
             <div className="map-empty muted">{load.status === "loading" ? tr("Chargement…", "Loading…") : tr("Aucune map.", "No map.")}</div>

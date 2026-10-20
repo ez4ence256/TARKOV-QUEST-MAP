@@ -3018,6 +3018,31 @@ kbd {
   height: 100%;
   object-fit: cover;
 }
+/* quête dépliée dans la fiche d'un objet */
+.finder-quest-detail {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.2rem 0 0.6rem 2.8rem;
+  padding: 0.5rem 0.6rem;
+  border-left: 2px solid var(--accent);
+  background: var(--bg-2);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+.finder-quest-detail .btn {
+  justify-self: start;
+}
+.finder-quest-objectives {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.9em;
+}
+.finder-quest-objectives li.is-done {
+  color: var(--muted);
+  text-decoration: line-through;
+}
 .finder-quest-main {
   display: flex;
   flex-direction: column;

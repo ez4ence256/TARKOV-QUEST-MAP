@@ -505,6 +505,8 @@ function Usage(p: {
   need?: ItemNeed;
 }) {
   const [tab, setTab] = useState<Tab>("quests");
+  // quête dépliée sur place (on reste dans la fiche de l'objet au lieu d'aller à la fiche quête)
+  const [openQuest, setOpenQuest] = useState<string | null>(null);
   const [wikiTitles, setWikiTitles] = useState<Record<string, string>>({});
   // « Où le trouver » : meilleurs spots (fichier généré) puis la page wiki de l'objet
   const [spots, setSpots] = useState<Spot[] | null>(null);
@@ -754,9 +756,14 @@ function Usage(p: {
                 const map = p.maps.find((m) => m.id === r.task.mapId)?.name;
                 // quête terminée ou échouée (comme « Masquer les quêtes terminées ») : grisée, toujours cliquable
                 const finished = isGreyed(r.task, p.done, p.failed);
+                const expanded = openQuest === r.taskId;
                 return (
                   <li key={r.taskId}>
-                    <button className={`finder-card finder-quest${finished ? " is-done" : ""}`} onClick={() => p.onShowQuest(r.taskId)}>
+                    <button
+                      className={`finder-card finder-quest${finished ? " is-done" : ""}${expanded ? " is-open" : ""}`}
+                      aria-expanded={expanded}
+                      onClick={() => setOpenQuest(expanded ? null : r.taskId)}
+                    >
                       <span className="finder-avatar">{trader?.imageLink && <img src={trader.imageLink} alt="" width={36} height={36} loading="lazy" referrerPolicy="no-referrer" />}</span>
                       <span className="finder-quest-main">
                         <strong>
@@ -772,8 +779,31 @@ function Usage(p: {
                           ))}
                         </span>
                       </span>
-                      <span className="muted finder-chevron" aria-hidden="true">›</span>
+                      <span className="muted finder-chevron" aria-hidden="true">{expanded ? "▾" : "▸"}</span>
                     </button>
+                    {expanded && (
+                      <div className="finder-quest-detail">
+                        <ul className="finder-quest-objectives">
+                          {r.task.objectives.map((o) => (
+                            <li key={o.id} className={p.done[o.id] ? "is-done" : undefined}>
+                              <UiIcon id={p.done[o.id] ? "circle-check" : "chevron-right"} size={14} /> {o.description || tr("(sans description)", "(no description)")}
+                              {o.optional && <span className="tag">{tr("optionnel", "optional")}</span>}
+                            </li>
+                          ))}
+                        </ul>
+                        <div className="muted small">
+                          {[
+                            r.task.minPlayerLevel ? tr(`Niveau ${r.task.minPlayerLevel}`, `Level ${r.task.minPlayerLevel}`) : null,
+                            r.task.kappaRequired ? "Kappa" : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </div>
+                        <button className="btn btn-small" onClick={() => p.onShowQuest(r.taskId)}>
+                          <UiIcon id="scroll-text" size={14} /> {tr("Ouvrir la fiche complète", "Open the full quest page")}
+                        </button>
+                      </div>
+                    )}
                   </li>
                 );
               })}
