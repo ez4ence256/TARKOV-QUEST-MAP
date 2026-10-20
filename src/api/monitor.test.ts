@@ -11,6 +11,13 @@ describe("parseMonitorEvent", () => {
     expect(parseMonitorEvent({ v: 1, type: "map", map: "woods", gameMode: "pve" })).toMatchObject({ type: "map", map: "woods" });
     expect(parseMonitorEvent({ v: 1, type: "hello" })?.type).toBe("hello");
   });
+  it("lot d'anciens logs", () => {
+    const b = { v: 1, type: "tasks", source: "pastLogs", gameMode: "pve", tasks: [{ taskId: task.taskId, status: "started" }], at: 5 };
+    expect(parseMonitorEvent(b)).toEqual({ type: "tasks", gameMode: "pve", tasks: b.tasks, at: 5 });
+    expect(parseMonitorEvent({ ...b, tasks: [] })).toBeNull();
+    expect(parseMonitorEvent({ ...b, source: "x" })).toBeNull();
+    expect(parseMonitorEvent({ ...b, tasks: [{ taskId: "abc", status: "started" }] })).toBeNull();
+  });
   it("accepte le mode PvP Saison", () => expect(parseMonitorEvent({ ...task, gameMode: "pvp-season" })?.type).toBe("task"));
   it("rejette le reste", () => {
     for (const bad of [null, "x", { ...task, v: 2 }, { ...task, taskId: "abc" }, { ...task, status: "modified" }, { ...task, gameMode: "season" }, { ...pos, x: NaN }, { ...pos, map: "Customs" }, { v: 1, type: "?" }]) {

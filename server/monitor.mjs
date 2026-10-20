@@ -5,6 +5,8 @@
 
 export const LIMITS = {
   maxBody: 8 * 1024,
+  maxTasksBody: 64 * 1024, // lot d'anciens logs (type « tasks »)
+  maxTasks: 1000,
   maxCodes: 1000,
   maxListeners: 10,
   perCodePerMin: 60,
@@ -38,6 +40,18 @@ const text = (v, max) => (typeof v === "string" && v.length <= max ? v : "");
 /** Valide un événement ; renvoie l'événement nettoyé ou null (type inconnu, champ manquant ou hors limites). */
 export function validateEvent(b) {
   if (!b || typeof b !== "object" || b.v !== 1) return null;
+  if (b.type === "tasks") {
+    if (b.source !== "pastLogs" || !GAME_MODES.includes(b.gameMode) || !Array.isArray(b.tasks)) return null;
+    if (b.tasks.length < 1 || b.tasks.length > LIMITS.maxTasks) return null;
+    const seen = new Set();
+    const tasks = [];
+    for (const t of b.tasks) {
+      if (!t || !STATUSES.includes(t.status) || typeof t.taskId !== "string" || !TASK_ID.test(t.taskId) || seen.has(t.taskId)) return null;
+      seen.add(t.taskId);
+      tasks.push({ taskId: t.taskId, status: t.status });
+    }
+    return { v: 1, type: "tasks", source: "pastLogs", gameMode: b.gameMode, tasks };
+  }
   if (b.type === "hello") return { v: 1, type: "hello", app: text(b.app, 64), version: text(b.version, 32) };
   if (!GAME_MODES.includes(b.gameMode)) return null;
   if (b.type === "task") {
@@ -73,7 +87,7 @@ function clientIp(req) {
   return fwd || req.socket.remoteAddress || "?";
 }
 
-/** Lit le corps JSON (8 Ko max) ; rejette avec { status, error }. */
+/** Lit le corps JSON (64 Ko max ; 8 Ko hors lot « tasks », vérifié après lecture) ; rejette avec { status, error }. */
 function readJson(req) {
   return new Promise((resolve, reject) => {
     const chunks = [];
@@ -82,7 +96,7 @@ function readJson(req) {
     req.on("data", (chunk) => {
       if (failed) return;
       size += chunk.length;
-      if (size > LIMITS.maxBody) {
+      if (size > LIMITS.maxTasksBody) {
         failed = true;
         reject({ status: 413, error: "too-large" });
         return;
@@ -92,7 +106,9 @@ function readJson(req) {
     req.on("end", () => {
       if (failed) return;
       try {
-        resolve(JSON.parse(Buffer.concat(chunks).toString("utf8")));
+        const body = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+        if (size > LIMITS.maxBody && body?.type !== "tasks") reject({ status: 413, error: "too-large" });
+        else resolve(body);
       } catch {
         reject({ status: 400, error: "bad-json" });
       }

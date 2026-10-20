@@ -9,6 +9,7 @@ export type MonitorStatus = "off" | "connecting" | "connected" | "unavailable";
 export type MonitorEvent =
   | { type: "hello"; at: number }
   | { type: "task"; status: "started" | "finished" | "failed"; taskId: string; gameMode: GameMode; at: number }
+  | { type: "tasks"; gameMode: GameMode; tasks: { taskId: string; status: "started" | "finished" | "failed" }[]; at: number }
   | { type: "map"; map: string; gameMode: GameMode; at: number }
   | { type: "position"; map: string; x: number; y: number; z: number; rotation: number; gameMode: GameMode; at: number };
 
@@ -29,6 +30,16 @@ export function parseMonitorEvent(raw: unknown): MonitorEvent | null {
   if (b.type === "hello") return { type: "hello", at };
   const gameMode = b.gameMode === "regular" || b.gameMode === "pve" || b.gameMode === "pvp-season" ? b.gameMode : null;
   if (!gameMode) return null;
+  if (b.type === "tasks") {
+    const list = b.tasks;
+    if (b.source !== "pastLogs" || !Array.isArray(list) || list.length < 1 || list.length > 1000) return null;
+    const tasks: { taskId: string; status: "started" | "finished" | "failed" }[] = [];
+    for (const t of list as Record<string, unknown>[]) {
+      if (!t || (t.status !== "started" && t.status !== "finished" && t.status !== "failed") || typeof t.taskId !== "string" || !/^[0-9a-f]{24}$/.test(t.taskId)) return null;
+      tasks.push({ taskId: t.taskId, status: t.status });
+    }
+    return { type: "tasks", gameMode, tasks, at };
+  }
   if (b.type === "task") {
     const status = b.status;
     if ((status !== "started" && status !== "finished" && status !== "failed") || typeof b.taskId !== "string" || !/^[0-9a-f]{24}$/.test(b.taskId)) return null;

@@ -25,6 +25,20 @@ describe("planMonitorBatch", () => {
   it("failed : marque échouée et désélectionne", () => {
     expect(planMonitorBatch([ev("d", "failed")], { ...ctx, selected: ["d"] }).action).toMatchObject({ failed: ["d"], deselect: ["d"] });
   });
+  it("gros lot mixte d'une même chaîne : plan cohérent", () => {
+    const chain = [task("a"), task("b", ["a"]), task("c", ["b"]), task("d", ["c"], ["e"]), task("e"), task("f")];
+    const p = planMonitorBatch(
+      [ev("a", "started"), ev("a", "finished"), ev("b", "finished"), ev("c", "started"), ev("d", "started"), ev("e", "failed"), ev("f", "finished"), ev("zz", "finished")],
+      { ...ctx, tasks: chain },
+    );
+    // a, b, f terminées ; c et d commencées ; e échouée ; zz inconnue
+    expect(p.counts).toMatchObject({ finished: 3, failed: 1 });
+    expect(p.action?.done).toEqual(expect.arrayContaining(["ao1", "ao2", "bo1", "bo2", "fo1", "fo2"]));
+    expect(p.action?.failed).toContain("e");
+    expect(p.action?.select).toContain("c");
+    expect(new Set(p.action?.done).size).toBe(p.action?.done.length);
+    expect(p.action?.select.filter((id) => p.action?.failed.includes(id))).toEqual([]);
+  });
   it("ignore autre mode et quêtes inconnues", () => {
     const p = planMonitorBatch([ev("d", "started", "regular" as never), ev("zz", "started")], ctx);
     expect(p.action).toBeNull();

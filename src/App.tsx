@@ -483,9 +483,7 @@ export default function App() {
   const monitorTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const flushMonitor = useRef(() => {});
   useEffect(() => () => clearTimeout(monitorTimer.current), []);
-  flushMonitor.current = () => {
-    monitorTimer.current = undefined;
-    const events = monitorQueue.current.splice(0);
+  const applyMonitor = (events: Extract<MonitorEvent, { type: "task" }>[], prefix: string) => {
     if (!gameMode || !events.length) return;
     const plan = planMonitorBatch(events, { gameMode, tasks, done: mode.done, failed, selected: mode.selected.map((s) => s.taskId), inRoom: inRoom() });
     const c = plan.counts;
@@ -506,7 +504,11 @@ export default function App() {
     }
     if (!parts.length) return;
     const undo = plan.undo;
-    setChainNotice({ text: `Monitor : ${parts.join(" · ")}`, undo: undo ? () => dispatch({ type: "applyQuestStatus", ...undo }) : undefined });
+    setChainNotice({ text: `${prefix} : ${parts.join(" · ")}`, undo: undo ? () => dispatch({ type: "applyQuestStatus", ...undo }) : undefined });
+  };
+  flushMonitor.current = () => {
+    monitorTimer.current = undefined;
+    applyMonitor(monitorQueue.current.splice(0), "Monitor");
   };
   const [player, setPlayer] = useState<(PlayerPosition & { mapId: string }) | null>(null);
   const monitorEvent = useRef((_e: MonitorEvent) => {});
@@ -514,6 +516,15 @@ export default function App() {
     if (e.type === "task") {
       monitorQueue.current.push(e);
       monitorTimer.current ??= setTimeout(() => flushMonitor.current(), 1500);
+    } else if (e.type === "tasks") {
+      // anciens logs : même logique que les événements en direct, mais appliqués tout de suite, en un seul lot
+      if (!gameMode) return;
+      if (e.gameMode !== gameMode) {
+        const name = (m: string) => (m === "regular" ? "PvP" : m === "pve" ? "PvE" : tr("PvP Saison", "PvP Season"));
+        setChainNotice({ text: tr(`Monitor : anciens logs ${name(e.gameMode)} ignorés (le site affiche ${name(gameMode)})`, `Monitor: ${name(e.gameMode)} past logs ignored (the site shows ${name(gameMode)})`) });
+        return;
+      }
+      applyMonitor(e.tasks.map((t) => ({ type: "task" as const, ...t, gameMode: e.gameMode, at: e.at })), tr("Monitor (anciens logs)", "Monitor (past logs)"));
     } else if ((e.type === "map" || e.type === "position") && e.gameMode === gameMode) {
       const target = maps.find((m) => m.normalizedName === e.map);
       if (target && target.id !== currentMap?.id) dispatch({ type: "setMap", mapId: target.id });

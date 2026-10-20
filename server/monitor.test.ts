@@ -81,6 +81,37 @@ describe("validation", () => {
   });
 });
 
+describe("lot d'anciens logs", () => {
+  const ids = (n: number) => Array.from({ length: n }, (_, i) => i.toString(16).padStart(24, "0"));
+  const batch = (n: number) => ({ v: 1, type: "tasks", source: "pastLogs", gameMode: "pve", tasks: ids(n).map((taskId) => ({ taskId, status: "finished" })) });
+  it("accepté (9 Ko), diffusé, non rejoué", async () => {
+    const s = sse(CODE);
+    await s.ready;
+    const b = batch(300);
+    expect(JSON.stringify(b).length).toBeGreaterThan(9 * 1024);
+    expect((await post(CODE, b)).status).toBe(204);
+    await s.waitFor(1);
+    expect(s.events[0]).toMatchObject(b);
+    s.close();
+    const late = sse(CODE);
+    await late.ready;
+    await new Promise((r) => setTimeout(r, 80));
+    expect(late.events).toHaveLength(0);
+    late.close();
+  });
+  it("400 : plus de 1000, doublons, vide, source absente", async () => {
+    expect((await post(CODE, batch(1001))).status).toBe(400);
+    const dup = batch(2);
+    dup.tasks[1].taskId = dup.tasks[0].taskId;
+    expect((await post(CODE, dup)).status).toBe(400);
+    expect((await post(CODE, batch(0))).status).toBe(400);
+    expect((await post(CODE, { ...batch(1), source: "x" })).status).toBe(400);
+  });
+  it("413 : une position de 9 Ko reste refusée", async () => {
+    expect((await post(CODE, { ...pos, pad: "x".repeat(9 * 1024) })).status).toBe(413);
+  });
+});
+
 describe("relais", () => {
   it("POST puis SSE : l'événement arrive avec « at »", async () => {
     const s = sse(CODE);
