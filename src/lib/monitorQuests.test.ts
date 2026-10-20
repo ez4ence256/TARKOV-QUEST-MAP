@@ -6,7 +6,7 @@ const ev = (taskId: string, status: "started" | "finished" | "failed", gameMode 
 const task = (id: string, reqs: string[] = [], failedBy?: string[]) =>
   ({ id, name: id, objectives: [{ id: id + "o1" }, { id: id + "o2" }], failedBy, details: { taskRequirements: reqs.map((r) => ({ taskId: r, status: ["complete"] })) } }) as unknown as Task;
 const tasks = [task("a"), task("b", ["a"]), task("c", [], ["b"]), task("d")];
-const ctx = { gameMode: "pve" as const, tasks, done: {}, failed: {}, selected: [] as string[], inRoom: false };
+const ctx = { gameMode: "pve" as const, tasks, done: {}, failed: {}, selected: [] as string[] };
 
 describe("planMonitorBatch", () => {
   it("started : sélectionne et grise les prérequis", () => {
@@ -14,9 +14,6 @@ describe("planMonitorBatch", () => {
     expect(p.action).toMatchObject({ select: ["b"], done: ["ao1", "ao2"] });
     expect(p.counts).toMatchObject({ started: 1, prereq: 1 });
     expect(p.undo?.undone).toEqual(["ao1", "ao2"]);
-  });
-  it("en room : pas de grisage automatique", () => {
-    expect(planMonitorBatch([ev("b", "started")], { ...ctx, inRoom: true }).action).toMatchObject({ select: ["b"], done: [] });
   });
   it("finished : coche, désélectionne et échoue les branches ; le dernier statut gagne", () => {
     const p = planMonitorBatch([ev("b", "started"), ev("b", "finished")], { ...ctx, selected: ["b"] });

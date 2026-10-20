@@ -1,33 +1,44 @@
-// Client des rooms : connexion SSE + envoi des différences d'état (voir server/rooms.mjs).
-// On ne suit pas les actions une à une : après chaque changement local, on compare l'état partageable
-// au dernier état connu du serveur (`synced`) et on envoie des opérations absolues { kind, id, on }.
-// Les opérations reçues sont appliquées aussi à `synced`, donc elles ne repartent jamais.
+// Client des rooms v2 : connexion SSE, publication de MON instantané, réception de ceux des autres (voir server/rooms.mjs).
+// Rien de ce qui vient de la room n'est écrit dans l'état local : les quêtes de chacun restent à lui.
+// Après chaque changement local, on republie (délai 400 ms) si l'instantané a vraiment changé ; on republie aussi à chaque (re)connexion.
 
-import { useCallback, useEffect, useRef, useState, type Dispatch } from "react";
-import type { GameMode } from "../types";
+import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch } from "react";
+import type { GameMode, Task } from "../types";
 import { tr } from "../lib/i18n";
-import { applyOpsToRoom, diffRoom, parseRoomOps, parseRoomState, roomStateOf, type RoomOp, type RoomState } from "../lib/roomSync";
-import { emptyModeState, reducer, sanitizeState, type Action, type AppState, type ModeState } from "../state/store";
+import {
+  cleanNickname,
+  MAX_NICKNAME,
+  parseMembers,
+  parseSnapshot,
+  publicSnapshotOf,
+  publishablePosition,
+  type RoomMemberInfo,
+  type RoomSnapshot,
+} from "../lib/roomSync";
+import type { Action, AppState } from "../state/store";
 
 export type RoomStatus = "connecting" | "connected" | "reconnecting" | "closed" | "unavailable";
 export interface RoomInfo {
   id: string;
   creator: boolean;
   status: RoomStatus;
+  /** Membres connectés (moi compris). */
   members: number;
+}
+/** Un autre membre de la room : son pseudo et son dernier instantané (null tant qu'il n'a rien publié). */
+export interface RoomMember extends RoomMemberInfo {
+  snapshot: RoomSnapshot | null;
+  /** Heure serveur de la dernière publication. */
+  at: number;
 }
 
 const SESSION_KEY = "tqp:room";
-export const backupKey = (mode: GameMode) => `tqp:beforeRoom:${mode}`;
+const NAME_KEY = "tqp:roomName";
 export const ROOM_ID = /^[23456789ABCDEFGHJKMNPQRSTUVWXYZ]{6}$/;
 const MODE_IDS: GameMode[] = ["regular", "pve", "pvp-season"];
-const SEND_DELAY = 150;
-const MAX_OPS = 1000;
+const PROTOCOL = 2;
+const SEND_DELAY = 400;
 const CLOSED_AFTER = 6; // essais (2,5 s) d'un non-créateur avant « Room fermée »
-
-let activeRoom = false;
-/** Vrai quand ce navigateur est dans une room (sert à prévenir que les réinitialisations sont partagées). */
-export const inRoom = () => activeRoom;
 
 class Unavailable extends Error {
   constructor(readonly hosting: boolean) {
@@ -52,26 +63,29 @@ async function api(method: string, path: string, body?: unknown): Promise<{ stat
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+/** Message de protocole du serveur (ancienne page encore ouverte), à afficher tel quel. */
+const protocolMessage = (data: Record<string, unknown>) => (data.error === "protocol" && typeof data.message === "string" ? data.message : null);
 
 interface Hooks {
-  /** ModeState du mode de la room (état local courant). */
-  getMode: (mode: GameMode) => ModeState | undefined;
-  onSnapshot: (mode: GameMode, state: RoomState, first: boolean) => void;
-  onOps: (mode: GameMode, ops: RoomOp[]) => void;
-  onInfo: (patch: Partial<RoomInfo>) => void;
+  /** Pseudo et instantané à publier maintenant ; null tant que les données ne sont pas chargées. */
+  getPublish: (mode: GameMode) => { name: string; snapshot: RoomSnapshot } | null;
   onMode: (mode: GameMode) => void;
+  onMembers: (members: RoomMemberInfo[]) => void;
+  onMember: (id: string, name: string, snapshot: RoomSnapshot, at: number) => void;
+  onInfo: (patch: Partial<RoomInfo>) => void;
   onError: (message: string) => void;
 }
 
 export class RoomClient {
   readonly clientId = Math.random().toString(36).slice(2) + Date.now().toString(36);
-  private synced: RoomState | null = null;
   private es: EventSource | null = null;
   private timer: ReturnType<typeof setTimeout> | undefined;
   private stopped = false;
-  private hadSnapshot = false;
+  private hadHello = false;
   private recovering = false;
   private sending = false;
+  /** Dernière publication acceptée par le serveur (JSON) : on n'envoie rien de plus tant que rien ne change. */
+  private lastSent = "";
 
   constructor(
     readonly id: string,
@@ -90,16 +104,16 @@ export class RoomClient {
     this.es?.close();
   }
 
-  /** À appeler après chaque changement d'état local. */
+  /** À appeler après chaque changement local possible : publie si l'instantané a changé. */
   schedule(delay = SEND_DELAY) {
-    if (this.stopped || !this.synced) return;
+    if (this.stopped || !this.hadHello) return;
     clearTimeout(this.timer);
     this.timer = setTimeout(() => void this.flush(), delay);
   }
 
   private connect() {
     if (this.stopped) return;
-    const es = new EventSource(`/api/rooms/${this.id}/events?client=${this.clientId}`);
+    const es = new EventSource(`/api/rooms/${this.id}/events?v=${PROTOCOL}&client=${this.clientId}`);
     this.es = es;
     es.onmessage = (e) => this.onMessage(String(e.data));
     es.onerror = () => {
@@ -118,54 +132,52 @@ export class RoomClient {
     } catch {
       return;
     }
-    if (msg.type === "snapshot") {
-      const state = parseRoomState(msg.state);
+    if (msg.type === "hello") {
       const mode = MODE_IDS.find((m) => m === msg.mode);
-      if (!state || !mode) return;
-      const first = !this.hadSnapshot;
-      this.hadSnapshot = true;
+      const members = parseMembers(msg.members);
+      if (!mode || !members) return;
+      this.hadHello = true;
       this.mode = mode;
-      this.synced = state;
+      this.lastSent = ""; // reconnexion : le serveur a pu tout perdre, on republie
       this.hooks.onMode(mode);
-      this.hooks.onSnapshot(mode, state, first);
-      this.hooks.onInfo({ status: "connected", members: Number(msg.members) || 1 });
-      this.schedule(); // à la jointure : envoie ce que le local avait en plus
-    } else if (msg.type === "op" && this.synced && this.mode) {
-      const ops = parseRoomOps(msg.ops);
-      if (!ops || msg.from === this.clientId) return;
-      this.synced = applyOpsToRoom(this.synced, ops);
-      this.hooks.onOps(this.mode, ops);
+      this.hooks.onMembers(members);
+      this.hooks.onInfo({ status: "connected", members: members.filter((m) => m.connected).length || 1 });
+      this.schedule(0);
     } else if (msg.type === "members") {
-      this.hooks.onInfo({ members: Number(msg.members) || 1 });
+      const members = parseMembers(msg.members);
+      if (!members) return;
+      this.hooks.onMembers(members);
+      this.hooks.onInfo({ members: members.filter((m) => m.connected).length || 1 });
+    } else if (msg.type === "member") {
+      const snapshot = parseSnapshot(msg.snapshot);
+      if (!snapshot || typeof msg.id !== "string" || msg.id === this.clientId || typeof msg.at !== "number") return;
+      this.hooks.onMember(msg.id, cleanNickname(msg.name), snapshot, msg.at);
     }
   }
 
   private async flush() {
-    if (this.stopped || !this.synced || !this.mode) return;
+    if (this.stopped || !this.mode) return;
     if (this.sending) return this.schedule();
-    const ops = diffRoom(this.synced, roomStateOf(this.hooks.getMode(this.mode)));
-    if (!ops.length) return;
-    const chunk = ops.slice(0, MAX_OPS);
+    const pub = this.hooks.getPublish(this.mode);
+    if (!pub) return;
+    const key = JSON.stringify(pub);
+    if (key === this.lastSent) return;
     this.sending = true;
-    let again = ops.length > chunk.length;
+    let retry = 0;
     try {
-      const r = await api("POST", `/api/rooms/${this.id}/ops`, { client: this.clientId, ops: chunk });
-      if (r.status === 200) {
-        if (this.synced) this.synced = applyOpsToRoom(this.synced, chunk);
-      } else if (r.status === 404) {
+      const r = await api("POST", `/api/rooms/${this.id}/publish`, { v: PROTOCOL, client: this.clientId, name: pub.name, snapshot: pub.snapshot });
+      if (r.status === 200) this.lastSent = key;
+      else if (r.status === 404) {
         this.es?.close();
         void this.recover();
-        again = false;
-      } else {
-        again = false;
-        this.hooks.onError(tr("La room a refusé ces changements (limite atteinte).", "The room refused these changes (limit reached)."));
-      }
+      } else if (r.status === 429) retry = 1500; // trop de publications d'un coup ou room pleine : on réessaie
+      else this.hooks.onError(protocolMessage(r.data) ?? tr("La room a refusé ton instantané.", "The room refused your snapshot."));
     } catch {
-      again = true; // réseau coupé : on réessaie
+      retry = 2000; // réseau coupé : on réessaie
     } finally {
       this.sending = false;
     }
-    if (again) this.schedule(2000);
+    if (retry) this.schedule(retry);
   }
 
   /** Connexion perdue pour de bon : la room existe-t-elle encore ? Le créateur la recrée si besoin. */
@@ -177,17 +189,22 @@ export class RoomClient {
     try {
       for (let attempt = 0; !this.stopped; attempt++) {
         try {
-          const r = await api("GET", `/api/rooms/${this.id}`);
+          const r = await api("GET", `/api/rooms/${this.id}?v=${PROTOCOL}`);
           if (r.status === 200) return this.connect();
+          const protocol = protocolMessage(r.data);
+          if (protocol) {
+            this.hooks.onError(protocol);
+            return this.hooks.onInfo({ status: "closed" });
+          }
           if (r.status === 404 && this.creator && this.mode) {
-            const put = await api("PUT", `/api/rooms/${this.id}`, { mode: this.mode, state: roomStateOf(this.hooks.getMode(this.mode)) });
+            const put = await api("PUT", `/api/rooms/${this.id}`, { v: PROTOCOL, mode: this.mode });
             if (put.status === 200) return this.connect();
           } else if (r.status === 404 && ++missing >= CLOSED_AFTER) {
             return this.hooks.onInfo({ status: "closed" });
           }
         } catch (e) {
           // une page d'erreur HTML (proxy, redéploiement) après une connexion réussie est passagère
-          if (e instanceof Unavailable && !this.hadSnapshot) return this.hooks.onInfo({ status: "unavailable" });
+          if (e instanceof Unavailable && !this.hadHello) return this.hooks.onInfo({ status: "unavailable" });
         }
         await sleep(Math.min(2500 + attempt * 1000, 10000));
       }
@@ -197,7 +214,7 @@ export class RoomClient {
   }
 }
 
-// --- sessionStorage : la room survit à un rechargement de la page ---
+// --- stockage : la room survit à un rechargement (sessionStorage), le pseudo reste (localStorage) ---
 
 interface Saved {
   id: string;
@@ -223,59 +240,77 @@ function writeSaved(saved: Saved | null) {
     /* stockage indisponible */
   }
 }
+function readName(): string {
+  try {
+    return (localStorage.getItem(NAME_KEY) ?? "").slice(0, MAX_NICKNAME);
+  } catch {
+    return "";
+  }
+}
 
-/** Hook de l'application : une room à la fois, synchronisée avec le reducer. */
-export function useRoom(state: AppState, dispatch: Dispatch<Action>) {
+export interface RoomContext {
+  tasksById: ReadonlyMap<string, Task>;
+  /** Dernière position du Monitor (map du site) ; publiée si elle est récente et du mode de la room. */
+  position: { mapId: string; x: number; y: number; z: number; rotation: number; at: number; gameMode: GameMode } | null;
+}
+
+/** Hook de l'application : une room à la fois. N'écrit jamais dans l'état (sauf le mode de jeu, pour afficher celui de la room). */
+export function useRoom(state: AppState, dispatch: Dispatch<Action>, ctx: RoomContext) {
   const [info, setInfo] = useState<RoomInfo | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  /** Après « Quitter » : propose de garder la room ou de restaurer l'état d'avant. */
-  const [offer, setOffer] = useState<GameMode | null>(null);
+  const [name, setNameState] = useState(readName);
+  const [list, setList] = useState<RoomMemberInfo[]>([]);
+  const [snaps, setSnaps] = useState<Record<string, { snapshot: RoomSnapshot; at: number }>>({});
   const client = useRef<RoomClient | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
+  const ctxRef = useRef(ctx);
+  ctxRef.current = ctx;
+  const nameRef = useRef(name);
+  nameRef.current = name;
 
-  useEffect(() => client.current?.schedule(), [state]);
+  // tout changement local peut changer l'instantané : le client compare avant d'envoyer
+  useEffect(() => client.current?.schedule(), [state.modes, ctx.tasksById, ctx.position, name]);
 
   const stop = useCallback(() => {
     client.current?.stop();
     client.current = null;
-    activeRoom = false;
+    setList([]);
+    setSnaps({});
   }, []);
 
   const begin = useCallback(
-    (id: string, creator: boolean, mode: GameMode | null, fresh: boolean) => {
+    (id: string, creator: boolean, mode: GameMode | null) => {
       stop();
       setError(null);
-      setOffer(null);
-      // l'action est aussi appliquée tout de suite à la copie de l'état : un envoi planifié ne voit jamais un état en retard
-      const apply = (action: Action) => {
-        stateRef.current = reducer(stateRef.current, action);
-        dispatch(action);
-      };
-      activeRoom = true;
       writeSaved({ id, creator, mode });
       setInfo({ id, creator, status: "connecting", members: 1 });
       const c = new RoomClient(id, creator, mode, {
-        getMode: (m) => stateRef.current.modes[m],
-        onMode: (m) => writeSaved({ id, creator, mode: m }),
-        onSnapshot: (m, roomState, first) => {
-          const cur = stateRef.current;
-          if (first && fresh) {
-            try {
-              localStorage.setItem(backupKey(m), JSON.stringify(cur.modes[m] ?? emptyModeState()));
-            } catch {
-              /* stockage plein : pas de sauvegarde */
-            }
-          }
-          if (cur.gameMode !== m) {
-            if (cur.gameMode) setNotice(tr(`La room est en mode ${m === "regular" ? "PvP" : m === "pve" ? "PvE" : "PvP Saison"} : vous y avez été basculé.`, `The room is in ${m === "regular" ? "PvP" : m === "pve" ? "PvE" : "PvP Season"} mode: you were switched to it.`));
-            apply({ type: "setGameMode", mode: m });
-          }
-          apply({ type: "roomSnapshot", mode: m, state: roomState, replace: !first });
+        getPublish: (m) => {
+          const { tasksById, position } = ctxRef.current;
+          if (tasksById.size === 0) return null; // données pas encore chargées : on ne publie pas un instantané vide
+          const snapshot = publicSnapshotOf(stateRef.current.modes[m], tasksById);
+          const pos = publishablePosition(position, m);
+          return { name: cleanNickname(nameRef.current), snapshot: pos ? { ...snapshot, position: pos } : snapshot };
         },
-        onOps: (m, ops) => apply({ type: "roomOps", mode: m, ops }),
+        onMode: (m) => {
+          writeSaved({ id, creator, mode: m });
+          const cur = stateRef.current;
+          if (cur.gameMode === m) return;
+          // seul l'affichage change de mode : aucune quête locale n'est touchée
+          if (cur.gameMode) setNotice(tr(`La room est en mode ${m === "regular" ? "PvP" : m === "pve" ? "PvE" : "PvP Saison"} : vous y avez été basculé.`, `The room is in ${m === "regular" ? "PvP" : m === "pve" ? "PvE" : "PvP Season"} mode: you were switched to it.`));
+          dispatch({ type: "setGameMode", mode: m });
+        },
+        onMembers: (members) => {
+          setList(members.filter((x) => x.id !== c.clientId));
+          setSnaps((prev) => Object.fromEntries(Object.entries(prev).filter(([k]) => members.some((x) => x.id === k))));
+        },
+        onMember: (mid, mname, snapshot, at) => {
+          setSnaps((prev) => ({ ...prev, [mid]: { snapshot, at } }));
+          setList((prev) => (prev.some((x) => x.id === mid) ? prev.map((x) => (x.id === mid ? { ...x, name: mname } : x)) : prev));
+        },
         onInfo: (patch) => setInfo((prev) => (prev && prev.id === id ? { ...prev, ...patch } : prev)),
         onError: setError,
       });
@@ -288,7 +323,7 @@ export function useRoom(state: AppState, dispatch: Dispatch<Action>) {
   // rechargement de la page : on rejoint la room enregistrée
   useEffect(() => {
     const saved = readSaved();
-    if (saved) begin(saved.id, saved.creator, saved.mode, false);
+    if (saved) begin(saved.id, saved.creator, saved.mode);
     return stop;
   }, [begin, stop]);
 
@@ -305,9 +340,9 @@ export function useRoom(state: AppState, dispatch: Dispatch<Action>) {
     setBusy(true);
     setError(null);
     try {
-      const r = await api("POST", "/api/rooms", { mode, state: roomStateOf(state.modes[mode]) });
-      if (r.status === 201 && typeof r.data.id === "string") begin(r.data.id, true, mode, true);
-      else setError(tr("Création impossible (limite du serveur atteinte ?).", "Could not create the room (server limit reached?)."));
+      const r = await api("POST", "/api/rooms", { v: PROTOCOL, mode });
+      if (r.status === 201 && typeof r.data.id === "string") begin(r.data.id, true, mode);
+      else setError(protocolMessage(r.data) ?? tr("Création impossible (limite du serveur atteinte ?).", "Could not create the room (server limit reached?)."));
     } catch (e) {
       failure(e);
     } finally {
@@ -322,9 +357,9 @@ export function useRoom(state: AppState, dispatch: Dispatch<Action>) {
     setBusy(true);
     setError(null);
     try {
-      const r = await api("GET", `/api/rooms/${id}`);
-      if (r.status === 200) begin(id, false, null, true);
-      else setError(tr("Room introuvable.", "Room not found."));
+      const r = await api("GET", `/api/rooms/${id}?v=${PROTOCOL}`);
+      if (r.status === 200) begin(id, false, null);
+      else setError(protocolMessage(r.data) ?? tr("Room introuvable.", "Room not found."));
     } catch (e) {
       failure(e);
     } finally {
@@ -332,37 +367,28 @@ export function useRoom(state: AppState, dispatch: Dispatch<Action>) {
     }
   };
 
+  /** Quitter = se déconnecter : rien n'a été fusionné, il n'y a rien à restaurer. */
   const leave = () => {
-    const mode = client.current ? readSaved()?.mode ?? null : null;
     stop();
     writeSaved(null);
     setInfo(null);
+  };
+
+  const setName = (raw: string) => {
+    const next = raw.slice(0, MAX_NICKNAME);
+    setNameState(next);
     try {
-      if (mode && localStorage.getItem(backupKey(mode))) setOffer(mode);
+      localStorage.setItem(NAME_KEY, next);
     } catch {
-      /* stockage indisponible */
+      /* pseudo non retenu */
     }
   };
 
-  const dropBackup = (mode: GameMode) => {
-    try {
-      localStorage.removeItem(backupKey(mode));
-    } catch {
-      /* rien */
-    }
-    setOffer(null);
-  };
-  const keepRoomState = () => offer && dropBackup(offer);
-  const restoreBefore = () => {
-    if (!offer) return;
-    try {
-      const saved = sanitizeState({ modes: { [offer]: JSON.parse(localStorage.getItem(backupKey(offer)) ?? "null") } }).modes[offer];
-      if (saved) dispatch({ type: "restoreMode", mode: offer, state: saved });
-    } catch {
-      /* sauvegarde illisible : on garde l'état actuel */
-    }
-    dropBackup(offer);
-  };
+  /** Les autres membres connus (pas moi), avec leur dernier instantané. */
+  const members: RoomMember[] = useMemo(
+    () => list.map((m) => ({ ...m, snapshot: snaps[m.id]?.snapshot ?? null, at: snaps[m.id]?.at ?? 0 })),
+    [list, snaps],
+  );
 
-  return { info, notice, dismissNotice: () => setNotice(null), error, busy, offer, create, join, leave, keepRoomState, restoreBefore };
+  return { info, notice, dismissNotice: () => setNotice(null), error, busy, name, setName, members, create, join, leave };
 }

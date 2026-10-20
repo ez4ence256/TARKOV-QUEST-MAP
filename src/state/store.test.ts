@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import type { Task } from "../types";
 import { emptyModeState, loadState, reducer, sanitizeState, type Action, type AppState, type ModeState } from "./store";
-import { roomStateOf } from "../lib/roomSync";
 import { orphanDoneCount, tasksWithProgress } from "../lib/points";
 
 // « Signal - Partie 3 » (« Signal - Part 3 ») : identifiants réels de l'API tarkov.dev,
@@ -131,14 +130,6 @@ describe("quêtes échouées, planque, faction", () => {
     expect(m.hideout).toEqual({ s5: 3, s6: -1 }); // -1 = station ignorée
     expect(m.faction).toBeUndefined();
     expect(sanitizeState(bad).includeHideout).toBe(false);
-  });
-  it("room : snapshot, ops et restauration gardent le personnel ; l'état partagé ne l'inclut pas", () => {
-    const s = stateWith(extra, {});
-    const a = reducer(s, { type: "roomSnapshot", mode: "regular", state: { selected: ["x"], done: [], storySelected: [], storyDone: [] }, replace: true });
-    const b = reducer(a, { type: "roomOps", mode: "regular", ops: [{ kind: "task", id: "y", on: true }] });
-    const c = reducer(b, { type: "restoreMode", mode: "regular", state: emptyModeState() });
-    for (const x of [a, b, c]) expect(x.modes.regular).toMatchObject({ failed: { q1: true }, hideout: { s1: 2 }, faction: "BEAR" });
-    expect(JSON.stringify(roomStateOf(s.modes.regular))).not.toMatch(/q1|hideout|BEAR/);
   });
   it("« Tout réinitialiser » vide les échouées mais garde planque et faction", () => {
     const m = reducer(stateWith(extra, {}), { type: "resetAllProgress" }).modes.regular!;

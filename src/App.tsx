@@ -1,6 +1,6 @@
 // Composant racine : choix du mode, chargement des données, panneau + carte.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { GameMap, Objective, TarkovData, Task } from "./types";
+import type { GameMap, GameMode, Objective, TarkovData, Task } from "./types";
 import { GAME_MODES } from "./types";
 import { loadTarkovData } from "./api/cache";
 import { BUNDLED_CALIBRATION, loadCalibration } from "./map/calibration";
@@ -26,7 +26,7 @@ import { clampPanelWidth, readPanelWidth } from "./lib/panelWidth";
 import { storyIdOf, storyStepId } from "./lib/story";
 import { chaptersWithPositions, currentStoryPoints, pointsOnMap } from "./lib/storyPoints";
 import { chapterName, useStoryItems } from "./components/StoryView";
-import { inRoom, useRoom } from "./api/room";
+import { useRoom } from "./api/room";
 import { maskCode, useMonitor, type MonitorEvent } from "./api/monitor";
 import { type PlayerPosition } from "./map/PlayerMarker";
 import { planMonitorBatch } from "./lib/monitorQuests";
@@ -35,6 +35,7 @@ import { computeNeeds } from "./lib/itemNeeds";
 import { loadHideout, type HideoutStation } from "./api/itemList";
 import { buildEventTasks, loadEventEntries, type EventEntry } from "./api/eventQuests";
 import { RoomControl } from "./components/RoomControl";
+import { LegacyRoomPrompt } from "./components/LegacyRoomPrompt";
 import { MapPicker } from "./components/MapPicker";
 import { Rail, type RailGroup } from "./components/Rail";
 import { RaidCard } from "./components/RaidCard";
@@ -86,7 +87,6 @@ const newId = () =>
 export default function App() {
   const { state, modeState: mode, dispatch } = useAppState();
   const gameMode = state.gameMode;
-  const room = useRoom(state, dispatch);
   const [load, setLoad] = useState<LoadState>({ status: "loading", data: null });
   const [reloadToken, setReloadToken] = useState(0);
   const [lang, setLang] = useState<Lang>(getLang);
@@ -200,7 +200,7 @@ export default function App() {
       muteUnlock.current = false;
       return;
     }
-    // premier calcul (chargement, autre mode) : rien à proposer ; plusieurs d'un coup (import, room) : non plus
+    // premier calcul (chargement, autre mode) : rien à proposer ; plusieurs d'un coup (import) : non plus
     if (!prev || prev.key !== key) return;
     const newly = tasks.filter((t) => finishedIds.has(t.id) && !prev.ids.has(t.id));
     if (newly.length !== 1) return;
@@ -412,7 +412,7 @@ export default function App() {
     });
   };
   // Grise les prérequis des quêtes qu'on vient d'activer. Actions locales seulement (jamais au chargement,
-  // à l'import ni via une room : les cases cochées y seraient envoyées à tout le groupe).
+  // à l'import ni à la réception d'un instantané de la room).
   const greyPrerequisites = (added: Task[], replace = false) => {
     const addedIds = new Set(added.map((t) => t.id));
     const complete = new Set<string>();
@@ -425,15 +425,6 @@ export default function App() {
     for (const id of [...addedIds, ...complete]) fail.delete(id);
     for (const id of addedIds) complete.delete(id);
     if (!complete.size && !fail.size) return;
-    if (inRoom()) {
-      setChainNotice({
-        text: tr(
-          "Room en cours : les prérequis ne sont pas grisés automatiquement (tes quêtes resteraient mélangées avec celles du groupe).",
-          "Room in progress: prerequisites are not greyed out automatically (your quests would get mixed with the group's).",
-        ),
-      });
-      return;
-    }
     // on dit pourquoi : avoir accès à une quête veut dire que celles qui la débloquent sont finies
     const who = added.length === 1 ? `« ${added[0].name} »` : tr(`Ces ${added.length} quêtes`, `These ${added.length} quests`);
     const whoEn = added.length === 1 ? `"${added[0].name}"` : `These ${added.length} quests`;
@@ -462,10 +453,10 @@ export default function App() {
     setMapNotice(tr(`Map affichée : ${name} (les points de « ${task.name} » s'y trouvent).`, `Displayed map: ${name} (the points of "${task.name}" are there).`));
   };
   // marque tous les objectifs faits, puis retire la quête de la sélection (l'UnlockToast propose la suite)
-  // (et fait échouer ses branches exclusives, hors room : la sélection y est partagée)
+  // (et fait échouer ses branches exclusives)
   const completeTask = (task: Task) => {
     const ticks = task.objectives.filter((o) => !mode.done[o.id]).map((o) => o.id);
-    const branch = inRoom() ? [] : branchFailures([task.id], tasks, mode.done, failed, new Set([task.id]));
+    const branch = branchFailures([task.id], tasks, mode.done, failed, new Set([task.id]));
     const sel = new Set(mode.selected.map((s) => s.taskId));
     const deselect = [task.id, ...branch].filter((id) => sel.has(id));
     dispatch({ type: "applyQuestStatus", done: ticks, failed: branch, deselect });
@@ -485,7 +476,7 @@ export default function App() {
   useEffect(() => () => clearTimeout(monitorTimer.current), []);
   const applyMonitor = (events: Extract<MonitorEvent, { type: "task" }>[], prefix: string) => {
     if (!gameMode || !events.length) return;
-    const plan = planMonitorBatch(events, { gameMode, tasks, done: mode.done, failed, selected: mode.selected.map((s) => s.taskId), inRoom: inRoom() });
+    const plan = planMonitorBatch(events, { gameMode, tasks, done: mode.done, failed, selected: mode.selected.map((s) => s.taskId) });
     const c = plan.counts;
     const modeName = (m: string) => (m === "regular" ? "PvP" : m === "pve" ? "PvE" : tr("PvP Saison", "PvP Season"));
     const other = events.find((e) => e.gameMode !== gameMode);
@@ -495,7 +486,6 @@ export default function App() {
       c.failed && tr(`${c.failed} échouée(s)`, `${c.failed} failed`),
       c.prereq && tr(`${c.prereq} prérequis grisé(s)`, `${c.prereq} prerequisite(s) greyed out`),
       c.branch && tr(`${c.branch} branche(s) exclusive(s) échouée(s)`, `${c.branch} exclusive branch quest(s) failed`),
-      c.started && inRoom() && tr("room en cours : prérequis non grisés", "room in progress: prerequisites not greyed out"),
       other && tr(`événement ${modeName(other.gameMode)} ignoré (le site affiche ${modeName(gameMode)})`, `${modeName(other.gameMode)} event ignored (the site shows ${modeName(gameMode)})`),
     ].filter(Boolean);
     if (plan.action) {
@@ -510,7 +500,8 @@ export default function App() {
     monitorTimer.current = undefined;
     applyMonitor(monitorQueue.current.splice(0), "Monitor");
   };
-  const [player, setPlayer] = useState<(PlayerPosition & { mapId: string }) | null>(null);
+  const [player, setPlayer] = useState<(PlayerPosition & { mapId: string; gameMode: GameMode }) | null>(null);
+  const room = useRoom(state, dispatch, { tasksById, position: player });
   const monitorEvent = useRef((_e: MonitorEvent) => {});
   monitorEvent.current = (e) => {
     if (e.type === "task") {
@@ -528,7 +519,7 @@ export default function App() {
     } else if ((e.type === "map" || e.type === "position") && e.gameMode === gameMode) {
       const target = maps.find((m) => m.normalizedName === e.map);
       if (target && target.id !== currentMap?.id) dispatch({ type: "setMap", mapId: target.id });
-      if (target && e.type === "position") setPlayer({ mapId: target.id, x: e.x, y: e.y, z: e.z, rotation: e.rotation, at: Math.min(e.at, Date.now()) });
+      if (target && e.type === "position") setPlayer({ mapId: target.id, gameMode: e.gameMode, x: e.x, y: e.y, z: e.z, rotation: e.rotation, at: Math.min(e.at, Date.now()) });
     }
   };
   const monitor = useMonitor((e) => monitorEvent.current(e));
@@ -892,6 +883,7 @@ export default function App() {
               </button>
             </div>
           )}
+          <LegacyRoomPrompt state={state} dispatch={dispatch} />
           {room.notice && (
             <div className="alert" role="status">
               {room.notice}{" "}

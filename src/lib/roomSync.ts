@@ -1,93 +1,146 @@
-// Partage en room : état échangé, différences et validation des identifiants.
-// Seuls la sélection de quêtes, les objectifs cochés et la Main story sont partagés
-// (couleurs, notes, points perso et positions manuelles restent locaux).
+// Rooms v2 : instantané public publié par chaque joueur (voir server/rooms.mjs).
+// Les quêtes de chacun restent locales : rien de ce qui vient de la room n'est jamais écrit dans l'état local.
 
-import type { ModeState } from "../state/store";
+import type { GameMode, Task } from "../types";
+import { storyStepId } from "./story";
+import { sanitizeState, type AppState, type ModeState } from "../state/store";
 
-export type RoomOpKind = "task" | "done" | "story" | "step";
-export interface RoomOp {
-  kind: RoomOpKind;
-  id: string;
-  on: boolean;
+export const DEFAULT_NICKNAME = "Joueur";
+/** Clé de la sauvegarde laissée par l'ancien code des rooms (suivie du mode de jeu). */
+export const LEGACY_BACKUP_PREFIX = "tqp:beforeRoom:";
+export const MAX_NICKNAME = 20;
+/** Âge maximal d'une position publiée (même durée que l'effacement du marqueur). */
+export const POSITION_MAX_AGE_MS = 5 * 60 * 1000;
+
+/** Mêmes plafonds que le serveur (qui reste seul juge). */
+export const SNAPSHOT_LIMITS = { selected: 200, done: 5000, manual: 500, storySelected: 50, storyDone: 2000 };
+
+export interface RoomPosition {
+  /** Identifiant de la map du site. */
+  map: string;
+  x: number;
+  y: number;
+  z: number;
+  rotation: number;
+  gameMode: GameMode;
+  /** Heure de capture (ms). */
+  at: number;
 }
 
-/** État partagé : identifiants des quêtes choisies, objectifs cochés, chapitres choisis, étapes cochées. */
-export interface RoomState {
-  selected: string[];
+export interface RoomSnapshot {
+  selected: { taskId: string; color: number }[];
+  /** Seulement les objectifs des quêtes sélectionnées. */
   done: string[];
+  /** Seulement les positions des objectifs des quêtes sélectionnées. */
+  manual: { objectiveId: string; mapId: string; x: number; z: number }[];
   storySelected: string[];
+  /** Seulement les étapes des chapitres sélectionnés. */
   storyDone: string[];
+  position?: RoomPosition;
 }
 
-export const emptyRoomState = (): RoomState => ({ selected: [], done: [], storySelected: [], storyDone: [] });
-
-export const OP_FIELD: Record<RoomOpKind, keyof RoomState> = {
-  task: "selected",
-  done: "done",
-  story: "storySelected",
-  step: "storyDone",
-};
-const KINDS = Object.keys(OP_FIELD) as RoomOpKind[];
-
-// mêmes règles que server/rooms.mjs (le serveur reste seul juge)
+const MODES: GameMode[] = ["regular", "pve", "pvp-season"];
 const TASK_ID = /^[A-Za-z0-9_\-:.]{1,100}$/;
+const MAP_ID = /^[a-z0-9-]{1,40}$/;
 // eslint-disable-next-line no-control-regex
 const STORY_ID = /^[^\u0000-\u001f\u007f]{1,200}$/;
-export const validRoomId = (kind: RoomOpKind, id: unknown): id is string =>
-  typeof id === "string" && (kind === "task" || kind === "done" ? TASK_ID : STORY_ID).test(id);
+const MAX_COORD = 100_000;
 
-/** Extrait l'état partageable d'un mode (identifiants invalides écartés). */
-export function roomStateOf(m: ModeState | undefined): RoomState {
-  const keep = (kind: RoomOpKind, ids: string[]) => ids.filter((id) => validRoomId(kind, id));
-  const checked = (rec: Record<string, unknown> | undefined) => Object.keys(rec ?? {}).filter((id) => rec![id]);
+/** Pseudo propre (mêmes règles que le serveur) : sans caractères de contrôle, 20 caractères, « Joueur » si vide. */
+export function cleanNickname(raw: unknown): string {
+  if (typeof raw !== "string") return DEFAULT_NICKNAME;
+  // eslint-disable-next-line no-control-regex
+  const name = [...raw.replace(/[\u0000-\u001f\u007f-\u009f]/g, "").trim()].slice(0, MAX_NICKNAME).join("").trim();
+  return name || DEFAULT_NICKNAME;
+}
+
+/**
+ * Ce qu'un joueur montre aux autres : quêtes choisies, cases cochées de CES quêtes seulement,
+ * positions placées à la main de leurs objectifs, chapitres choisis et leurs étapes cochées.
+ * Notes, points perso, échecs, planque et faction ne sortent jamais. La position (Monitor) est ajoutée par l'appelant.
+ */
+export function publicSnapshotOf(m: ModeState | undefined, tasksById: ReadonlyMap<string, Task>): RoomSnapshot {
+  const selected = (m?.selected ?? []).filter((s) => TASK_ID.test(s.taskId)).slice(0, SNAPSHOT_LIMITS.selected);
+  const objectiveIds = new Set<string>();
+  for (const s of selected) for (const o of tasksById.get(s.taskId)?.objectives ?? []) objectiveIds.add(o.id);
+  const done = Object.keys(m?.done ?? {}).filter((id) => m!.done[id] && objectiveIds.has(id) && TASK_ID.test(id));
+  const manual = Object.entries(m?.manual ?? {})
+    .filter(([id, p]) => objectiveIds.has(id) && TASK_ID.test(id) && MAP_ID.test(p.mapId) && Number.isFinite(p.x) && Number.isFinite(p.z))
+    .map(([objectiveId, p]) => ({ objectiveId, mapId: p.mapId, x: p.x, z: p.z }));
+  const storySelected = (m?.story?.selected ?? []).filter((c) => STORY_ID.test(c)).slice(0, SNAPSHOT_LIMITS.storySelected);
+  const prefixes = storySelected.map((c) => storyStepId(c, ""));
+  const storyDone = Object.keys(m?.story?.done ?? {}).filter((id) => STORY_ID.test(id) && prefixes.some((p) => id.startsWith(p)));
   return {
-    selected: keep("task", (m?.selected ?? []).map((s) => s.taskId)),
-    done: keep("done", checked(m?.done)),
-    storySelected: keep("story", m?.story?.selected ?? []),
-    storyDone: keep("step", checked(m?.story?.done)),
+    selected: selected.map((s) => ({ taskId: s.taskId, color: Number.isInteger(s.color) && s.color >= 0 && s.color <= 63 ? s.color : 0 })),
+    done: done.slice(0, SNAPSHOT_LIMITS.done),
+    manual: manual.slice(0, SNAPSHOT_LIMITS.manual),
+    storySelected,
+    storyDone: storyDone.slice(0, SNAPSHOT_LIMITS.storyDone),
   };
 }
 
-/** Opérations absolues qui font passer `prev` à `next`. */
-export function diffRoom(prev: RoomState, next: RoomState): RoomOp[] {
-  const ops: RoomOp[] = [];
-  for (const kind of KINDS) {
-    const field = OP_FIELD[kind];
-    const before = new Set(prev[field]);
-    const after = new Set(next[field]);
-    for (const id of after) if (!before.has(id)) ops.push({ kind, id, on: true });
-    for (const id of before) if (!after.has(id)) ops.push({ kind, id, on: false });
-  }
-  return ops;
+/** Position à publier : seulement dans le mode de la room et si elle a moins de 5 minutes. */
+export function publishablePosition(
+  p: { mapId: string; x: number; y: number; z: number; rotation: number; at: number; gameMode: GameMode } | null,
+  roomMode: GameMode,
+  now = Date.now(),
+): RoomPosition | undefined {
+  if (!p || p.gameMode !== roomMode || now - p.at > POSITION_MAX_AGE_MS || !MAP_ID.test(p.mapId)) return undefined;
+  return { map: p.mapId, x: p.x, y: p.y, z: p.z, rotation: p.rotation, gameMode: p.gameMode, at: p.at };
 }
 
-/** Applique des opérations à un état (copie). */
-export function applyOpsToRoom(state: RoomState, ops: RoomOp[]): RoomState {
-  const sets = Object.fromEntries(Object.entries(state).map(([f, ids]) => [f, new Set(ids as string[])])) as Record<keyof RoomState, Set<string>>;
-  for (const { kind, id, on } of ops) sets[OP_FIELD[kind]][on ? "add" : "delete"](id);
-  return Object.fromEntries(Object.entries(sets).map(([f, s]) => [f, [...s]])) as unknown as RoomState;
-}
+const num = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v) && Math.abs(v) <= MAX_COORD;
+const strings = (v: unknown, max: number, re: RegExp): v is string[] => Array.isArray(v) && v.length <= max && v.every((s) => typeof s === "string" && re.test(s));
 
-/** Vérifie la forme d'un message du serveur (jamais de confiance aveugle). */
-export function parseRoomState(raw: unknown): RoomState | null {
+/** Vérifie un instantané reçu du serveur (jamais de confiance aveugle) ; null s'il est invalide. */
+export function parseSnapshot(raw: unknown): RoomSnapshot | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
-  const out = emptyRoomState();
-  for (const kind of KINDS) {
-    const field = OP_FIELD[kind];
-    const list = r[field];
-    if (!Array.isArray(list) || !list.every((id) => validRoomId(kind, id))) return null;
-    out[field] = list;
+  const L = SNAPSHOT_LIMITS;
+  if (!Array.isArray(r.selected) || r.selected.length > L.selected || !Array.isArray(r.manual) || r.manual.length > L.manual) return null;
+  if (!strings(r.done, L.done, TASK_ID) || !strings(r.storySelected, L.storySelected, STORY_ID) || !strings(r.storyDone, L.storyDone, STORY_ID)) return null;
+  const selected: RoomSnapshot["selected"] = [];
+  for (const t of r.selected as Record<string, unknown>[]) {
+    if (!t || typeof t.taskId !== "string" || !TASK_ID.test(t.taskId) || !Number.isInteger(t.color) || (t.color as number) < 0 || (t.color as number) > 63) return null;
+    selected.push({ taskId: t.taskId, color: t.color as number });
+  }
+  const manual: RoomSnapshot["manual"] = [];
+  for (const m of r.manual as Record<string, unknown>[]) {
+    if (!m || typeof m.objectiveId !== "string" || !TASK_ID.test(m.objectiveId) || typeof m.mapId !== "string" || !MAP_ID.test(m.mapId) || !num(m.x) || !num(m.z)) return null;
+    manual.push({ objectiveId: m.objectiveId, mapId: m.mapId, x: m.x, z: m.z });
+  }
+  const out: RoomSnapshot = { selected, done: r.done, manual, storySelected: r.storySelected, storyDone: r.storyDone };
+  const p = r.position as Record<string, unknown> | null | undefined;
+  if (p) {
+    if (typeof p.map !== "string" || !MAP_ID.test(p.map) || !MODES.includes(p.gameMode as GameMode)) return null;
+    if (![p.x, p.y, p.z, p.rotation].every(num) || typeof p.at !== "number" || !Number.isFinite(p.at)) return null;
+    out.position = { map: p.map, x: p.x as number, y: p.y as number, z: p.z as number, rotation: p.rotation as number, gameMode: p.gameMode as GameMode, at: p.at };
   }
   return out;
 }
 
-export function parseRoomOps(raw: unknown): RoomOp[] | null {
-  if (!Array.isArray(raw)) return null;
-  const ops: RoomOp[] = [];
-  for (const op of raw as Partial<RoomOp>[]) {
-    if (!op || !KINDS.includes(op.kind as RoomOpKind) || typeof op.on !== "boolean" || !validRoomId(op.kind as RoomOpKind, op.id)) return null;
-    ops.push({ kind: op.kind as RoomOpKind, id: op.id!, on: op.on });
+export interface RoomMemberInfo {
+  id: string;
+  name: string;
+  connected: boolean;
+}
+
+/** Liste de membres reçue du serveur ; null si elle est invalide. Le pseudo est nettoyé une seconde fois (non fiable). */
+export function parseMembers(raw: unknown): RoomMemberInfo[] | null {
+  if (!Array.isArray(raw) || raw.length > 100) return null;
+  const out: RoomMemberInfo[] = [];
+  for (const m of raw as Record<string, unknown>[]) {
+    if (!m || typeof m.id !== "string" || !/^[A-Za-z0-9_-]{1,64}$/.test(m.id) || typeof m.name !== "string") return null;
+    out.push({ id: m.id, name: cleanNickname(m.name), connected: m.connected === true });
   }
-  return ops;
+  return out;
+}
+
+/** Ancienne room (v1) : remet sélection, cases cochées et Main story sauvegardées avant la jointure ; le reste est gardé. */
+export function restoreFromBackup(state: AppState, mode: GameMode, raw: unknown): AppState {
+  const saved = sanitizeState({ modes: { [mode]: raw } }).modes[mode];
+  if (!saved) return state;
+  const current = state.modes[mode];
+  const restored: ModeState = { ...(current ?? saved), selected: saved.selected, done: saved.done, story: saved.story };
+  return { ...state, modes: { ...state.modes, [mode]: restored } };
 }

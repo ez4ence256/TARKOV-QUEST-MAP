@@ -16,7 +16,7 @@ export interface MonitorPlan {
 
 export function planMonitorBatch(
   events: TaskEvent[],
-  ctx: { gameMode: GameMode; tasks: Task[]; done: Record<string, number>; failed: Record<string, true>; selected: string[]; inRoom: boolean },
+  ctx: { gameMode: GameMode; tasks: Task[]; done: Record<string, number>; failed: Record<string, true>; selected: string[] },
 ): MonitorPlan {
   const byId = new Map(ctx.tasks.map((t) => [t.id, t]));
   const sel = new Set(ctx.selected);
@@ -34,18 +34,16 @@ export function planMonitorBatch(
   F.forEach(tick);
   const Fx = F.filter((id) => sel.has(id) || byId.get(id)!.objectives.some((o) => !ctx.done[o.id]));
   const X = ids("failed").filter((id) => !ctx.failed[id]);
-  const branch = ctx.inRoom ? [] : branchFailures(F, ctx.tasks, ctx.done, ctx.failed, new Set(F));
+  const branch = branchFailures(F, ctx.tasks, ctx.done, ctx.failed, new Set(F));
   const pc = new Set<string>();
   const pf = new Set<string>();
-  if (!ctx.inRoom) {
-    for (const id of S) {
-      const c = prerequisiteChanges(id, ctx.tasks, ctx.done, ctx.failed);
-      c.complete.forEach((r) => pc.add(r));
-      c.failed.forEach((r) => pf.add(r));
-    }
-    for (const id of [...S, ...F, ...X, ...pc]) pf.delete(id);
-    for (const id of [...S, ...F, ...X]) pc.delete(id);
+  for (const id of S) {
+    const c = prerequisiteChanges(id, ctx.tasks, ctx.done, ctx.failed);
+    c.complete.forEach((r) => pc.add(r));
+    c.failed.forEach((r) => pf.add(r));
   }
+  for (const id of [...S, ...F, ...X, ...pc]) pf.delete(id);
+  for (const id of [...S, ...F, ...X]) pc.delete(id);
   pc.forEach(tick);
   const newFail = [...new Set([...X, ...branch, ...pf])].filter((id) => !ctx.failed[id]);
   const startSet = new Set(S);

@@ -1916,6 +1916,11 @@ kbd {
   flex: 1;
   min-width: 0;
 }
+.room-name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
 .room-id {
   flex: 1;
   font-size: 1.4rem;

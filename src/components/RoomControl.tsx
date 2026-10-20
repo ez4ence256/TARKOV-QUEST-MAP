@@ -3,10 +3,11 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { tr } from "../lib/i18n";
 import { UiIcon } from "./UiIcon";
 import type { useRoom } from "../api/room";
+import { DEFAULT_NICKNAME, MAX_NICKNAME } from "../lib/roomSync";
 
 export function RoomControl({ room, variant }: { room: ReturnType<typeof useRoom>; variant?: "rail" }) {
   const rail = variant === "rail";
-  const { info, error, busy, offer } = room;
+  const { info, error, busy } = room;
   const [open, setOpen] = useState(false);
   const [joinId, setJoinId] = useState("");
   const [copied, setCopied] = useState(false);
@@ -53,6 +54,21 @@ export function RoomControl({ room, variant }: { room: ReturnType<typeof useRoom
     }
   };
 
+  const nickname = (
+    <label className="room-name">
+      <span className="small">{tr("Ton pseudo", "Your nickname")}</span>
+      <input
+        className="input"
+        value={room.name}
+        maxLength={MAX_NICKNAME}
+        placeholder={DEFAULT_NICKNAME}
+        autoComplete="off"
+        spellCheck={false}
+        onChange={(e) => room.setName(e.target.value)}
+      />
+    </label>
+  );
+
   const submit = (e: FormEvent) => {
     e.preventDefault();
     void room.join(joinId);
@@ -65,7 +81,7 @@ export function RoomControl({ room, variant }: { room: ReturnType<typeof useRoom
         className={`${rail ? "rail-item" : "btn btn-small room-toggle"} ${info ? "is-active" : ""}`}
         aria-expanded={open}
         aria-controls="room-popover"
-        title={tr("Jouer en groupe : partager sélection et progression", "Play as a group: share selection and progress")}
+        title={tr("Jouer en groupe : voir les quêtes de ses coéquipiers", "Play as a group: see your teammates' quests")}
         onClick={() => setOpen((o) => !o)}
       >
         <UiIcon id="users" size={rail ? 22 : 18} />
@@ -86,10 +102,11 @@ export function RoomControl({ room, variant }: { room: ReturnType<typeof useRoom
               <p className="small" role="status">
                 {statusText} · {tr(`${info.members} membre${info.members > 1 ? "s" : ""}`, `${info.members} member${info.members > 1 ? "s" : ""}`)}
               </p>
+              {nickname}
               <p className="muted small">
                 {tr(
-                  "Quêtes choisies, objectifs et chapitres cochés sont partagés. Les réinitialisations aussi.",
-                  "Selected quests, ticked objectives and chapters are shared. So are resets.",
+                  "Tes quêtes restent à toi : la room montre aux autres ce que tu affiches (quêtes choisies, objectifs cochés, position) et te montre le leur, en lecture seule.",
+                  "Your quests stay yours: the room shows the others what you display (selected quests, ticked objectives, position) and shows you theirs, read-only.",
                 )}
               </p>
               <button className="btn btn-small btn-danger" onClick={room.leave}>
@@ -98,19 +115,7 @@ export function RoomControl({ room, variant }: { room: ReturnType<typeof useRoom
             </>
           ) : (
             <>
-              {offer && (
-                <div className="room-offer" role="group" aria-label={tr("Room quittée", "Room left")}>
-                  <p className="small">{tr("Room quittée. Que faire de votre sélection ?", "Room left. What about your selection?")}</p>
-                  <div className="btn-row">
-                    <button className="btn btn-small" onClick={room.keepRoomState}>
-                      {tr("Garder l'état de la room", "Keep the room's state")}
-                    </button>
-                    <button className="btn btn-small" onClick={room.restoreBefore}>
-                      {tr("Restaurer mon état d'avant", "Restore my previous state")}
-                    </button>
-                  </div>
-                </div>
-              )}
+              {nickname}
               <button className="btn btn-primary btn-small" onClick={() => void room.create()} disabled={busy}>
                 {tr("Créer une room", "Create a room")}
               </button>
@@ -134,8 +139,8 @@ export function RoomControl({ room, variant }: { room: ReturnType<typeof useRoom
               </form>
               <p className="muted small">
                 {tr(
-                  "Sans mot de passe : toute personne qui a l'ID peut modifier la room.",
-                  "No password: anyone with the ID can edit the room.",
+                  "Sans mot de passe : toute personne qui a l'ID voit ce que tu publies (pseudo, quêtes, position).",
+                  "No password: anyone with the ID sees what you publish (nickname, quests, position).",
                 )}
               </p>
             </>
