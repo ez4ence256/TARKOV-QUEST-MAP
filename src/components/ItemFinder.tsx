@@ -76,7 +76,7 @@ interface Props {
   done: Record<string, number>;
   /** Quêtes échouées : grisées comme les terminées. */
   failed?: Record<string, true>;
-  /** Objets à garder (quêtes pas faites, planque si incluse) : badges BESOIN / VENDABLE et « À garder ». */
+  /** Objets à garder (quêtes pas faites, planque si incluse) : badges À GARDER / VENDABLE et bloc « À garder ». */
   needs: Map<string, ItemNeed>;
   /** « rail » : bouton de la barre latérale (icône au-dessus du libellé). */
   variant?: "rail";
@@ -394,10 +394,10 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   );
 }
 
-/** Pastille d'une tuile : BESOIN (accent) ou VENDABLE (discret). */
+/** Pastille d'une tuile : À GARDER (en évidence) ou VENDABLE (discret). */
 function NeedBadge({ need }: { need?: ItemNeed }) {
   if (!need) return <span className="finder-need">{tr("VENDABLE", "SELLABLE")}</span>;
-  const parts = [need.count > 0 ? tr(`BESOIN ×${need.count}`, `NEED ×${need.count}`) : tr("BESOIN", "NEED")];
+  const parts = [need.count > 0 ? tr(`À GARDER ×${need.count}`, `KEEP ×${need.count}`) : tr("À GARDER", "KEEP")];
   if (need.firCount > 0) parts.push("FIR");
   if (need.anyOf) parts.push(tr("au choix", "any of"));
   return <span className="finder-need is-need">{parts.join(" · ")}</span>;

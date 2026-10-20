@@ -59,7 +59,7 @@ export interface ModeState {
   story?: StoryState;
   /** Quêtes marquées échouées (grisées comme les terminées). Personnel : jamais partagé en room. */
   failed?: Record<string, true>;
-  /** Niveau construit par station de la planque (0 = pas construite). Personnel. */
+  /** Niveau construit par station de la planque (0 = pas construite, -1 = ignorée : ne compte pas). Personnel. */
   hideout?: Record<string, number>;
   /** Faction du joueur : les quêtes de l'autre ne comptent pas dans les objets à garder. Personnel. */
   faction?: Faction;
@@ -115,7 +115,7 @@ function sanitizeFailed(raw: unknown): Record<string, true> | undefined {
 function sanitizeHideout(raw: unknown): Record<string, number> | undefined {
   if (!raw || typeof raw !== "object") return undefined;
   const out: Record<string, number> = {};
-  for (const [id, level] of Object.entries(raw)) if (id && Number.isInteger(level) && level >= 0 && level <= 20) out[id] = level;
+  for (const [id, level] of Object.entries(raw)) if (id && Number.isInteger(level) && level >= -1 && level <= 20) out[id] = level;
   return Object.keys(out).length ? out : undefined;
 }
 
@@ -345,7 +345,7 @@ export function reducer(state: AppState, action: Action): AppState {
     case "setIncludeHideout":
       return { ...state, includeHideout: action.value };
     case "setHideoutLevel":
-      return updateMode(state, (m) => ({ ...m, hideout: { ...m.hideout, [action.stationId]: Math.max(0, Math.min(20, Math.trunc(action.level) || 0)) } }));
+      return updateMode(state, (m) => ({ ...m, hideout: { ...m.hideout, [action.stationId]: Math.max(-1, Math.min(20, Math.trunc(action.level) || 0)) } }));
     case "setFaction":
       return updateMode(state, (m) => {
         const { faction: _old, ...rest } = m;

@@ -431,7 +431,19 @@ export default function App() {
       });
       return;
     }
-    applyGrey([...complete], [...fail], (k, f) => tr(`${k + f} quête(s) prérequise(s) grisée(s) (${k} terminée(s), ${f} échouée(s)).`, `${k + f} prerequisite quest(s) greyed out (${k} completed, ${f} failed).`), replace);
+    // on dit pourquoi : avoir accès à une quête veut dire que celles qui la débloquent sont finies
+    const who = added.length === 1 ? `« ${added[0].name} »` : tr(`Ces ${added.length} quêtes`, `These ${added.length} quests`);
+    const whoEn = added.length === 1 ? `"${added[0].name}"` : `These ${added.length} quests`;
+    applyGrey(
+      [...complete],
+      [...fail],
+      (k, f) =>
+        tr(
+          `${who} : tu y as accès, donc les ${k + f} quête(s) qui la débloquent sont grisée(s) automatiquement (${k} terminée(s)${f ? `, ${f} échouée(s)` : ""}). Une seule activation suffit pour toute la chaîne.`,
+          `${whoEn}: you have access to it, so the ${k + f} quest(s) that unlock it are greyed out automatically (${k} completed${f ? `, ${f} failed` : ""}). One activation covers the whole chain.`,
+        ),
+      replace,
+    );
   };
   const toggleTask = (taskId: string) => {
     const adding = !mode.selected.some((s) => s.taskId === taskId);

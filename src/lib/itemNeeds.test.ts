@@ -35,6 +35,7 @@ describe("computeNeeds", () => {
     const stations = [{ id: "s", name: "S", levels: [{ level: 1, items: [{ itemId: "h", count: 2, fir: false }] }, { level: 2, items: [{ itemId: "h", count: 5, fir: true }] }] }];
     expect(computeNeeds({ tasks: [], done: {}, stations, hideoutLevels: { s: 1 } }).get("h")).toMatchObject({ count: 5, firCount: 5, sources: [{ kind: "station", stationId: "s", level: 2 }] });
     expect(computeNeeds({ tasks: [], done: {}, stations }).get("h")!.count).toBe(7);
-    expect(computeNeeds({ tasks: [], done: {} }).size).toBe(0);
+    expect(computeNeeds({ tasks: [], done: {} }).size).toBe(0);    // station ignorée (-1) : aucun de ses niveaux ne compte
+    expect(computeNeeds({ tasks: [], done: {}, stations, hideoutLevels: { s: -1 } }).has("h")).toBe(false);
   });
 });

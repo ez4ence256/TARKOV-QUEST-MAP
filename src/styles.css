@@ -2963,9 +2963,17 @@ kbd {
   color: var(--muted);
   letter-spacing: 0.03em;
 }
+/* « À GARDER » : pastille bien visible */
 .finder-need.is-need {
+  padding: 0.05em 0.4em;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
   color: var(--accent-2);
-  font-weight: 600;
+  font-size: 0.8em;
+  font-weight: 700;
+}
+.hideout-station.is-ignored {
+  opacity: 0.55;
 }
 .finder-only-need {
   flex: none;

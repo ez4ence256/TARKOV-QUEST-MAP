@@ -125,10 +125,10 @@ describe("quêtes échouées, planque, faction", () => {
     expect(back.includeHideout).toBe(true);
   });
   it("valeurs invalides écartées", () => {
-    const bad = { modes: { regular: { failed: { a: 1, "": true, b: true }, hideout: { s1: 99, s2: 1.5, s3: "x", s4: -1, s5: 3 }, faction: "scav" } }, includeHideout: "oui" };
+    const bad = { modes: { regular: { failed: { a: 1, "": true, b: true }, hideout: { s1: 99, s2: 1.5, s3: "x", s4: -2, s5: 3, s6: -1 }, faction: "scav" } }, includeHideout: "oui" };
     const m = sanitizeState(bad).modes.regular!;
     expect(m.failed).toEqual({ b: true });
-    expect(m.hideout).toEqual({ s5: 3 });
+    expect(m.hideout).toEqual({ s5: 3, s6: -1 }); // -1 = station ignorée
     expect(m.faction).toBeUndefined();
     expect(sanitizeState(bad).includeHideout).toBe(false);
   });

@@ -55,6 +55,7 @@ export function computeNeeds(p: {
   }
   for (const s of p.stations ?? []) {
     const built = p.hideoutLevels?.[s.id] ?? 0;
+    if (built < 0) continue; // station ignorée (ex. ferme à bitcoins qu'on ne monte pas)
     for (const l of s.levels)
       if (l.level > built) for (const i of l.items) add(i.itemId, { kind: "station", stationId: s.id, level: l.level, count: i.count, fir: i.fir });
   }

@@ -64,17 +64,19 @@ export function HideoutTab(p: Props) {
           {p.stations.map((s) => {
             const built = p.levels[s.id] ?? 0;
             const max = Math.max(0, ...s.levels.map((l) => l.level));
-            const next = s.levels.find((l) => l.level > built);
+            const ignored = built < 0;
+            const next = ignored ? undefined : s.levels.find((l) => l.level > built);
             return (
-              <li key={s.id} className="hideout-station">
+              <li key={s.id} className={`hideout-station${ignored ? " is-ignored" : ""}`}>
                 <div className="row-between">
                   <strong>{s.name}</strong>
                   <select
                     className="input"
-                    value={Math.min(built, max)}
+                    value={ignored ? -1 : Math.min(built, max)}
                     onChange={(e) => p.onLevel(s.id, Number(e.target.value))}
                     aria-label={tr(`Niveau actuel : ${s.name}`, `Current level: ${s.name}`)}
                   >
+                    <option value={-1}>{tr("Ignorer", "Ignore")}</option>
                     <option value={0}>{tr("0 (pas construite)", "0 (not built)")}</option>
                     {s.levels.map((l) => (
                       <option key={l.level} value={l.level}>
@@ -98,7 +100,9 @@ export function HideoutTab(p: Props) {
                     </ul>
                   </>
                 ) : (
-                  <p className="muted small">{tr("Niveau maximum", "Max level")}</p>
+                  <p className="muted small">
+                    {ignored ? tr("Ignorée : ses objets ne comptent pas dans « À garder ».", "Ignored: its items don't count in “To keep”.") : tr("Niveau maximum", "Max level")}
+                  </p>
                 )}
               </li>
             );
