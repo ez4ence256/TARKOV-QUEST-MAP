@@ -28,6 +28,7 @@ import { chaptersWithPositions, currentStoryPoints, pointsOnMap } from "./lib/st
 import { chapterName, useStoryItems } from "./components/StoryView";
 import { inRoom, useRoom } from "./api/room";
 import { maskCode, useMonitor, type MonitorEvent } from "./api/monitor";
+import { type PlayerPosition } from "./map/PlayerMarker";
 import { planMonitorBatch } from "./lib/monitorQuests";
 import { branchFailures, prerequisiteChanges } from "./lib/questChain";
 import { computeNeeds } from "./lib/itemNeeds";
@@ -507,6 +508,7 @@ export default function App() {
     const undo = plan.undo;
     setChainNotice({ text: `Monitor : ${parts.join(" · ")}`, undo: undo ? () => dispatch({ type: "applyQuestStatus", ...undo }) : undefined });
   };
+  const [player, setPlayer] = useState<(PlayerPosition & { mapId: string }) | null>(null);
   const monitorEvent = useRef((_e: MonitorEvent) => {});
   monitorEvent.current = (e) => {
     if (e.type === "task") {
@@ -515,6 +517,7 @@ export default function App() {
     } else if ((e.type === "map" || e.type === "position") && e.gameMode === gameMode) {
       const target = maps.find((m) => m.normalizedName === e.map);
       if (target && target.id !== currentMap?.id) dispatch({ type: "setMap", mapId: target.id });
+      if (target && e.type === "position") setPlayer({ mapId: target.id, x: e.x, y: e.y, z: e.z, rotation: e.rotation, at: Math.min(e.at, Date.now()) });
     }
   };
   const monitor = useMonitor((e) => monitorEvent.current(e));
@@ -922,6 +925,7 @@ export default function App() {
               onStoryDone={(chapter, stepKey) => setStoryStep(chapter, stepKey, true)}
               onStoryOpen={(chapter) => showQuest(storyIdOf(chapter))}
               onStoryPhotos={showStoryPhotos}
+              player={player && player.mapId === currentMap.id ? player : null}
               itemSpots={itemSpots}
               onClearItemSpots={() => setItemSpots([])}
               onPhotos={showPhotos}

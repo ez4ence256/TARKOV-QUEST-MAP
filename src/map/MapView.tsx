@@ -1,6 +1,7 @@
 // Carte Leaflet (CRS.Simple calibré) avec les points des quêtes et les points perso.
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
+import { PlayerMarker, type PlayerPosition } from "./PlayerMarker";
 import { MapContainer, Marker, Polygon, Popup, Tooltip, useMap, useMapEvents } from "react-leaflet";
 import type { GameMap, MapPoint, Objective, Task } from "../types";
 import type { Action, CustomPoint, ModeState } from "../state/store";
@@ -71,6 +72,8 @@ interface MapViewProps {
   /** Meilleurs spots d'un objet (item finder), toutes maps : seuls ceux de cette map sont montrés. */
   itemSpots: ItemSpotMarker[];
   onClearItemSpots: () => void;
+  /** Dernière position envoyée par le Monitor, si elle est sur cette map. */
+  player?: PlayerPosition | null;
 }
 
 /** Emprise par défaut quand une map n'a pas de calibrage : celle des points, sinon un carré. */
@@ -246,6 +249,11 @@ function MapViewInner(props: MapViewProps) {
     (p: { x: number; z: number }) => setLevel(selectableUpperOf(p, calibration) ?? displayLevelOf(p, calibration)),
     [calibration],
   );
+  // nouvelle position du Monitor : le sélecteur d'étage suit la hauteur du joueur
+  const player = props.player;
+  useEffect(() => {
+    if (player) showLevelOf(player);
+  }, [player, showLevelOf]);
   // nombre de points restants par niveau, pour le sélecteur
   const levelCounts = useMemo(() => {
     const counts = new Map<Level, number>();
@@ -354,6 +362,8 @@ function MapViewInner(props: MapViewProps) {
             </MarkerWithOutline>
           );
         })}
+
+        {player && <PlayerMarker player={player} coordinateRotation={calibration?.coordinateRotation ?? 0} />}
 
         {customPoints.map((cp) => (
           <Marker

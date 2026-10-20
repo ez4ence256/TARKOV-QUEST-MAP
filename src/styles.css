@@ -1408,6 +1408,10 @@ kbd {
   max-width: calc(100% - 1.5rem);
 }
 /* Sorties : rectangle vertical, bonhomme blanc ; vert = sortie, orange = transit et coop */
+.player-marker {
+  background: none;
+  border: 0;
+}
 .exit-marker {
   background: none;
   border: 0;
