@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { writeCachedData } from "./cache";
+import { withWikiKappa, writeCachedData } from "./cache";
 import type { TarkovData } from "../types";
 
 const fake = (gameMode: string, language: string) => ({ gameMode, language }) as unknown as TarkovData;
@@ -35,5 +35,15 @@ describe("writeCachedData", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     writeCachedData(fake("regular", "en"));
     expect(warn).toHaveBeenCalled();
+  });
+});
+
+describe("withWikiKappa", () => {
+  it("garde le drapeau tarkov.dev et ajoute les quêtes du wiki", () => {
+    const task = (id: string, kappaRequired: boolean) => ({ id, kappaRequired });
+    const data = { tasks: [task("a", true), task("b", false), task("c", false)] } as unknown as TarkovData;
+    const out = withWikiKappa(data, new Set(["b"]));
+    expect(out.tasks.map((t) => t.kappaRequired)).toEqual([true, true, false]);
+    expect(data.tasks[1].kappaRequired).toBe(false);
   });
 });

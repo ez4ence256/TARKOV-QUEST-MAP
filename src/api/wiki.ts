@@ -108,21 +108,59 @@ export const parseGuideGalleries = (wikitext: string) => parseGalleries(guideSec
 let queue: Promise<unknown> = Promise.resolve();
 let lastRequestAt = 0;
 
+// Repli same-origin (/api/wiki) quand le navigateur ne peut pas joindre Fandom (blocage réseau/CORS, IP limitée).
+const PROXY_MS = 10 * 60 * 1000;
+let proxyUntil = 0;
+
+/** Vrai si l'échec de la route directe mérite un essai par le proxy : erreur réseau (TypeError), HTTP 403 ou 429. */
+export const shouldFallback = (failure: unknown) => failure instanceof TypeError || failure === 403 || failure === 429;
+/** Vrai pendant les 10 minutes qui suivent un repli réussi : le proxy est alors utilisé directement. */
+export const proxyActive = (now = Date.now()) => now < proxyUntil;
+export const markProxy = (now = Date.now()) => void (proxyUntil = now + PROXY_MS);
+export const resetProxy = () => void (proxyUntil = 0);
+
 export function wikiRequest(params: Record<string, string>, lang: WikiLang = "en"): Promise<Record<string, unknown>> {
   const url = `${wikiApi(lang)}?${new URLSearchParams({ ...params, format: "json", formatversion: "2", origin: "*" })}`;
+  const proxy = `/api/wiki?${new URLSearchParams({ lang, ...params })}`;
   const run = queue.then(async () => {
     const wait = lastRequestAt + REQUEST_GAP_MS - Date.now();
     if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
     lastRequestAt = Date.now();
-    const res = await fetch(url);
+    let res: Response | undefined;
+    if (!proxyActive()) {
+      let failure: unknown;
+      try {
+        res = await fetch(url);
+        failure = res.status;
+      } catch (error) {
+        failure = error;
+      }
+      if (res?.ok) return readWiki(res);
+      const original = res ? new Error(`wiki: HTTP ${res.status}`) : failure;
+      if (!shouldFallback(failure)) throw original;
+      try {
+        const alt = await fetch(proxy);
+        // l'hébergement statique répond en HTML : pas de proxy, on garde l'erreur d'origine
+        if (!alt.ok || !(alt.headers.get("content-type") ?? "").includes("json")) throw original;
+        markProxy();
+        return readWiki(alt);
+      } catch {
+        throw original;
+      }
+    }
+    res = await fetch(proxy);
     if (!res.ok) throw new Error(`wiki: HTTP ${res.status}`);
-    const json = (await res.json()) as Record<string, unknown>;
-    const error = json.error as { code?: string; info?: string } | undefined;
-    if (error) throw Object.assign(new Error(`wiki: ${error.info ?? tr("erreur", "error")}`), { code: error.code });
-    return json;
+    return readWiki(res);
   });
   queue = run.catch(() => undefined);
   return run;
+}
+
+async function readWiki(res: Response): Promise<Record<string, unknown>> {
+  const json = (await res.json()) as Record<string, unknown>;
+  const error = json.error as { code?: string; info?: string } | undefined;
+  if (error) throw Object.assign(new Error(`wiki: ${error.info ?? tr("erreur", "error")}`), { code: error.code });
+  return json;
 }
 
 /** Normalisation MediaWiki d'un titre de fichier ("SA house1.png" -> "File:SA house1.png"). */

@@ -4,6 +4,7 @@
 
 import type { GameMode, TarkovData } from "../types";
 import { fetchTarkovData } from "./tarkovJson";
+import kappaWiki from "../data/kappa-wiki.json";
 
 export const DATA_TTL_MS = 6 * 60 * 60 * 1000; // 6 heures
 const CACHE_VERSION = 11;
@@ -16,6 +17,13 @@ export function readCachedData(mode: GameMode, lang: string): TarkovData | null 
   } catch {
     return null;
   }
+}
+
+const wikiKappaIds = new Set<string>(kappaWiki.ids);
+
+/** Kappa = drapeau tarkov.dev OU liste du wiki (reqkappa) ; appliqué à la lecture, donc sans toucher au cache. */
+export function withWikiKappa(data: TarkovData, ids: Set<string> = wikiKappaIds): TarkovData {
+  return { ...data, tasks: data.tasks.map((t) => (t.kappaRequired || !ids.has(t.id) ? t : { ...t, kappaRequired: true })) };
 }
 
 /** Les copies d'un ancien format prennent de la place pour rien. */
@@ -68,15 +76,15 @@ export async function loadTarkovData(
   purgeOldCaches();
   const cached = readCachedData(mode, lang);
   if (!force && cached && Date.now() - cached.fetchedAt < DATA_TTL_MS) {
-    return { data: cached, source: "cache" };
+    return { data: withWikiKappa(cached), source: "cache" };
   }
   try {
     const data = await fetchTarkovData(mode, lang, signal);
     writeCachedData(data);
-    return { data, source: "network" };
+    return { data: withWikiKappa(data), source: "network" };
   } catch (error) {
     if ((error as Error).name === "AbortError") throw error;
-    if (cached) return { data: cached, source: "stale", error: (error as Error).message };
+    if (cached) return { data: withWikiKappa(cached), source: "stale", error: (error as Error).message };
     throw error;
   }
 }

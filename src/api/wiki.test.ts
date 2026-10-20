@@ -4,10 +4,15 @@ import {
   exitKey,
   loadQuestPhotos,
   loadWikiPage,
+  markProxy,
+  proxyActive,
+  resetProxy,
+  shouldFallback,
   parseExitTables,
   parseGuideGalleries,
   purgeExpiredCache,
   writeCache,
+  wikiRequest,
   wikiTitleFromLink,
 } from "./wiki";
 
@@ -332,4 +337,47 @@ describe("stockage plein", () => {
     expect(localStorage.getItem(P + "a")).toBeNull();
     expect(localStorage.getItem("tqp:data:x")).toHaveLength(500);
   });
+});
+
+describe("repli par le proxy /api/wiki", () => {
+  afterEach(() => {
+    resetProxy();
+    vi.unstubAllGlobals();
+  });
+
+  it("shouldFallback : erreur réseau, 403 et 429 seulement", () => {
+    expect(shouldFallback(new TypeError("Failed to fetch"))).toBe(true);
+    expect(shouldFallback(403)).toBe(true);
+    expect(shouldFallback(429)).toBe(true);
+    expect(shouldFallback(500)).toBe(false);
+    expect(shouldFallback(new Error("x"))).toBe(false);
+  });
+
+  it("proxy utilisé 10 minutes après un repli", () => {
+    expect(proxyActive(1000)).toBe(false);
+    markProxy(1000);
+    expect(proxyActive(1000 + 599_999)).toBe(true);
+    expect(proxyActive(1000 + 600_000)).toBe(false);
+  });
+
+  const jsonRes = (body: unknown) => new Response(JSON.stringify(body), { headers: { "Content-Type": "application/json" } });
+
+  it("réessaie par /api/wiki si la route directe échoue, puis utilise le proxy directement", async () => {
+    const fetchMock = vi.fn(async (url: string) => {
+      if (url.startsWith("https://")) throw new TypeError("Failed to fetch");
+      return jsonRes({ parse: { title: "ok" } });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    expect(await wikiRequest({ action: "parse", page: "A" }, "fr")).toEqual({ parse: { title: "ok" } });
+    expect(fetchMock.mock.calls.map((c) => c[0])).toEqual([expect.stringContaining("fandom.com/fr/api.php"), "/api/wiki?lang=fr&action=parse&page=A"]);
+    expect(proxyActive()).toBe(true);
+    await wikiRequest({ action: "parse", page: "B" });
+    expect(fetchMock).toHaveBeenCalledTimes(3); // 3e appel : proxy seul, sans retenter Fandom
+  }, 10_000);
+
+  it("garde l'erreur d'origine si le repli répond en HTML (hébergement statique)", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => (url.startsWith("https://") ? new Response("", { status: 403 }) : new Response("<html>", { headers: { "Content-Type": "text/html" } }))));
+    await expect(wikiRequest({ action: "parse", page: "C" })).rejects.toThrow("wiki: HTTP 403");
+    expect(proxyActive()).toBe(false);
+  }, 10_000);
 });

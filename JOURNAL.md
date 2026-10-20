@@ -11,7 +11,7 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | Élément | État |
 |---|---|
 | Branche | **`main`** seule (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**, branche par défaut). |
-| Version affichée | **0.8.29** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
+| Version affichée | **0.8.30** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
 | **Nouveau design** | depuis la **0.8.23** (commit `e189862` : barre latérale, mode raid, Barlow, icônes SVG). Dernière version avec l'**ancien design** : **0.8.22** (commit `a562131`). Pour revenir en arrière sur un point précis, comparer avec `git diff a562131 e189862 -- <fichier>`. |
 | Derniers commits | `3bc65a9` Item finder : recherche par image (0.8.2) · `78f5fb6` Ctrl+V d'une capture dans l'item finder (0.8.1) · `14c4dc9` Item finder redessiné (0.8.0) · `6800a70` journal fin de session 8 · `245ee03` Version 0.7.23 · `3a59955` Main story : ponts de l'Icebreaker pour Boreas · `2593e19` Icebreaker : calibrage corrigé · `45beb1b` positions > 100 m retirées (0.7.22) · `7acab9f` positions de The Ticket · `5447eef` bouton du panneau en icône seule sur téléphone (0.7.21) · `69ddc95` Item finder · `d81736d` infos du Labyrinthe sur la map |
 | Travail non commité | Seulement `.claude/` (non suivi, volontairement hors du dépôt : chemin propre à cette machine) |
@@ -55,7 +55,7 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | `69ddc95` | 8 | Item finder (objets du jeu, quêtes, hideout, barters, crafts) |
 | `5447eef` | 8 | Barre du haut : bouton du panneau en icône seule sur téléphone |
 
-### Tests (425, 46 fichiers)
+### Tests (435, 47 fichiers)
 
 | Fichier | Ce qui est couvert |
 |---|---|
@@ -371,6 +371,9 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
   - **Retour d'usage** : 11 photos prises au téléphone, puis « Could not read the image: Failed to fetch dynamically imported module …/assets/ocr-DdHdfv1C.js » et aucune quête. Cause : la page était ouverte depuis avant le déploiement, son fichier OCR n'existait plus (404 ; le site en ligne utilisait `ocr-ZsTwrBKM.js`). Correction (`src/lib/staleBuild.ts`) : la capture téléphone vérifie que le module OCR se charge AVANT d'afficher le QR code (sinon « Le site a été mis à jour… recharge la page » + bouton Recharger) ; si la mise à jour tombe entre les photos et leur lecture, le PC garde code + identifiants dans `sessionStorage` (`tqp:phoneResume`), recharge la page et récupère les photos (encore sur le serveur, lecture unique, 10 min). Message clair aussi dans Capture et l'item finder. Vérifié : reprise après rechargement -> photo lue.
   - **Kappa seulement** : case dans Ajouter (à droite des cases « terminées ») et dans Mes quêtes ; dans Objets, à côté de « seulement les objets nécessaires » (objets à remettre pour les quêtes Kappa). Données tarkov.dev d'octobre 2026 : **seulement 13 quêtes `kappaRequired`** (Chimie 1-3, Collector, Le tireur de Tarkov 1-4, Sew it Good 1-2, Pat le coursier 1-2, Shooter Born in Heaven) -> 13 quêtes, 49 objets.
   - **Objets › À garder pour** : « Tout le monde », **Planque** (objets des niveaux non construits, stations non ignorées ; si la planque n'est pas incluse, « (l'inclure) » l'active d'un clic), puis les marchands. Vérifié : Planque 119 objets.
+- **Wiki de secours par le serveur, liste Kappa du wiki** (0.8.30).
+  - **Retour d'usage** : « Le wiki ne répond pas (Failed to fetch) » sur les fiches quête. L'API Fandom répondait depuis localhost et depuis tarkov.aprilox.fr dans le navigateur de test : chez l'utilisateur la requête était bloquée (Fandom/Cloudflare qui freine une IP renvoie une page sans en-tête CORS, ou extension de blocage). Correction : relais `GET /api/wiki?lang=en|fr&…` (`server/wiki.mjs`, monté dans `server/index.mjs` et Vite) : paramètres en liste blanche (ceux que l'app envoie réellement), `format=json&formatversion=2` imposés, User-Agent du site, cache mémoire LRU 24 h (1000 entrées, 50 Mo), requêtes identiques partagées, 2 requêtes/s vers Fandom, 120/min par IP, erreurs jamais mises en cache. `wikiRequest` (`src/api/wiki.ts`) essaie d'abord en direct puis, sur erreur réseau / 403 / 429, une fois par le relais (réponse JSON exigée), et passe par le relais pendant 10 min ensuite. Vérifié : relais contre le vrai Fandom (0,28 s puis 1 ms en cache, FR ok) ; navigateur avec Fandom bloqué -> fiche Pénurie chargée par le relais, sans message d'erreur.
+  - **Kappa** : `npm run sync:kappa` (`scripts/sync-kappa.mjs`) lit le champ `reqkappa` de l'infobox des 495 pages de quêtes (lots de 50, 1 requête/s) -> `src/data/kappa-wiki.json` (**194 quêtes**, contre 13 chez tarkov.dev). `withWikiKappa` (`src/api/cache.ts`) fait l'union au chargement des données (le cache garde les quêtes brutes : pas de changement de version de cache). Fiche quête : « Kappa : requise (tarkov.dev + wiki) ». Contrôles : Pénurie et Collector requises, Debut et Chimie 4 non.
 
 ## Étude 3D (session 5, en attente de validation)
 
