@@ -7,6 +7,7 @@ import { getLang, tr } from "../lib/i18n";
 import { exitPinHtml } from "../map/exitIcons";
 import { EXIT_KIND_LABELS, type ExitIconKind } from "../lib/exits";
 import { Icon } from "./Icon";
+import { MONITOR_CODE, maskCode, statusLine, type MonitorLink } from "../api/monitor";
 import { version } from "../../package.json";
 
 interface Props {
@@ -24,6 +25,7 @@ interface Props {
   onRefresh: () => void;
   onExport: () => void;
   onImport: (state: AppState) => void;
+  monitor: MonitorLink;
   /** Section « Réinitialiser la progression » (voir ResetProgressSection). */
   resetSection: ReactNode;
 }
@@ -43,6 +45,8 @@ const exitLegend = (): [ExitIconKind, string][] => [
 export function SettingsTab(p: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [codeInput, setCodeInput] = useState("");
+  const codeOk = MONITOR_CODE.test(codeInput.trim());
 
   const handleFile = async (file: File | undefined) => {
     if (!file) return;
@@ -128,6 +132,47 @@ export function SettingsTab(p: Props) {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section>
+        <div className="subhead">Tarkov AprilOx Monitor</div>
+        <p className="muted small">
+          {tr(
+            "L'application Tarkov AprilOx Monitor lit les logs du jeu et envoie ici tes quêtes et ta position (captures d'écran).",
+            "The Tarkov AprilOx Monitor app reads the game logs and sends your quests and your position (screenshots) here.",
+          )}{" "}
+          <a href="https://github.com/ez4ence256/TarkovAprilOxMonitor" target="_blank" rel="noreferrer">
+            {tr("Télécharger", "Download")}
+          </a>
+        </p>
+        <input
+          className="input"
+          value={p.monitor.code ? maskCode(p.monitor.code) : codeInput}
+          disabled={Boolean(p.monitor.code)}
+          maxLength={64}
+          autoComplete="off"
+          spellCheck={false}
+          placeholder={tr("Code de liaison (16 caractères)", "Pairing code (16 characters)")}
+          aria-label={tr("Code de liaison", "Pairing code")}
+          onChange={(e) => setCodeInput(e.target.value)}
+        />
+        <div className="btn-row">
+          <button
+            className="btn btn-small"
+            disabled={Boolean(p.monitor.code) || !codeOk}
+            onClick={() => {
+              p.monitor.connect(codeInput.trim());
+              setCodeInput("");
+            }}
+          >
+            {tr("Connecter", "Connect")}
+          </button>
+          <button className="btn btn-small" disabled={!p.monitor.code} onClick={p.monitor.disconnect}>
+            {tr("Déconnecter", "Disconnect")}
+          </button>
+        </div>
+        {codeInput.trim() && !codeOk && !p.monitor.code && <p className="small">{tr("Le code fait 16 lettres et chiffres.", "The code is 16 letters and digits.")}</p>}
+        <p className="small" role="status">{statusLine(p.monitor.status, p.monitor.lastAt)}</p>
       </section>
 
       <section>

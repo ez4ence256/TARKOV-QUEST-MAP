@@ -27,6 +27,7 @@ import { storyIdOf, storyStepId } from "./lib/story";
 import { chaptersWithPositions, currentStoryPoints, pointsOnMap } from "./lib/storyPoints";
 import { chapterName, useStoryItems } from "./components/StoryView";
 import { inRoom, useRoom } from "./api/room";
+import { maskCode, useMonitor } from "./api/monitor";
 import { branchFailures, prerequisiteChanges } from "./lib/questChain";
 import { computeNeeds } from "./lib/itemNeeds";
 import { loadHideout, type HideoutStation } from "./api/itemList";
@@ -84,6 +85,7 @@ export default function App() {
   const { state, modeState: mode, dispatch } = useAppState();
   const gameMode = state.gameMode;
   const room = useRoom(state, dispatch);
+  const monitor = useMonitor(() => {});
   const [load, setLoad] = useState<LoadState>({ status: "loading", data: null });
   const [reloadToken, setReloadToken] = useState(0);
   const [lang, setLang] = useState<Lang>(getLang);
@@ -752,6 +754,7 @@ export default function App() {
               onRefresh={() => setReloadToken((n) => n + 1)}
               onExport={() => exportState(state)}
               onImport={(imported) => dispatch({ type: "import", state: imported })}
+              monitor={monitor}
               resetSection={
                 <ResetProgressSection
                   tasks={tasks}
@@ -822,6 +825,17 @@ export default function App() {
             </div>
           )}
 
+          {monitor.pending && (
+            <div className="alert" role="status">
+              {tr(`Connecter ce Monitor ? Code ${maskCode(monitor.pending)}`, `Connect this Monitor? Code ${maskCode(monitor.pending)}`)}{" "}
+              <button className="link" onClick={monitor.confirmPending}>
+                {tr("Oui", "Yes")}
+              </button>{" "}
+              <button className="link" onClick={monitor.dismissPending}>
+                {tr("Non", "No")}
+              </button>
+            </div>
+          )}
           {room.notice && (
             <div className="alert" role="status">
               {room.notice}{" "}
