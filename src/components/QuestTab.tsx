@@ -68,6 +68,8 @@ interface Props {
   storyDone: Record<string, true>;
   onStoryStep: (chapter: string, stepKey: string, done: boolean) => void;
   onStoryReset: (chapter: string) => void;
+  /** Quête d'un coéquipier de la room : sa progression, en lecture seule (ni « Fait », ni « Activer »). */
+  owner?: string;
 }
 
 /** Quêtes proposées dans un onglet (Quête, Photos) : la quête demandée, puis la sélection. */
@@ -542,6 +544,11 @@ export function QuestTab(p: Props) {
         </div>
       )}
 
+      {p.owner && (
+        <div className="warn-box" role="note">
+          {tr(`Quête de ${p.owner} : sa progression, en lecture seule.`, `${p.owner}'s quest: their progress, read-only.`)}
+        </div>
+      )}
       <div className="quest-tab-head">
         <h2 className="quest-tab-title">{task.name}</h2>
         <span
@@ -571,6 +578,7 @@ export function QuestTab(p: Props) {
                 <input
                   type="checkbox"
                   checked={isDone}
+                  disabled={Boolean(p.owner)}
                   onChange={(e) => p.onSetDone(o.id, e.target.checked)}
                   aria-label={isDone ? tr("Marquer comme non fait", "Mark as not done") : tr("Marquer comme fait", "Mark as done")}
                 />
@@ -592,7 +600,7 @@ export function QuestTab(p: Props) {
       </ul>
       <p className="muted small">{tr("Décocher un objectif fait réapparaître ses points sur la carte.", "Unchecking an objective makes its points reappear on the map.")}</p>
       <div className="btn-row">
-        {checked > 0 && (
+        {checked > 0 && !p.owner && (
           <ConfirmButton
             label={tr("Réinitialiser cette quête", "Reset this quest")}
             question={tr(`Décocher ${checked} objectif${checked > 1 ? "s" : ""} ?`, `Uncheck ${checked} objective${checked > 1 ? "s" : ""}?`)}
@@ -605,7 +613,7 @@ export function QuestTab(p: Props) {
             <UiIcon id="image" /> Photos
           </button>
         )}
-        {(!greyed || active) && (
+        {!p.owner && (!greyed || active) && (
           <button
             className={`btn btn-small${active ? " btn-primary" : ""}`}
             aria-pressed={active}
@@ -615,7 +623,7 @@ export function QuestTab(p: Props) {
             {active ? tr("✓ Active", "✓ Active") : tr("Activer", "Activate")}
           </button>
         )}
-        {!greyed ? (
+        {p.owner ? null : !greyed ? (
           <>
             <button className="btn btn-small btn-primary" onClick={() => p.onComplete(task)}>
               <UiIcon id="circle-check" /> {tr("Quête terminée", "Quest done")}

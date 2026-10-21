@@ -80,6 +80,8 @@ interface MapViewProps {
   player?: PlayerPosition | null;
   /** Coéquipiers de la room (lecture seule) : objectifs en cours sur cette map et positions. Jamais comptés dans les totaux. */
   team?: { markers: TeamMarker[]; players: TeamPlayer[] };
+  /** Ouvre Détails sur la quête d'un coéquipier (sa progression, lecture seule). */
+  onTeamQuest?: (memberId: string, taskId: string) => void;
 }
 
 /** Emprise par défaut quand une map n'a pas de calibrage : celle des points, sinon un carré. */
@@ -401,7 +403,16 @@ function MapViewInner(props: MapViewProps) {
           );
         })}
 
-        {props.team && <TeamLayer markers={props.team.markers} players={props.team.players} coordinateRotation={calibration?.coordinateRotation ?? 0} />}
+        {props.team && (
+          <TeamLayer
+            markers={props.team.markers}
+            players={props.team.players}
+            coordinateRotation={calibration?.coordinateRotation ?? 0}
+            focusTaskId={props.focusTaskId}
+            onQuest={(memberId, taskId) => props.onTeamQuest?.(memberId, taskId)}
+            onPhotos={props.onPhotos}
+          />
+        )}
         {player && <PlayerMarker player={player} coordinateRotation={calibration?.coordinateRotation ?? 0} />}
 
         {customPoints.map((cp) => (

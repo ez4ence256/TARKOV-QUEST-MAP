@@ -129,6 +129,8 @@ export default function App() {
   }, [tab]);
   /** Quête affichée dans l'onglet Photos. */
   const [tabTaskId, setTabTaskId] = useState<string | null>(null);
+  // coéquipier dont la quête est affichée dans Détails (sa progression, lecture seule) ; null = la mienne
+  const [tabOwner, setTabOwner] = useState<string | null>(null);
   // sortie cliquée sur la carte : l'onglet Photos montre la sienne plutôt que celles d'une quête
   const [photoExit, setPhotoExit] = useState<ExitPhotosTarget | null>(null);
   const [photoStory, setPhotoStory] = useState<StoryPhotosTarget | null>(null);
@@ -316,6 +318,7 @@ export default function App() {
   // ouvre l'onglet Quête ou Photos sur une quête (boutons de la liste, du panneau ou d'une popup)
   const showTaskTab = useCallback((taskId: string, which: "quest" | "photos") => {
     setTabTaskId(taskId);
+    setTabOwner(null);
     if (which === "photos") {
       setPhotoExit(null);
       setPhotoStory(null);
@@ -344,6 +347,10 @@ export default function App() {
   };
   const showPhotos = useCallback((taskId: string) => showTaskTab(taskId, "photos"), [showTaskTab]);
   const showQuest = useCallback((taskId: string) => showTaskTab(taskId, "quest"), [showTaskTab]);
+  const showTeamQuest = useCallback((memberId: string, taskId: string) => {
+    showTaskTab(taskId, "quest");
+    setTabOwner(memberId);
+  }, [showTaskTab]);
 
   // Ctrl+V d'une image n'importe où (sauf dans un champ de texte, et sauf quand l'item finder est ouvert : il lit la capture lui-même) : import par capture
   const [pastedImage, setPastedImage] = useState<{ blob: Blob; n: number } | null>(null);
@@ -523,6 +530,10 @@ export default function App() {
     [teamLive],
   );
   const { items: teamStoryItems } = useStoryItems(teamStoryIds, data?.itemNames ?? NO_NAMES);
+  const ownerView = useMemo(() => {
+    const m = tabOwner ? room.members.find((x) => x.id === tabOwner && x.snapshot) : undefined;
+    return m ? { name: m.name, done: viewModeOf(m.snapshot!, tasksById).done } : undefined;
+  }, [tabOwner, room.members, tasksById]);
   const team = useMemo(() => {
     if (!currentMap || teamLive.length === 0) return undefined;
     const markers: TeamMarker[] = [];
@@ -545,12 +556,14 @@ export default function App() {
           outline: pt.outline,
           color,
           text: `${task.name} — ${objective.description}`,
+          taskId: task.id,
+          info: { memberId: m.id, photos: Boolean(task.wikiLink) },
           ...(g ? { group: { id: `${m.id}:${objective.id}`, rep: g.rep === pt.key, count: g.keys.length } } : {}),
         });
       }
       for (const c of view.story?.selected ?? []) {
         const mine = pointsOnMap(currentStoryPoints(c, teamStoryItems[c] ?? [], view.story?.done ?? NO_DONE), currentMap.normalizedName);
-        for (const p of mine) markers.push({ key: `${m.id}:${p.id}`, owner: m.name, x: p.x, z: p.z, color: STORY_COLOR, text: `${storyName(c)} — ${p.stepTitle}` });
+        for (const p of mine) markers.push({ key: `${m.id}:${p.id}`, owner: m.name, x: p.x, z: p.z, color: STORY_COLOR, text: `${storyName(c)} — ${p.stepTitle}`, taskId: storyIdOf(c) });
       }
       const pos = m.snapshot!.position;
       if (pos && pos.map === currentMap.id) players.push({ id: m.id, name: m.name, position: pos });
@@ -777,7 +790,10 @@ export default function App() {
                   maps={maps}
                   currentMapId={currentMap?.id ?? null}
                   onPhotos={showPhotos}
-                  onQuest={showQuest}
+                  onQuest={(taskId) => {
+                    const viewed = room.members.find((m) => m.id === viewedId) ?? room.members[0];
+                    if (viewed) showTeamQuest(viewed.id, taskId);
+                  }}
                   onStory={(chapter) => showQuest(storyIdOf(chapter))}
                   itemIcons={data.itemIcons ?? {}}
                   itemNames={data.itemNames ?? {}}
@@ -800,12 +816,16 @@ export default function App() {
               itemIcons={data.itemIcons ?? {}}
               selectedIds={[...mode.selected.map((s) => s.taskId), ...(mode.story?.selected ?? []).map(storyIdOf)]}
               taskId={tabTaskId}
-              onTaskChange={setTabTaskId}
+              onTaskChange={(id) => {
+                setTabOwner(null);
+                setTabTaskId(id);
+              }}
+              owner={ownerView?.name}
               storyDone={mode.story?.done ?? {}}
               onStoryStep={setStoryStep}
               onStoryReset={(chapter) => dispatch({ type: "resetStory", chapter })}
-              done={mode.done}
-              failed={failed}
+              done={ownerView?.done ?? mode.done}
+              failed={ownerView ? NO_DONE : failed}
               onActivate={(task) => toggleTask(task.id)}
               onDeactivate={(task) => dispatch({ type: "toggleTask", taskId: task.id })}
               onFail={failTask}
@@ -1034,6 +1054,7 @@ export default function App() {
               onPhotos={showPhotos}
               onExit={showExitPhotos}
               onQuest={showQuest}
+              onTeamQuest={showTeamQuest}
               focusTaskId={panelOpen && tab === "quest" ? tabTaskId : null}
             />
           ) : (

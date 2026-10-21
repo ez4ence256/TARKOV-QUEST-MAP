@@ -132,6 +132,8 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   const [onlyNeeded, setOnlyNeeded] = useState(false);
   // « Kappa seulement » : objets à remettre pour les quêtes demandées pour la Kappa
   const [kappaOnly, setKappaOnly] = useState(false);
+  // « Planque » : objets de la planque ; cochée avec « Kappa seulement », les deux à la fois
+  const [hideoutOnly, setHideoutOnly] = useState(false);
   // marchand choisi sous les catégories : objets qui restent à remettre pour ses quêtes (aucun au départ)
   const [trader, setTrader] = useState<string | null>(null);
   const [open, setOpen] = useState<Set<string>>(new Set());
@@ -247,15 +249,16 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
       }
     return out;
   }, [needs, tasks]);
+  const pools = useMemo(() => [...(kappaOnly ? [KAPPA] : []), ...(hideoutOnly ? [HIDEOUT] : [])], [kappaOnly, hideoutOnly]);
   const filtered = useMemo(
     () =>
       results.filter(
         (i) => (!cat || cat.items.has(i.id)) && (!onlyNeeded || needs.has(i.id)) && (!trader || Boolean(traderItems.get(trader)?.has(i.id))) &&
-          (!kappaOnly || Boolean(traderItems.get(KAPPA)?.has(i.id))),
+          (!pools.length || pools.some((k) => traderItems.get(k)?.has(i.id))),
       ),
-    [results, cat, onlyNeeded, needs, trader, traderItems, kappaOnly],
+    [results, cat, onlyNeeded, needs, trader, traderItems, pools],
   );
-  useEffect(() => setShown(PAGE), [q, cat, onlyNeeded, trader, kappaOnly]);
+  useEffect(() => setShown(PAGE), [q, cat, onlyNeeded, trader, pools]);
   const pickCategory = (node: CategoryNode) => {
     setCat((c) => (c?.id === node.id ? null : node));
     setOpen((o) => new Set(o).add(node.id));
@@ -343,6 +346,17 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
           <label className="check finder-only-need">
             <input type="checkbox" checked={kappaOnly} onChange={(e) => setKappaOnly(e.target.checked)} />
             {tr("Kappa seulement", "Kappa only")}
+          </label>
+          <label className="check finder-only-need" title={hideoutIncluded ? undefined : tr("Ajoute les objets de la planque aux objets à garder", "Adds the hideout items to the items to keep")}>
+            <input
+              type="checkbox"
+              checked={hideoutOnly}
+              onChange={(e) => {
+                if (e.target.checked && !hideoutIncluded) onIncludeHideout?.();
+                setHideoutOnly(e.target.checked);
+              }}
+            />
+            {tr("Planque", "Hideout")}
           </label>
           <button className="btn btn-small" onClick={onClose} aria-label={tr("Fermer", "Close")}>
             <UiIcon id="x" />
