@@ -100,6 +100,12 @@ describe("un objectif à la fois", () => {
     expect(shown({ s1: 1, s2: 1, s3: 1, l1: 1 })).toEqual(["c"]);
   });
 
+  it("objectif en cours sans map : le prochain raid est montré aussi (Le juste prix 2)", () => {
+    const at = (id: string, mapId: string, optional = false) => ({ id, type: "visit", description: "", optional, mapIds: [mapId], locations: [{ mapId, position: { x: 0, y: 0, z: 0 } }] });
+    const t: Task = { ...task, objectives: [{ ...task.objectives[2], type: "taskStatus" }, at("w1", "woods", true), at("w2", "woods", true), at("c1", "customs", true)] };
+    expect(shownObjectives(t, {}, false, true).map((o) => o.id)).toEqual(["c", "w1", "w2"]);
+  });
+
   it("préfère un objectif obligatoire restant à un optionnel", () => {
     const t: Task = { ...task, objectives: [task.objectives[3], task.objectives[0]] };
     expect(currentObjective(t, {})?.id).toBe("a");

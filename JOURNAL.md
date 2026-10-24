@@ -11,7 +11,7 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | Élément | État |
 |---|---|
 | Branche | **`main`** seule (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**, branche par défaut). |
-| Version affichée | **0.8.36** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
+| Version affichée | **0.8.37** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
 | **Nouveau design** | depuis la **0.8.23** (commit `e189862` : barre latérale, mode raid, Barlow, icônes SVG). Dernière version avec l'**ancien design** : **0.8.22** (commit `a562131`). Pour revenir en arrière sur un point précis, comparer avec `git diff a562131 e189862 -- <fichier>`. |
 | Derniers commits | `3bc65a9` Item finder : recherche par image (0.8.2) · `78f5fb6` Ctrl+V d'une capture dans l'item finder (0.8.1) · `14c4dc9` Item finder redessiné (0.8.0) · `6800a70` journal fin de session 8 · `245ee03` Version 0.7.23 · `3a59955` Main story : ponts de l'Icebreaker pour Boreas · `2593e19` Icebreaker : calibrage corrigé · `45beb1b` positions > 100 m retirées (0.7.22) · `7acab9f` positions de The Ticket · `5447eef` bouton du panneau en icône seule sur téléphone (0.7.21) · `69ddc95` Item finder · `d81736d` infos du Labyrinthe sur la map |
 | Travail non commité | Seulement `.claude/` (non suivi, volontairement hors du dépôt : chemin propre à cette machine) |
@@ -387,6 +387,7 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
   - Item finder : case « Planque » à côté de « Kappa seulement », combinable : Kappa seule, Planque seule, ou les deux (objets de l'une OU de l'autre). Cocher Planque inclut la planque si elle ne l'était pas. Vérifié : Kappa 506, Planque 119, les deux 585 (sans quête choisie).
   - Bulle d'un point de coéquipier : boutons « Quête » et « Photos ». « Quête » (et le lien « quête » de sa colonne) ouvre Détails sur SA progression en lecture seule (`QuestTab` prop `owner` : bandeau, cases désactivées, seul « Photos » reste ; état `tabOwner` dans `App`, remis à zéro dès qu'on ouvre une autre quête). Mon état n'est pas touché.
   - Quête affichée dans Détails : les points des coéquipiers des autres quêtes sont estompés aussi (opacité 0,3, `TeamMarker.taskId`). Vérifié avec deux origines : Alpha ouvre Mauvaise réputation de Bravo -> lecture seule, son objectif coché par Bravo apparaît en direct (1/3) ; Alpha ouvre Appâtage -> le point de Bravo passe à 0,3.
+- **« Un raid à la fois » : objectif en cours sans map** (0.8.37, remarque) : Le juste prix - Partie 2 n'a qu'un objectif obligatoire, « Terminer la quête Hobby Club » (sans map) ; ses objectifs de Bois sont optionnels, donc rien ne s'affichait avant de cocher Hobby Club. Désormais, si l'objectif en cours n'a pas de map, le prochain raid (premier objectif non fait avec une map, obligatoire d'abord) et ses objectifs de la même map sont montrés aussi (`shownObjectives`). Vérifié : la quête choisie -> map Bois, 2 points.
 
 ## Étude 3D (session 5, en attente de validation)
 

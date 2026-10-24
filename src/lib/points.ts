@@ -56,7 +56,11 @@ export function shownObjectives(
   oneAtATime: boolean,
 ): Objective[] {
   const current = oneAtATime ? currentObjective(task, done) : undefined;
-  const raidMaps = new Set(current ? objectiveMaps(current) : []);
+  // objectif en cours sans map (quête à terminer, remise d'objets) : on montre aussi le prochain raid
+  // (Le juste prix 2 : « terminer Hobby Club » obligatoire, objectifs de Bois optionnels)
+  const mapped = task.objectives.filter((o) => !done[o.id] && objectiveMaps(o).length > 0);
+  const raid = current && objectiveMaps(current).length === 0 ? (mapped.find((o) => !o.optional) ?? mapped[0]) : current;
+  const raidMaps = new Set(raid ? objectiveMaps(raid) : []);
   const sameRaid = (o: Objective) => o === current || objectiveMaps(o).some((m) => raidMaps.has(m));
   return task.objectives.filter((o) => (done[o.id] ? showDone : !oneAtATime || sameRaid(o)));
 }
