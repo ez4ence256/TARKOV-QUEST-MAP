@@ -11,7 +11,7 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | Élément | État |
 |---|---|
 | Branche | **`main`** seule (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**, branche par défaut). |
-| Version affichée | **0.8.37** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
+| Version affichée | **0.8.38** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
 | **Nouveau design** | depuis la **0.8.23** (commit `e189862` : barre latérale, mode raid, Barlow, icônes SVG). Dernière version avec l'**ancien design** : **0.8.22** (commit `a562131`). Pour revenir en arrière sur un point précis, comparer avec `git diff a562131 e189862 -- <fichier>`. |
 | Derniers commits | `3bc65a9` Item finder : recherche par image (0.8.2) · `78f5fb6` Ctrl+V d'une capture dans l'item finder (0.8.1) · `14c4dc9` Item finder redessiné (0.8.0) · `6800a70` journal fin de session 8 · `245ee03` Version 0.7.23 · `3a59955` Main story : ponts de l'Icebreaker pour Boreas · `2593e19` Icebreaker : calibrage corrigé · `45beb1b` positions > 100 m retirées (0.7.22) · `7acab9f` positions de The Ticket · `5447eef` bouton du panneau en icône seule sur téléphone (0.7.21) · `69ddc95` Item finder · `d81736d` infos du Labyrinthe sur la map |
 | Travail non commité | Seulement `.claude/` (non suivi, volontairement hors du dépôt : chemin propre à cette machine) |
@@ -388,6 +388,13 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
   - Bulle d'un point de coéquipier : boutons « Quête » et « Photos ». « Quête » (et le lien « quête » de sa colonne) ouvre Détails sur SA progression en lecture seule (`QuestTab` prop `owner` : bandeau, cases désactivées, seul « Photos » reste ; état `tabOwner` dans `App`, remis à zéro dès qu'on ouvre une autre quête). Mon état n'est pas touché.
   - Quête affichée dans Détails : les points des coéquipiers des autres quêtes sont estompés aussi (opacité 0,3, `TeamMarker.taskId`). Vérifié avec deux origines : Alpha ouvre Mauvaise réputation de Bravo -> lecture seule, son objectif coché par Bravo apparaît en direct (1/3) ; Alpha ouvre Appâtage -> le point de Bravo passe à 0,3.
 - **« Un raid à la fois » : objectif en cours sans map** (0.8.37, remarque) : Le juste prix - Partie 2 n'a qu'un objectif obligatoire, « Terminer la quête Hobby Club » (sans map) ; ses objectifs de Bois sont optionnels, donc rien ne s'affichait avant de cocher Hobby Club. Désormais, si l'objectif en cours n'a pas de map, le prochain raid (premier objectif non fait avec une map, obligatoire d'abord) et ses objectifs de la même map sont montrés aussi (`shownObjectives`). Vérifié : la quête choisie -> map Bois, 2 points.
+- **Revue téléphone (375 × 812)** (0.8.38, demande « que tout soit bien vu sur téléphone »). Contrôle par le DOM de chaque écran (débordements, textes coupés, cibles trop petites) ; les captures du panneau échouent souvent (fenêtre réduite) et les clics simulés n'arrivent pas en mode téléphone : écrans pilotés par script.
+  - **Objets** : la recherche avait 0 px de large et la case « Planque » + le bouton × sortaient de l'écran (impossible de fermer). À ≤ 600 px : recherche + × sur la 1re ligne, cases en dessous ; onglets de la fiche (Crafts, Où le trouver) sur deux lignes au lieu d'un défilement invisible.
+  - **Marchands** : rangée sur deux lignes (vignettes 40 px) au lieu d'un défilement où 4 marchands étaient hors écran.
+  - **Carte** : au départ la map était plus large que l'écran (Bois : 522 px pour 375), car le zoom minimum empêchait de dézoomer assez ; un cran de dézoom en plus sur ≤ 800 px. Vérifié : les 10 maps vectorielles tiennent en largeur.
+  - Écran tactile (`pointer: coarse`) : liens quête / photos / wiki, × et cases des objectifs plus faciles à toucher (zone agrandie sans bouger la mise en page).
+  - « Placer sur la carte » n'est plus proposé pour « Terminer la quête X » (`taskStatus`). Aide de départ : « prends en photo » au lieu de « Ctrl+V » sur écran tactile.
+  - Vérifié sans problème : Mes quêtes, Ajouter (Rechercher, Capture), Détails (Infos, Photos, agrandissement), Points, Planque, Réglages (mode de jeu et version y sont), Room, mode raid, bulles de la carte (recadrées dans l'écran). Ordinateur inchangé (en-tête Objets, Marchands).
 
 ## Étude 3D (session 5, en attente de validation)
 

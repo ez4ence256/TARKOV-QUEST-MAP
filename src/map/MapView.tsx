@@ -249,8 +249,8 @@ function MapViewInner(props: MapViewProps) {
     [calibration],
   );
   const bounds = useMemo(() => toLatLngBounds(rawBounds), [rawBounds]);
-  // un cran de dézoom de plus que tarkov.dev, pour voir les grandes maps en entier
-  const minZoom = calibration ? calibration.minZoom - 1 : -2;
+  // un cran de dézoom de plus que tarkov.dev (deux sur téléphone : sinon la map entière ne tient pas en largeur)
+  const minZoom = calibration ? calibration.minZoom - (window.matchMedia("(max-width: 800px)").matches ? 2 : 1) : -2;
   const maxZoom = calibration ? calibration.maxZoom + 1 : 6;
   const onStatus = useCallback((s: BaseStatus) => setBaseStatus(s), []);
   const showLevelOf = useCallback(

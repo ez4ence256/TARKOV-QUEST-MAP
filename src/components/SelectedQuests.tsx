@@ -231,7 +231,8 @@ export function SelectedQuests(props: Props) {
                         : `point${n > 1 ? "s" : ""}`}
                     </button>
                   ))}
-                  {!hasApiPosition(o) &&
+                  {/* « terminer la quête X » n'a pas de lieu : rien à placer */}
+                  {!hasApiPosition(o) && (manual || o.type !== "taskStatus") &&
                     (manual ? (
                       <>
                         <button className="chip" onClick={() => props.onFocus(manualPointKey(o.id), manual.mapId)}>

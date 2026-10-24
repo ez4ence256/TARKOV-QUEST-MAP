@@ -25,10 +25,16 @@ export function resetHelp() {
 const steps = () => [
   {
     title: tr("Ajoute tes quêtes", "Add your quests"),
-    text: tr(
-      "Onglet « Ajouter » : cherche une quête et clique dessus. Ou colle une capture du menu Tâches du jeu avec Ctrl+V.",
-      "“Add” tab: search for a quest and click it. Or paste a screenshot of the in-game Tasks menu with Ctrl+V.",
-    ),
+    // téléphone : pas de Ctrl+V, mais une photo de l'écran du jeu (Ajouter › Capture)
+    text: window.matchMedia("(pointer: coarse)").matches
+      ? tr(
+          "Onglet « Ajouter » : cherche une quête et touche-la. Ou, dans « Capture », prends en photo le menu Tâches du jeu.",
+          "“Add” tab: search for a quest and tap it. Or, in “Capture”, take a photo of the in-game Tasks menu.",
+        )
+      : tr(
+          "Onglet « Ajouter » : cherche une quête et clique dessus. Ou colle une capture du menu Tâches du jeu avec Ctrl+V.",
+          "“Add” tab: search for a quest and click it. Or paste a screenshot of the in-game Tasks menu with Ctrl+V.",
+        ),
   },
   {
     title: tr("Choisis ta map", "Pick your map"),

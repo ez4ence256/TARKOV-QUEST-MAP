@@ -2372,6 +2372,23 @@ kbd {
     display: inline-flex !important;
   }
 }
+/* écran tactile : petites cibles (liens quête / photos / wiki, ×, cases) plus faciles à toucher, sans bouger la mise en page */
+@media (pointer: coarse) {
+  .panel .link,
+  .panel a {
+    padding: 6px 2px;
+    margin: -6px 0;
+  }
+  .panel .icon-btn {
+    min-width: 36px;
+    min-height: 36px;
+    margin: -6px -8px -6px 0;
+  }
+  .objective-check input {
+    width: 22px;
+    height: 22px;
+  }
+}
 
 /* Infos du Labyrinthe */
 .lab-marker-wrap {
@@ -3193,6 +3210,35 @@ kbd {
   }
   .finder-grid {
     grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  }
+  /* téléphone : recherche + fermer sur la 1re ligne, les cases en dessous */
+  .finder-head {
+    flex-wrap: wrap;
+  }
+  .finder-head .finder-search-wrap {
+    flex-basis: calc(100% - 3.5rem);
+  }
+  .finder-head .finder-only-need {
+    order: 1;
+  }
+  /* onglets de la fiche (Quêtes, Hideout… Où le trouver) : tous visibles, sur deux lignes */
+  .finder-tabs {
+    flex-wrap: wrap;
+  }
+  /* marchands : tous visibles (2 lignes) plutôt qu'une rangée qui défile sans qu'on le voie */
+  .trader-row {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 0.4rem;
+  }
+  .trader-pick {
+    width: 62px;
+  }
+  .trader-pick img,
+  .trader-noimg {
+    width: 40px;
+    height: 40px;
   }
 }
 /* objets à garder : pastille des tuiles, bloc « À garder » de la fiche, filtre */
