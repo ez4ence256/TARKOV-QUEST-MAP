@@ -10,6 +10,10 @@ import type { GameMap, TarkovData, Task, Trader } from "../types";
 import { baseQuestName } from "../lib/questWiki";
 import { cleanInline, findSection, parseBlocks, parseInfobox, splitSections } from "../lib/wikiText";
 import { pageUrlFor, readCache, wikiRequest, wikiTitleFromLink, writeCache } from "./wiki";
+import eventPositions from "../data/event-positions.json";
+
+/** Positions relevées à la main sur les images du wiki (« Titre::n° d'objectif »), voir event-positions.json. */
+const POSITIONS = eventPositions as Record<string, { map: string; positions: { x: number; z: number }[] }>;
 
 /** Une quête d'événement lue sur le wiki (indépendante de la langue et des données tarkov.dev). */
 export interface EventEntry {
@@ -90,14 +94,21 @@ export function buildEventTasks(entries: EventEntry[], data: Pick<TarkovData, "t
         kappaRequired: false,
         wikiLink: pageUrlFor(e.title),
         source: "wiki",
-        objectives: texts.map((description, i) => ({
-          id: `wiki-${slug}-${i + 1}`,
-          type: "wiki",
-          description,
-          optional: false,
-          mapIds,
-          locations: [],
-        })),
+        objectives: texts.map((description, i) => {
+          const pos = POSITIONS[`${e.title}::${i}`];
+          const mapId = pos && data.maps.find((m) => m.normalizedName === pos.map)?.id;
+          return {
+            id: `wiki-${slug}-${i + 1}`,
+            type: "wiki",
+            description,
+            optional: false,
+            mapIds,
+            // plusieurs positions : l'une OU l'autre (n'importe quel toit…), affichées comme emplacements possibles
+            locations: mapId
+              ? pos.positions.map((p) => ({ mapId, position: { x: p.x, y: 0, z: p.z }, ...(pos.positions.length > 1 ? { possible: true as const } : {}) }))
+              : [],
+          };
+        }),
       };
     });
 }

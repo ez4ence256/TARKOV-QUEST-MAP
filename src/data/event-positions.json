@@ -1,0 +1,24 @@
+{
+  "Fog of War::0": {
+    "map": "lighthouse",
+    "positions": [{ "x": -65.1, "z": -692.4 }],
+    "source": "Fog of War Map.png (BRDM au nord de la station d'épuration)",
+    "method": "même BRDM que « Revision - Lighthouse » (2e BRDM, position tarkov.dev), qui tombe sur le cadre BRDM de l'image du wiki"
+  },
+  "Fog of War::1": {
+    "map": "lighthouse",
+    "positions": [{ "x": 21, "z": -432 }],
+    "source": "Fog of War Map.png (cadre « Checkp. »)",
+    "method": "image du wiki recalée sur 5 repères tarkov.dev (Armored Train, Industrial Zone Gates, Transit to Reserve, Scav Hideout at the Grotto, hélicoptère d'Easy Job) : écart 5 à 10 px, soit ±10 m"
+  },
+  "Fog of War::2": {
+    "map": "lighthouse",
+    "positions": [
+      { "x": 44, "z": -616 },
+      { "x": -100, "z": -740 },
+      { "x": -195, "z": -661 }
+    ],
+    "source": "Fog of War Map.png (bâtiments 1, 2 et 3)",
+    "method": "même recalage que le poste de contrôle ; centre de chaque bâtiment (n'importe quel toit compte)"
+  }
+}

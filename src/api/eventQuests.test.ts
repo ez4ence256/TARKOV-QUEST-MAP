@@ -67,6 +67,15 @@ describe("buildEventTasks", () => {
     expect(buildEventTasks(entries, { ...ctx, tasks: [dev("All Inclusive Support [PVP ZONE]")] })).toEqual([]);
   });
 
+  it("positions relevées à la main (Fog of War, Phare)", () => {
+    const fog = { title: "Fog of War", givenBy: null, locations: ["Lighthouse"], objectives: ["a", "b", "c"] };
+    const maps = [{ ...ctx.maps[0], id: "lh", name: "Phare", nameEn: "Lighthouse", normalizedName: "lighthouse" }];
+    const [t] = buildEventTasks([fog], { ...ctx, maps, tasks: [] });
+    expect(t.objectives.map((o) => o.locations.length)).toEqual([1, 1, 3]);
+    expect(t.objectives[0].locations[0]).toMatchObject({ mapId: "lh", position: { x: -65.1, z: -692.4 } });
+    expect(t.objectives[2].locations.every((l) => l.possible)).toBe(true);
+  });
+
   it("ids valides pour les rooms", () => {
     const re = /^[A-Za-z0-9_\-:.]{1,100}$/;
     const t = buildEventTasks([{ title: "A Familiar Face...", givenBy: null, locations: [], objectives: ["x"] }], { ...ctx, tasks: [] })[0];
