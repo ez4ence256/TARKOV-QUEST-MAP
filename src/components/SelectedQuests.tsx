@@ -45,6 +45,9 @@ interface Props {
   /** En room : « Seulement mes quêtes » (carte sans les points des coéquipiers). */
   onlyMine?: boolean;
   onOnlyMine?: (value: boolean) => void;
+  /** « Kappa seulement » : partagé avec Ajouter et la carte ; la colonne du coéquipier suit le mien. */
+  kappaOnly?: boolean;
+  onKappaOnly?: (value: boolean) => void;
   itemIcons: Record<string, string>;
   itemNames: Record<string, string>;
 }
@@ -78,7 +81,7 @@ export function SelectedQuests(props: Props) {
   const onFilterMap = (item: (typeof items)[number]) =>
     !filterId || Boolean(props.questsOnMap.get(filterId)?.has(item.chapter !== null ? storyIdOf(item.chapter) : item.sel!.taskId));
   // « Kappa seulement » : quêtes demandées pour la Kappa (les chapitres de la Main story n'en font pas partie)
-  const [kappaOnly, setKappaOnly] = useState(false);
+  const kappaOnly = Boolean(props.kappaOnly);
   const onFilterKappa = (item: (typeof items)[number]) =>
     !kappaOnly || (item.chapter === null && Boolean(tasksById.get(item.sel!.taskId)?.kappaRequired));
 
@@ -127,7 +130,7 @@ export function SelectedQuests(props: Props) {
           </span>
           {!props.readOnly && (
             <label className="check small">
-              <input type="checkbox" checked={kappaOnly} onChange={(e) => setKappaOnly(e.target.checked)} />
+              <input type="checkbox" checked={kappaOnly} onChange={(e) => props.onKappaOnly?.(e.target.checked)} />
               {tr("Kappa seulement", "Kappa only")}
             </label>
           )}

@@ -36,15 +36,17 @@ interface Props {
   /** En room : « Seulement mes quêtes » (carte sans les points des coéquipiers) ; absent hors room. */
   onlyMine?: boolean;
   onOnlyMine?: (value: boolean) => void;
+  /** « Kappa seulement » : partagé avec Mes quêtes et la carte. */
+  kappaOnly: boolean;
+  onKappaOnly: (value: boolean) => void;
 }
 
-export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhotos, onClearSelection, onShowMap, onToggleStory, onOpenStory, onlyMine, onOnlyMine }: Props) {
+export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhotos, onClearSelection, onShowMap, onToggleStory, onOpenStory, onlyMine, onOnlyMine, kappaOnly, onKappaOnly }: Props) {
   const [query, setQuery] = useState("");
   const [trader, setTrader] = useState("");
   const [mapFilter, setMapFilter] = useState("");
   const [hideCompleted, setHideCompleted] = useState(false);
   const [onlyCompleted, setOnlyCompleted] = useState(false);
-  const [kappaOnly, setKappaOnly] = useState(false);
 
   const tradersById = useMemo(() => new Map(traders.map((t) => [t.id, t])), [traders]);
   const selected = useMemo(() => new Map(mode.selected.map((s) => [s.taskId, s.color])), [mode.selected]);
@@ -227,7 +229,7 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
         </label>
         </div>
         <label className="check">
-          <input type="checkbox" checked={kappaOnly} onChange={(e) => setKappaOnly(e.target.checked)} />
+          <input type="checkbox" checked={kappaOnly} onChange={(e) => onKappaOnly(e.target.checked)} />
           {tr("Kappa seulement", "Kappa only")}
         </label>
         {onlyMine !== undefined && (

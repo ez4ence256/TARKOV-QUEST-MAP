@@ -10,6 +10,7 @@ import { exportState, getLastMode, useAppState, type CustomPoint } from "./state
 import { QUEST_COLORS } from "./lib/objectiveTypes";
 import { buildObjectivePoints, isTaskFinished, manualPointKey, questsUnlockedBy, shownObjectives, spawnGroups, taskMapIds } from "./lib/points";
 import { ModePicker } from "./components/ModePicker";
+import { UiIcon } from "./components/UiIcon";
 import { QuestList } from "./components/QuestList";
 import { SelectedQuests } from "./components/SelectedQuests";
 import { CustomPointsTab } from "./components/CustomPointsTab";
@@ -236,9 +237,12 @@ export default function App() {
   }, [maps, mode.mapId, selectedTasks]);
 
   const oneAtATime = state.oneAtATime !== false;
+  // « Kappa seulement » (Ajouter, Mes quêtes) : la carte ne montre plus que les quêtes demandées pour la Kappa
+  const [kappaOnly, setKappaOnly] = useState(false);
+  const mapTasks = useMemo(() => (kappaOnly ? selectedTasks.filter((t) => t.kappaRequired) : selectedTasks), [kappaOnly, selectedTasks]);
   const points = useMemo(
-    () => (currentMap ? buildObjectivePoints(selectedTasks, mode, currentMap.id, state.showDone, oneAtATime) : []),
-    [selectedTasks, mode, currentMap, state.showDone, oneAtATime],
+    () => (currentMap ? buildObjectivePoints(mapTasks, mode, currentMap.id, state.showDone, oneAtATime) : []),
+    [mapTasks, mode, currentMap, state.showDone, oneAtATime],
   );
 
   // Nombre de points restants par map (affiché dans le sélecteur de map), et quêtes qui y ont ces points
@@ -249,21 +253,22 @@ export default function App() {
       counts.set(mapId, (counts.get(mapId) ?? 0) + 1);
       quests.set(mapId, (quests.get(mapId) ?? new Set()).add(taskId));
     };
-    for (const t of selectedTasks)
+    for (const t of mapTasks)
       for (const o of shownObjectives(t, mode.done, false, oneAtATime)) {
         for (const l of o.locations) add(l.mapId, t.id);
         const manual = mode.manual[o.id];
         if (o.locations.length === 0 && manual) add(manual.mapId, t.id);
       }
     return { pointsPerMap: counts, questsPerMap: quests };
-  }, [selectedTasks, mode.done, mode.manual, oneAtATime]);
+  }, [mapTasks, mode.done, mode.manual, oneAtATime]);
 
   // Main story : case en cours des chapitres choisis qui ont une position relevée sur le wiki
   const storyIds = useMemo(() => (mode.story?.selected ?? []).filter((c) => chaptersWithPositions().includes(c)), [mode.story?.selected]);
   const { items: storyItems, chapters: storyChapters } = useStoryItems(storyIds, data?.itemNames ?? NO_NAMES);
   const storyDone = mode.story?.done ?? NO_DONE;
   const storyPointsAll = useMemo(() => storyIds.flatMap((c) => currentStoryPoints(c, storyItems[c] ?? [], storyDone)), [storyIds, storyItems, storyDone]);
-  const storyPoints = useMemo(() => pointsOnMap(storyPointsAll, currentMap?.normalizedName), [storyPointsAll, currentMap]);
+  // la Main story ne fait pas partie de la Kappa : pas de points en « Kappa seulement »
+  const storyPoints = useMemo(() => (kappaOnly ? [] : pointsOnMap(storyPointsAll, currentMap?.normalizedName)), [kappaOnly, storyPointsAll, currentMap]);
   // la case en cours de la Main story compte aussi dans le sélecteur de map
   // filtre « Mes maps » de la Sélection, partagé avec la colonne du coéquipier en room
   const [selectionMap, setSelectionMap] = useState<string | null>(null);
@@ -272,14 +277,14 @@ export default function App() {
   const { mapCounts, questsOnMap } = useMemo(() => {
     const counts = new Map(pointsPerMap);
     const onMap = new Map([...questsPerMap].map(([id, s]) => [id, new Set(s)]));
-    for (const p of storyPointsAll) {
+    for (const p of kappaOnly ? [] : storyPointsAll) {
       const id = maps.find((m) => m.normalizedName === p.map)?.id;
       if (!id) continue;
       counts.set(id, (counts.get(id) ?? 0) + 1);
       onMap.set(id, (onMap.get(id) ?? new Set()).add(storyIdOf(p.chapter)));
     }
     return { mapCounts: counts, questsOnMap: onMap };
-  }, [pointsPerMap, questsPerMap, storyPointsAll, maps]);
+  }, [pointsPerMap, questsPerMap, storyPointsAll, maps, kappaOnly]);
   const storyName = useCallback((chapter: string) => chapterName(storyChapters, chapter), [storyChapters]);
   const setStoryStep = (chapter: string, stepKey: string, value: boolean) => dispatch({ type: "setStoryStep", chapter, stepKey, done: value });
 
@@ -539,7 +544,7 @@ export default function App() {
     const markers: TeamMarker[] = [];
     const players: TeamPlayer[] = [];
     for (const { m, view } of teamLive) {
-      const pts = buildObjectivePoints(teammateTasks(view, tasksById), view, currentMap.id, state.showDone, oneAtATime);
+      const pts = buildObjectivePoints(teammateTasks(view, tasksById).filter((t) => !kappaOnly || t.kappaRequired), view, currentMap.id, state.showDone, oneAtATime);
       // ses emplacements possibles d'un même objet : un seul point aussi, déplié au clic (de mon côté)
       const groups = spawnGroups(pts);
       for (const pt of pts) {
@@ -561,7 +566,7 @@ export default function App() {
           ...(g ? { group: { id: `${m.id}:${objective.id}`, rep: g.rep === pt.key, count: g.keys.length } } : {}),
         });
       }
-      for (const c of view.story?.selected ?? []) {
+      for (const c of kappaOnly ? [] : (view.story?.selected ?? [])) {
         const mine = pointsOnMap(currentStoryPoints(c, teamStoryItems[c] ?? [], view.story?.done ?? NO_DONE), currentMap.normalizedName);
         for (const p of mine) markers.push({ key: `${m.id}:${p.id}`, owner: m.name, x: p.x, z: p.z, color: STORY_COLOR, text: `${storyName(c)} — ${p.stepTitle}`, taskId: storyIdOf(c) });
       }
@@ -569,7 +574,7 @@ export default function App() {
       if (pos && pos.map === currentMap.id) players.push({ id: m.id, name: m.name, position: pos });
     }
     return { markers, players };
-  }, [teamLive, teamStoryItems, currentMap, tasksById, objectivesById, state.showDone, oneAtATime, storyName]);
+  }, [teamLive, teamStoryItems, currentMap, tasksById, objectivesById, state.showDone, oneAtATime, storyName, kappaOnly]);
   const monitorEvent = useRef((_e: MonitorEvent) => {});
   monitorEvent.current = (e) => {
     if (e.type === "task") {
@@ -672,6 +677,8 @@ export default function App() {
       onMapFilter={setSelectionMap}
       onlyMine={room.members.length > 0 ? onlyMine : undefined}
       onOnlyMine={setOnlyMine}
+      kappaOnly={kappaOnly}
+      onKappaOnly={setKappaOnly}
       onComplete={completeTask}
       onFocus={focusPoint}
       onStartPlacing={(o) =>
@@ -776,6 +783,8 @@ export default function App() {
               onOpenStory={(chapter) => showQuest(storyIdOf(chapter))}
               onlyMine={room.members.length > 0 ? onlyMine : undefined}
               onOnlyMine={setOnlyMine}
+              kappaOnly={kappaOnly}
+              onKappaOnly={setKappaOnly}
             />
           )}
           {data && tab === "selection" && (
@@ -800,6 +809,7 @@ export default function App() {
                   // le filtre ne vaut que si la map a encore de mes points (comme dans ma colonne)
                   mapFilter={selectionMap && (mapCounts.get(selectionMap) ?? 0) > 0 ? selectionMap : null}
                   oneAtATime={oneAtATime}
+                  kappaOnly={kappaOnly}
                 />
                 <div className="room-col room-col-mine">{mySelection}</div>
               </div>
@@ -947,6 +957,17 @@ export default function App() {
               <span className="scav-check-long">{tr("Extracts Scav", "Scav extracts")}</span>
               <span className="scav-check-short" aria-hidden="true">Scav</span>
             </label>
+            {kappaOnly && (
+              <button
+                className="btn btn-small kappa-chip"
+                onClick={() => setKappaOnly(false)}
+                title={tr("La carte ne montre que les quêtes demandées pour la Kappa. Cliquer pour tout montrer.", "The map only shows the quests required for the Kappa. Click to show everything.")}
+              >
+                <span className="kappa-chip-long">{tr("Kappa seulement", "Kappa only")}</span>
+                <span className="kappa-chip-short">Kappa</span>
+                <UiIcon id="x" size={12} />
+              </button>
+            )}
           </div>
           <div className="map-alerts">
           {unlockOffer && (

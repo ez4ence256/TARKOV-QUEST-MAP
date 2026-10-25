@@ -624,6 +624,25 @@ button:focus-visible {
 .scav-check-short {
   display: none;
 }
+/* « Kappa seulement » actif : la carte ne montre que les quêtes de la Kappa (clic = retirer) */
+.kappa-chip {
+  flex: none;
+  white-space: nowrap;
+  color: var(--accent-2);
+  border-color: var(--accent);
+}
+/* carte étroite : « Kappa » seul, pour garder le nom de la map lisible */
+.kappa-chip-short {
+  display: none;
+}
+@container (max-width: 640px) {
+  .kappa-chip-long {
+    display: none;
+  }
+  .kappa-chip-short {
+    display: inline;
+  }
+}
 .lang-select {
   width: auto;
   flex: none;
@@ -1371,6 +1390,7 @@ kbd {
   flex: 1;
   position: relative;
   min-width: 0;
+  container-type: inline-size; /* la barre du haut de la carte s'adapte à la place laissée par le panneau */
 }
 .map-wrap,
 .leaflet-map {

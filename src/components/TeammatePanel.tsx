@@ -7,7 +7,7 @@ import { viewModeOf } from "../lib/roomView";
 import { questsByMap } from "../lib/points";
 import { SelectedQuests } from "./SelectedQuests";
 
-type QuestProps = Pick<ComponentProps<typeof SelectedQuests>, "tasks" | "traders" | "maps" | "currentMapId" | "onPhotos" | "onQuest" | "onStory" | "itemIcons" | "itemNames">;
+type QuestProps = Pick<ComponentProps<typeof SelectedQuests>, "tasks" | "traders" | "maps" | "currentMapId" | "onPhotos" | "onQuest" | "onStory" | "itemIcons" | "itemNames" | "kappaOnly">;
 
 const noop = () => {};
 const NO_COUNTS = new Map<string, number>();
