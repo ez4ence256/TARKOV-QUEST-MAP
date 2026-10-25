@@ -11,7 +11,7 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | Élément | État |
 |---|---|
 | Branche | **`main`** seule (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**, branche par défaut). |
-| Version affichée | **0.8.39** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
+| Version affichée | **0.8.40** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
 | **Nouveau design** | depuis la **0.8.23** (commit `e189862` : barre latérale, mode raid, Barlow, icônes SVG). Dernière version avec l'**ancien design** : **0.8.22** (commit `a562131`). Pour revenir en arrière sur un point précis, comparer avec `git diff a562131 e189862 -- <fichier>`. |
 | Derniers commits | `3bc65a9` Item finder : recherche par image (0.8.2) · `78f5fb6` Ctrl+V d'une capture dans l'item finder (0.8.1) · `14c4dc9` Item finder redessiné (0.8.0) · `6800a70` journal fin de session 8 · `245ee03` Version 0.7.23 · `3a59955` Main story : ponts de l'Icebreaker pour Boreas · `2593e19` Icebreaker : calibrage corrigé · `45beb1b` positions > 100 m retirées (0.7.22) · `7acab9f` positions de The Ticket · `5447eef` bouton du panneau en icône seule sur téléphone (0.7.21) · `69ddc95` Item finder · `d81736d` infos du Labyrinthe sur la map |
 | Travail non commité | Seulement `.claude/` (non suivi, volontairement hors du dépôt : chemin propre à cette machine) |
@@ -396,6 +396,7 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
   - « Placer sur la carte » n'est plus proposé pour « Terminer la quête X » (`taskStatus`). Aide de départ : « prends en photo » au lieu de « Ctrl+V » sur écran tactile.
   - Vérifié sans problème : Mes quêtes, Ajouter (Rechercher, Capture), Détails (Infos, Photos, agrandissement), Points, Planque, Réglages (mode de jeu et version y sont), Room, mode raid, bulles de la carte (recadrées dans l'écran). Ordinateur inchangé (en-tête Objets, Marchands).
 - **« Kappa seulement » appliqué à la carte** (0.8.39, demande). La case est désormais un seul état dans `App` (`kappaOnly`), partagé par Ajouter, Mes quêtes et la colonne du coéquipier. Cochée : la carte ne montre que les points des quêtes demandées pour la Kappa (`mapTasks`), les compteurs du sélecteur de map et de « Mes maps » suivent, la Main story est masquée, les points du coéquipier aussi filtrés. Étiquette « Kappa seulement × » à côté de « Extracts Scav » (clic = retirer le filtre) ; « Kappa » seul quand la carte est étroite (requête de conteneur sur `.map-area`). Vérifié : Douanes avec Capture d'avant-postes + Mauvaise réputation (pas Kappa) + Le vagabond de Polikhim (Kappa, sans position) -> 2 points -> 0, case cochée aussi dans Ajouter, × -> 2 points et case décochée ; téléphone : étiquette « Kappa » sur la même ligne, liste des maps toujours bien placée.
+- **Mes quêtes : compteur en « Kappa seulement »** (0.8.40, demande) : « N quête(s) Kappa sur la carte » ne compte que les quêtes Kappa choisies (avant : toutes les quêtes choisies) ; la Main story n'est plus ajoutée au compteur pendant le filtre.
 
 ## Étude 3D (session 5, en attente de validation)
 

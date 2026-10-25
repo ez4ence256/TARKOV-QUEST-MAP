@@ -82,6 +82,7 @@ export function SelectedQuests(props: Props) {
     !filterId || Boolean(props.questsOnMap.get(filterId)?.has(item.chapter !== null ? storyIdOf(item.chapter) : item.sel!.taskId));
   // « Kappa seulement » : quêtes demandées pour la Kappa (les chapitres de la Main story n'en font pas partie)
   const kappaOnly = Boolean(props.kappaOnly);
+  const kappaCount = mode.selected.filter((s) => tasksById.get(s.taskId)?.kappaRequired).length;
   const onFilterKappa = (item: (typeof items)[number]) =>
     !kappaOnly || (item.chapter === null && Boolean(tasksById.get(item.sel!.taskId)?.kappaRequired));
 
@@ -125,8 +126,10 @@ export function SelectedQuests(props: Props) {
       {items.length > 0 && (
         <div className="selection-head">
           <span className="muted small">
-            {tr(`${mode.selected.length} quête(s) sur la carte`, `${mode.selected.length} quest(s) on the map`)}
-            {storySelected.length > 0 && ` · ${storySelected.length} Main story`}
+            {kappaOnly
+              ? tr(`${kappaCount} quête(s) Kappa sur la carte`, `${kappaCount} Kappa quest(s) on the map`)
+              : tr(`${mode.selected.length} quête(s) sur la carte`, `${mode.selected.length} quest(s) on the map`)}
+            {!kappaOnly && storySelected.length > 0 && ` · ${storySelected.length} Main story`}
           </span>
           {!props.readOnly && (
             <label className="check small">
