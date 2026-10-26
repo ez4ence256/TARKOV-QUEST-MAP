@@ -13,7 +13,7 @@ import { pageUrlFor, readCache, wikiRequest, wikiTitleFromLink, writeCache } fro
 import eventPositions from "../data/event-positions.json";
 
 /** Positions relevées à la main sur les images du wiki (« Titre::n° d'objectif »), voir event-positions.json. */
-const POSITIONS = eventPositions as Record<string, { map: string; positions: { x: number; z: number }[] }>;
+const POSITIONS = eventPositions as Record<string, { map: string; positions: { x: number; y?: number; z: number }[] }>;
 
 /** Une quête d'événement lue sur le wiki (indépendante de la langue et des données tarkov.dev). */
 export interface EventEntry {
@@ -105,7 +105,7 @@ export function buildEventTasks(entries: EventEntry[], data: Pick<TarkovData, "t
             mapIds,
             // plusieurs positions : l'une OU l'autre (n'importe quel toit…), affichées comme emplacements possibles
             locations: mapId
-              ? pos.positions.map((p) => ({ mapId, position: { x: p.x, y: 0, z: p.z }, ...(pos.positions.length > 1 ? { possible: true as const } : {}) }))
+              ? pos.positions.map((p) => ({ mapId, position: { x: p.x, y: p.y ?? 0, z: p.z }, ...(pos.positions.length > 1 ? { possible: true as const } : {}) }))
               : [],
           };
         }),

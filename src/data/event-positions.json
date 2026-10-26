@@ -1,24 +1,122 @@
 {
+  "A Familiar Face...::0": {
+    "map": "lighthouse",
+    "positions": [{ "x": 6, "z": -869 }],
+    "source": "sortie Armored Train",
+    "method": "position de la sortie dans tarkov.dev (maps)"
+  },
+  "All-Inclusive Support::1": {
+    "map": "lighthouse",
+    "positions": [{ "x": -377, "z": -624 }],
+    "source": "All-Inclusive Support Location.png (cercle « Cabin »)",
+    "method": "carte Lighthouse du wiki (u/Jindouz, 2242×3892, toutes les images de quête superposables) recalée sur 12 sorties / transits tarkov.dev : affine aux moindres carrés + correction locale par les repères proches ; écart ±15 m"
+  },
+  "All-Inclusive Support::2": {
+    "map": "lighthouse",
+    "positions": [{ "x": -293, "z": -781 }],
+    "source": "transit vers Reserve",
+    "method": "position du transit dans tarkov.dev (maps)"
+  },
+  "Callsign Malachite::0": {
+    "map": "lighthouse",
+    "positions": [{ "x": -377, "z": -624 }],
+    "source": "même cabane que All-Inclusive Support (guide du wiki : cabane près de la sortie Passage by the Lake)",
+    "method": "voir All-Inclusive Support::1"
+  },
+  "Doxed::0": {
+    "map": "ground-zero",
+    "positions": [{ "x": -60, "z": 27 }],
+    "source": "Doxed (guide du wiki : bureau du complexe TerraGroup)",
+    "method": "approximatif : zone « lab scientist in the TerraGroup complex » de Saving the Mole (tarkov.dev) ; le bureau exact est sur les photos"
+  },
+  "Ease the Move::0": {
+    "map": "lighthouse",
+    "positions": [{ "x": -42, "z": -375 }, { "x": -162, "z": -374 }, { "x": -300, "z": -211 }],
+    "source": "Ease the Move Map.png (cercles 1.1, 1.2, 1.3)",
+    "method": "voir All-Inclusive Support::1"
+  },
+  "Ease the Move::1": {
+    "map": "lighthouse",
+    "positions": [{ "x": -414, "z": -271 }, { "x": -431, "z": -322 }],
+    "source": "Ease the Move Map.png (cercles 2.1, 2.2)",
+    "method": "voir All-Inclusive Support::1"
+  },
+  "Ease the Move::2": {
+    "map": "lighthouse",
+    "positions": [{ "x": 179, "z": -474 }],
+    "source": "Ease the Move Map.png (cercle « Grotto »)",
+    "method": "voir All-Inclusive Support::1 (repère le plus proche : sortie Scav Hideout at the Grotto, 25 px)"
+  },
   "Fog of War::0": {
     "map": "lighthouse",
     "positions": [{ "x": -65.1, "z": -692.4 }],
     "source": "Fog of War Map.png (BRDM au nord de la station d'épuration)",
-    "method": "même BRDM que « Revision - Lighthouse » (2e BRDM, position tarkov.dev), qui tombe sur le cadre BRDM de l'image du wiki"
+    "method": "même BRDM que « Revision - Lighthouse » (2e BRDM, position tarkov.dev), qui tombe sur le cadre BRDM de l'image du wiki (3 m)"
   },
   "Fog of War::1": {
     "map": "lighthouse",
-    "positions": [{ "x": 21, "z": -432 }],
+    "positions": [{ "x": 17, "z": -441 }],
     "source": "Fog of War Map.png (cadre « Checkp. »)",
-    "method": "image du wiki recalée sur 5 repères tarkov.dev (Armored Train, Industrial Zone Gates, Transit to Reserve, Scav Hideout at the Grotto, hélicoptère d'Easy Job) : écart 5 à 10 px, soit ±10 m"
+    "method": "voir All-Inclusive Support::1"
   },
   "Fog of War::2": {
     "map": "lighthouse",
-    "positions": [
-      { "x": 44, "z": -616 },
-      { "x": -100, "z": -740 },
-      { "x": -195, "z": -661 }
-    ],
-    "source": "Fog of War Map.png (bâtiments 1, 2 et 3)",
-    "method": "même recalage que le poste de contrôle ; centre de chaque bâtiment (n'importe quel toit compte)"
+    "positions": [{ "x": 39, "z": -619 }, { "x": -98, "z": -739 }, { "x": -192, "z": -664 }],
+    "source": "Fog of War Map.png (bâtiments 1, 2 et 3 ; n'importe quel toit compte)",
+    "method": "voir All-Inclusive Support::1 ; centre de chaque bâtiment"
+  },
+  "Hidden Route::0": {
+    "map": "factory",
+    "positions": [{ "x": -27.01, "y": -3.09, "z": -42.75 }],
+    "source": "transit vers The Lab",
+    "method": "position du transit dans tarkov.dev (maps), au sous-sol"
+  },
+  "Lose the Tail::0": {
+    "map": "lighthouse",
+    "positions": [{ "x": -60, "z": -610 }],
+    "source": "guide du wiki : Glukhar et ses gardes à la station d'épuration pendant l'événement",
+    "method": "centre de la station (bâtiments et poste de contrôle de Fog of War)"
+  },
+  "Lose the Tail::1": {
+    "map": "lighthouse",
+    "positions": [{ "x": -60, "z": -610 }],
+    "source": "guide du wiki : Glukhar à la station d'épuration pendant l'événement",
+    "method": "centre de la station (bâtiments et poste de contrôle de Fog of War)"
+  },
+  "Number Temporarily Unavailable::0": {
+    "map": "lighthouse",
+    "positions": [{ "x": -85, "z": 463 }],
+    "source": "Bogatyrs patch Lighthouse map.png (cercle « Camp »)",
+    "method": "voir All-Inclusive Support::1"
+  },
+  "Number Temporarily Unavailable::1": {
+    "map": "lighthouse",
+    "positions": [{ "x": -85, "z": 463 }],
+    "source": "Bogatyrs patch Lighthouse map.png (cercle « Camp »)",
+    "method": "voir All-Inclusive Support::1"
+  },
+  "Number Temporarily Unavailable::2": {
+    "map": "lighthouse",
+    "positions": [{ "x": -85, "z": 463 }],
+    "source": "Bogatyrs patch Lighthouse map.png (cercle « Camp »)",
+    "method": "voir All-Inclusive Support::1"
+  },
+  "Scope the Clearing::0": {
+    "map": "lighthouse",
+    "positions": [{ "x": 10, "z": -903 }],
+    "source": "Scope the Clearing Map.png (cercle nord du quai)",
+    "method": "voir All-Inclusive Support::1 ; l'image ne dit pas lequel des deux cercles du quai est le premier"
+  },
+  "Scope the Clearing::1": {
+    "map": "lighthouse",
+    "positions": [{ "x": 7, "z": -866 }],
+    "source": "Scope the Clearing Map.png (cercle sud du quai, sur la sortie Armored Train)",
+    "method": "voir All-Inclusive Support::1"
+  },
+  "Scope the Clearing::2": {
+    "map": "lighthouse",
+    "positions": [{ "x": 101, "z": -933 }],
+    "source": "Scope the Clearing Map.png (cercle près du transit vers Woods)",
+    "method": "voir All-Inclusive Support::1"
   }
 }

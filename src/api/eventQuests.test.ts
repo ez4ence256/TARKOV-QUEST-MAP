@@ -55,12 +55,14 @@ describe("parseEventQuest", () => {
 describe("buildEventTasks", () => {
   const entries = [parseEventQuest("All-Inclusive Support", ALL_INCLUSIVE)!];
 
-  it("tâche synthétique : marchand, map, objectifs sans position", () => {
+  it("tâche synthétique : marchand, map, positions relevées seulement là où le wiki en montre", () => {
     const [t] = buildEventTasks(entries, { ...ctx, tasks: [] });
     expect(t).toMatchObject({ id: "wiki-All-Inclusive-Support", source: "wiki", traderId: "t1", mapId: "m1", kappaRequired: false });
     expect(t.wikiLink).toBe("https://escapefromtarkov.fandom.com/wiki/All-Inclusive_Support");
     expect(t.objectives.map((o) => o.id)).toEqual(["wiki-All-Inclusive-Support-1", "wiki-All-Inclusive-Support-2", "wiki-All-Inclusive-Support-3"]);
-    expect(t.objectives.every((o) => o.locations.length === 0 && o.mapIds[0] === "m1")).toBe(true);
+    expect(t.objectives.every((o) => o.mapIds[0] === "m1")).toBe(true);
+    // « éliminer 15 cibles » : nulle part ; fusée à la cabane et transit vers Reserve : un point chacun
+    expect(t.objectives.map((o) => o.locations.length)).toEqual([0, 1, 1]);
   });
 
   it("retirée quand tarkov.dev a la quête (nom, même avec suffixe PVP ZONE)", () => {
