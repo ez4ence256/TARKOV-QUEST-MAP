@@ -50,6 +50,23 @@ describe("parseEventQuest", () => {
     });
   });
   it("page sans infobox ni objectif : ignorée", () => expect(parseEventQuest("X", "#REDIRECT [[Y]]")).toBeNull());
+  it("objectifs sous un sous-titre (Halloween : branches Skier / Therapist) : le sous-titre les précède", () => {
+    const text = `{{Infobox quest
+|given by =[[Therapist]]
+|location =[[Infected Factory]], [[Infected Lab]]
+}}
+==Objectives==
+====[[Skier]] questline exclusive====
+* Survive and extract from [[Factory|Infected Factory]]
+====[[Therapist]] questline exclusive====
+* Survive and extract from [[The Lab|Infected Lab]]
+==Rewards==
+`;
+    expect(parseEventQuest("Halloween: A new Vaccine", text)?.objectives).toEqual([
+      "(Skier questline exclusive) Survive and extract from Infected Factory",
+      "(Therapist questline exclusive) Survive and extract from Infected Lab",
+    ]);
+  });
 });
 
 describe("buildEventTasks", () => {
@@ -76,6 +93,15 @@ describe("buildEventTasks", () => {
     expect(t.objectives.map((o) => o.locations.length)).toEqual([1, 1, 3]);
     expect(t.objectives[0].locations[0]).toMatchObject({ mapId: "lh", position: { x: -65.1, z: -692.4 } });
     expect(t.objectives[2].locations.every((l) => l.possible)).toBe(true);
+  });
+
+  it("Halloween : maps « Infected » rattachées à leur map de base, chambre 105 sur Douanes", () => {
+    const maps = [map("fa", "Factory"), map("lab", "The Lab"), { ...map("cu", "Customs"), normalizedName: "customs" }];
+    const help = { title: "Halloween: Unexpected Help", givenBy: null, locations: ["Lighthouse", "Customs"], objectives: ["get", "stash"] };
+    const exam = { title: "Halloween: Rumors", givenBy: null, locations: ["Infected Factory", "Infected Lab"], objectives: ["x"] };
+    const [h, r] = buildEventTasks([help, exam], { ...ctx, maps, tasks: [] });
+    expect(r.objectives[0].mapIds).toEqual(["fa", "lab"]);
+    expect(h.objectives[1].locations[0]).toMatchObject({ mapId: "cu", position: { x: 227.88, z: 135.61 } });
   });
 
   it("ids valides pour les rooms", () => {

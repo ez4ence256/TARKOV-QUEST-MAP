@@ -65,6 +65,24 @@
     "source": "Fog of War Map.png (bâtiments 1, 2 et 3 ; n'importe quel toit compte)",
     "method": "voir All-Inclusive Support::1 ; centre de chaque bâtiment"
   },
+  "Halloween: Unexpected Help::1": {
+    "map": "customs",
+    "positions": [{ "x": 227.88, "y": 0.91, "z": 135.61 }],
+    "source": "chambre 105 du dortoir à deux étages",
+    "method": "position de la serrure « Dorm room 105 key » dans tarkov.dev (maps, locks)"
+  },
+  "Halloween: Follow-Up Examination::0": {
+    "map": "the-lab",
+    "positions": [{ "x": -122.89, "y": -3.66, "z": -258.32 }, { "x": -123.23, "y": 1.04, "z": -406.52 }],
+    "source": "Follow-Up Examination Lab Spawn 1 et 2 (tunnel de Sewage Conduit, croisement près de la salle à carte bleue) ; le 3e (« zone de travail ») et ceux de l'Usine ne sont pas placés",
+    "method": "sortie Sewage Conduit et serrure « TerraGroup Labs keycard (Blue) » dans tarkov.dev (maps) : à quelques mètres près"
+  },
+  "Halloween: Follow-Up Examination::2": {
+    "map": "the-lab",
+    "positions": [{ "x": -122.89, "y": -3.66, "z": -258.32 }, { "x": -123.23, "y": 1.04, "z": -406.52 }],
+    "source": "même corps que l'objectif 0 (prise de sang)",
+    "method": "voir Halloween: Follow-Up Examination::0"
+  },
   "Hidden Route::0": {
     "map": "factory",
     "positions": [{ "x": -27.01, "y": -3.09, "z": -42.75 }],

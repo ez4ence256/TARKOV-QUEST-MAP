@@ -3289,6 +3289,15 @@ kbd {
   padding-left: 1.2rem;
   font-size: 0.9em;
 }
+/* « Kappa seulement » : quêtes non Kappa à part, en retrait */
+.finder-keep-other {
+  margin-top: 0.4rem;
+  opacity: 0.7;
+}
+.finder-keep-other .finder-sub {
+  margin: 0 0 0.15rem;
+  font-size: 0.85em;
+}
 /* onglet Planque */
 .hideout-list {
   list-style: none;

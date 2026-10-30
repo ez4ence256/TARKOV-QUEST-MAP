@@ -28,7 +28,8 @@ interface EventCache {
   fetchedAt: number;
 }
 
-const CACHE_KEY = "events:v1";
+// v2 : relit la liste tout de suite (quêtes Halloween 2026 ajoutées au wiki pendant le cache de 7 jours)
+const CACHE_KEY = "events:v2";
 const BATCH = 50;
 const MAX_CONTINUATIONS = 5;
 
@@ -38,13 +39,16 @@ export function parseEventQuest(title: string, wikitext: string): EventEntry | n
   const { sections } = splitSections(wikitext);
   const blocks = parseBlocks(findSection(sections, "Objectives")?.body ?? "", title);
   const objectives: string[] = [];
+  // sous-titre (« Skier questline exclusive ») : il précède ses objectifs, sinon ceux des deux branches se mélangent
+  let group = "";
   for (const b of blocks) {
-    if (b.type === "paragraph") objectives.push(b.text);
+    if (b.type === "heading") group = `(${b.text}) `;
+    if (b.type === "paragraph") objectives.push(group + b.text);
     if (b.type !== "list") continue;
     // une sous-puce détaille l'objectif au-dessus : elle s'y ajoute au lieu de devenir une case à cocher
     for (const item of b.items) {
       if (item.depth > 1 && objectives.length > 0) objectives[objectives.length - 1] += `; ${item.text}`;
-      else objectives.push(item.text);
+      else objectives.push(group + item.text);
     }
   }
   if (objectives.length === 0 && !infobox["given by"]) return null;
@@ -75,7 +79,11 @@ export function buildEventTasks(entries: EventEntry[], data: Pick<TarkovData, "t
     const n = name ? norm(name) : "";
     return n ? data.traders.find((t) => norm(t.normalizedName) === n || norm(t.name) === n) : undefined;
   };
-  const mapOf = (name: string): GameMap | undefined => data.maps.find((m) => [m.nameEn, m.name, m.normalizedName].some((x) => x && norm(x) === norm(name)));
+  // « Infected Factory » / « Infected Lab » (Halloween) : la map de base, seule à avoir une image
+  const mapOf = (name: string): GameMap | undefined => {
+    const n = norm(name).replace(/^infected /, "");
+    return data.maps.find((m) => [m.nameEn, m.name, m.normalizedName].some((x) => x && norm(x) === n));
+  };
 
   return entries
     .filter((e) => !known.has(norm(e.title)) && !knownPages.has(e.title.toLowerCase()))

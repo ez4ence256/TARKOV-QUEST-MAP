@@ -102,6 +102,8 @@ const MAP_VARIANTS: Record<string, string> = {
   "6a294a5b5eb5f9a1700417b7": "5b0fc42d86f7744a585f9105", // Le labo (Dark) -> Le labo
   "65b8d6f5cdde2479cb2a3125": "653e6760052c01c1c805532f", // Point zéro 21+ -> Point zéro
   "68236e8153654e8c1200798a": "653e6760052c01c1c805532f", // Ground Zero Tutoriel -> Point zéro
+  "6a8dd1325e15a5ea2e010820": "55f2d3fd4bdc2d5f408b4567", // Usine infectée (Halloween) -> Usine
+  "6a8dd0941fc6ba7a9505908f": "5b0fc42d86f7744a585f9105", // Labo infecté (Halloween) -> Le labo
 };
 /** Id de map, variante remplacée par sa map de base. */
 const mapRef = (v: unknown): string | null => {

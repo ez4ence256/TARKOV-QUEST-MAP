@@ -24,7 +24,7 @@ import { isTaskFinished } from "../lib/points";
 import { isGreyed } from "../lib/questChain";
 import { STATUS_LABELS } from "../lib/questWiki";
 import { ObjectiveItems } from "./ObjectiveItems";
-import type { ItemNeed } from "../lib/itemNeeds";
+import type { ItemNeed, NeedSource } from "../lib/itemNeeds";
 import { isStaleBuildError, staleBuildMessage } from "../lib/staleBuild";
 
 const PAGE = 100;
@@ -404,6 +404,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                 done={done}
                 failed={failed}
                 need={needs.get(selected.id)}
+                kappaOnly={kappaOnly}
               />
             </>
           ) : (
@@ -521,6 +522,8 @@ function Usage(p: {
   done: Record<string, number>;
   failed?: Record<string, true>;
   need?: ItemNeed;
+  /** « Kappa seulement » : les quêtes non demandées pour la Kappa passent dans un bloc à part. */
+  kappaOnly?: boolean;
 }) {
   const [tab, setTab] = useState<Tab>("quests");
   // quête dépliée sur place (on reste dans la fiche de l'objet au lieu d'aller à la fiche quête)
@@ -633,24 +636,42 @@ function Usage(p: {
         {!p.need ? (
           <p className="muted small">{tr("Aucune quête ni station ne le demande : vendable.", "No quest or station needs it: sellable.")}</p>
         ) : (
-          <ul className="finder-keep-list">
-            {p.need.sources.map((s, i) => (
-              <li key={i}>
-                {s.kind === "quest" ? (
-                  <button className="link" onClick={() => p.onShowQuest(s.taskId)}>
-                    {p.tasksById.get(s.taskId)?.name ?? s.taskId}
-                  </button>
-                ) : (
-                  <>
-                    {p.hideout.data?.stationName[s.stationId] ?? s.stationId} · {tr("niv.", "lvl")} {s.level}
-                  </>
-                )}{" "}
-                ×{s.count}
-                {s.fir && " FIR"}
-                {s.kind === "quest" && s.anyOf && ` · ${tr("au choix", "any of")}`}
-              </li>
-            ))}
-          </ul>
+          (() => {
+            const isNonKappa = (s: NeedSource) => p.kappaOnly === true && s.kind === "quest" && !p.tasksById.get(s.taskId)?.kappaRequired;
+            const keep = p.need.sources.filter((s) => !isNonKappa(s));
+            const nonKappa = p.need.sources.filter(isNonKappa);
+            const list = (sources: NeedSource[]) => (
+              <ul className="finder-keep-list">
+                {sources.map((s, i) => (
+                  <li key={i}>
+                    {s.kind === "quest" ? (
+                      <button className="link" onClick={() => p.onShowQuest(s.taskId)}>
+                        {p.tasksById.get(s.taskId)?.name ?? s.taskId}
+                      </button>
+                    ) : (
+                      <>
+                        {p.hideout.data?.stationName[s.stationId] ?? s.stationId} · {tr("niv.", "lvl")} {s.level}
+                      </>
+                    )}{" "}
+                    ×{s.count}
+                    {s.fir && " FIR"}
+                    {s.kind === "quest" && s.anyOf && ` · ${tr("au choix", "any of")}`}
+                  </li>
+                ))}
+              </ul>
+            );
+            return (
+              <>
+                {keep.length > 0 ? list(keep) : <p className="muted small">{tr("Rien pour la Kappa ni la planque.", "Nothing for the Kappa or the hideout.")}</p>}
+                {nonKappa.length > 0 && (
+                  <div className="finder-keep-other">
+                    <h4 className="finder-sub">{tr("Non Kappa", "Not Kappa")}</h4>
+                    {list(nonKappa)}
+                  </div>
+                )}
+              </>
+            );
+          })()
         )}
       </section>
       <div role="tablist" className="finder-tabs" aria-label={tr("Utilisations", "Uses")}>
