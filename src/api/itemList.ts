@@ -25,6 +25,8 @@ export interface ListedItem {
   alts: string[];
   /** Nom anglais : titre de la page de l'objet sur le wiki. */
   nameEn: string;
+  /** Noms courts (langue, anglais) : ceux écrits sur les cases de l'inventaire. */
+  shorts?: string[];
 }
 
 /** Traductions d'objets (langue puis anglais) -> liste triée par nom. */
@@ -37,7 +39,8 @@ export function parseItemList(primary: Record<string, string>, english: Record<s
     const name = primary[`${id} Name`] ?? english[`${id} Name`];
     if (!name) continue;
     const alts = [name, primary[`${id} ShortName`], english[`${id} Name`], english[key]].filter((s): s is string => Boolean(s));
-    out.push({ id, name, alts: [...new Set(alts)], nameEn: english[`${id} Name`] ?? name });
+    const shorts = [...new Set([primary[`${id} ShortName`], english[key]].filter((s): s is string => Boolean(s)))];
+    out.push({ id, name, alts: [...new Set(alts)], nameEn: english[`${id} Name`] ?? name, shorts });
   }
   return out.sort((a, b) => a.name.localeCompare(b.name, lang));
 }

@@ -26,6 +26,7 @@ import { STATUS_LABELS } from "../lib/questWiki";
 import { ObjectiveItems } from "./ObjectiveItems";
 import type { ItemNeed, NeedSource } from "../lib/itemNeeds";
 import { isStaleBuildError, staleBuildMessage } from "../lib/staleBuild";
+import { ContainerScan, type ScanState } from "./ContainerScan";
 
 const PAGE = 100;
 
@@ -126,6 +127,9 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   const [shown, setShown] = useState(PAGE);
   const [selected, setSelected] = useState<ListedItem | null>(null);
   const [ocr, setOcr] = useState<OcrState | null>(null);
+  // onglet « Conteneur » : capture d'une junk box / d'un sac, objets à vendre ou à garder
+  const [mode, setMode] = useState<"search" | "container">("search");
+  const [scan, setScan] = useState<ScanState | null>(null);
   // catégories du flea : arbre, catégorie choisie (filtre la grille), catégories ouvertes
   const [tree, setTree] = useState<CategoryNode[] | null>(null);
   const [cat, setCat] = useState<CategoryNode | null>(null);
@@ -198,7 +202,73 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
     };
   }, [all, gameMode, lang]);
 
+  // image de la capture affichée sous le résultat : libérée à la suivante et à la fermeture
+  const shotUrl = useRef<string | null>(null);
+  useEffect(() => () => void (shotUrl.current && URL.revokeObjectURL(shotUrl.current)), []);
+  // capture collée avant que la liste des objets soit là : lue dès son arrivée
+  const pendingShot = useRef<Blob | null>(null);
+  const scanContainer = async (blob: Blob) => {
+    const id = ++run.current;
+    setSelected(null);
+    setScan({ step: "reading", progress: null });
+    if (!all) {
+      pendingShot.current = blob;
+      return;
+    }
+    try {
+      const [pixels, grid, { readStripWords }] = await Promise.all([blobPixels(blob), import("../lib/containerGrid"), import("../lib/ocr")]);
+      const g = grid.detectGrid(pixels);
+      if (!g) {
+        if (id === run.current)
+          setScan({ step: "error", message: tr("Pas de grille de cases dans cette image : colle une capture du conteneur ouvert, cases visibles.", "No grid of cells in this image: paste a screenshot of the open container, cells visible.") });
+        return;
+      }
+      const tops = grid.rowTops(g, pixels.height);
+      const canvasOf = (s: { width: number; height: number; data: ArrayLike<number> }) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = s.width;
+        canvas.height = s.height;
+        canvas.getContext("2d")!.putImageData(new ImageData(new Uint8ClampedArray(s.data), s.width, s.height), 0, 0);
+        return canvas;
+      };
+      const strips = tops.map((top) => grid.nameStrip(pixels, g, top));
+      const words = await readStripWords(strips.map(canvasOf), (done) => id === run.current && setScan({ step: "reading", progress: done * 0.7 }));
+      if (id !== run.current) return;
+      const index = grid.buildShortIndex(all);
+      const read = words.flatMap((w, row) => grid.matchStrip(grid.tightWords(strips[row], w, g), g, row, index));
+      // cases restées sans nom mais avec des lettres : relues une par une, en noir et blanc, en gris, puis en gris sans les bouts de bord autour du nom
+      const grays = tops.map((top) => grid.nameStrip(pixels, g, top, true));
+      for (const [n, [pass, band]] of ([[strips, false], [grays, false], [grays, true]] as const).entries()) {
+        const retry = strips.flatMap((s, row) => grid.unreadCells(s, g, read.filter((f) => f.row === row)).map((col) => ({ row, col, ...grid.cellStrip(pass[row], g, col, band) })));
+        const again = await readStripWords(retry.map((r) => canvasOf(r.img)), (done) => id === run.current && setScan({ step: "reading", progress: 0.7 + (n + done) * 0.1 }));
+        if (id !== run.current) return;
+        retry.forEach((r, i) => {
+          const moved = grid.tightWords(strips[r.row], again[i].map((w) => ({ ...w, x0: w.x0 + r.shift, x1: w.x1 + r.shift })), g);
+          read.push(...grid.matchStrip(moved, g, r.row, index).filter((f) => f.col === r.col && grid.retryRead(f, index, band)));
+        });
+      }
+      read.sort((a, b) => a.row - b.row || a.col - b.col);
+      const sizes = grid.itemSizes(pixels, g, read, tops);
+      const found = read.flatMap((f, i) => (sizes[i] ? [{ ...f, ...sizes[i], x: g.ox + f.col * g.pitch, y: tops[f.row] }] : []));
+      if (shotUrl.current) URL.revokeObjectURL(shotUrl.current);
+      shotUrl.current = URL.createObjectURL(blob);
+      setScan({ step: "done", url: shotUrl.current, width: pixels.width, height: pixels.height, pitch: g.pitch, found });
+    } catch (error) {
+      if (id === run.current)
+        setScan({ step: "error", message: isStaleBuildError(error) ? staleBuildMessage() : tr("Lecture impossible. La première utilisation demande une connexion (données de langue).", "Could not read the image. The first use needs a connection (language data).") });
+    }
+  };
+
+  useEffect(() => {
+    if (!all || !pendingShot.current) return;
+    const blob = pendingShot.current;
+    pendingShot.current = null;
+    void scanContainer(blob);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- seulement à l'arrivée de la liste
+  }, [all]);
+
   pasteRef.current = async (blob) => {
+    if (mode === "container") return scanContainer(blob);
     const id = ++run.current;
     if (!all) return setOcr({ step: "error" });
     setOcr({ step: "reading", progress: null });
@@ -287,6 +357,18 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
 
   const usage = useMemo(() => buildUsageIndex(tasks), [tasks]);
   const tasksById = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
+  /** Pourquoi garder un objet du conteneur, avec les filtres actuels (mêmes règles que les tuiles et « Kappa seulement » / « Planque »). */
+  const keepReasons = (itemId: string): string[] => {
+    const need = needs.get(itemId);
+    if (!need || (pools.length && !pools.some((k) => traderItems.get(k)?.has(itemId)))) return [];
+    return [
+      ...new Set(
+        need.sources
+          .filter((s) => (s.kind === "quest" ? !pools.length || (kappaOnly && tasksById.get(s.taskId)?.kappaRequired) : !pools.length || hideoutOnly))
+          .map((s) => (s.kind === "quest" ? (tasksById.get(s.taskId)?.name ?? s.taskId) : tr("Planque", "Hideout"))),
+      ),
+    ];
+  };
   const byId = useMemo(() => new Map((all ?? []).map((i) => [i.id, i])), [all]);
 
   const banner = (
@@ -321,7 +403,33 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   return (
     <div className="finder-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className="finder" role="dialog" aria-modal="true" aria-label="Item finder">
+        <div role="tablist" className="finder-tabs finder-modes" aria-label={tr("Mode", "Mode")}>
+          {(
+            [
+              ["search", tr("Recherche", "Search")],
+              ["container", tr("Conteneur (vendre)", "Container (sell)")],
+            ] as const
+          ).map(([m, label]) => (
+            <button
+              key={m}
+              role="tab"
+              aria-selected={mode === m}
+              className={`finder-tab${mode === m ? " active" : ""}`}
+              onClick={() => {
+                setMode(m);
+                setSelected(null);
+                run.current++;
+                setOcr(null);
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         <div className="finder-head">
+          {mode === "container" ? (
+            <p className="finder-container-hint">{tr("Ctrl+V n'importe quel conteneur ou inventaire : vois tout de suite quoi vendre ou garder", "Ctrl+V any container or inventory: instantly see what to sell or keep")}</p>
+          ) : (
           <div className="finder-search-wrap">
             <span className="finder-search-icon" aria-hidden="true"><UiIcon id="search" /></span>
             <input
@@ -339,10 +447,13 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
               }}
             />
           </div>
-          <label className="check finder-only-need">
-            <input type="checkbox" checked={onlyNeeded} onChange={(e) => setOnlyNeeded(e.target.checked)} />
-            {tr("Afficher seulement les objets nécessaires", "Show only the needed items")}
-          </label>
+          )}
+          {mode === "search" && (
+            <label className="check finder-only-need">
+              <input type="checkbox" checked={onlyNeeded} onChange={(e) => setOnlyNeeded(e.target.checked)} />
+              {tr("Afficher seulement les objets nécessaires", "Show only the needed items")}
+            </label>
+          )}
           <label className="check finder-only-need">
             <input type="checkbox" checked={kappaOnly} onChange={(e) => setKappaOnly(e.target.checked)} />
             {tr("Kappa seulement", "Kappa only")}
@@ -363,7 +474,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
           </button>
         </div>
 
-        <div className={`finder-body${all && !selected && !error ? " finder-split" : ""}`}>
+        <div className={`finder-body${all && !selected && !error && mode === "search" ? " finder-split" : ""}`}>
           {error ? (
             <>
               {banner}
@@ -407,6 +518,16 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                 kappaOnly={kappaOnly}
               />
             </>
+          ) : mode === "container" ? (
+            <ContainerScan
+              scan={scan}
+              byId={byId}
+              iconSrc={(id) => iconSrc(id, itemIcons)}
+              keepReasons={keepReasons}
+              filterLabel={pools.length ? [kappaOnly && tr("quêtes Kappa", "Kappa quests"), hideoutOnly && tr("planque", "hideout")].filter(Boolean).join(" + ") : null}
+              onPick={setSelected}
+              onFile={(file) => scanContainer(file)}
+            />
           ) : (
             <>
               <div className="finder-main">

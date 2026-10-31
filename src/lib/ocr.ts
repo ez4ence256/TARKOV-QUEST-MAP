@@ -162,3 +162,34 @@ export async function readImageLines(
     onProgress = null;
   }
 }
+
+/** Caractères des noms courts (lettres, chiffres, quelques signes) : le bruit des icônes ne donne plus de symboles. */
+const SHORT_NAME_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÀÂÇÉÈÊËÎÏÔÙÛÜàâçéèêëîïôùûü0123456789-.#'/_ ";
+
+/**
+ * Lit des bandes d'une seule ligne (noms courts d'une capture de conteneur, voir lib/containerGrid).
+ * Le worker est partagé : la liste de caractères est remise à vide ensuite (la page seg. est
+ * redonnée par readImageLines à chaque lecture).
+ */
+export async function readStripWords(
+  strips: HTMLCanvasElement[],
+  progress?: (done: number) => void,
+): Promise<{ text: string; confidence: number; x0: number; x1: number }[][]> {
+  const worker = await getWorker();
+  await worker.setParameters({ tessedit_pageseg_mode: "7" as never, tessedit_char_whitelist: SHORT_NAME_CHARS });
+  try {
+    const out: { text: string; confidence: number; x0: number; x1: number }[][] = [];
+    for (const strip of strips) {
+      const { data } = await worker.recognize(strip, {}, { blocks: true });
+      const words: { text: string; confidence: number; x0: number; x1: number }[] = [];
+      for (const block of data.blocks ?? [])
+        for (const paragraph of block.paragraphs)
+          for (const line of paragraph.lines) for (const w of line.words) words.push({ text: w.text, confidence: w.confidence, x0: w.bbox.x0, x1: w.bbox.x1 });
+      out.push(words);
+      progress?.(out.length / strips.length);
+    }
+    return out;
+  } finally {
+    await worker.setParameters({ tessedit_char_whitelist: "" });
+  }
+}

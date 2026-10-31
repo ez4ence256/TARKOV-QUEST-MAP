@@ -10,7 +10,7 @@ const fr = { [`${A} Name`]: "Collier en or", [`${A} ShortName`]: "Collier" };
 describe("parseItemList", () => {
   it("ne garde que les objets (clé ShortName), pas les catégories", () => {
     const list = parseItemList(fr, en, "fr");
-    expect(list).toEqual([{ id: A, name: "Collier en or", alts: ["Collier en or", "Collier", "Golden neck chain", "GNC"], nameEn: "Golden neck chain" }]);
+    expect(list).toEqual([{ id: A, name: "Collier en or", alts: ["Collier en or", "Collier", "Golden neck chain", "GNC"], nameEn: "Golden neck chain", shorts: ["Collier", "GNC"] }]);
   });
   it("langue absente : repli sur l'anglais", () => {
     expect(parseItemList({}, en, "fr")[0].name).toBe("Golden neck chain");

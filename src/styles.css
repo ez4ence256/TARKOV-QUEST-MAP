@@ -3289,6 +3289,229 @@ kbd {
   padding-left: 1.2rem;
   font-size: 0.9em;
 }
+/* onglet « Conteneur » des Objets : compteurs (filtre), capture avec un cadre par objet, liste compacte.
+   Vert = à vendre, orange = à vérifier, rouge = à garder. */
+.finder-modes {
+  padding: 0 0.75rem;
+}
+.finder-container-hint {
+  flex: 1;
+  margin: 0;
+  color: var(--muted);
+}
+.container-empty {
+  max-width: 34rem;
+  margin: 2rem auto;
+  text-align: center;
+}
+.container-empty-title {
+  font-family: var(--font-title);
+  font-size: var(--fs-xl);
+  color: var(--accent-2);
+}
+.container-progress {
+  height: 6px;
+  overflow: hidden;
+  background: var(--bg-3);
+  border-radius: 999px;
+}
+.container-progress span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.2s;
+}
+.container-result {
+  --sell: var(--ok);
+  --check: #f0a43a;
+  --keep: var(--danger);
+}
+.container-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.container-bar-note {
+  flex: 1;
+  min-width: 8rem;
+}
+.container-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0.35rem 0.8rem;
+  color: var(--text);
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--c);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.container-chip input {
+  accent-color: var(--c);
+  align-self: center;
+  margin: 0;
+}
+.container-chip-n {
+  font-family: var(--font-title);
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--c);
+}
+.container-chip.active {
+  background: color-mix(in srgb, var(--c) 18%, var(--bg-3));
+  border-color: var(--c);
+}
+.container-chip.dim {
+  opacity: 0.5;
+}
+.is-sell {
+  --c: var(--sell);
+}
+.is-check {
+  --c: var(--check);
+}
+.is-keep {
+  --c: var(--keep);
+}
+.container-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+.container-shot-col {
+  position: sticky;
+  top: 0;
+}
+.container-shot {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  margin-bottom: 0.4rem;
+  line-height: 0;
+}
+.container-shot img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  transition: filter 0.12s;
+}
+.container-box {
+  position: absolute;
+  box-sizing: border-box;
+  padding: 0;
+  background: color-mix(in srgb, var(--c) 22%, transparent);
+  border: 2px solid var(--c);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: opacity 0.12s;
+}
+.container-box.dim {
+  opacity: 0.12;
+}
+.container-box.hot {
+  z-index: 1;
+  background: color-mix(in srgb, var(--c) 55%, transparent);
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--c);
+}
+/* un objet survolé (liste ou image) : le reste de la capture s'assombrit, ses cases ressortent en couleur */
+.container-shot.has-hot img {
+  filter: brightness(0.4);
+}
+.container-shot.has-hot .container-box.dim {
+  opacity: 0;
+}
+.container-lists {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr); /* noms longs : coupés (…), pas de défilement de côté */
+  gap: 1rem;
+}
+.container-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.4rem;
+  font-family: var(--font-title);
+  font-size: var(--fs-lg);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--c);
+}
+.container-section-n {
+  padding: 0 0.45rem;
+  font-size: var(--fs-sm);
+  color: var(--bg);
+  background: var(--c);
+  border-radius: 999px;
+}
+.container-rows {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.container-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.3rem 0.5rem;
+  color: var(--text);
+  text-align: left;
+  background: var(--bg-3);
+  border: 0;
+  border-left: 3px solid var(--c);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.container-row:hover,
+.container-row.hot,
+.container-row:focus-visible {
+  background: color-mix(in srgb, var(--c) 16%, var(--bg-3));
+}
+.container-row-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.container-row-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.container-row-why {
+  overflow: hidden;
+  font-size: var(--fs-xs);
+  color: var(--c);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.container-row-n {
+  flex: none;
+  font-family: var(--font-title);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--muted);
+}
+.container-file {
+  cursor: pointer;
+}
+@media (max-width: 800px) {
+  .container-layout {
+    grid-template-columns: 1fr;
+  }
+  .container-shot-col {
+    position: static;
+  }
+}
 /* « Kappa seulement » : quêtes non Kappa à part, en retrait */
 .finder-keep-other {
   margin-top: 0.4rem;
