@@ -308,6 +308,8 @@ export interface Found {
   how: ShortMatch["how"];
   /** Nom de 2 lettres mal assuré : gardé seulement si une autre lecture de la case dit pareil (voir agreed). */
   weak?: true;
+  /** Lu seulement en relisant la case seule : moins sûr (bas d'une figurine lu « fear »), voir itemSizes. */
+  retry?: true;
 }
 
 /**
@@ -468,7 +470,7 @@ const MAX_CELLS = 8;
  * (35 % du contraste typique d'un trait) : une capture floue a des traits plus pâles. `found` est trié par
  * rangée puis colonne ; null : nom dans une case déjà couverte, à oublier.
  */
-export function itemSizes(img: Rgba, grid: Grid, found: { row: number; col: number; how?: ShortMatch["how"] }[], tops: number[]): (ItemSize | null)[] {
+export function itemSizes(img: Rgba, grid: Grid, found: { row: number; col: number; how?: ShortMatch["how"]; retry?: true }[], tops: number[]): (ItemSize | null)[] {
   const g = grayOf(img);
   const W = img.width;
   const cols = Math.floor((W - grid.ox) / grid.pitch);
@@ -498,16 +500,20 @@ export function itemSizes(img: Rgba, grid: Grid, found: { row: number; col: numb
   all.sort((a, b) => a - b);
   const threshold = 0.35 * (all[Math.floor(all.length * 0.75)] ?? 0);
 
-  // coin d'un objet reconnu -> lu à peu près
-  const corners = new Map(found.map((f) => [`${f.row},${f.col}`, f.how === "fuzzy"]));
+  // coin d'un objet reconnu -> lu à peu près, ou relu seul
+  const corners = new Map(found.map((f) => [`${f.row},${f.col}`, { fuzzy: f.how === "fuzzy", retry: !!f.retry }]));
   const taken = new Set<string>();
   return found.map((f) => {
     // case déjà couverte par un objet plus haut ou à droite : nom lu à peu près dans son dessin (« FENTE » dans
     // une perceuse) ; un nom lu tel quel reste, la taille de l'autre est plus douteuse que lui
-    if (taken.has(`${f.row},${f.col}`) && f.how === "fuzzy") return null;
+    if (taken.has(`${f.row},${f.col}`) && (f.how === "fuzzy" || f.retry)) return null;
     // un objet déjà large de 2 cases (ou haut de 2) qui s'étend sans trait sur toute sa largeur passe un nom lu
     // à peu près ; pas un objet d'une case, dont le trait pâle (capture floue) ne prouve rien
-    const free = (r: number, c: number, wide: boolean) => !taken.has(`${r},${c}`) && (!corners.has(`${r},${c}`) || (wide && corners.get(`${r},${c}`)!));
+    // un nom trouvé seulement en relisant sa case ne bloque pas (bas de la figurine de scav lu « fear »)
+    const free = (r: number, c: number, wide: boolean) => {
+      const k = corners.get(`${r},${c}`);
+      return !taken.has(`${r},${c}`) && (!k || k.retry || (wide && k.fuzzy));
+    };
     const span = (n: number, at: (i: number) => number) => Array.from({ length: n }, (_, i) => at(i));
     // une limite entre deux cases d'un même objet n'a de trait nulle part, alors qu'un bout clair du dessin
     // peut en imiter un : la limite est jugée sur toute la largeur (ou hauteur) déjà trouvée, au plus faible,
@@ -639,7 +645,8 @@ export interface ShortMatch {
 export function matchShort(text: string, index: Map<string, string[]>): ShortMatch | null {
   const k = shortKey(text);
   if (k.length < 2) return null;
-  const exact = index.get(k) ?? (k.length >= 4 ? (index.get(k.slice(0, -1)) ?? index.get(k.slice(1))) : undefined);
+  // 0 et O se ressemblent dans la police du jeu (« H202 » : H2O2)
+  const exact = index.get(k) ?? index.get(k.replace(/0/g, "o")) ?? (k.length >= 4 ? (index.get(k.slice(0, -1)) ?? index.get(k.slice(1))) : undefined);
   if (exact) return { ids: exact, how: "exact" };
   const raw = text.replace(/[^\p{L}\p{N}]/gu, "");
   const shaped = raw.length === 3 ? index.get(SHAPED + shape(raw)) : undefined;

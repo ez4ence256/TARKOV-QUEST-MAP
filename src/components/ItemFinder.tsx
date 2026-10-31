@@ -248,7 +248,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
         if (id !== run.current) return;
         retry.forEach((r, i) => {
           const moved = grid.tightWords(strips[r.row], again[i].map((w) => ({ ...w, x0: w.x0 + r.shift, x1: w.x1 + r.shift })), g);
-          add(grid.matchStrip(moved, g, r.row, index).filter((f) => f.col === r.col && grid.retryRead(f, index, band)));
+          add(grid.matchStrip(moved, g, r.row, index).filter((f) => f.col === r.col && grid.retryRead(f, index, band)).map((f) => ({ ...f, retry: true as const })));
         });
       }
       read.push(...grid.agreed(weak, read));

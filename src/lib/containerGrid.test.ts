@@ -46,6 +46,11 @@ describe("matchShort", () => {
     expect(matchShort("FMI", three)?.ids).toEqual(["fmj"]);
     expect(matchShort("Ege", three)?.ids).toEqual(["egg"]);
   });
+  it("0 lu à la place de O", () => {
+    const h2o2 = buildShortIndex([{ id: "h2o2", shorts: ["H2O2"] }, { id: "tea", shorts: ["42"] }]);
+    expect(matchShort("H202", h2o2)?.ids).toEqual(["h2o2"]);
+    expect(matchShort("42", h2o2)?.ids).toEqual(["tea"]);
+  });
 });
 
 describe("matchStrip", () => {
