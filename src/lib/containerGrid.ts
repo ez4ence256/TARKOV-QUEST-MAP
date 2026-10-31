@@ -4,7 +4,7 @@
 // donne la rangée et la colonne de la case en haut à droite de l'objet.
 // Logique pure (aucun appel au navigateur) : testée sous Node. L'OCR lui-même est dans lib/ocr.ts.
 
-import type { Rgba } from "./itemImage";
+import { P, shrink, type Rgba, type Thumb } from "./itemImage";
 import { normalizeOcr, similarity } from "./ocrMatch";
 
 export interface Grid {
@@ -306,6 +306,8 @@ export interface Found {
   text: string;
   ids: string[];
   how: ShortMatch["how"];
+  /** Nom de 2 lettres mal assuré : gardé seulement si une autre lecture de la case dit pareil (voir agreed). */
+  weak?: true;
 }
 
 /**
@@ -349,9 +351,9 @@ export function matchStrip(words: StripWord[], grid: Grid, row: number, index: M
     if (key.length <= 3) {
       const gap = grid.ox + (col + 1) * grid.pitch - toX(part[part.length - 1].x1);
       if (gap < -6 || gap > 8) return null;
-      if (key.length === 2 && part.every((w) => w.confidence < 50)) return null;
       const raw = text.replace(/[^\p{L}\p{N}]/gu, "");
       if (![raw, raw.slice(0, -1), raw.slice(1)].some((r) => index.has(CASED + r)) && !index.has(SHAPED + shape(raw))) return null;
+      if (key.length === 2 && part.every((w) => w.confidence < 50)) return { row, col, text, ids: m.ids, how: m.how, weak: true };
     }
     return { row, col, text, ids: m.ids, how: m.how };
   };
@@ -368,6 +370,21 @@ export function matchStrip(words: StripWord[], grid: Grid, row: number, index: M
       if (pair ?? one) out.push((pair ?? one)!);
       i += pair ? 2 : 1;
     }
+  }
+  return out;
+}
+
+/**
+ * Noms de 2 lettres mal assurés (« EC » lu à 39 % puis à 26 %) : gardés quand deux lectures de la même case
+ * (bande, puis relectures) disent le même nom et qu'aucun nom sûr n'y est. Un bout d'icône lu « PP » une
+ * fois ne passe pas.
+ */
+export function agreed(weak: Found[], read: Found[]): Found[] {
+  const out: Found[] = [];
+  for (const [k, f] of weak.entries()) {
+    const here = (o: Found) => o.row === f.row && o.col === f.col;
+    if (read.some(here) || out.some(here)) continue;
+    if (weak.some((o, j) => j !== k && here(o) && shortKey(o.text) === shortKey(f.text))) out.push({ row: f.row, col: f.col, text: f.text, ids: f.ids, how: f.how });
   }
   return out;
 }
@@ -505,6 +522,57 @@ export function itemSizes(img: Rgba, grid: Grid, found: { row: number; col: numb
     for (let r = f.row; r < f.row + h; r++) for (let c = f.col - w + 1; c <= f.col; c++) taken.add(`${r},${c}`);
     return { w, h };
   });
+}
+
+/**
+ * Objets qui portent le même nom court (« Cat » : figurine, garrot CAT ; « AP-20 » : balle, boîte) : l'objet
+ * découpé sur la capture est comparé à l'image de case de chacun (référence de l'item finder, P px par case,
+ * à sa taille en cases). Écart moyen sur 255 par objet, du plus proche au moins proche.
+ */
+export function iconScores(img: Rgba, grid: Grid, top: number, f: { col: number } & ItemSize, refs: { id: string; thumb: Thumb }[]) {
+  const x0 = Math.max(0, Math.round(grid.ox + (f.col - f.w + 1) * grid.pitch));
+  const y0 = Math.max(0, Math.round(top));
+  const width = Math.min(img.width - x0, Math.round(f.w * grid.pitch));
+  const height = Math.min(img.height - y0, Math.round(f.h * grid.pitch));
+  const crop = { width, height, data: new Uint8ClampedArray(width * height * 4) };
+  for (let y = 0; y < height; y++) crop.data.set(img.data.subarray(((y0 + y) * img.width + x0) * 4, ((y0 + y) * img.width + x0 + width) * 4), y * width * 4);
+  // objet tourné dans le sac (figurine de chat 1x3 couchée en 3x1) : comparé tourné d'un quart de tour, dans les deux sens
+  const turned = (cw: boolean) => {
+    const out = { width: height, height: width, data: new Uint8ClampedArray(width * height * 4) };
+    for (let y = 0; y < height; y++)
+      for (let x = 0; x < width; x++) {
+        const [tx, ty] = cw ? [height - 1 - y, x] : [y, width - 1 - x];
+        out.data.set(crop.data.subarray((y * width + x) * 4, (y * width + x) * 4 + 4), (ty * height + tx) * 4);
+      }
+    return out;
+  };
+  const diff = (img: Rgba, thumb: Thumb) => {
+    const cap = shrink(img, thumb.w, thumb.h);
+    let s = 0;
+    for (let k = 0; k < cap.d.length; k++) s += Math.abs(cap.d[k] - thumb.d[k]);
+    return s / cap.d.length;
+  };
+  return refs
+    .map(({ id, thumb }) => {
+      const rotated = f.w !== f.h && thumb.w === f.h * P && thumb.h === f.w * P;
+      const score = rotated ? Math.min(diff(turned(true), thumb), diff(turned(false), thumb)) : diff(crop, thumb);
+      return { id, score, size: rotated || (thumb.w === f.w * P && thumb.h === f.h * P) };
+    })
+    .sort((a, b) => a.score - b.score);
+}
+
+/**
+ * Parmi les objets d'un même nom court, ceux qui restent possibles d'après leur image : ceux de la bonne
+ * taille s'il y en a, puis jusqu'à 1,5 x l'écart du plus proche (balle 7, boîte 18 : la boîte part ; deux
+ * calibres à 7 et 9 restent tous les deux). Un objet sans image reste.
+ */
+export function narrowByIcon(ids: string[], scores: { id: string; score: number; size: boolean }[]): string[] {
+  const sized = scores.some((s) => s.size) ? scores.filter((s) => s.size) : scores;
+  if (!sized.length) return ids;
+  const best = sized[0].score;
+  const keep = new Set(sized.filter((s) => s.score <= best * 1.5).map((s) => s.id));
+  const judged = new Set(scores.map((s) => s.id));
+  return ids.filter((id) => keep.has(id) || !judged.has(id));
 }
 
 /** Nom court comparable : sans accents, sans ponctuation ni espaces (« #FireKlean » -> « fireklean »). */

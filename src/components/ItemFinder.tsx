@@ -27,6 +27,7 @@ import { ObjectiveItems } from "./ObjectiveItems";
 import type { ItemNeed, NeedSource } from "../lib/itemNeeds";
 import { isStaleBuildError, staleBuildMessage } from "../lib/staleBuild";
 import { ContainerScan, type ScanState } from "./ContainerScan";
+import type { Found } from "../lib/containerGrid";
 
 const PAGE = 100;
 
@@ -235,7 +236,10 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
       const words = await readStripWords(strips.map(canvasOf), (done) => id === run.current && setScan({ step: "reading", progress: done * 0.7 }));
       if (id !== run.current) return;
       const index = grid.buildShortIndex(all);
-      const read = words.flatMap((w, row) => grid.matchStrip(grid.tightWords(strips[row], w, g), g, row, index));
+      const read: Found[] = [];
+      const weak: Found[] = []; // noms de 2 lettres mal assurés, gardés si deux lectures concordent
+      const add = (found: Found[]) => found.forEach((f) => (f.weak ? weak : read).push(f));
+      add(words.flatMap((w, row) => grid.matchStrip(grid.tightWords(strips[row], w, g), g, row, index)));
       // cases restées sans nom mais avec des lettres : relues une par une, en noir et blanc, en gris, puis en gris sans les bouts de bord autour du nom
       const grays = tops.map((top) => grid.nameStrip(pixels, g, top, true));
       for (const [n, [pass, band]] of ([[strips, false], [grays, false], [grays, true]] as const).entries()) {
@@ -244,12 +248,24 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
         if (id !== run.current) return;
         retry.forEach((r, i) => {
           const moved = grid.tightWords(strips[r.row], again[i].map((w) => ({ ...w, x0: w.x0 + r.shift, x1: w.x1 + r.shift })), g);
-          read.push(...grid.matchStrip(moved, g, r.row, index).filter((f) => f.col === r.col && grid.retryRead(f, index, band)));
+          add(grid.matchStrip(moved, g, r.row, index).filter((f) => f.col === r.col && grid.retryRead(f, index, band)));
         });
       }
+      read.push(...grid.agreed(weak, read));
       read.sort((a, b) => a.row - b.row || a.col - b.col);
       const sizes = grid.itemSizes(pixels, g, read, tops);
       const found = read.flatMap((f, i) => (sizes[i] ? [{ ...f, ...sizes[i], x: g.ox + f.col * g.pitch, y: tops[f.row] }] : []));
+      // nom porté par plusieurs objets : leur image départage (balle ou boîte, figurine ou masque) ; sans les
+      // images (hors ligne), tous restent
+      if (found.some((f) => f.ids.length > 1)) {
+        const images = await loadItemImages().catch(() => null);
+        if (id !== run.current) return;
+        if (images) {
+          const thumbOf = new Map(images.ids.map((k, i) => [k, images.thumbs[i]]));
+          for (const f of found)
+            if (f.ids.length > 1) f.ids = grid.narrowByIcon(f.ids, grid.iconScores(pixels, g, f.y, f, f.ids.flatMap((k) => (thumbOf.has(k) ? [{ id: k, thumb: thumbOf.get(k)! }] : []))));
+        }
+      }
       if (shotUrl.current) URL.revokeObjectURL(shotUrl.current);
       shotUrl.current = URL.createObjectURL(blob);
       setScan({ step: "done", url: shotUrl.current, width: pixels.width, height: pixels.height, pitch: g.pitch, found });

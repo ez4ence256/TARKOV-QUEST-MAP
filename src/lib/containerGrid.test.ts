@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { BORDER, buildShortIndex, cellStrip, detectGrid, matchShort, matchStrip, nameStrip, profilePeriod, stripScale, unreadCells, type Grid, type StripWord } from "./containerGrid";
+import { agreed, BORDER, buildShortIndex, cellStrip, detectGrid, iconScores, matchShort, matchStrip, nameStrip, narrowByIcon, profilePeriod, stripScale, unreadCells, type Found, type Grid, type StripWord } from "./containerGrid";
+import { P } from "./itemImage";
 
 const items = [
   { id: "vase", shorts: ["Vase"] },
@@ -150,5 +151,27 @@ describe("bande du nom", () => {
     const { img, shift } = cellStrip(strip, grid, 1);
     expect(img.height).toBe(strip.height);
     expect(shift).toBe(Math.round(63 * stripScale(grid)));
+  });
+});
+
+describe("noms partagés et noms de 2 lettres", () => {
+  it("l'image départage, objet tourné compris", () => {
+    // capture 3x1 : moitié gauche rouge, reste bleu ; référence 1x3 (même objet debout) et 3x1 toute bleue
+    const pitch = 20;
+    const img = { width: 3 * pitch, height: pitch, data: new Uint8ClampedArray(3 * pitch * pitch * 4) };
+    for (let y = 0; y < pitch; y++) for (let x = 0; x < 3 * pitch; x++) img.data.set(x < pitch ? [255, 0, 0, 255] : [0, 0, 255, 255], (y * 3 * pitch + x) * 4);
+    const thumb = (w: number, h: number, at: (x: number, y: number) => number[]) => ({ w, h, d: Uint8Array.from({ length: w * h * 3 }, (_, k) => at(Math.floor(k / 3) % w, Math.floor(k / 3 / w))[k % 3]) });
+    const standing = thumb(P, 3 * P, (_, y) => (y >= 2 * P ? [255, 0, 0] : [0, 0, 255])); // tourné : la gauche rouge en bas
+    const blue = thumb(3 * P, P, () => [0, 0, 255]);
+    const small = thumb(P, P, () => [255, 0, 0]);
+    const scores = iconScores(img, { pitch, ox: 0, oy: 0 }, 0, { col: 2, w: 3, h: 1 }, [{ id: "blue", thumb: blue }, { id: "cat", thumb: standing }, { id: "small", thumb: small }]);
+    expect(scores[0]).toMatchObject({ id: "cat", score: 0, size: true });
+    expect(narrowByIcon(["blue", "cat", "small", "noimage"], scores)).toEqual(["cat", "noimage"]);
+  });
+  it("2 lettres mal assurées : gardées si deux lectures concordent", () => {
+    const ec = (row: number, col: number, text = "EC"): Found => ({ row, col, text, ids: ["ec"], how: "exact", weak: true });
+    expect(agreed([ec(0, 4), ec(0, 4, "EC")], [])).toHaveLength(1);
+    expect(agreed([ec(0, 4), ec(1, 4)], [])).toHaveLength(0);
+    expect(agreed([ec(0, 4), ec(0, 4)], [{ ...ec(0, 4, "Vase"), weak: undefined }])).toHaveLength(0);
   });
 });
