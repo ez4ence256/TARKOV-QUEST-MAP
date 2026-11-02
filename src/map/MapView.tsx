@@ -18,7 +18,7 @@ import { labyrinthFor } from "../lib/labyrinth";
 import type { StoryMapPoint } from "../lib/storyPoints";
 import type { ExitPhotosTarget } from "../components/PhotosTab";
 import { floorFromText } from "../lib/floorText";
-import { spawnGroups } from "../lib/points";
+import { groupIdOf, spawnGroups } from "../lib/points";
 import {
   displayLevelOf,
   isShownOnLevel,
@@ -267,6 +267,7 @@ function MapViewInner(props: MapViewProps) {
     const counts = new Map<Level, number>();
     for (const pt of points) {
       if (mode.done[pt.objectiveId ?? ""]) continue;
+      if (pt.zoneKey && pt.zoneKey !== pt.key) continue; // répétition d'une zone : déjà comptée
       const l = selectableUpperOf(pt, calibration) ?? displayLevelOf(pt, calibration); // étage supérieur du sélecteur : compté chez lui seulement
       counts.set(l, (counts.get(l) ?? 0) + 1);
     }
@@ -347,9 +348,11 @@ function MapViewInner(props: MapViewProps) {
           const offLevel = !isShownOnLevel(pt, calibration, level);
           const upper = upperLevelOf(pt, calibration);
           const textFloor = manual ? null : floorFromText(objective.description);
-          const group = groups.get(objective.id);
-          const folded = Boolean(group) && !openGroups.has(objective.id);
+          const groupId = groupIdOf(pt);
+          const group = groups.get(groupId);
+          const folded = Boolean(group) && !openGroups.has(groupId);
           if (folded && pt.key !== group!.rep) return null;
+          const floorBadge = upper !== null && calibration ? levelBadge(calibration, upper) || undefined : undefined;
           return (
             <MarkerWithOutline
               key={pt.key}
@@ -357,7 +360,9 @@ function MapViewInner(props: MapViewProps) {
               color={color}
               title={`${task.name} — ${objective.description}${objective.optional ? ` (${tr("optionnel", "optional")})` : ""}${
                 folded
-                  ? ` (${tr(`${group!.keys.length} emplacements possibles : clic pour les voir`, `${group!.keys.length} possible locations: click to show them`)})`
+                  ? pt.zoneKey
+                    ? ` (${tr(`${group!.keys.length} positions presque au même endroit : clic pour les voir`, `${group!.keys.length} almost identical positions: click to show them`)})`
+                    : ` (${tr(`${group!.keys.length} emplacements possibles : clic pour les voir`, `${group!.keys.length} possible locations: click to show them`)})`
                   : pt.spawn
                     ? ` (${tr("emplacement possible", "possible location")} ${pt.spawn.index}/${pt.spawn.count})`
                     : ""
@@ -366,15 +371,15 @@ function MapViewInner(props: MapViewProps) {
                 faded: done,
                 offLevel,
                 optional: objective.optional,
-                // groupe replié : le nombre d'emplacements à la place du numéro d'étage
-                badge: folded ? String(group!.keys.length) : upper !== null && calibration ? levelBadge(calibration, upper) || undefined : undefined,
+                // groupe replié : le nombre d'emplacements à la place du numéro d'étage (groupe d'une même zone : l'étage reste prioritaire)
+                badge: folded ? (pt.zoneKey ? (floorBadge ?? `×${group!.keys.length}`) : String(group!.keys.length)) : floorBadge,
               })}
               offLevel={offLevel}
               dimmed={Boolean(props.focusTaskId) && props.focusTaskId !== task.id}
               tooltip={upper !== null && calibration ? <UpperLevelTooltip point={pt} calibration={calibration} level={upper} /> : null}
               // replié : le point représente tout le groupe (un « voir » sur n'importe quel emplacement le trouve)
               register={folded ? (m) => group!.keys.forEach((k) => registerMarker(k)(m)) : registerMarker(pt.key)}
-              onClick={folded ? () => toggleGroup(objective.id, true) : undefined}
+              onClick={folded ? () => toggleGroup(groupId, true) : undefined}
               draggable={manual}
               onDragEnd={(p) =>
                 dispatch({ type: "setManual", objectiveId: objective.id, position: { mapId: pt.mapId, ...p } })
@@ -389,7 +394,7 @@ function MapViewInner(props: MapViewProps) {
                 done={done}
                 manual={manual}
                 spawn={folded ? undefined : pt.spawn}
-                onGroup={group && !folded ? () => toggleGroup(objective.id, false) : undefined}
+                onGroup={group && !folded ? () => toggleGroup(groupId, false) : undefined}
                 onPhotos={task.wikiLink ? () => props.onPhotos(task.id) : undefined}
                 onQuest={() => props.onQuest(task.id)}
                 levelLabel={textFloor ?? (layers.length > 0 && !manual ? levelName(calibration, pointLevel) : undefined)}

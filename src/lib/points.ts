@@ -15,10 +15,27 @@ export const manualPointKey = (objectiveId: string) => `${objectiveId}@manual`;
 /** Un objectif a-t-il au moins une position fournie par l'API ? */
 export const hasApiPosition = (o: Objective) => o.locations.length > 0;
 
+/**
+ * Première position de la même zone : les variantes d'une map (Usine jour / nuit, Point zéro 21+) la répètent
+ * à quelques mètres. Les emplacements possibles d'un objet ne comptent pas : ce sont de vrais endroits différents.
+ */
+function zoneRoot(o: Objective, loc: Objective["locations"][number]) {
+  if (loc.possible) return loc;
+  return (
+    o.locations.find((l) => !l.possible && l.mapId === loc.mapId && Math.hypot(l.position.x - loc.position.x, l.position.z - loc.position.z) < 3 && Math.abs(l.position.y - loc.position.y) < 2) ?? loc
+  );
+}
+
+/** Position qui répète une zone déjà comptée : le nombre de points à faire ne la compte pas. */
+export const isZoneRepeat = (o: Objective, loc: Objective["locations"][number]) => zoneRoot(o, loc) !== loc;
+
+/** Identifiant du groupe d'un point : sa zone, sinon son objectif (emplacements possibles). */
+export const groupIdOf = (p: MapPoint) => p.zoneKey ?? p.objectiveId ?? "";
+
 /** Maps (ids) où un objectif a des positions connues, avec le nombre de points. */
 export function objectiveMapCounts(o: Objective): Map<string, number> {
   const counts = new Map<string, number>();
-  for (const loc of o.locations) counts.set(loc.mapId, (counts.get(loc.mapId) ?? 0) + 1);
+  for (const loc of o.locations) if (!isZoneRepeat(o, loc)) counts.set(loc.mapId, (counts.get(loc.mapId) ?? 0) + 1);
   return counts;
 }
 
@@ -97,6 +114,7 @@ export function buildObjectivePoints(
         const spawnIndex = loc.possible && spawns.length > 1 ? spawns.indexOf(loc) + 1 : 0;
         points.push({
           ...(spawnIndex ? { spawn: { index: spawnIndex, count: spawns.length } } : {}),
+          ...(loc.possible ? {} : { zoneKey: objectivePointKey(o.id, zoneRoot(o, loc).position) }),
           key: objectivePointKey(o.id, loc.position),
           kind: "objective",
           mapId,
@@ -173,14 +191,14 @@ export const normalizeSearch = (s: string) =>
   s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 /**
- * Emplacements possibles d'un même objet (points `spawn`) regroupés : un seul point affiché tant que
+ * Emplacements possibles d'un même objet (points `spawn`) et positions d'une même zone (`zoneKey`) regroupés : un seul point affiché tant que
  * le groupe n'est pas déplié — celui le plus proche du centre du groupe (un vrai emplacement).
  */
 export function spawnGroups(points: MapPoint[]): Map<string, { rep: string; keys: string[] }> {
-  const byObjective = new Map<string, MapPoint[]>();
-  for (const p of points) if (p.spawn && p.objectiveId) byObjective.set(p.objectiveId, [...(byObjective.get(p.objectiveId) ?? []), p]);
+  const byGroup = new Map<string, MapPoint[]>();
+  for (const p of points) if (p.spawn || p.zoneKey) { const id = groupIdOf(p); byGroup.set(id, [...(byGroup.get(id) ?? []), p]); }
   const out = new Map<string, { rep: string; keys: string[] }>();
-  for (const [id, list] of byObjective) {
+  for (const [id, list] of byGroup) {
     if (list.length < 2) continue;
     const cx = list.reduce((s, p) => s + p.x, 0) / list.length;
     const cz = list.reduce((s, p) => s + p.z, 0) / list.length;

@@ -196,4 +196,6 @@ export interface MapPoint {
   outline?: GamePosition[];
   /** Emplacement possible d'un objet de quête : numéro (à partir de 1) et nombre total. */
   spawn?: { index: number; count: number };
+  /** Clé du premier point de la même zone (répétée par une variante de la map) : ces points sont regroupés. */
+  zoneKey?: string;
 }

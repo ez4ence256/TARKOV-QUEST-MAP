@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Task } from "../types";
 import { emptyModeState } from "../state/store";
-import { buildObjectivePoints, currentObjective, isFreeOrder, manualPointKey, questsUnlockedBy, questsByMap, shownObjectives, spawnGroups, taskMapIds, taskProgress } from "./points";
+import { buildObjectivePoints, currentObjective, groupIdOf, isFreeOrder, isZoneRepeat, manualPointKey, objectiveMapCounts, questsUnlockedBy, questsByMap, shownObjectives, spawnGroups, taskMapIds, taskProgress } from "./points";
 
 const task: Task = {
   id: "t",
@@ -173,6 +173,36 @@ describe("emplacements possibles regroupés", () => {
   });
   it("un seul emplacement sur la map : pas de groupe", () => {
     expect(spawnGroups([sp("a", 0, 0)]).size).toBe(0);
+  });
+});
+
+describe("zone répétée par une variante de map", () => {
+  const zone = (x: number, z: number, y = 0, mapId = "m1") => ({ mapId, position: { x, y, z } });
+  // a et a' à 1 m (même zone), b ailleurs, c juste au-dessus d'un autre étage
+  const o = { id: "o", type: "plantItem", description: "", optional: false, mapIds: ["m1"], locations: [zone(0, 0), zone(1, 0), zone(50, 50), zone(0, 1, 4), zone(0, 0, 0, "m2")] };
+  const t: Task = { ...task, objectives: [o] };
+
+  it("une seule position comptée par zone, par map et par étage", () => {
+    expect(o.locations.map((l) => isZoneRepeat(o, l))).toEqual([false, true, false, false, false]);
+    expect(objectiveMapCounts(o).get("m1")).toBe(3);
+    expect(objectiveMapCounts(o).get("m2")).toBe(1);
+  });
+
+  it("regroupe seulement les positions de la même zone : les autres zones de l'objectif restent à part", () => {
+    const pts = buildObjectivePoints([t], emptyModeState(), "m1", false);
+    const g = spawnGroups(pts);
+    expect(g.size).toBe(1);
+    const [group] = [...g.values()];
+    expect(group.keys).toEqual([pts[0].key, pts[1].key]);
+    expect(groupIdOf(pts[1])).toBe(pts[0].key);
+    expect(g.has(groupIdOf(pts[2]))).toBe(false);
+  });
+
+  it("les emplacements possibles restent regroupés par objectif", () => {
+    const s = { ...o, locations: [{ ...zone(0, 0), possible: true as const }, { ...zone(1, 0), possible: true as const }] };
+    const pts = buildObjectivePoints([{ ...t, objectives: [s] }], emptyModeState(), "m1", false);
+    expect(s.locations.some((l) => isZoneRepeat(s, l))).toBe(false);
+    expect([...spawnGroups(pts).keys()]).toEqual(["o"]);
   });
 });
 

@@ -57,6 +57,14 @@ export function ObjectivePopup(p: ObjectivePopupProps) {
           )}
         </div>
       )}
+      {!p.spawn && p.onGroup && (
+        <div className="popup-spawn">
+          {tr("Même endroit, position selon la variante de la carte", "Same spot, position depends on the map variant")}
+          <button className="btn btn-ghost btn-small" onClick={p.onGroup}>
+            {tr("Regrouper en un seul point", "Fold into a single point")}
+          </button>
+        </div>
+      )}
       {p.levelLabel && (
         <div className="popup-level">
           {tr("Étage : ", "Floor: ")}<strong>{p.levelLabel}</strong>

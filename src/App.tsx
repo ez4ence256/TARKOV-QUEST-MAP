@@ -8,7 +8,7 @@ import { MapView, type Placing } from "./map/MapView";
 import type { ItemSpotMarker } from "./map/ItemSpotsLayer";
 import { exportState, getLastMode, useAppState, type CustomPoint } from "./state/store";
 import { QUEST_COLORS } from "./lib/objectiveTypes";
-import { buildObjectivePoints, isTaskFinished, manualPointKey, questsUnlockedBy, shownObjectives, spawnGroups, taskMapIds } from "./lib/points";
+import { buildObjectivePoints, groupIdOf, isTaskFinished, isZoneRepeat, manualPointKey, questsUnlockedBy, shownObjectives, spawnGroups, taskMapIds } from "./lib/points";
 import { ModePicker } from "./components/ModePicker";
 import { UiIcon } from "./components/UiIcon";
 import { QuestList } from "./components/QuestList";
@@ -287,7 +287,7 @@ export default function App() {
     };
     for (const t of mapTasks)
       for (const o of shownObjectives(t, mode.done, false, oneAtATime)) {
-        for (const l of o.locations) add(l.mapId, t.id);
+        for (const l of o.locations) if (!isZoneRepeat(o, l)) add(l.mapId, t.id);
         const manual = mode.manual[o.id];
         if (o.locations.length === 0 && manual) add(manual.mapId, t.id);
       }
@@ -630,7 +630,7 @@ export default function App() {
         const objective = pt.objectiveId ? objectivesById.get(pt.objectiveId) : undefined;
         if (!task || !objective) continue;
         const color = QUEST_COLORS[(view.selected.find((s) => s.taskId === task.id)?.color ?? 0) % QUEST_COLORS.length];
-        const g = groups.get(objective.id);
+        const g = groups.get(groupIdOf(pt));
         markers.push({
           key: `${m.id}:${pt.key}`,
           owner: m.name,
@@ -641,7 +641,7 @@ export default function App() {
           text: `${task.name} — ${objective.description}`,
           taskId: task.id,
           info: { memberId: m.id, photos: Boolean(task.wikiLink) },
-          ...(g ? { group: { id: `${m.id}:${objective.id}`, rep: g.rep === pt.key, count: g.keys.length } } : {}),
+          ...(g ? { group: { id: `${m.id}:${groupIdOf(pt)}`, rep: g.rep === pt.key, count: g.keys.length } } : {}),
         });
       }
       for (const c of kappaOnly ? [] : (view.story?.selected ?? [])) {
