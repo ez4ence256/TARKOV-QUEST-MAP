@@ -10,7 +10,8 @@ import { iconSrc } from "../lib/itemIcons";
 import { buildCategoryTree, type CategoryNode } from "../lib/itemCategories";
 import { formatPrice, traderOffers, tradersWithOffers, type Offer, type OfferKind, type TraderOffersFile } from "../lib/traderOffers";
 import { loadItemCategories, loadItemList, loadTraderOffers, type ListedItem } from "../api/itemList";
-import { CategoryTree } from "./ItemFinder";
+import { CategoryTree, StreamerChecklist } from "./ItemFinder";
+import { collectorItems } from "../lib/collector";
 import { ItemThumb } from "./ItemThumb";
 
 /** Catégorie « Objets d'échange » (Barter items) du handbook du jeu. */
@@ -22,6 +23,9 @@ interface Props {
   traders: Trader[];
   tasks: Task[];
   itemIcons: Record<string, string>;
+  /** Objectifs cochés : objets streamer de Collector mis de côté (portrait de Fence). */
+  done: Record<string, number>;
+  onSetDone: (objectiveId: string, value: boolean) => void;
   /** « rail » : bouton de la barre latérale (icône au-dessus du libellé). */
   variant?: "rail";
 }
@@ -44,7 +48,7 @@ export function TraderWindow(props: Props) {
   );
 }
 
-function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, onClose }: Props & { onClose: () => void }) {
+function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, done, onSetDone, onClose }: Props & { onClose: () => void }) {
   const [file, setFile] = useState<TraderOffersFile | null>(null);
   const [items, setItems] = useState<Map<string, ListedItem> | null>(null);
   const [error, setError] = useState(false);
@@ -84,6 +88,9 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, onClose }: Pr
     const selling = tradersWithOffers(file);
     return traders.filter((t) => selling.has(t.id));
   }, [file, traders]);
+  // Fence ne vend rien ici : son portrait, tout à droite, ouvre les objets streamer de sa quête Collector
+  const fence = traders.find((t) => t.normalizedName === "fence");
+  const collector = useMemo(() => collectorItems(tasks, done), [tasks, done]);
   const current = trader ?? shown[0]?.id ?? null;
   const levels = (current && file?.levels[current]) || [[1, 0, 0, 0] as [number, number, number, number]];
   const all = level === 0;
@@ -154,7 +161,21 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, onClose }: Pr
                   <span>{t.name}</span>
                 </button>
               ))}
+              {fence && collector.size > 0 && (
+                <button role="tab" aria-selected={fence.id === current} className={`trader-pick trader-pick-fence${fence.id === current ? " active" : ""}`} onClick={() => pickTrader(fence.id)} title={tr("Fence : objets streamer de Collector (Kappa)", "Fence: Collector streamer items (Kappa)")}>
+                  {fence.imageLink ? <img src={fence.imageLink} alt="" width={56} height={56} loading="lazy" referrerPolicy="no-referrer" /> : <span className="trader-noimg" />}
+                  <span>{fence.name}</span>
+                </button>
+              )}
             </div>
+            {fence && current === fence.id ? (
+              <div className="finder-body">
+                <div className="finder-main">
+                  <StreamerChecklist collector={collector} name={name} itemIcons={itemIcons} onSetDone={onSetDone} />
+                </div>
+              </div>
+            ) : (
+            <>
             <div className="trader-bar">
               <div className="finder-tabs trader-levels" role="tablist" aria-label={tr("Niveau de loyauté", "Loyalty level")}>
                 {levels.map(([n]) => (
@@ -233,6 +254,8 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, onClose }: Pr
                 )}
               </div>
             </div>
+            </>
+            )}
           </>
         )}
       </div>

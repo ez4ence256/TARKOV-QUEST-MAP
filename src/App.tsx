@@ -815,7 +815,7 @@ export default function App() {
             }}
           />
         }
-        traders={<TraderWindow variant="rail" gameMode={gameMode} lang={lang} traders={data?.traders ?? []} tasks={tasks} itemIcons={data?.itemIcons ?? NO_NAMES} />}
+        traders={<TraderWindow variant="rail" gameMode={gameMode} lang={lang} traders={data?.traders ?? []} tasks={tasks} itemIcons={data?.itemIcons ?? NO_NAMES} done={mode.done} onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })} />}
         room={<RoomControl variant="rail" room={room} />}
       />
 

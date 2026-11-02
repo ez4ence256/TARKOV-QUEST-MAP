@@ -2640,6 +2640,10 @@ kbd {
   border-radius: 6px;
   background: var(--bg);
 }
+/* Fence (objets streamer de Collector) : tout à droite de la ligne des marchands */
+.trader-pick-fence {
+  margin-left: auto;
+}
 .trader-pick.active {
   color: var(--accent-2);
   border-color: var(--accent);
@@ -3056,12 +3060,6 @@ kbd {
 .finder-tab.active {
   color: var(--accent-2);
   border-bottom-color: var(--accent);
-}
-/* onglet à part, poussé à droite, plus serré */
-.finder-tab-streamer {
-  margin-left: auto;
-  padding: 0.45rem 0.5rem;
-  font-size: 0.85em;
 }
 .finder-streamer {
   list-style: none;
