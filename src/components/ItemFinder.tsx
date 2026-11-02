@@ -983,7 +983,11 @@ function Usage(p: {
                                 return (
                                   <li key={q.taskId} className={ok ? "is-done" : undefined}>
                                     <UiIcon id={ok ? "circle-check" : "chevron-right"} size={14} /> {t?.name ?? q.taskId}
-                                    {q.status.length > 0 && <span className="muted"> ({q.status.map((s) => STATUS_LABELS[s] ?? s).join(tr(" ou ", " or "))})</span>}
+                                    {/* statut exigé, puis où en est le joueur : « (terminée) » seul se lisait comme « déjà faite » */}
+                                    <span className="muted">
+                                      {q.status.length > 0 && tr(` — doit être ${q.status.map((s) => STATUS_LABELS[s] ?? s).join(" ou ")}`, ` — must be ${q.status.map((s) => STATUS_LABELS[s] ?? s).join(" or ")}`)}
+                                      {!ok ? tr(" · pas encore faite", " · not done yet") : isTaskFinished(t!, p.done) ? tr(" · ✓ tu l'as terminée", " · ✓ you completed it") : tr(" · échouée chez toi", " · you failed it")}
+                                    </span>
                                   </li>
                                 );
                               })}
