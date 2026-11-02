@@ -1299,8 +1299,13 @@ function SpotCard(p: {
 
 /** Objets streamer de Collector (fenêtre Marchands, Fence) : cocher = un exemplaire FIR mis de côté, plus à garder. */
 export function StreamerChecklist({ collector, name, itemIcons, onSetDone }: { collector: Map<string, { objectiveId: string; kept: boolean }>; name: (id: string) => string; itemIcons: Record<string, string>; onSetDone: (objectiveId: string, value: boolean) => void }) {
+  const [onlyMissing, setOnlyMissing] = useState(false);
   return (
     <>
+      <label className="check finder-only-need">
+        <input type="checkbox" checked={onlyMissing} onChange={(e) => setOnlyMissing(e.target.checked)} />
+        {tr("Afficher seulement ceux qui me manquent", "Show only the missing ones")}
+      </label>
       <p className="muted finder-count" role="status">
         {tr("Objets streamer Kappa", "Kappa streamer items")} : {[...collector.values()].filter((c) => c.kept).length}/{collector.size} {tr("de côté", "set aside")}
         {" · "}
@@ -1309,6 +1314,7 @@ export function StreamerChecklist({ collector, name, itemIcons, onSetDone }: { c
       <ul className="finder-streamer">
         {[...collector]
           .map(([id, c]) => ({ id, ...c, name: name(id) }))
+          .filter((c) => !onlyMissing || !c.kept)
           .sort((a, b) => a.name.localeCompare(b.name))
           .map((c) => (
             <li key={c.id} className={c.kept ? "is-done" : undefined}>
