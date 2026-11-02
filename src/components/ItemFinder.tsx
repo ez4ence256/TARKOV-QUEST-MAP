@@ -135,7 +135,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   const [selected, setSelected] = useState<ListedItem | null>(null);
   const [ocr, setOcr] = useState<OcrState | null>(null);
   // onglet « Conteneur » : capture d'une junk box / d'un sac, objets à vendre ou à garder
-  const [mode, setMode] = useState<"search" | "container">("search");
+  const [mode, setMode] = useState<"search" | "container" | "streamer">("search");
   const [scan, setScan] = useState<ScanState | null>(null);
   // catégories du flea : arbre, catégorie choisie (filtre la grille), catégories ouvertes
   const [tree, setTree] = useState<CategoryNode[] | null>(null);
@@ -145,8 +145,6 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   const [kappaOnly, setKappaOnly] = useState(false);
   // « Planque » : objets de la planque ; cochée avec « Kappa seulement », les deux à la fois
   const [hideoutOnly, setHideoutOnly] = useState(false);
-  // « Objets streamer Kappa » (Collector) : seulement les objets de la quête Collector
-  const [collectorOnly, setCollectorOnly] = useState(false);
   // marchand choisi sous les catégories : objets qui restent à remettre pour ses quêtes (aucun au départ)
   const [trader, setTrader] = useState<string | null>(null);
   const [open, setOpen] = useState<Set<string>>(new Set());
@@ -348,12 +346,12 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   const filtered = useMemo(
     () =>
       results.filter(
-        (i) => (!collectorOnly || collector.has(i.id)) && (!cat || cat.items.has(i.id)) && (!onlyNeeded || needs.has(i.id)) && (!trader || Boolean(traderItems.get(trader)?.has(i.id))) &&
+        (i) => (!cat || cat.items.has(i.id)) && (!onlyNeeded || needs.has(i.id)) && (!trader || Boolean(traderItems.get(trader)?.has(i.id))) &&
           (!pools.length || pools.some((k) => traderItems.get(k)?.has(i.id))),
       ),
-    [results, cat, onlyNeeded, needs, trader, traderItems, pools, collectorOnly, collector],
+    [results, cat, onlyNeeded, needs, trader, traderItems, pools],
   );
-  useEffect(() => setShown(PAGE), [q, cat, onlyNeeded, trader, pools, collectorOnly]);
+  useEffect(() => setShown(PAGE), [q, cat, onlyNeeded, trader, pools]);
   const pickCategory = (node: CategoryNode) => {
     setCat((c) => (c?.id === node.id ? null : node));
     setOpen((o) => new Set(o).add(node.id));
@@ -438,13 +436,14 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
             [
               ["search", tr("Recherche", "Search")],
               ["container", tr("Conteneur (vendre)", "Container (sell)")],
+              ["streamer", tr("Objets streamer Kappa", "Kappa streamer items")],
             ] as const
           ).map(([m, label]) => (
             <button
               key={m}
               role="tab"
               aria-selected={mode === m}
-              className={`finder-tab${mode === m ? " active" : ""}`}
+              className={`finder-tab${mode === m ? " active" : ""}${m === "streamer" ? " finder-tab-streamer" : ""}`}
               onClick={() => {
                 setMode(m);
                 setSelected(null);
@@ -457,7 +456,9 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
           ))}
         </div>
         <div className="finder-head">
-          {mode === "container" ? (
+          {mode === "streamer" ? (
+            <p className="finder-container-hint">{tr("Coche les objets streamer que tu as mis de côté (FIR) : ils ne sont plus à garder pour Collector.", "Tick the streamer items you set aside (FIR): they no longer need keeping for Collector.")}</p>
+          ) : mode === "container" ? (
             <p className="finder-container-hint">{tr("Ctrl+V n'importe quel conteneur ou inventaire : vois tout de suite quoi vendre ou garder", "Ctrl+V any container or inventory: instantly see what to sell or keep")}</p>
           ) : (
           <div className="finder-search-wrap">
@@ -484,13 +485,11 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
               {tr("Afficher seulement les objets nécessaires", "Show only the needed items")}
             </label>
           )}
+          {mode !== "streamer" && (
+          <>
           <label className="check finder-only-need">
             <input type="checkbox" checked={kappaOnly} onChange={(e) => setKappaOnly(e.target.checked)} />
             {tr("Kappa seulement", "Kappa only")}
-          </label>
-          <label className="check finder-only-need">
-            <input type="checkbox" checked={collectorOnly} onChange={(e) => setCollectorOnly(e.target.checked)} />
-            {tr("Objets streamer Kappa", "Kappa streamer items")}
           </label>
           <label className="check finder-only-need" title={hideoutIncluded ? undefined : tr("Ajoute les objets de la planque aux objets à garder", "Adds the hideout items to the items to keep")}>
             <input
@@ -503,6 +502,8 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
             />
             {tr("Planque", "Hideout")}
           </label>
+          </>
+          )}
           <button className="btn btn-small" onClick={onClose} aria-label={tr("Fermer", "Close")}>
             <UiIcon id="x" />
           </button>
@@ -555,6 +556,26 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                 kappaOnly={kappaOnly}
               />
             </>
+          ) : mode === "streamer" ? (
+            <div className="finder-main">
+              <p className="muted finder-count" role="status">
+                {tr("Objets streamer Kappa", "Kappa streamer items")} : {[...collector.values()].filter((c) => c.kept).length}/{collector.size} {tr("de côté", "set aside")}
+              </p>
+              <ul className="finder-streamer">
+                {[...collector]
+                  .map(([id, c]) => ({ id, ...c, name: byId.get(id)?.name ?? itemNames[id] ?? id }))
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((c) => (
+                    <li key={c.id} className={c.kept ? "is-done" : undefined}>
+                      <label className="check">
+                        <input type="checkbox" checked={c.kept} onChange={(e) => onSetDone(c.objectiveId, e.target.checked)} />
+                        <ItemThumb src={iconSrc(c.id, itemIcons)} name="" size={32} />
+                        {c.name}
+                      </label>
+                    </li>
+                  ))}
+              </ul>
+            </div>
           ) : mode === "container" ? (
             <ContainerScan
               scan={scan}
@@ -573,7 +594,6 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                   <p className="muted finder-count" role="status">
                     {tr(`${filtered.length} objet(s)`, `${filtered.length} item(s)`)}
                     {cat && ` · ${cat.name}`}
-                    {collectorOnly && ` · ${tr("Objets streamer Kappa", "Kappa streamer items")} : ${[...collector.values()].filter((c) => c.kept).length}/${collector.size} ${tr("de côté", "set aside")}`}
                   </p>
                 )}
                 {ocr?.step === "done" ? (
