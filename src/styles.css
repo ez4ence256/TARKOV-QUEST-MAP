@@ -3061,6 +3061,21 @@ kbd {
   color: var(--accent-2);
   border-bottom-color: var(--accent);
 }
+/* recherche + « seulement ceux qui me manquent » sur une ligne */
+.streamer-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+}
+.streamer-tools .finder-search-wrap {
+  flex: 1 1 16rem;
+}
+.streamer-tools .check {
+  max-width: none;
+  white-space: nowrap;
+}
 .finder-streamer {
   list-style: none;
   margin: 0;

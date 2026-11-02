@@ -1298,14 +1298,28 @@ function SpotCard(p: {
 }
 
 /** Objets streamer de Collector (fenêtre Marchands, Fence) : cocher = un exemplaire FIR mis de côté, plus à garder. */
-export function StreamerChecklist({ collector, name, itemIcons, onSetDone }: { collector: Map<string, { objectiveId: string; kept: boolean }>; name: (id: string) => string; itemIcons: Record<string, string>; onSetDone: (objectiveId: string, value: boolean) => void }) {
+export function StreamerChecklist({ collector, name, alts, itemIcons, onSetDone }: { collector: Map<string, { objectiveId: string; kept: boolean }>; name: (id: string) => string; alts: (id: string) => string[]; itemIcons: Record<string, string>; onSetDone: (objectiveId: string, value: boolean) => void }) {
   const [onlyMissing, setOnlyMissing] = useState(false);
+  const [query, setQuery] = useState("");
   return (
     <>
+      <div className="streamer-tools">
+      <div className="finder-search-wrap">
+        <span className="finder-search-icon" aria-hidden="true"><UiIcon id="search" /></span>
+        <input
+          className="input finder-search"
+          type="search"
+          value={query}
+          placeholder={tr("Chercher un objet streamer (FR ou EN)…", "Search a streamer item (FR or EN)…")}
+          aria-label={tr("Chercher un objet streamer", "Search a streamer item")}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
       <label className="check finder-only-need">
         <input type="checkbox" checked={onlyMissing} onChange={(e) => setOnlyMissing(e.target.checked)} />
         {tr("Afficher seulement ceux qui me manquent", "Show only the missing ones")}
       </label>
+      </div>
       <p className="muted finder-count" role="status">
         {tr("Objets streamer Kappa", "Kappa streamer items")} : {[...collector.values()].filter((c) => c.kept).length}/{collector.size} {tr("de côté", "set aside")}
         {" · "}
@@ -1314,7 +1328,7 @@ export function StreamerChecklist({ collector, name, itemIcons, onSetDone }: { c
       <ul className="finder-streamer">
         {[...collector]
           .map(([id, c]) => ({ id, ...c, name: name(id) }))
-          .filter((c) => !onlyMissing || !c.kept)
+          .filter((c) => (!onlyMissing || !c.kept) && (!query.trim() || [c.name, ...alts(c.id)].some((a) => scoreName(query, a) > 0)))
           .sort((a, b) => a.name.localeCompare(b.name))
           .map((c) => (
             <li key={c.id} className={c.kept ? "is-done" : undefined}>

@@ -171,7 +171,7 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, done, onSetDo
             {fence && current === fence.id ? (
               <div className="finder-body">
                 <div className="finder-main">
-                  <StreamerChecklist collector={collector} name={name} itemIcons={itemIcons} onSetDone={onSetDone} />
+                  <StreamerChecklist collector={collector} name={name} alts={(id) => items?.get(id)?.alts ?? []} itemIcons={itemIcons} onSetDone={onSetDone} />
                 </div>
               </div>
             ) : (
