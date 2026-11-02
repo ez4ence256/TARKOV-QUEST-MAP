@@ -796,7 +796,7 @@ export default function App() {
         panelOpen={panelOpen}
         onTogglePanel={() => setPanelOpen((o) => !o)}
         finder={
-          <ItemFinder variant="rail" gameMode={gameMode} lang={lang} tasks={tasks} traders={data?.traders ?? []} maps={maps} itemNames={data?.itemNames ?? NO_NAMES} itemIcons={data?.itemIcons ?? NO_NAMES} onShowQuest={showQuest}
+          <ItemFinder variant="rail" onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })} gameMode={gameMode} lang={lang} tasks={tasks} traders={data?.traders ?? []} maps={maps} itemNames={data?.itemNames ?? NO_NAMES} itemIcons={data?.itemIcons ?? NO_NAMES} onShowQuest={showQuest}
             done={mode.done}
             failed={failed}
             needs={needs}

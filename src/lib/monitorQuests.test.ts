@@ -37,6 +37,12 @@ describe("planMonitorBatch", () => {
     expect(new Set(p.action?.done).size).toBe(p.action?.done.length);
     expect(p.action?.select.filter((id) => p.action?.failed.includes(id))).toEqual([]);
   });
+  it("reopen : Collector n'est jamais rouverte (ses cases cochées sont des objets de côté)", () => {
+    const col = { ...task("col"), nameEn: "Collector" } as Task;
+    const p = planMonitorBatch([ev("col", "started")], { ...ctx, tasks: [col], done: { colo1: 1, colo2: 1 }, reopen: true });
+    expect(p.counts.reopened).toBe(0);
+    expect(p.action?.undone ?? []).toEqual([]);
+  });
   it("reopen : une quête terminée ou ratée vue en cours est rouverte et resélectionnée (capture seulement)", () => {
     const greyed = { ...ctx, done: { ao1: 1, ao2: 1 }, failed: { d: true as const } };
     expect(planMonitorBatch([ev("a", "started"), ev("d", "started")], greyed).action).toBeNull();

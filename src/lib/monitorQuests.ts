@@ -4,6 +4,7 @@
 
 import type { GameMode, Task } from "../types";
 import type { MonitorEvent } from "../api/monitor";
+import { isCollector } from "./collector";
 import { branchFailures, isGreyed, prerequisiteChanges } from "./questChain";
 
 type TaskEvent = Extract<MonitorEvent, { type: "task" }>;
@@ -31,7 +32,8 @@ export function planMonitorBatch(
     else if (byId.has(e.taskId)) last.set(e.taskId, e.status);
   }
   const ids = (status: TaskEvent["status"]) => [...last].filter(([, s]) => s === status).map(([id]) => id);
-  const R = ctx.reopen ? ids("started").filter((id) => isGreyed(byId.get(id)!, ctx.done, ctx.failed)) : [];
+  // Collector exclue : ses cases cochées = objets FIR mis de côté, une capture « en cours » ne doit pas les effacer
+  const R = ctx.reopen ? ids("started").filter((id) => !isCollector(byId.get(id)!) && isGreyed(byId.get(id)!, ctx.done, ctx.failed)) : [];
   const S = [...ids("started").filter((id) => !sel.has(id) && !isGreyed(byId.get(id)!, ctx.done, ctx.failed)), ...R.filter((id) => !sel.has(id))];
   const undone = R.flatMap((id) => byId.get(id)!.objectives.filter((o) => ctx.done[o.id]).map((o) => o.id));
   const unfailed = R.filter((id) => ctx.failed[id]);

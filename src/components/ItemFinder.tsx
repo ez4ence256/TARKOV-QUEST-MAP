@@ -26,6 +26,7 @@ import { STATUS_LABELS } from "../lib/questWiki";
 import { ObjectiveItems } from "./ObjectiveItems";
 import { TaskRewardList } from "./QuestTab";
 import type { ItemNeed, NeedSource } from "../lib/itemNeeds";
+import { collectorItems } from "../lib/collector";
 import { isStaleBuildError, staleBuildMessage } from "../lib/staleBuild";
 import { ContainerScan, type ScanState } from "./ContainerScan";
 import type { Found } from "../lib/containerGrid";
@@ -91,6 +92,8 @@ interface Props {
   /** La planque compte-t-elle dans les objets à garder ? (sinon le filtre « Planque » propose de l'inclure) */
   hideoutIncluded?: boolean;
   onIncludeHideout?: () => void;
+  /** Coche / décoche un objectif (Collector : « j'en ai un FIR de côté »). */
+  onSetDone: (objectiveId: string, value: boolean) => void;
   /** Niveaux construits de la planque (stationId -> niveau, -1 = ignorée) : niveaux déjà faits grisés. */
   hideoutLevels?: Record<string, number>;
   /** « rail » : bouton de la barre latérale (icône au-dessus du libellé). */
@@ -124,7 +127,7 @@ export function ItemFinder(props: Props) {
   );
 }
 
-function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIcons, onShowQuest, onShowSpots, onAddPoint, done, failed, needs, hideoutIncluded, onIncludeHideout, hideoutLevels, onClose }: Props & { onClose: () => void }) {
+function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIcons, onShowQuest, onShowSpots, onAddPoint, done, failed, needs, hideoutIncluded, onIncludeHideout, onSetDone, hideoutLevels, onClose }: Props & { onClose: () => void }) {
   const [list, setList] = useState<ListedItem[] | null>(null);
   const [error, setError] = useState(false);
   const [query, setQuery] = useState("");
@@ -142,6 +145,8 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   const [kappaOnly, setKappaOnly] = useState(false);
   // « Planque » : objets de la planque ; cochée avec « Kappa seulement », les deux à la fois
   const [hideoutOnly, setHideoutOnly] = useState(false);
+  // « Objets streamer Kappa » (Collector) : seulement les objets de la quête Collector
+  const [collectorOnly, setCollectorOnly] = useState(false);
   // marchand choisi sous les catégories : objets qui restent à remettre pour ses quêtes (aucun au départ)
   const [trader, setTrader] = useState<string | null>(null);
   const [open, setOpen] = useState<Set<string>>(new Set());
@@ -339,15 +344,16 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
     return out;
   }, [needs, tasks]);
   const pools = useMemo(() => [...(kappaOnly ? [KAPPA] : []), ...(hideoutOnly ? [HIDEOUT] : [])], [kappaOnly, hideoutOnly]);
+  const collector = useMemo(() => collectorItems(tasks, done), [tasks, done]);
   const filtered = useMemo(
     () =>
       results.filter(
-        (i) => (!cat || cat.items.has(i.id)) && (!onlyNeeded || needs.has(i.id)) && (!trader || Boolean(traderItems.get(trader)?.has(i.id))) &&
+        (i) => (!collectorOnly || collector.has(i.id)) && (!cat || cat.items.has(i.id)) && (!onlyNeeded || needs.has(i.id)) && (!trader || Boolean(traderItems.get(trader)?.has(i.id))) &&
           (!pools.length || pools.some((k) => traderItems.get(k)?.has(i.id))),
       ),
-    [results, cat, onlyNeeded, needs, trader, traderItems, pools],
+    [results, cat, onlyNeeded, needs, trader, traderItems, pools, collectorOnly, collector],
   );
-  useEffect(() => setShown(PAGE), [q, cat, onlyNeeded, trader, pools]);
+  useEffect(() => setShown(PAGE), [q, cat, onlyNeeded, trader, pools, collectorOnly]);
   const pickCategory = (node: CategoryNode) => {
     setCat((c) => (c?.id === node.id ? null : node));
     setOpen((o) => new Set(o).add(node.id));
@@ -368,6 +374,11 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
             </span>
             <span className="finder-tile-name">{item.name}</span>
             <NeedBadge need={needs.get(item.id)} />
+            {collector.has(item.id) && (
+              <span className="tag" title={tr("Objet streamer pour Collector, la quête qui débloque la Kappa", "Streamer item for Collector, the quest that unlocks the Kappa")}>
+                {collector.get(item.id)!.kept ? tr("Objet streamer ✓", "Streamer item ✓") : tr("Objet streamer", "Streamer item")}
+              </span>
+            )}
           </button>
         </li>
       ))}
@@ -477,6 +488,10 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
             <input type="checkbox" checked={kappaOnly} onChange={(e) => setKappaOnly(e.target.checked)} />
             {tr("Kappa seulement", "Kappa only")}
           </label>
+          <label className="check finder-only-need">
+            <input type="checkbox" checked={collectorOnly} onChange={(e) => setCollectorOnly(e.target.checked)} />
+            {tr("Objets streamer Kappa", "Kappa streamer items")}
+          </label>
           <label className="check finder-only-need" title={hideoutIncluded ? undefined : tr("Ajoute les objets de la planque aux objets à garder", "Adds the hideout items to the items to keep")}>
             <input
               type="checkbox"
@@ -535,6 +550,8 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                 failed={failed}
                 hideoutLevels={hideoutLevels}
                 need={needs.get(selected.id)}
+                collector={collector.get(selected.id)}
+                onSetDone={onSetDone}
                 kappaOnly={kappaOnly}
               />
             </>
@@ -556,6 +573,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                   <p className="muted finder-count" role="status">
                     {tr(`${filtered.length} objet(s)`, `${filtered.length} item(s)`)}
                     {cat && ` · ${cat.name}`}
+                    {collectorOnly && ` · ${tr("Objets streamer Kappa", "Kappa streamer items")} : ${[...collector.values()].filter((c) => c.kept).length}/${collector.size} ${tr("de côté", "set aside")}`}
                   </p>
                 )}
                 {ocr?.step === "done" ? (
@@ -664,6 +682,9 @@ function Usage(p: {
   failed?: Record<string, true>;
   hideoutLevels?: Record<string, number>;
   need?: ItemNeed;
+  /** Objet de Collector : son objectif et « un FIR de côté » (coché). */
+  collector?: { objectiveId: string; kept: boolean };
+  onSetDone: (objectiveId: string, value: boolean) => void;
   /** « Kappa seulement » : les quêtes non demandées pour la Kappa passent dans un bloc à part. */
   kappaOnly?: boolean;
 }) {
@@ -775,6 +796,12 @@ function Usage(p: {
       </div>
       <section className="finder-keep" aria-label={tr("À garder", "To keep")}>
         <h3 className="finder-sub">{tr("À garder", "To keep")}</h3>
+        {p.collector && (
+          <label className="check">
+            <input type="checkbox" checked={p.collector.kept} onChange={(e) => p.onSetDone(p.collector!.objectiveId, e.target.checked)} />
+            {tr("J'en ai un FIR de côté (objet streamer Kappa)", "I have a FIR one set aside (Kappa streamer item)")}
+          </label>
+        )}
         {!p.need ? (
           <p className="muted small">{tr("Aucune quête ni station ne le demande : vendable.", "No quest or station needs it: sellable.")}</p>
         ) : (
