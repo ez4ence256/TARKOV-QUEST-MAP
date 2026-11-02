@@ -44,10 +44,23 @@ export function currentObjective(task: Task, done: Record<string, number>): Obje
 /** Maps d'un objectif : celles de ses zones s'il en a, sinon celles annoncées par tarkov.dev. */
 const objectiveMaps = (o: Objective) => (o.locations.length ? o.locations.map((l) => l.mapId) : o.mapIds);
 
+/** Installer, repérer, marquer : rien n'impose un ordre entre ces objectifs. */
+const FREE_ORDER_TYPES = new Set(["plantItem", "visit", "mark"]);
+
+/**
+ * Quête à faire dans l'ordre qu'on veut, sur plusieurs maps (Is This a Reference?, Viewer, Needle in a Haystack…) :
+ * seulement ces actions parmi ses objectifs obligatoires. Remettre, tuer, ramasser puis déposer ou s'extraire imposent une suite.
+ */
+export function isFreeOrder(task: Task): boolean {
+  const required = task.objectives.filter((o) => !o.optional);
+  return required.every((o) => FREE_ORDER_TYPES.has(o.type)) && new Set(required.flatMap(objectiveMaps)).size > 1;
+}
+
 /**
  * Objectifs d'une quête à montrer sur la carte (les faits suivent `showDone`).
  * « Un raid à la fois » : l'objectif en cours et tous les autres non faits de la même map,
  * pour tout faire dans le même raid (Ill-Wisher, Soins privés…) ; les autres maps attendent.
+ * Une quête sans ordre (`isFreeOrder`) montre toujours toutes ses maps.
  */
 export function shownObjectives(
   task: Task,
@@ -55,14 +68,15 @@ export function shownObjectives(
   showDone: boolean,
   oneAtATime: boolean,
 ): Objective[] {
-  const current = oneAtATime ? currentObjective(task, done) : undefined;
+  const oneRaid = oneAtATime && !isFreeOrder(task);
+  const current = oneRaid ? currentObjective(task, done) : undefined;
   // objectif en cours sans map (quête à terminer, remise d'objets) : on montre aussi le prochain raid
   // (Le juste prix 2 : « terminer Hobby Club » obligatoire, objectifs de Bois optionnels)
   const mapped = task.objectives.filter((o) => !done[o.id] && objectiveMaps(o).length > 0);
   const raid = current && objectiveMaps(current).length === 0 ? (mapped.find((o) => !o.optional) ?? mapped[0]) : current;
   const raidMaps = new Set(raid ? objectiveMaps(raid) : []);
   const sameRaid = (o: Objective) => o === current || objectiveMaps(o).some((m) => raidMaps.has(m));
-  return task.objectives.filter((o) => (done[o.id] ? showDone : !oneAtATime || sameRaid(o)));
+  return task.objectives.filter((o) => (done[o.id] ? showDone : !oneRaid || sameRaid(o)));
 }
 
 /** Points des quêtes sélectionnées + points placés à la main, pour une map. */

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Task } from "../types";
 import { emptyModeState } from "../state/store";
-import { buildObjectivePoints, currentObjective, manualPointKey, questsUnlockedBy, questsByMap, shownObjectives, spawnGroups, taskMapIds, taskProgress } from "./points";
+import { buildObjectivePoints, currentObjective, isFreeOrder, manualPointKey, questsUnlockedBy, questsByMap, shownObjectives, spawnGroups, taskMapIds, taskProgress } from "./points";
 
 const task: Task = {
   id: "t",
@@ -104,6 +104,24 @@ describe("un objectif à la fois", () => {
     const at = (id: string, mapId: string, optional = false) => ({ id, type: "visit", description: "", optional, mapIds: [mapId], locations: [{ mapId, position: { x: 0, y: 0, z: 0 } }] });
     const t: Task = { ...task, objectives: [{ ...task.objectives[2], type: "taskStatus" }, at("w1", "woods", true), at("w2", "woods", true), at("c1", "customs", true)] };
     expect(shownObjectives(t, {}, false, true).map((o) => o.id)).toEqual(["c", "w1", "w2"]);
+  });
+
+  it("quête sans ordre sur plusieurs maps : toutes ses maps sont montrées (Is This a Reference?)", () => {
+    const at = (id: string, mapId: string, type = "plantItem") => ({ id, type, description: "", optional: false, mapIds: [mapId], locations: [{ mapId, position: { x: 0, y: 0, z: 0 } }] });
+    const t: Task = { ...task, objectives: [at("s1", "streets"), at("c1", "customs"), at("w1", "woods", "visit")] };
+    expect(isFreeOrder(t)).toBe(true);
+    expect(shownObjectives(t, {}, false, true).map((o) => o.id)).toEqual(["s1", "c1", "w1"]);
+    expect(shownObjectives(t, { s1: 1 }, false, true).map((o) => o.id)).toEqual(["c1", "w1"]);
+    expect(buildObjectivePoints([t], emptyModeState(), "customs", false, true).map((p) => p.objectiveId)).toEqual(["c1"]);
+  });
+
+  it("une suite imposée reste un raid à la fois (ramasser puis déposer, transit, une seule map)", () => {
+    const at = (id: string, mapId: string, type: string) => ({ id, type, description: "", optional: false, mapIds: [mapId], locations: [{ mapId, position: { x: 0, y: 0, z: 0 } }] });
+    const suite: Task = { ...task, objectives: [at("f", "reserve", "findQuestItem"), at("p", "woods", "plantQuestItem")] };
+    expect(isFreeOrder(suite)).toBe(false);
+    expect(shownObjectives(suite, {}, false, true).map((o) => o.id)).toEqual(["f"]);
+    expect(isFreeOrder({ ...task, objectives: [at("m", "woods", "mark"), at("e", "woods", "extract"), at("n", "lighthouse", "mark")] })).toBe(false);
+    expect(isFreeOrder({ ...task, objectives: [at("a", "woods", "plantItem"), at("b", "woods", "visit")] })).toBe(false);
   });
 
   it("préfère un objectif obligatoire restant à un optionnel", () => {
