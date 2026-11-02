@@ -602,6 +602,8 @@ export default function App() {
   // Coéquipiers (room) : leurs objectifs en cours et leurs positions, calculés comme les miens (même réglage « un raid à la fois »)
   // mais en lecture seule, hors de mes totaux (« Mes maps », sélecteur de map) et sans toucher à mon état.
   const [viewedId, setViewedId] = useState<string | null>(null);
+  // objet à ouvrir dans la fenêtre Objets (clic sur un objet streamer dans Fence)
+  const [finderItem, setFinderItem] = useState<string | null>(null);
   const teamLive = useMemo(
     () => room.members.filter((m) => m.connected && m.snapshot).map((m) => ({ m, view: viewModeOf(m.snapshot!, tasksById) })),
     [room.members, tasksById],
@@ -796,7 +798,7 @@ export default function App() {
         panelOpen={panelOpen}
         onTogglePanel={() => setPanelOpen((o) => !o)}
         finder={
-          <ItemFinder variant="rail" onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })} gameMode={gameMode} lang={lang} tasks={tasks} traders={data?.traders ?? []} maps={maps} itemNames={data?.itemNames ?? NO_NAMES} itemIcons={data?.itemIcons ?? NO_NAMES} onShowQuest={showQuest}
+          <ItemFinder variant="rail" openItem={finderItem} onItemClosed={() => setFinderItem(null)}onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })} gameMode={gameMode} lang={lang} tasks={tasks} traders={data?.traders ?? []} maps={maps} itemNames={data?.itemNames ?? NO_NAMES} itemIcons={data?.itemIcons ?? NO_NAMES} onShowQuest={showQuest}
             done={mode.done}
             failed={failed}
             needs={needs}
@@ -815,7 +817,7 @@ export default function App() {
             }}
           />
         }
-        traders={<TraderWindow variant="rail" gameMode={gameMode} lang={lang} traders={data?.traders ?? []} tasks={tasks} itemIcons={data?.itemIcons ?? NO_NAMES} done={mode.done} onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })} />}
+        traders={<TraderWindow variant="rail" onOpenItem={setFinderItem}gameMode={gameMode} lang={lang} traders={data?.traders ?? []} tasks={tasks} itemIcons={data?.itemIcons ?? NO_NAMES} done={mode.done} onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })} />}
         room={<RoomControl variant="rail" room={room} />}
       />
 

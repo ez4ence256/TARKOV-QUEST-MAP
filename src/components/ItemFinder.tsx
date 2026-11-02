@@ -96,6 +96,10 @@ interface Props {
   onSetDone: (objectiveId: string, value: boolean) => void;
   /** Niveaux construits de la planque (stationId -> niveau, -1 = ignorée) : niveaux déjà faits grisés. */
   hideoutLevels?: Record<string, number>;
+  /** Objet à ouvrir directement (clic sur un objet streamer dans Fence) : la fenêtre s'ouvre sur sa fiche. */
+  openItem?: string | null;
+  /** Fenêtre fermée : App oublie `openItem`. */
+  onItemClosed?: () => void;
   /** « rail » : bouton de la barre latérale (icône au-dessus du libellé). */
   variant?: "rail";
 }
@@ -114,6 +118,7 @@ export function ItemFinder(props: Props) {
   const toggle = useRef<HTMLButtonElement>(null);
   const close = () => {
     setOpen(false);
+    props.onItemClosed?.();
     toggle.current?.focus();
   };
   return (
@@ -122,12 +127,12 @@ export function ItemFinder(props: Props) {
         <UiIcon id="search" size={props.variant === "rail" ? 22 : 18} />
         <span className={props.variant === "rail" ? "rail-label" : "item-finder-label"}>{tr("Objets", "Items")}</span>
       </button>
-      {open && <FinderDialog {...props} onClose={close} />}
+      {(open || props.openItem) && <FinderDialog {...props} onClose={close} />}
     </>
   );
 }
 
-function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIcons, onShowQuest, onShowSpots, onAddPoint, done, failed, needs, hideoutIncluded, onIncludeHideout, onSetDone, hideoutLevels, onClose }: Props & { onClose: () => void }) {
+function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIcons, onShowQuest, onShowSpots, onAddPoint, done, failed, needs, hideoutIncluded, onIncludeHideout, onSetDone, hideoutLevels, openItem, onClose }: Props & { onClose: () => void }) {
   const [list, setList] = useState<ListedItem[] | null>(null);
   const [error, setError] = useState(false);
   const [query, setQuery] = useState("");
@@ -197,6 +202,14 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
       .map(([id, name]): ListedItem => ({ id, name, alts: [name], nameEn: name }));
     return extra.length ? [...list, ...extra].sort((a, b) => a.name.localeCompare(b.name, lang)) : list;
   }, [list, itemNames, lang]);
+
+  // ouverte depuis Fence : sur la fiche de l'objet dès que la liste est là (une seule fois : « Retour » reste possible)
+  const pendingItem = useRef(openItem);
+  useEffect(() => {
+    if (!all || !pendingItem.current) return;
+    setSelected(all.find((i) => i.id === pendingItem.current) ?? null);
+    pendingItem.current = null;
+  }, [all]);
 
   useEffect(() => {
     if (!all) return;
@@ -1298,7 +1311,7 @@ function SpotCard(p: {
 }
 
 /** Objets streamer de Collector (fenêtre Marchands, Fence) : cocher = un exemplaire FIR mis de côté, plus à garder. */
-export function StreamerChecklist({ collector, name, alts, itemIcons, onSetDone }: { collector: Map<string, { objectiveId: string; kept: boolean }>; name: (id: string) => string; alts: (id: string) => string[]; itemIcons: Record<string, string>; onSetDone: (objectiveId: string, value: boolean) => void }) {
+export function StreamerChecklist({ collector, name, alts, itemIcons, onSetDone, onOpenItem }: { collector: Map<string, { objectiveId: string; kept: boolean }>; name: (id: string) => string; alts: (id: string) => string[]; itemIcons: Record<string, string>; onSetDone: (objectiveId: string, value: boolean) => void; onOpenItem: (id: string) => void }) {
   const [onlyMissing, setOnlyMissing] = useState(false);
   const [query, setQuery] = useState("");
   return (
@@ -1332,11 +1345,11 @@ export function StreamerChecklist({ collector, name, alts, itemIcons, onSetDone 
           .sort((a, b) => a.name.localeCompare(b.name))
           .map((c) => (
             <li key={c.id} className={c.kept ? "is-done" : undefined}>
-              <label className="check">
-                <input type="checkbox" checked={c.kept} onChange={(e) => onSetDone(c.objectiveId, e.target.checked)} />
+              <input type="checkbox" aria-label={c.name} checked={c.kept} onChange={(e) => onSetDone(c.objectiveId, e.target.checked)} />
+              <button type="button" className="finder-streamer-item" title={tr("Voir la fiche de l'objet", "Open the item page")} onClick={() => onOpenItem(c.id)}>
                 <ItemThumb src={iconSrc(c.id, itemIcons)} name="" size={32} />
                 {c.name}
-              </label>
+              </button>
             </li>
           ))}
       </ul>

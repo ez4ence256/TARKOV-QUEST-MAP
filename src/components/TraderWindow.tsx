@@ -26,6 +26,8 @@ interface Props {
   /** Objectifs cochés : objets streamer de Collector mis de côté (portrait de Fence). */
   done: Record<string, number>;
   onSetDone: (objectiveId: string, value: boolean) => void;
+  /** Clic sur un objet streamer : ouvre sa fiche dans la fenêtre Objets. */
+  onOpenItem: (itemId: string) => void;
   /** « rail » : bouton de la barre latérale (icône au-dessus du libellé). */
   variant?: "rail";
 }
@@ -48,7 +50,7 @@ export function TraderWindow(props: Props) {
   );
 }
 
-function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, done, onSetDone, onClose }: Props & { onClose: () => void }) {
+function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, done, onSetDone, onOpenItem, onClose }: Props & { onClose: () => void }) {
   const [file, setFile] = useState<TraderOffersFile | null>(null);
   const [items, setItems] = useState<Map<string, ListedItem> | null>(null);
   const [error, setError] = useState(false);
@@ -171,7 +173,7 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, done, onSetDo
             {fence && current === fence.id ? (
               <div className="finder-body">
                 <div className="finder-main">
-                  <StreamerChecklist collector={collector} name={name} alts={(id) => items?.get(id)?.alts ?? []} itemIcons={itemIcons} onSetDone={onSetDone} />
+                  <StreamerChecklist collector={collector} name={name} alts={(id) => items?.get(id)?.alts ?? []} itemIcons={itemIcons} onSetDone={onSetDone} onOpenItem={(id) => { onClose(); onOpenItem(id); }} />
                 </div>
               </div>
             ) : (
