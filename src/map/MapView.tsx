@@ -16,7 +16,7 @@ import { ItemSpotsLayer, type ItemSpotMarker } from "./ItemSpotsLayer";
 import { LabyrinthLayer } from "./LabyrinthLayer";
 import { labyrinthFor } from "../lib/labyrinth";
 import type { StoryMapPoint } from "../lib/storyPoints";
-import type { ExitPhotosTarget } from "../components/PhotosTab";
+import type { ExitPhotosTarget, PhotoSpot } from "../components/PhotosTab";
 import { floorFromText } from "../lib/floorText";
 import { groupIdOf, spawnGroups } from "../lib/points";
 import {
@@ -56,7 +56,7 @@ interface MapViewProps {
   placing: Placing;
   onPlace: (pos: { x: number; z: number }) => void;
   /** Ouvre l'onglet Photos sur une quête. */
-  onPhotos: (taskId: string) => void;
+  onPhotos: (taskId: string, spot?: PhotoSpot) => void;
   /** Clic sur une sortie : ouvre l'onglet Photos sur elle. */
   onExit: (target: ExitPhotosTarget) => void;
   /** Ouvre l'onglet Quête sur une quête. */
@@ -265,10 +265,15 @@ function MapViewInner(props: MapViewProps) {
   // nombre de points restants par niveau, pour le sélecteur
   const levelCounts = useMemo(() => {
     const counts = new Map<Level, number>();
+    const seen = new Set<string>();
     for (const pt of points) {
       if (mode.done[pt.objectiveId ?? ""]) continue;
-      if (pt.zoneKey && pt.zoneKey !== pt.key) continue; // répétition d'une zone : déjà comptée
       const l = selectableUpperOf(pt, calibration) ?? displayLevelOf(pt, calibration); // étage supérieur du sélecteur : compté chez lui seulement
+      if (pt.objectiveId) {
+        const k = `${pt.objectiveId}|${l}`; // un objectif compte une fois par étage
+        if (seen.has(k)) continue;
+        seen.add(k);
+      }
       counts.set(l, (counts.get(l) ?? 0) + 1);
     }
     return counts;
@@ -361,7 +366,7 @@ function MapViewInner(props: MapViewProps) {
               title={`${task.name} — ${objective.description}${objective.optional ? ` (${tr("optionnel", "optional")})` : ""}${
                 folded
                   ? pt.zoneKey
-                    ? ` (${tr(`${group!.keys.length} positions presque au même endroit : clic pour les voir`, `${group!.keys.length} almost identical positions: click to show them`)})`
+                    ? ` (${tr(`${group!.keys.length} positions pour le même objectif : clic pour les voir`, `${group!.keys.length} positions for the same objective: click to show them`)})`
                     : ` (${tr(`${group!.keys.length} emplacements possibles : clic pour les voir`, `${group!.keys.length} possible locations: click to show them`)})`
                   : pt.spawn
                     ? ` (${tr("emplacement possible", "possible location")} ${pt.spawn.index}/${pt.spawn.count})`
@@ -395,7 +400,7 @@ function MapViewInner(props: MapViewProps) {
                 manual={manual}
                 spawn={folded ? undefined : pt.spawn}
                 onGroup={group && !folded ? () => toggleGroup(groupId, false) : undefined}
-                onPhotos={task.wikiLink ? () => props.onPhotos(task.id) : undefined}
+                onPhotos={task.wikiLink ? () => props.onPhotos(task.id, { objectiveId: objective.id, mapId: pt.mapId }) : undefined}
                 onQuest={() => props.onQuest(task.id)}
                 levelLabel={textFloor ?? (layers.length > 0 && !manual ? levelName(calibration, pointLevel) : undefined)}
                 levelSource={textFloor ? tr("d'après la description", "from the description") : undefined}

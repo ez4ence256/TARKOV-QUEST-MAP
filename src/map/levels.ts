@@ -140,8 +140,15 @@ export function selectableUpperOf(p: PointHeight, calibration: MapCalibration | 
 
 /** Niveau "naturel" d'un point : le premier où il apparaît, principal en priorité. */
 export function levelOf(p: PointHeight, calibration: MapCalibration | undefined): Level {
-  if (!calibration || isOnLevel(p, calibration, null)) return null;
-  const i = calibration.layers.findIndex((_, idx) => isOnLevel(p, calibration, idx));
+  if (!calibration) return null;
+  // la zone d'un sous-sol déborde dans le niveau principal : si son centre est dessous, il compte pour l'étage souterrain
+  const bottom = calibration.heightRange?.[0];
+  if (p.y !== undefined && bottom !== undefined && bottom > OPEN_BOTTOM && p.y < bottom) {
+    const u = calibration.layers.findIndex((l) => isUnderground(calibration, l) && pointIsOnLayer({ x: p.x, z: p.z, y: p.y }, l));
+    if (u !== -1) return u;
+  }
+  if (isOnLevel(p, calibration, null)) return null;
+  const i =calibration.layers.findIndex((_, idx) => isOnLevel(p, calibration, idx));
   return i === -1 ? null : i;
 }
 

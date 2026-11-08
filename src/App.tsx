@@ -8,7 +8,7 @@ import { MapView, type Placing } from "./map/MapView";
 import type { ItemSpotMarker } from "./map/ItemSpotsLayer";
 import { exportState, getLastMode, useAppState, type CustomPoint } from "./state/store";
 import { QUEST_COLORS } from "./lib/objectiveTypes";
-import { buildObjectivePoints, groupIdOf, isTaskFinished, isZoneRepeat, manualPointKey, questsUnlockedBy, shownObjectives, spawnGroups, taskMapIds } from "./lib/points";
+import { buildObjectivePoints, groupIdOf, isTaskFinished,manualPointKey, questsUnlockedBy, shownObjectives, spawnGroups, taskMapIds } from "./lib/points";
 import { ModePicker } from "./components/ModePicker";
 import { UiIcon } from "./components/UiIcon";
 import { QuestList } from "./components/QuestList";
@@ -16,7 +16,7 @@ import { SelectedQuests } from "./components/SelectedQuests";
 import { CustomPointsTab } from "./components/CustomPointsTab";
 import { SettingsTab } from "./components/SettingsTab";
 import { HideoutTab } from "./components/HideoutTab";
-import { PhotosTab, type ExitPhotosTarget, type StoryPhotosTarget } from "./components/PhotosTab";
+import { PhotosTab, type ExitPhotosTarget, type PhotoSpot, type StoryPhotosTarget } from "./components/PhotosTab";
 import { ResetProgressSection } from "./components/ResetProgressSection";
 import { QuestTab } from "./components/QuestTab";
 import { CaptureTab } from "./components/CaptureTab";
@@ -135,6 +135,11 @@ export default function App() {
   // sortie cliquée sur la carte : l'onglet Photos montre la sienne plutôt que celles d'une quête
   const [photoExit, setPhotoExit] = useState<ExitPhotosTarget | null>(null);
   const [photoStory, setPhotoStory] = useState<StoryPhotosTarget | null>(null);
+  // point de la carte dont on montre seulement les photos ; effacé dès qu'on quitte l'onglet Photos
+  const [photoSpot, setPhotoSpot] = useState<PhotoSpot | null>(null);
+  useEffect(() => {
+    if (tab !== "photos") setPhotoSpot(null);
+  }, [tab]);
   const [panelOpen, setPanelOpen] = useState(() => !isMobile() && !raidSaved());
   /** Largeur du panneau sur ordinateur (poignée de redimensionnement, enregistrée). */
   const [panelWidth, setPanelWidth] = useState(() => readPanelWidth(window.innerWidth));
@@ -287,7 +292,8 @@ export default function App() {
     };
     for (const t of mapTasks)
       for (const o of shownObjectives(t, mode.done, false, oneAtATime)) {
-        for (const l of o.locations) if (!isZoneRepeat(o, l)) add(l.mapId, t.id);
+        // un objectif se fait une fois : il compte une fois par map où il a des positions
+        for (const mapId of new Set(o.locations.map((l) => l.mapId))) add(mapId, t.id);
         const manual = mode.manual[o.id];
         if (o.locations.length === 0 && manual) add(manual.mapId, t.id);
       }
@@ -353,9 +359,10 @@ export default function App() {
   );
 
   // ouvre l'onglet Quête ou Photos sur une quête (boutons de la liste, du panneau ou d'une popup)
-  const showTaskTab = useCallback((taskId: string, which: "quest" | "photos") => {
+  const showTaskTab = useCallback((taskId: string, which: "quest" | "photos", spot: PhotoSpot | null = null) => {
     setTabTaskId(taskId);
     setTabOwner(null);
+    setPhotoSpot(spot);
     if (which === "photos") {
       setPhotoExit(null);
       setPhotoStory(null);
@@ -366,6 +373,7 @@ export default function App() {
   const showExitPhotos = useCallback((target: ExitPhotosTarget) => {
     setPhotoExit(target);
     setPhotoStory(null);
+    setPhotoSpot(null);
     setTab("photos");
     setPanelOpen(true);
   }, []);
@@ -379,10 +387,12 @@ export default function App() {
     const photos = section === undefined ? all : all.filter((p) => p.section === section);
     setPhotoStory({ title: `${storyName(chapter)} - ${item?.title ?? stepKey}`, photos, sections: item?.sections, pageUrl: item?.pageUrl, pageTitle: item?.pageTitle });
     setPhotoExit(null);
+    setPhotoSpot(null);
     setTab("photos");
     setPanelOpen(true);
   };
-  const showPhotos = useCallback((taskId: string) => showTaskTab(taskId, "photos"), [showTaskTab]);
+  // spot : le point de la carte cliqué, pour ne montrer que ses photos (sans lui : toutes celles de la quête)
+  const showPhotos = useCallback((taskId: string, spot?: PhotoSpot) => showTaskTab(taskId, "photos", spot ?? null), [showTaskTab]);
   const showQuest = useCallback((taskId: string) => showTaskTab(taskId, "quest"), [showTaskTab]);
   const showTeamQuest = useCallback((memberId: string, taskId: string) => {
     showTaskTab(taskId, "quest");
@@ -640,7 +650,7 @@ export default function App() {
           color,
           text: `${task.name} — ${objective.description}`,
           taskId: task.id,
-          info: { memberId: m.id, photos: Boolean(task.wikiLink) },
+          info: { memberId: m.id, photos: Boolean(task.wikiLink), objectiveId: objective.id, mapId: pt.mapId },
           ...(g ? { group: { id: `${m.id}:${groupIdOf(pt)}`, rep: g.rep === pt.key, count: g.keys.length } } : {}),
         });
       }
@@ -959,10 +969,14 @@ export default function App() {
               taskId={tabTaskId}
               onTaskChange={(id) => {
                 setPhotoExit(null);
+                setPhotoSpot(null);
                 setTabTaskId(id);
               }}
               exit={photoExit}
               story={photoStory}
+              spot={photoSpot}
+              maps={maps}
+              onShowAll={() => setPhotoSpot(null)}
             />
           )}
           {data && tab === "custom" && (

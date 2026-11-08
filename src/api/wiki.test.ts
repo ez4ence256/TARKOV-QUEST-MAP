@@ -10,6 +10,7 @@ import {
   shouldFallback,
   parseExitTables,
   parseGuideGalleries,
+  photoFilesForSpot,
   purgeExpiredCache,
   writeCache,
   wikiRequest,
@@ -380,4 +381,123 @@ describe("repli par le proxy /api/wiki", () => {
     await expect(wikiRequest({ action: "parse", page: "C" })).rejects.toThrow("wiki: HTTP 403");
     expect(proxyActive()).toBe(false);
   }, 10_000);
+});
+
+describe("photoFilesForSpot", () => {
+  const MAPS = ["Customs", "Woods", "Night Factory", "Factory"];
+  const target = (text: string, mapName: string, allTexts: string[] = [text, "Install a camera elsewhere", "Install a camera again"]) => ({ text, allTexts, mapName, mapNames: MAPS });
+  const gal = (...files: string[]) => `<gallery>\n${files.map((f) => `File:${f}`).join("\n")}\n</gallery>`;
+  const bold = (t: string) => `'''${t}'''`;
+
+  it("blocs au titre en gras sous un titre de map : le bloc exact", () => {
+    const wt = [
+      "==Guide==", "====[[Customs]]====",
+      bold("The bucket-head villain"), "Text", gal("BucketMap.png", "Bucket.png"),
+      bold("Every indie developer's worst nightmare"), gal("DevMap.png", "Dev.png"),
+      "====Woods====",
+      bold("The ominous sign"), gal("SignMap.png", "Sign.png"),
+    ].join("\n");
+    expect(photoFilesForSpot(wt, target("Install a camera to watch the indie developer's worst nightmare", "Customs"))).toEqual(["DevMap.png", "Dev.png"]);
+    // le titre ne se trouve que sur une autre map : repli sur toute la map, jamais un bloc d'une autre map
+    expect(photoFilesForSpot(wt, target("Install a camera at the ominous sign", "Customs"))).toEqual(["BucketMap.png", "Bucket.png", "DevMap.png", "Dev.png"]);
+  });
+
+  it("légendes par photo : la photo et la carte d'ensemble de son bloc", () => {
+    const wt = "==Guide==\n<gallery>\nFile:A.png|Overview map of the area\nFile:B.png|Sniper nest on the water tower\nFile:C.png|Other thing\n</gallery>";
+    expect(photoFilesForSpot(wt, target("Locate the sniper nest water tower", "Woods"))).toEqual(["A.png", "B.png"]);
+  });
+
+  it("ordinaux ignorés, lien incertain : null", () => {
+    const wt = ["==Guide==", bold("Cargo on the first floor"), gal("X.png"), bold("Something else"), gal("Y.png")].join("\n");
+    expect(photoFilesForSpot(wt, target("Locate the first cargo", "Customs"))).toBeNull();
+  });
+
+  it("sans galerie : null", () => {
+    expect(photoFilesForSpot("==Guide==\nJuste du texte", target("Locate the thing", "Customs"))).toBeNull();
+  });
+
+  it("variante de map : Night Factory lit les titres Factory", () => {
+    const wt = ["==Guide==", "====Factory====", bold("Stairway to skies"), gal("S.png"), "====Customs====", bold("Dorm"), gal("D.png")].join("\n");
+    expect(photoFilesForSpot(wt, target("Install a camera at the stairway to skies", "Night Factory"))).toEqual(["S.png"]);
+  });
+});
+
+describe("photoFilesForSpot : intro, titres courts, cartes d'ensemble", () => {
+  const MAPS = ["Woods", "Customs"];
+  const tgt = (text: string, allTexts: string[]) => ({ text, allTexts, mapName: "Woods", mapNames: MAPS });
+  const gal = (...files: string[]) => `<gallery>\n${files.map((f) => `File:${f}`).join("\n")}\n</gallery>`;
+
+  it("l'intro devant la première galerie n'est pas un titre ; un titre court suffit", () => {
+    const wt = ["==Guide==", "Stash an Iskra ration pack in the ZB-016 bunker and a water bottle in the ZB-014 bunker.", gal("Overview.png"), "====ZB-016====", gal("Z16a.png", "Z16b.png"), "====ZB-014====", gal("Z14.png")].join("\n");
+    const all = ["Stash an Iskra ration pack in the ZB-016 bunker on Woods", "Stash a water bottle in the ZB-014 bunker on Woods"];
+    expect(photoFilesForSpot(wt, tgt(all[0], all))).toEqual(["Z16a.png", "Z16b.png"]);
+    expect(photoFilesForSpot(wt, tgt(all[1], all))).toEqual(["Z14.png"]);
+  });
+
+  it("une carte d'ensemble à la légende très proche ne gagne pas seule", () => {
+    const wt = "==Guide==\n<gallery>\nFile:Ov.png|Map of the pharmacy shelf stash spot\nFile:Real.png|Pharmacy shelf stash\nFile:Other.png|Cashier\n</gallery>";
+    expect(photoFilesForSpot(wt, tgt("Stash the pharmacy shelf stash spot", ["Stash the pharmacy shelf stash spot", "Locate the cashier"]))).toEqual(["Ov.png", "Real.png"]);
+  });
+});
+
+describe("photoFilesForSpot : quêtes sur plusieurs maps", () => {
+  const MAPS = ["Woods", "Shoreline", "Factory", "Customs", "Lighthouse"];
+  const tgt = (text: string, mapName: string, allTexts: string[]) => ({ text, allTexts, mapName, mapNames: MAPS });
+  const gal = (...files: string[]) => `<gallery>\n${files.map((f) => `File:${f}`).join("\n")}\n</gallery>`;
+
+  it("la map est dans la phrase du bloc (Viewer)", () => {
+    const wt = [
+      "==Guide==", "In this quest you have to place 1 [[WI-FI Camera]] each on [[Woods]], [[Shoreline]] and [[Factory]].", "",
+      "On [[Woods]] it has to be placed at a rock ledge.", `<li style="display: inline-block;">${gal("WoodsMap.png", "WoodsLoc.png")}</li>`,
+      "On [[Shoreline]] it has to be placed at the top of the lighthouse.", gal("ShoreMap.jpg", "Light.png"),
+      "On [[Factory]] it has to be placed on the office stairs.", gal("FactoryLoc.png"),
+    ].join("\n");
+    const all = ["Place a WI-FI Camera at the rock ledge on Woods", "Place a WI-FI Camera at the lighthouse on Shoreline", "Place a WI-FI Camera at the stairs on Factory"];
+    expect(photoFilesForSpot(wt, tgt(all[0], "Woods", all))).toEqual(["WoodsMap.png", "WoodsLoc.png"]);
+    // sans rapprochement de texte : tous les blocs de la map, jamais ceux des autres
+    expect(photoFilesForSpot(wt, tgt("Place a WI-FI Camera somewhere", "Shoreline", ["Place a WI-FI Camera somewhere", "Other one", "Third one"]))).toEqual(["ShoreMap.jpg", "Light.png"]);
+  });
+
+  it("titre de section avec lien de map (Thirsty)", () => {
+    const wt = ["==Guide==", "Stash the tanks on [[Woods]] and [[Customs]].", "===[[Woods]] stashing location===", gal("WMap.png", "WLoc.png"), "===[[Customs]] stashing location===", gal("CMap.png", "CStore.png", "CLoc.png")].join("\n");
+    const all = ["Stash a propane tank in the bunker", "Stash a propane tank in the store"];
+    expect(photoFilesForSpot(wt, tgt(all[1], "Customs", all))).toEqual(["CMap.png", "CStore.png", "CLoc.png"]);
+    expect(photoFilesForSpot(wt, tgt(all[0], "Woods", all))).toEqual(["WMap.png", "WLoc.png"]);
+  });
+
+  it("chaque objectif a son bloc (Easy Job)", () => {
+    const wt = [
+      "==Guide==", "Locate the helicopter in one of the basins at the water treatment plant in the north.", gal("HeliMap.png", "HeliPic.png"),
+      "Additionally, kill 10 [[Rogues]] in a specific area of the water treatment plant on [[Lighthouse]].", gal("KillMap.png"),
+    ].join("\n");
+    const all = ["Locate the helicopter at the water treatment plant", "Kill 10 Rogues in the area of the water treatment plant"];
+    expect(photoFilesForSpot(wt, tgt(all[0], "Lighthouse", all))).toEqual(["HeliMap.png", "HeliPic.png"]);
+    expect(photoFilesForSpot(wt, tgt(all[1], "Lighthouse", all))).toEqual(["KillMap.png"]);
+  });
+
+  it("un seul lien de map égaré : pas de restriction", () => {
+    const wt = ["==Guide==", "Spot A is near the cabins.", gal("A.png"), "Spot B, like on [[Customs]], is behind the shed.", gal("B.png")].join("\n");
+    const all = ["Do the thing at the cabins", "Do the thing behind the shed"];
+    // aucune des deux n'est sûre pour une autre cible : tout reste visible
+    expect(photoFilesForSpot(wt, tgt("Visit the lighthouse top", "Woods", all))).toBeNull();
+    expect(photoFilesForSpot(wt, tgt(all[1], "Woods", all))).toEqual(["B.png"]);
+  });
+});
+
+describe("photoFilesForSpot : derniers cas", () => {
+  const MAPS = ["Woods", "Shoreline"];
+  const gal = (...files: string[]) => `<gallery>\n${files.map((f) => `File:${f}`).join("\n")}\n</gallery>`;
+
+  it("objectif sans mot distinctif : niveau map seulement", () => {
+    const wt = ["==Guide==", "====Woods====", gal("W.png"), "====Shoreline====", gal("S.png")].join("\n");
+    const t = "Mark the first spot";
+    expect(photoFilesForSpot(wt, { text: t, allTexts: [t, t], mapName: "Woods", mapNames: MAPS })).toEqual(["W.png"]);
+    expect(photoFilesForSpot(gal("W.png"), { text: t, allTexts: [t, t], mapName: "Woods", mapNames: MAPS })).toBeNull();
+  });
+
+  it("le texte d'un bloc suit le dernier titre, pas l'intro", () => {
+    const wt = ["==Guide==", "Mark any of the special cargo boxes.", "===Red warehouse===", gal("Map.png", "One.png"), "===Blue shed===", "Boxes by the shed.", gal("Two.png")].join("\n");
+    const t = "Mark any of the special cargo boxes";
+    expect(photoFilesForSpot(wt, { text: t, allTexts: [t, "Other thing"], mapName: "Woods", mapNames: MAPS })).toBeNull();
+  });
 });

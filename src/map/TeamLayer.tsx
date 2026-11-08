@@ -9,6 +9,7 @@ import { gameToLatLng } from "./crs";
 import { PlayerMarker } from "./PlayerMarker";
 import { teamPinIcon } from "./teamIcons";
 import { UiIcon } from "../components/UiIcon";
+import type { PhotoSpot } from "../components/PhotosTab";
 
 export interface TeamMarker {
   key: string;
@@ -25,9 +26,9 @@ export interface TeamMarker {
   /** Quête ou chapitre du point : estompé quand une autre est affichée dans Détails. */
   taskId?: string;
   /** Quête (pas la Main story) : boutons « Quête » (sa progression, lecture seule) et « Photos ». */
-  info?: { memberId: string; photos: boolean };
+  info?: { memberId: string; photos: boolean; objectiveId: string; mapId: string };
 }
-type TeamActions = { focusTaskId?: string | null; onQuest: (memberId: string, taskId: string) => void; onPhotos: (taskId: string) => void };
+type TeamActions = { focusTaskId?: string | null; onQuest: (memberId: string, taskId: string) => void; onPhotos: (taskId: string, spot?: PhotoSpot) => void };
 export interface TeamPlayer {
   id: string;
   name: string;
@@ -105,7 +106,7 @@ function TeamPoint({ marker: m, count, onUnfold, onFold, focusTaskId, onQuest, o
                   <UiIcon id="scroll-text" /> {tr("Quête", "Quest")}
                 </button>
                 {m.info.photos && (
-                  <button className="btn btn-ghost" onClick={() => onPhotos(m.taskId!)}>
+                  <button className="btn btn-ghost" onClick={() => onPhotos(m.taskId!, { objectiveId: m.info!.objectiveId, mapId: m.info!.mapId })}>
                     <UiIcon id="image" /> Photos
                   </button>
                 )}

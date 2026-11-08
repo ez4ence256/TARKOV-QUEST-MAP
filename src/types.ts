@@ -56,6 +56,8 @@ export interface Objective {
   /** Valeur brute du champ "type" de l'API (mark, visit, findQuestItem…). */
   type: string;
   description: string;
+  /** Texte anglais (le wiki est en anglais) ; absent des anciennes données en cache et des tests. */
+  descriptionEn?: string;
   optional: boolean;
   /** Maps auxquelles l'API rattache l'objectif (même sans position précise). */
   mapIds: string[];

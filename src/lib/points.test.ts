@@ -178,24 +178,34 @@ describe("emplacements possibles regroupés", () => {
 
 describe("zone répétée par une variante de map", () => {
   const zone = (x: number, z: number, y = 0, mapId = "m1") => ({ mapId, position: { x, y, z } });
-  // a et a' à 1 m (même zone), b ailleurs, c juste au-dessus d'un autre étage
+  // 4 zones sur m1 (dont une à 50 m et une à l'étage), une sur m2
   const o = { id: "o", type: "plantItem", description: "", optional: false, mapIds: ["m1"], locations: [zone(0, 0), zone(1, 0), zone(50, 50), zone(0, 1, 4), zone(0, 0, 0, "m2")] };
   const t: Task = { ...task, objectives: [o] };
 
-  it("une seule position comptée par zone, par map et par étage", () => {
-    expect(o.locations.map((l) => isZoneRepeat(o, l))).toEqual([false, true, false, false, false]);
-    expect(objectiveMapCounts(o).get("m1")).toBe(3);
+  it("un objectif compte une fois par map, quel que soit le nombre de zones", () => {
+    expect(o.locations.map((l) => isZoneRepeat(o, l))).toEqual([false, true, true, true, false]);
+    expect(objectiveMapCounts(o).get("m1")).toBe(1);
     expect(objectiveMapCounts(o).get("m2")).toBe(1);
   });
 
-  it("regroupe seulement les positions de la même zone : les autres zones de l'objectif restent à part", () => {
+  it("regroupe toutes les zones de l'objectif sur la map en un seul groupe", () => {
     const pts = buildObjectivePoints([t], emptyModeState(), "m1", false);
     const g = spawnGroups(pts);
     expect(g.size).toBe(1);
     const [group] = [...g.values()];
-    expect(group.keys).toEqual([pts[0].key, pts[1].key]);
-    expect(groupIdOf(pts[1])).toBe(pts[0].key);
-    expect(g.has(groupIdOf(pts[2]))).toBe(false);
+    expect(group.keys).toEqual(pts.map((p) => p.key));
+    expect(groupIdOf(pts[2])).toBe(pts[0].key);
+  });
+
+  it("Claustrophobia : 5 zones éloignées = 5 points, un groupe, un compte", () => {
+    const c = { ...o, type: "shoot", locations: [0, 40, 80, 120, 160].map((x) => zone(x, x)) };
+    const pts = buildObjectivePoints([{ ...t, objectives: [c] }], emptyModeState(), "m1", false);
+    const g = spawnGroups(pts);
+    expect(pts).toHaveLength(5);
+    expect(g.size).toBe(1);
+    const [group] = [...g.values()];
+    expect(pts.map((p) => p.key)).toContain(group.rep);
+    expect(objectiveMapCounts(c).get("m1")).toBe(1);
   });
 
   it("les emplacements possibles restent regroupés par objectif", () => {

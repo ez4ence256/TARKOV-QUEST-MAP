@@ -1,8 +1,8 @@
 // Onglet "Photos" : photos d'emplacements d'une quête, tirées du wiki Escape from Tarkov.
 // Chargées seulement quand l'onglet est ouvert sur une quête (voir src/api/wiki.ts).
 import { Fragment, useEffect, useState } from "react";
-import type { Task } from "../types";
-import { WIKI_HOST, loadExitPhotos, loadQuestPhotos, photosForExit, type ExitPhotosPage, type WikiGallery, type WikiPhoto } from "../api/wiki";
+import type { GameMap, Task } from "../types";
+import { WIKI_HOST, loadExitPhotos, loadQuestPhotos, loadWikiPage, photoFilesForSpot, photosForExit, type ExitPhotosPage, type WikiGallery, type WikiPhoto } from "../api/wiki";
 import { EXIT_KIND_LABELS } from "../lib/exits";
 import { tr } from "../lib/i18n";
 
@@ -26,6 +26,12 @@ export interface StoryPhotosTarget {
   pageTitle?: string;
 }
 
+/** Point de la carte cliqué : on ne montre que les photos que le wiki lui associe, si le lien est certain. */
+export interface PhotoSpot {
+  objectiveId: string;
+  mapId: string;
+}
+
 interface Props {
   tasks: Task[];
   /** Quêtes sélectionnées (proposées dans la liste). */
@@ -37,6 +43,11 @@ interface Props {
   exit?: ExitPhotosTarget | null;
   /** Case de la Main story : ses photos remplacent celles de la quête. */
   story?: StoryPhotosTarget | null;
+  /** Point cliqué sur la carte : filtre les photos de la quête. */
+  spot?: PhotoSpot | null;
+  maps?: GameMap[];
+  /** « Voir toutes les photos » : abandonne le filtre. */
+  onShowAll?: () => void;
 }
 
 type PhotosState =
@@ -64,11 +75,45 @@ function useQuestPhotos(wikiLink: string | null) {
   return state;
 }
 
+/** Fichiers du wiki propres au point cliqué (null : tout montrer). `undefined` tant que la page du wiki se charge. */
+function useSpotFiles(task: Task | undefined, spot: PhotoSpot | null | undefined, maps: GameMap[]): string[] | null | undefined {
+  const [state, setState] = useState<{ key: string; files: string[] | null } | null>(null);
+  const objective = spot ? task?.objectives.find((o) => o.id === spot.objectiveId) : undefined;
+  const map = spot ? maps.find((m) => m.id === spot.mapId) : undefined;
+  const wikiLink = task?.wikiLink ?? null;
+  const key = spot && objective && map && wikiLink ? `${wikiLink}|${spot.objectiveId}|${spot.mapId}` : null;
+  useEffect(() => {
+    if (!key || !task || !objective || !map || !wikiLink) return;
+    let cancelled = false;
+    const textOf = (o: { descriptionEn?: string; description: string }) => o.descriptionEn ?? o.description;
+    loadWikiPage(wikiLink).then(
+      (page) => {
+        if (cancelled) return;
+        const files = photoFilesForSpot(page.wikitext, {
+          text: textOf(objective),
+          allTexts: task.objectives.filter((o) => o.locations.length > 0).map(textOf),
+          mapName: map.nameEn ?? map.name,
+          mapNames: maps.map((m) => m.nameEn ?? m.name),
+        });
+        setState({ key, files });
+      },
+      () => !cancelled && setState({ key, files: null }),
+    );
+    return () => {
+      cancelled = true;
+    };
+    // task, objective et map découlent de key
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  if (!key) return null;
+  return state?.key === key ? state.files : undefined;
+}
+
 function PhotoList({ photos }: { photos: WikiPhoto[] }) {
   return (
     <ul className="photo-grid">
-      {photos.map((photo) => (
-        <li key={photo.file} className="photo">
+      {photos.map((photo, i) => (
+        <li key={`${photo.file}-${i}`} className="photo">
           <a data-lightbox href={photo.fullUrl} target="_blank" rel="noreferrer" title={photo.caption || tr("Voir en grand", "View full size")}>
             <img src={photo.thumbUrl} alt={photo.caption || photo.file} loading="lazy" referrerPolicy="no-referrer" />
           </a>
@@ -154,7 +199,7 @@ function ExitPhotosView({ exit }: { exit: ExitPhotosTarget }) {
   );
 }
 
-export function PhotosTab({ tasks, selectedIds, taskId, onTaskChange, exit, story }: Props) {
+export function PhotosTab({ tasks, selectedIds, taskId, onTaskChange, exit, story, spot, maps = [], onShowAll }: Props) {
   const tasksById = new Map(tasks.map((t) => [t.id, t]));
   // quêtes proposées : la sélection, plus la quête demandée si elle n'en fait pas partie
   const optionIds = [...new Set([...(taskId ? [taskId] : []), ...selectedIds])].filter(
@@ -162,6 +207,7 @@ export function PhotosTab({ tasks, selectedIds, taskId, onTaskChange, exit, stor
   );
   const current = (taskId && tasksById.get(taskId)) || (optionIds[0] ? tasksById.get(optionIds[0]) : undefined);
   const photos = useQuestPhotos(exit || story ? null : (current?.wikiLink ?? null));
+  const spotFiles = useSpotFiles(exit || story ? undefined : current, spot, maps);
 
   if (!current && !exit && !story) {
     return (
@@ -187,12 +233,18 @@ export function PhotosTab({ tasks, selectedIds, taskId, onTaskChange, exit, stor
           </option>
         ))}
       </select>
-      {story ? <StoryPhotosView story={story} /> : exit ? <ExitPhotosView exit={exit} /> : <QuestPhotos current={current!} photos={photos} />}
+      {story ? <StoryPhotosView story={story} /> : exit ? <ExitPhotosView exit={exit} /> : <QuestPhotos current={current!} photos={photos} spotFiles={spotFiles} onShowAll={onShowAll} />}
     </div>
   );
 }
 
-function QuestPhotos({ current, photos }: { current: Task; photos: PhotosState }) {
+function QuestPhotos({ current, photos, spotFiles, onShowAll }: { current: Task; photos: PhotosState; spotFiles: string[] | null | undefined; onShowAll?: () => void }) {
+  // spotFiles undefined : le wiki se charge, on n'affiche pas tout en attendant
+  const all = photos.status === "ready" ? photos.gallery.photos : [];
+  const some = spotFiles ? spotFiles.flatMap((f) => all.find((p) => p.file === f) ?? []) : [];
+  const shown = some.length > 0 && some.length < all.length ? some : all;
+  const filtered = shown !== all;
+  const waiting = spotFiles === undefined;
   return (
     <>
       <p className="muted small">
@@ -200,13 +252,15 @@ function QuestPhotos({ current, photos }: { current: Task; photos: PhotosState }
         <a href={current.wikiLink!} target="_blank" rel="noreferrer">
           {tr("wiki Escape from Tarkov", "Escape from Tarkov wiki")}
         </a>
-        {tr(
-          ", légendes en anglais. Elles concernent la quête entière : le wiki ne dit pas à quel point de la carte correspond chaque photo.",
-          ", captions in English. They apply to the whole quest: the wiki does not say which point on the map each photo matches.",
-        )}
+        {filtered
+          ? tr(", légendes en anglais.", ", captions in English.")
+          : tr(
+              ", légendes en anglais. Elles concernent la quête entière : le wiki ne dit pas à quel point de la carte correspond chaque photo.",
+              ", captions in English. They apply to the whole quest: the wiki does not say which point on the map each photo matches.",
+            )}
       </p>
 
-      {photos.status === "loading" && <p className="muted">{tr("Chargement des photos du wiki…", "Loading wiki photos…")}</p>}
+      {(photos.status === "loading" || (photos.status === "ready" && waiting)) && <p className="muted">{tr("Chargement des photos du wiki…", "Loading wiki photos…")}</p>}
       {photos.status === "error" && (
         <p className="error">
           {tr(`Le wiki ne répond pas (${photos.error}).`, `The wiki is not responding (${photos.error}).`)}{" "}
@@ -218,7 +272,15 @@ function QuestPhotos({ current, photos }: { current: Task; photos: PhotosState }
       {photos.status === "ready" && photos.gallery.photos.length === 0 && (
         <p className="muted">{tr("Le wiki n'a pas de photos d'emplacement pour cette quête.", "The wiki has no location photos for this quest.")}</p>
       )}
-      {photos.status === "ready" && photos.gallery.photos.length > 0 && <PhotoList photos={photos.gallery.photos} />}
+      {photos.status === "ready" && !waiting && filtered && (
+        <p className="muted small">
+          {tr(`Photos de ce point (${shown.length} sur ${all.length})`, `Photos of this point (${shown.length} of ${all.length})`)}{" "}
+          <button className="btn btn-ghost btn-small" onClick={onShowAll}>
+            {tr("Voir toutes les photos", "Show all photos")}
+          </button>
+        </p>
+      )}
+      {photos.status === "ready" && !waiting && shown.length > 0 && <PhotoList photos={shown} />}
     </>
   );
 }

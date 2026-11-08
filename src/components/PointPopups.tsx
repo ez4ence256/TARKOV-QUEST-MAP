@@ -59,7 +59,7 @@ export function ObjectivePopup(p: ObjectivePopupProps) {
       )}
       {!p.spawn && p.onGroup && (
         <div className="popup-spawn">
-          {tr("Même endroit, position selon la variante de la carte", "Same spot, position depends on the map variant")}
+          {tr("Même objectif, plusieurs positions possibles sur la carte (zone en plusieurs morceaux ou variante de la carte)", "Same objective, several positions on the map (zone in several pieces or map variant)")}
           <button className="btn btn-ghost btn-small" onClick={p.onGroup}>
             {tr("Regrouper en un seul point", "Fold into a single point")}
           </button>

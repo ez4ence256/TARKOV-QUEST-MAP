@@ -103,6 +103,137 @@ export function parseGalleries(text: string): { file: string; caption: string }[
 /** Photos des galeries de la section Guide. */
 export const parseGuideGalleries = (wikitext: string) => parseGalleries(guideSection(wikitext));
 
+// --- Photos d'un seul point : on rapproche le texte de l'objectif du titre de chaque galerie du guide ---
+
+/** Nom de map du jeu -> nom de la map sur le wiki (variantes : Night Factory, Ground Zero 21+, The Lab (Dark)). */
+export const wikiMapName = (name: string) =>
+  name.replace(/\s*\(dark\)\s*$/i, "").replace(/\s*21\+\s*$/, "").replace(/^night factory$/i, "Factory");
+
+const SPOT_STOPWORDS = new Set(
+  "the a an of on at in to and or with from by for near inside your you is are as it its this that all any who where some very".split(" "),
+);
+// « first » du wiki n'est pas forcément le « first » du jeu : les ordinaux ne servent pas à rapprocher
+const SPOT_ORDINALS = new Set("first second third fourth fifth sixth seventh eighth ninth tenth one two three".split(" "));
+
+function spotTokens(text: string): Set<string> {
+  const words = text.toLowerCase().replace(/['’]/g, "").match(/[a-z0-9]+/g) ?? [];
+  return new Set(words.filter((w) => !SPOT_STOPWORDS.has(w) && !SPOT_ORDINALS.has(w)));
+}
+
+interface SpotBlock {
+  /** Map du bloc (nom wiki en minuscules) : titre de map en vigueur, ou lien de map dans sa phrase d'introduction. */
+  map: string | null;
+  /** Ligne en gras ou titre de section (hors titre qui n'est qu'un nom de map). */
+  title: string;
+  /** Dernière ligne de texte avant la galerie. */
+  text: string;
+  photos: { file: string; caption: string }[];
+}
+
+/** Maps (nom wiki, minuscules) liées par [[Map]] ou [[Map|texte]] dans un texte. */
+function linkedMaps(text: string, maps: Set<string>): Set<string> {
+  const found = new Set<string>();
+  for (const m of text.matchAll(/\[\[([^\]|#]+)(?:\|[^\]]*)?\]\]/g)) {
+    const key = wikiMapName(m[1].trim()).toLowerCase();
+    if (maps.has(key)) found.add(key);
+  }
+  return found;
+}
+
+/** Un bloc par galerie du guide : map, titre (gras ou titre de section), dernière ligne de texte et photos. */
+function spotBlocks(wikitext: string, mapNames: string[]): SpotBlock[] {
+  const guide = guideSection(wikitext);
+  const maps = new Set(mapNames.map((n) => wikiMapName(n).toLowerCase()));
+  const blocks: SpotBlock[] = [];
+  let last = 0;
+  let sticky: string | null = null;
+  for (const g of guide.matchAll(/<gallery[^>]*>[\s\S]*?<\/gallery>/gi)) {
+    const before = guide.slice(last, g.index).replace(/\{\|[\s\S]*?\|\}/g, "").replace(/\[\[(?:File|Image):[^\]]*\]\]/gi, "");
+    last = g.index + g[0].length;
+    let bold = "";
+    let heading = "";
+    let text = "";
+    for (const raw of before.split("\n")) {
+      const line = raw.replace(/<[^>]+>/g, "").trim();
+      if (!line) continue;
+      const h = line.match(/^(=+)\s*(.+?)\s*\1$/);
+      if (h) {
+        text = ""; // le texte est celui qui suit le dernier titre
+        const label = cleanCaption(h[2]);
+        const own = linkedMaps(h[2], maps);
+        if (maps.has(wikiMapName(label).toLowerCase())) sticky = wikiMapName(label).toLowerCase();
+        else {
+          if (own.size === 1) sticky = [...own][0];
+          heading = label;
+        }
+        continue;
+      }
+      const b = line.match(/^'''(.+)'''$/);
+      if (b) bold = cleanCaption(b[1]);
+      text = line;
+    }
+    const own = linkedMaps(text, maps);
+    blocks.push({ map: own.size === 1 ? [...own][0] : sticky, title: bold || heading, text: cleanCaption(text), photos: parseGalleries(g[0]) });
+  }
+  return blocks;
+}
+
+/**
+ * Fichiers à montrer pour un point de la carte (null = tout montrer, quand le lien n'est pas certain).
+ * Rapproche l'objectif (en anglais) du titre, puis des légendes de photo, puis du texte de chaque galerie du guide.
+ */
+export function photoFilesForSpot(
+  wikitext: string,
+  target: { text: string; allTexts: string[]; mapName: string; mapNames: string[] },
+): string[] | null {
+  const blocks = spotBlocks(wikitext, target.mapNames);
+  if (blocks.length === 0) return null;
+  const mapWords = new Set(target.mapNames.flatMap((n) => [...spotTokens(n), ...spotTokens(wikiMapName(n))]));
+  const common = (w: string) => target.allTexts.length >= 2 && target.allTexts.filter((t) => spotTokens(t).has(w)).length > target.allTexts.length / 2;
+  const wanted = [...spotTokens(target.text)].filter((w) => !mapWords.has(w) && !common(w));
+  const score = (text: string) => {
+    const tokens = spotTokens(text);
+    return wanted.filter((w) => tokens.has(w)).length / wanted.length;
+  };
+
+  // plusieurs maps repérées dont la sienne : on écarte les blocs d'une autre map (les blocs sans map restent)
+  const mapKey = wikiMapName(target.mapName).toLowerCase();
+  const tagged = new Set(blocks.flatMap((b) => (b.map ? [b.map] : [])));
+  const restricted = tagged.size >= 2 && tagged.has(mapKey);
+  const candidates = restricted ? blocks.filter((b) => !b.map || b.map === mapKey) : blocks;
+  const files = (list: { file: string }[]) => [...new Set(list.map((p) => p.file))];
+
+  // meilleur bloc : score >= 0.6, strictement au-dessus de tous les autres
+  const unique = (scores: number[]) => {
+    const best = Math.max(...scores);
+    return best >= 0.6 && scores.filter((s) => s === best).length === 1 ? scores.indexOf(best) : -1;
+  };
+
+  // titre court (« ZB-016 ») dont tous les mots sont dans l'objectif : correspondance complète
+  const titleScore = (title: string) => {
+    const own = [...spotTokens(title)].filter((w) => !mapWords.has(w) && !common(w));
+    return own.length > 0 && own.every((w) => wanted.includes(w)) ? 1 : score(title);
+  };
+  // sans mot distinctif dans l'objectif, aucun rapprochement : seul le niveau map reste possible
+  const byTitle = wanted.length ? unique(candidates.map((b) => titleScore(b.title))) : -1;
+  if (byTitle >= 0) return files(candidates[byTitle].photos);
+
+  const isOverview = (p: { file: string; caption: string }) => /\bmap\b/i.test(p.caption) || /map/i.test(p.file);
+  // une carte d'ensemble ne concourt pas : sa légende répète souvent les mots de l'objectif
+  const photos = candidates.flatMap((b) => b.photos.filter((p) => !isOverview(p)).map((p) => ({ block: b, photo: p })));
+  const byCaption = wanted.length ? unique(photos.map((p) => score(p.photo.caption))) : -1;
+  if (byCaption >= 0) {
+    const { block, photo } = photos[byCaption];
+    return files([...block.photos.filter(isOverview), photo]);
+  }
+
+  const byText = wanted.length ? unique(candidates.map((b) => score(b.text))) : -1;
+  if (byText >= 0) return files(candidates[byText].photos);
+
+  if (candidates.length < blocks.length) return files(candidates.flatMap((b) => b.photos));
+  return null;
+}
+
 // --- Requêtes au wiki, une par seconde au plus ---
 
 let queue: Promise<unknown> = Promise.resolve();

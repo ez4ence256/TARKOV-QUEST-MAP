@@ -284,6 +284,7 @@ function readTask(raw: Dict, t: (k: unknown) => string, tEn: (k: unknown) => str
       id: asString(obj.id) ?? `${id}-obj-${index}`,
       type: asString(obj.type) ?? "unknown",
       description: t(obj.description),
+      descriptionEn: tEn(obj.description),
       optional: obj.optional === true,
       mapIds: [...new Set(asArray(obj.maps).map(mapRef).filter((m): m is string => m !== null))],
       locations: onTaskMap(readLocations(obj), taskMap),

@@ -16,20 +16,19 @@ export const manualPointKey = (objectiveId: string) => `${objectiveId}@manual`;
 export const hasApiPosition = (o: Objective) => o.locations.length > 0;
 
 /**
- * Première position de la même zone : les variantes d'une map (Usine jour / nuit, Point zéro 21+) la répètent
- * à quelques mètres. Les emplacements possibles d'un objet ne comptent pas : ce sont de vrais endroits différents.
+ * Première zone du même objectif sur la même map : un objectif se fait une seule fois, ses autres zones
+ * (morceaux d'une zone, variantes de la map comme Usine jour / nuit) se replient sur celle-ci.
+ * Les emplacements possibles d'un objet ne comptent pas : ils sont regroupés à part.
  */
 function zoneRoot(o: Objective, loc: Objective["locations"][number]) {
   if (loc.possible) return loc;
-  return (
-    o.locations.find((l) => !l.possible && l.mapId === loc.mapId && Math.hypot(l.position.x - loc.position.x, l.position.z - loc.position.z) < 3 && Math.abs(l.position.y - loc.position.y) < 2) ?? loc
-  );
+  return o.locations.find((l) => !l.possible && l.mapId === loc.mapId) ?? loc;
 }
 
-/** Position qui répète une zone déjà comptée : le nombre de points à faire ne la compte pas. */
+/** Zone qui répète une zone déjà comptée du même objectif sur la même map : le nombre de points à faire ne la compte pas. */
 export const isZoneRepeat = (o: Objective, loc: Objective["locations"][number]) => zoneRoot(o, loc) !== loc;
 
-/** Identifiant du groupe d'un point : sa zone, sinon son objectif (emplacements possibles). */
+/** Identifiant du groupe d'un point : son objectif sur sa map (zones), sinon son objectif (emplacements possibles). */
 export const groupIdOf = (p: MapPoint) => p.zoneKey ?? p.objectiveId ?? "";
 
 /** Maps (ids) où un objectif a des positions connues, avec le nombre de points. */
@@ -191,7 +190,7 @@ export const normalizeSearch = (s: string) =>
   s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 /**
- * Emplacements possibles d'un même objet (points `spawn`) et positions d'une même zone (`zoneKey`) regroupés : un seul point affiché tant que
+ * Emplacements possibles d'un même objet (points `spawn`) et zones d'un même objectif sur une même map (`zoneKey`) regroupés : un seul point affiché tant que
  * le groupe n'est pas déplié — celui le plus proche du centre du groupe (un vrai emplacement).
  */
 export function spawnGroups(points: MapPoint[]): Map<string, { rep: string; keys: string[] }> {

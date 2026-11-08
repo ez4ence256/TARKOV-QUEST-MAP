@@ -166,4 +166,16 @@ describe("étages supérieurs et souterrains", () => {
     expect(levelBadge(customs, layerIndex(customs, "4th Floor"))).toBe("4");
     expect(levelBadge(shoreline, layerIndex(shoreline, "3rd Floor"))).toBe("3");
   });
+
+  it("Usine : une zone dont le centre est sous le niveau principal reste aux Tunnels", () => {
+    const factory = BUNDLED_CALIBRATION["factory"];
+    const tunnels = layerIndex(factory, "Tunnels");
+    const zone = { x: 19.81, z: 3.3, y: -2.56, top: -0.06, bottom: -5.06 };
+    expect(levelOf(zone, factory)).toBe(tunnels);
+    expect(displayLevelOf(zone, factory)).toBe(tunnels);
+    expect(isShownOnLevel(zone, factory, tunnels)).toBe(true);
+    expect(isShownOnLevel(zone, factory, null)).toBe(false);
+    // centre dans le niveau principal : rien ne change
+    expect(levelOf({ x: 19.81, z: 3.3, y: 0.5, top: 2, bottom: -2 }, factory)).toBeNull();
+  });
 });

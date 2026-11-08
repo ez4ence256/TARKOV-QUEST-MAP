@@ -7,7 +7,7 @@ import { fetchTarkovData } from "./tarkovJson";
 import kappaWiki from "../data/kappa-wiki.json";
 
 export const DATA_TTL_MS = 6 * 60 * 60 * 1000; // 6 heures
-const CACHE_VERSION = 11;
+const CACHE_VERSION = 12;
 const cacheKey = (mode: GameMode, lang: string) => `tqp:data:v${CACHE_VERSION}:${mode}:${lang}`;
 
 export function readCachedData(mode: GameMode, lang: string): TarkovData | null {
