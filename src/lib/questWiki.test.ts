@@ -174,14 +174,11 @@ describe("comparaison des prérequis", () => {
   });
   const ctx = { tasks: [ratHunting, signal3], traders };
 
-  it("Signal - Part 3 : quête préalable et Kappa en désaccord, niveau d'accord", () => {
+  it("Signal - Part 3 : quête préalable en désaccord, niveau d'accord, Kappa du wiki ignorée (ancien reqkappa)", () => {
     const cmp = comparePrerequisites(signal3, readWikiQuest(SIGNAL_3_WIKI), ctx);
     expect(cmp.tarkovTasks).toEqual([{ name: "Rat Hunting", taskId: "rat", status: ["complete"] }]);
     expect(cmp.wikiTasks).toEqual([]);
-    expect(cmp.warnings).toEqual([
-      "tarkov.dev demande la quête « Rat Hunting », que le wiki ne mentionne pas.",
-      "Kappa : non requise selon tarkov.dev, requise selon le wiki.",
-    ]);
+    expect(cmp.warnings).toEqual(["tarkov.dev demande la quête « Rat Hunting », que le wiki ne mentionne pas."]);
     // quête suivante d'après tarkov.dev (celle qui demande Rat Hunting)
     expect(comparePrerequisites(ratHunting, null, ctx).tarkovNext).toEqual([{ name: "Signal - Part 3", taskId: "signal3" }]);
   });

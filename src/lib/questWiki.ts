@@ -172,11 +172,7 @@ export function comparePrerequisites(task: Task, wiki: WikiQuest | null, ctx: Qu
         tr(`Niveau de fidélité du marchand : ${loyalty ? `LL${loyalty}` : "non indiqué"} selon tarkov.dev, LL${wiki.loyaltyLevel} selon le wiki.`, `Trader loyalty level: ${loyalty ? `LL${loyalty}` : "not specified"} per tarkov.dev, LL${wiki.loyaltyLevel} per the wiki.`),
       );
     }
-    if (wiki.kappa !== null && wiki.kappa !== task.kappaRequired) {
-      warnings.push(
-        tr(`Kappa : ${task.kappaRequired ? "requise" : "non requise"} selon tarkov.dev, ${wiki.kappa ? "requise" : "non requise"} selon le wiki.`, `Kappa: ${task.kappaRequired ? "required" : "not required"} per tarkov.dev, ${wiki.kappa ? "required" : "not required"} per the wiki.`),
-      );
-    }
+    // pas de comparaison Kappa : le champ reqkappa du wiki date d'avant la 1.1.0.0 (retiré le 22/10/2026), une page en cache peut encore l'avoir
   }
   return { tarkovTasks, wikiTasks, tarkovNext, wikiNext, warnings };
 }

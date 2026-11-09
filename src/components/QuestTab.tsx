@@ -539,9 +539,9 @@ export function QuestTab(p: Props) {
           <li>
             Kappa{tr(" : ", ": ")}
             {/* quête absente de tarkov.dev : seul l'avis du wiki compte */}
-            {/* kappaRequired réunit tarkov.dev et la liste du wiki (src/data/kappa-wiki.json) */}
-            {task.source !== "wiki" && <>{task.kappaRequired ? tr("requise", "required") : tr("non requise", "not required")} (tarkov.dev + wiki)</>}
-            {wiki && wiki.kappa !== null ? `${task.source !== "wiki" ? " · " : ""}${wiki.kappa ? tr("requise", "required") : tr("non requise", "not required")} (wiki)` : ""}
+            {/* kappaRequired vient de tarkov.dev */}
+            {task.source !== "wiki" && <>{task.kappaRequired ? tr("requise", "required") : tr("non requise", "not required")} (tarkov.dev)</>}
+            {task.source === "wiki" && wiki && wiki.kappa !== null ? `${wiki.kappa ? tr("requise", "required") : tr("non requise", "not required")} (wiki)` : ""}
           </li>
           {task.details?.lightkeeperRequired && <li>{tr("Requise pour Lightkeeper (tarkov.dev)", "Required for Lightkeeper (tarkov.dev)")}</li>}
         </ul>
