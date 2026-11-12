@@ -1,7 +1,8 @@
 {
   "name": "Tarkov Quest Planner",
   "short_name": "Quest Planner",
-  "description": "Carte et suivi des quêtes Escape from Tarkov",
+  "description": "Escape from Tarkov quest map and tracker",
+  "lang": "en",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

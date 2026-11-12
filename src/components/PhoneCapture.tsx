@@ -1,7 +1,6 @@
 // Côté PC de la capture par téléphone : session sur le relais, QR code, attente des photos.
 // Quand le téléphone confirme, les photos sont récupérées (lecture unique) et remises à CaptureTab pour l'OCR.
-import { useEffect, useMemo, useRef, useState } from "react";
-import qrcode from "qrcode-generator";
+import { useEffect, useRef, useState } from "react";
 import { plural, tr } from "../lib/i18n";
 import { isLocalOrigin, normalizeOrigin, phoneUrl, PHONE_ORIGIN_KEY } from "../lib/phoneCapture";
 import { isStaleBuildError, staleBuildMessage } from "../lib/staleBuild";
@@ -132,12 +131,20 @@ export function PhoneCapture({ onPhotos }: { onPhotos: (photos: Blob[]) => void 
   }, [code]);
 
   // QR en data: GIF généré localement (aucun service externe)
-  const qr = useMemo(() => {
-    if (!code || !origin) return null;
-    const q = qrcode(0, "M");
-    q.addData(phoneUrl(origin, code));
-    q.make();
-    return q.createDataURL(5, 3);
+  // le générateur n'est chargé qu'à l'ouverture de cette fenêtre
+  const [qr, setQr] = useState<string | null>(null);
+  useEffect(() => {
+    if (!code || !origin) return setQr(null);
+    let alive = true;
+    void import("qrcode-generator").then(({ default: qrcode }) => {
+      const q = qrcode(0, "M");
+      q.addData(phoneUrl(origin, code));
+      q.make();
+      if (alive) setQr(q.createDataURL(5, 3));
+    });
+    return () => {
+      alive = false;
+    };
   }, [code, origin]);
 
   if (state.step === "idle" || state.step === "error") {

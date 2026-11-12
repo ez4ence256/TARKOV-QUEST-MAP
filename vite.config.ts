@@ -51,5 +51,6 @@ export default defineConfig(({ mode }) => ({
   plugins: [react(), roomsPlugin, sitePlugin((loadEnv(mode, ".", "").SITE_URL || "https://tarkov.aprilox.fr/").replace(/\/*$/, "/"))],
   test: {
     environment: "jsdom",
+    setupFiles: ["./src/testSetup.ts"],
   },
 }));

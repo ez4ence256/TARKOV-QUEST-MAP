@@ -2,7 +2,7 @@
 // ModePicker.test.tsx vérifie que les deux (et les données structurées) disent la même chose.
 import { tr } from "./i18n";
 
-/** Titre de l'onglet hors carte (index.html porte la version française). */
+/** Titre de l'onglet hors carte (index.html porte la version anglaise). */
 export const homeTitle = () =>
   tr("Carte et suivi des quêtes Escape from Tarkov | Tarkov Quest Planner", "Escape from Tarkov quest map and tracker | Tarkov Quest Planner");
 

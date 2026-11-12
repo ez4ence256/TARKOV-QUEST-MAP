@@ -22,3 +22,25 @@ export const LIGHTKEEPER_SERVICES: Record<string, { fr: string; en: string }> = 
   Provocation: { fr: "Soutien des Rogues (2 Secure magnetic tape cassette + 2 500 €)", en: "Rogue support (2 Secure magnetic tape cassette + €2,500)" },
   "Make an Impression": { fr: "Soutien de Zryachiy (3 Military flash drive + 2 000 $)", en: "Zryachiy support (3 Military flash drive + $2,000)" },
 };
+
+/**
+ * Guide : quêtes à faire avant Lightkeeper (`before`) puis les siennes (`own`), chacune après ses préalables
+ * (ordre topologique ; à égalité : tarkov.dev avant wiki, niveau requis, nom). Préalable inconnu ignoré ;
+ * cycle : le reste est ajouté dans l'ordre de tri. shortcut: split par marchand après le tri global, un préalable
+ * de Lightkeeper qui dépendrait d'une de ses quêtes resterait dans `before`.
+ */
+export function lightkeeperSteps<T extends Pick<Task, "id" | "name" | "traderId" | "minPlayerLevel" | "lightkeeperRequired" | "source" | "details">>(tasks: T[]): { before: T[]; own: T[] } {
+  const inSet = tasks.filter((t) => t.lightkeeperRequired);
+  const ids = new Set(inSet.map((t) => t.id));
+  const cmp = (a: T, b: T) => Number(a.source === "wiki") - Number(b.source === "wiki") || (a.minPlayerLevel ?? 0) - (b.minPlayerLevel ?? 0) || a.name.localeCompare(b.name);
+  const waiting = new Map(inSet.map((t) => [t.id, new Set((t.details?.taskRequirements ?? []).map((r) => r.taskId).filter((id) => ids.has(id) && id !== t.id))]));
+  const sorted: T[] = [];
+  const left = [...inSet].sort(cmp);
+  while (left.length) {
+    const i = left.findIndex((t) => waiting.get(t.id)!.size === 0);
+    const [t] = left.splice(i < 0 ? 0 : i, 1); // i < 0 : cycle
+    sorted.push(t);
+    for (const w of waiting.values()) w.delete(t.id);
+  }
+  return { before: sorted.filter((t) => t.traderId !== LIGHTKEEPER_TRADER_ID), own: sorted.filter((t) => t.traderId === LIGHTKEEPER_TRADER_ID) };
+}

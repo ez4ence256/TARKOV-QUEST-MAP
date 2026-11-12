@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Objective, Task } from "../types";
 import { computeNeeds } from "./itemNeeds";
+import { prerequisiteChanges } from "./questChain";
 
 const obj = (id: string, type: string, extra: Partial<Objective> = {}): Objective => ({ id, type, description: "", optional: false, mapIds: [], locations: [], ...extra });
 const task = (id: string, objectives: Objective[], faction?: "BEAR" | "USEC"): Task => ({
@@ -37,5 +38,28 @@ describe("computeNeeds", () => {
     expect(computeNeeds({ tasks: [], done: {}, stations }).get("h")!.count).toBe(7);
     expect(computeNeeds({ tasks: [], done: {} }).size).toBe(0);    // station ignorée (-1) : aucun de ses niveaux ne compte
     expect(computeNeeds({ tasks: [], done: {}, stations, hideoutLevels: { s: -1 } }).has("h")).toBe(false);
+  });
+  it("planque exclue (sans stations) : les objets de la planque deviennent vendables, ceux des quêtes restent à garder ; incluse : les deux", () => {
+    const stations = [{ id: "s", name: "S", levels: [{ level: 1, items: [{ itemId: "h", count: 2, fir: false }, { itemId: "i1", count: 4, fir: false }] }] }];
+    const without = computeNeeds({ tasks, done: {} });
+    expect(without.has("h")).toBe(false);
+    expect(without.get("i1")!.count).toBe(5);
+    const withHideout = computeNeeds({ tasks, done: {}, stations });
+    expect(withHideout.get("h")!.count).toBe(2);
+    expect(withHideout.get("i1")!.count).toBe(9);
+  });
+  it("prérequis d'une quête activée : grisés comme sur la carte, donc leurs objets sont vendables", () => {
+    const pre = task("pre", [obj("p1", "giveItem", { itemIds: ["ip"], count: 2 })]);
+    const next = task("next", [obj("n1", "giveItem", { itemIds: ["in"], count: 1 })]);
+    next.details = { taskRequirements: [{ taskId: "pre", status: ["complete"] }] } as Task["details"];
+    const all = [pre, next];
+    expect(computeNeeds({ tasks: all, done: {} }).get("ip")!.count).toBe(2); // pas encore activée
+    // activation : la même fonction que l'app (greyPrerequisites) coche les objectifs des prérequis
+    const { complete } = prerequisiteChanges("next", all, {}, {});
+    expect(complete).toEqual(["pre"]);
+    const done = Object.fromEntries(all.filter((t) => complete.includes(t.id)).flatMap((t) => t.objectives.map((o) => [o.id, 1])));
+    const n = computeNeeds({ tasks: all, done });
+    expect(n.has("ip")).toBe(false);
+    expect(n.get("in")!.count).toBe(1);
   });
 });

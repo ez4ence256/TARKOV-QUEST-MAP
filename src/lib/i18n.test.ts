@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { plural, setLang, tr } from "./i18n";
 
 afterEach(() => setLang("fr"));
@@ -21,5 +21,27 @@ describe("plural", () => {
   it("anglais : pluriel sauf pour 1", () => {
     setLang("en");
     expect([0, 1, 2].map((n) => `quest${plural(n)}`)).toEqual(["quests", "quest", "quests"]);
+  });
+});
+
+describe("langue par défaut", () => {
+  const initial = async (stored: Record<string, string>) => {
+    localStorage.clear();
+    Object.entries(stored).forEach(([k, v]) => localStorage.setItem(k, v));
+    vi.resetModules();
+    return (await import("./i18n")).getLang();
+  };
+  afterEach(() => localStorage.clear());
+  it("anglais sans rien d'enregistré, et le choix est fixé", async () => {
+    expect(await initial({})).toBe("en");
+    expect(localStorage.getItem("tqp:lang")).toBe("en");
+  });
+  it("le choix enregistré est respecté", async () => {
+    expect(await initial({ "tqp:lang": "fr" })).toBe("fr");
+    expect(await initial({ "tqp:lang": "en", "tqp:lastMode": "pve" })).toBe("en");
+  });
+  it("visiteur d'avant (données mais pas de langue) : reste en français", async () => {
+    expect(await initial({ "tqp:lastMode": "regular" })).toBe("fr");
+    expect(await initial({ "tqp:state:v1": "{}" })).toBe("fr");
   });
 });

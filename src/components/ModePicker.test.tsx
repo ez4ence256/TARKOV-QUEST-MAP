@@ -4,13 +4,15 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import indexHtml from "../../index.html?raw";
 import { ModePicker } from "./ModePicker";
+import { setLang } from "../lib/i18n";
 import { homeContent } from "../lib/homeContent";
 import { version } from "../../package.json";
 
+setLang("en"); // la copie statique d'index.html est anglaise
 const html = indexHtml.replaceAll("__SITE_URL__", "https://example.test/").replaceAll("__APP_VERSION__", version);
 const staticDoc = new DOMParser().parseFromString(html, "text/html");
 const reactDoc = new DOMParser().parseFromString(
-  renderToStaticMarkup(<ModePicker last={null} onPick={() => {}} lang="fr" onLang={() => {}} />),
+  renderToStaticMarkup(<ModePicker last={null} onPick={() => {}} lang="en" onLang={() => {}} />),
   "text/html",
 );
 
@@ -67,7 +69,7 @@ describe("index.html : référencement", () => {
   const meta = (sel: string) => staticDoc.querySelector(sel)?.getAttribute("content") ?? "";
   it("titre, description, lien canonique et partage", () => {
     expect(staticDoc.title.length).toBeLessThanOrEqual(70);
-    expect(staticDoc.title).toBe("Carte et suivi des quêtes Escape from Tarkov | Tarkov Quest Planner");
+    expect(staticDoc.title).toBe("Escape from Tarkov quest map and tracker | Tarkov Quest Planner");
     const description = meta('meta[name="description"]');
     expect(description.length).toBeGreaterThanOrEqual(110);
     expect(description.length).toBeLessThanOrEqual(160);

@@ -1,5 +1,5 @@
 // Composant racine : choix du mode, chargement des données, panneau + carte.
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { GameMap, GameMode, Objective, TarkovData, Task } from "./types";
 import { GAME_MODES } from "./types";
 import { loadTarkovData } from "./api/cache";
@@ -18,7 +18,6 @@ import { SettingsTab } from "./components/SettingsTab";
 import { HideoutTab } from "./components/HideoutTab";
 import { PhotosTab, type ExitPhotosTarget, type PhotoSpot, type StoryPhotosTarget } from "./components/PhotosTab";
 import { ResetProgressSection } from "./components/ResetProgressSection";
-import { QuestTab } from "./components/QuestTab";
 import { CaptureTab } from "./components/CaptureTab";
 import { dominantMap } from "./lib/ocrMatch";
 import { PanelResizer } from "./components/PanelResizer";
@@ -47,10 +46,14 @@ import { MapPicker } from "./components/MapPicker";
 import { Rail, type RailGroup } from "./components/Rail";
 import { RaidCard } from "./components/RaidCard";
 import { FirstVisitHelp, helpWanted, resetHelp } from "./components/FirstVisitHelp";
-import { ItemFinder } from "./components/ItemFinder";
-import { TraderWindow } from "./components/TraderWindow";
+import { LazyWindow } from "./components/LazyWindow";
 import { Lightbox } from "./components/Lightbox";
 import { UnlockToast } from "./components/UnlockToast";
+
+// fenêtres et vues chargées à la demande (hors du premier écran : carte + Mes quêtes)
+const loadItemFinder = () => import("./components/ItemFinder").then((m) => m.ItemFinder);
+const loadTraderWindow = () => import("./components/TraderWindow").then((m) => m.TraderWindow);
+const QuestTab = lazy(() => import("./components/QuestTab").then((m) => ({ default: m.QuestTab })));
 
 type Tab = "selection" | "quests" | "capture" | "quest" | "photos" | "custom" | "hideout" | "settings";
 
@@ -822,26 +825,30 @@ export default function App() {
         panelOpen={panelOpen}
         onTogglePanel={() => setPanelOpen((o) => !o)}
         finder={
-          <ItemFinder variant="rail" openItem={finderItem} onItemClosed={() => setFinderItem(null)}onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })} gameMode={gameMode} lang={lang} tasks={tasks} traders={data?.traders ?? []} maps={maps} itemNames={data?.itemNames ?? NO_NAMES} itemIcons={data?.itemIcons ?? NO_NAMES} onShowQuest={showQuest}
-            done={mode.done}
-            failed={failed}
-            needs={needs}
-            hideoutIncluded={includeHideout}
-            hideoutLevels={mode.hideout}
-            onIncludeHideout={() => dispatch({ type: "setIncludeHideout", value: true })}
-            onAddPoint={(pt) => {
-              const point = { ...pt, id: newId(), createdAt: Date.now() };
-              dispatch({ type: "addCustom", point });
-              // en fond, la carte passe sur la map du point et le centre (le finder reste ouvert)
-              focusPoint(`custom:${point.id}`, point.mapId);
-            }}
-            onShowSpots={(spots, spot) => {
-              setItemSpots(spots);
-              focusPoint(spot.key, spot.mapId);
-            }}
-          />
+          <LazyWindow load={loadItemFinder} icon="search" label={tr("Objets", "Items")} title={tr("Chercher où sert un objet", "Find where an item is used")} forceLoad={finderItem != null}>
+            {(ItemFinder) => (
+            <ItemFinder variant="rail" openItem={finderItem} onItemClosed={() => setFinderItem(null)}onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })} gameMode={gameMode} lang={lang} tasks={tasks} traders={data?.traders ?? []} maps={maps} itemNames={data?.itemNames ?? NO_NAMES} itemIcons={data?.itemIcons ?? NO_NAMES} onShowQuest={showQuest}
+              done={mode.done}
+              failed={failed}
+              needs={needs}
+              hideoutIncluded={includeHideout}
+              hideoutLevels={mode.hideout}
+              onIncludeHideout={() => dispatch({ type: "setIncludeHideout", value: true })}
+              onAddPoint={(pt) => {
+                const point = { ...pt, id: newId(), createdAt: Date.now() };
+                dispatch({ type: "addCustom", point });
+                // en fond, la carte passe sur la map du point et le centre (le finder reste ouvert)
+                focusPoint(`custom:${point.id}`, point.mapId);
+              }}
+              onShowSpots={(spots, spot) => {
+                setItemSpots(spots);
+                focusPoint(spot.key, spot.mapId);
+              }}
+            />
+            )}
+          </LazyWindow>
         }
-        traders={<TraderWindow variant="rail" onOpenItem={setFinderItem}gameMode={gameMode} lang={lang} traders={data?.traders ?? []} tasks={tasks} itemIcons={data?.itemIcons ?? NO_NAMES} done={mode.done} onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })} />}
+        traders={<LazyWindow load={loadTraderWindow} icon="store" label={tr("Marchands", "Traders")} ariaLabel={tr("Marchands", "Traders")} title={tr("Ce que vendent les marchands, par niveau", "What traders sell, by level")}>{(TraderWindow) => <TraderWindow variant="rail" onOpenItem={setFinderItem}gameMode={gameMode} lang={lang} traders={data?.traders ?? []} tasks={tasks} itemIcons={data?.itemIcons ?? NO_NAMES} done={mode.done} onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })} failed={failed} selectedIds={mode.selected.map((s) => s.taskId)} onCompleteQuest={completeTask} onResetQuest={(task) => dispatch({ type: "resetProgress", objectiveIds: task.objectives.map((o) => o.id), taskId: task.id })} onAddQuest={toggleTask} onOpenQuest={showQuest} />}</LazyWindow>}
         room={<RoomControl variant="rail" room={room} />}
       />
 
@@ -926,7 +933,8 @@ export default function App() {
             )
           )}
           {data && tab === "quest" && (
-            <QuestTab
+            <Suspense fallback={<div className="tab-body notice muted">{tr("Chargement…", "Loading…")}</div>}>
+              <QuestTab
               tasks={tasks}
               traders={data.traders}
               maps={maps}
@@ -952,6 +960,7 @@ export default function App() {
               onComplete={completeTask}
               onPhotos={showPhotos}
             />
+            </Suspense>
           )}
           {data && tab === "capture" && (
             <CaptureTab

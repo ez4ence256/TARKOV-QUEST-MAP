@@ -13,6 +13,11 @@ import { loadItemCategories, loadItemList, loadTraderOffers, type ListedItem } f
 import { CategoryTree, StreamerChecklist } from "./ItemFinder";
 import { collectorItems } from "../lib/collector";
 import { ItemThumb } from "./ItemThumb";
+import { LightkeeperGuide } from "./LightkeeperGuide";
+import { LIGHTKEEPER_TRADER_ID } from "../lib/lightkeeper";
+
+/** Pseudo-identifiant de l'onglet « guide Lightkeeper » (distinct de son onglet d'offres). */
+const LK_GUIDE = "lightkeeper-guide";
 
 /** Catégorie « Objets d'échange » (Barter items) du handbook du jeu. */
 const BARTER_ITEMS = "5b47574386f77428ca22b33e";
@@ -26,6 +31,13 @@ interface Props {
   /** Objectifs cochés : objets streamer de Collector mis de côté (portrait de Fence). */
   done: Record<string, number>;
   onSetDone: (objectiveId: string, value: boolean) => void;
+  /** Guide Lightkeeper : mêmes actions que « Quête terminée » / « Ajouter à mes quêtes » / « Ouvrir la fiche ». */
+  failed: Record<string, true>;
+  selectedIds: string[];
+  onCompleteQuest: (task: Task) => void;
+  onResetQuest: (task: Task) => void;
+  onAddQuest: (taskId: string) => void;
+  onOpenQuest: (taskId: string) => void;
   /** Clic sur un objet streamer : ouvre sa fiche dans la fenêtre Objets. */
   onOpenItem: (itemId: string) => void;
   /** « rail » : bouton de la barre latérale (icône au-dessus du libellé). */
@@ -50,7 +62,7 @@ export function TraderWindow(props: Props) {
   );
 }
 
-function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, done, onSetDone, onOpenItem, onClose }: Props & { onClose: () => void }) {
+function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, done, onSetDone, onOpenItem, onClose, failed, selectedIds, onCompleteQuest, onResetQuest, onAddQuest, onOpenQuest }: Props & { onClose: () => void }) {
   const [file, setFile] = useState<TraderOffersFile | null>(null);
   const [items, setItems] = useState<Map<string, ListedItem> | null>(null);
   const [error, setError] = useState(false);
@@ -93,7 +105,10 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, done, onSetDo
   // Fence ne vend rien ici : son portrait, tout à droite, ouvre les objets streamer de sa quête Collector
   const fence = traders.find((t) => t.normalizedName === "fence");
   const collector = useMemo(() => collectorItems(tasks, done), [tasks, done]);
+  const lightkeeper = traders.find((t) => t.id === LIGHTKEEPER_TRADER_ID);
   const current = trader ?? shown[0]?.id ?? null;
+  const guide = current === LK_GUIDE;
+  const itemNames = useMemo(() => (guide && items ? Object.fromEntries([...items].map(([id, i]) => [id, i.name])) : {}), [guide, items]);
   const levels = (current && file?.levels[current]) || [[1, 0, 0, 0] as [number, number, number, number]];
   const all = level === 0;
   const lvl = all ? levels.length : Math.min(level, levels.length);
@@ -169,8 +184,20 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, done, onSetDo
                   <span>{fence.name}</span>
                 </button>
               )}
+              {lightkeeper && (
+                <button role="tab" aria-selected={guide} className={`trader-pick${guide ? " active" : ""}`} onClick={() => pickTrader(LK_GUIDE)} title={tr("Lightkeeper : guide pas à pas pour le débloquer", "Lightkeeper: step-by-step guide to unlock him")}>
+                  {lightkeeper.imageLink ? <img src={lightkeeper.imageLink} alt="" width={56} height={56} loading="lazy" referrerPolicy="no-referrer" /> : <span className="trader-noimg" />}
+                  <span>{tr("Guide Lightkeeper", "Lightkeeper guide")}</span>
+                </button>
+              )}
             </div>
-            {fence && current === fence.id ? (
+            {guide ? (
+              <div className="finder-body">
+                <div className="finder-main" tabIndex={0} role="region" aria-label={tr("Guide Lightkeeper", "Lightkeeper guide")}>
+                  <LightkeeperGuide tasks={tasks} traders={traders} done={done} failed={failed} selectedIds={selectedIds} itemIcons={itemIcons} itemNames={itemNames} lang={lang} onComplete={onCompleteQuest} onReset={onResetQuest} onAddQuest={onAddQuest} onOpenQuest={(id) => { onClose(); onOpenQuest(id); }} />
+                </div>
+              </div>
+            ) : fence && current === fence.id ? (
               <div className="finder-body">
                 <div className="finder-main" tabIndex={0} role="region" aria-label={tr("Liste Fence", "Fence list")}>
                   <StreamerChecklist collector={collector} name={name} alts={(id) => items?.get(id)?.alts ?? []} itemIcons={itemIcons} onSetDone={onSetDone} onOpenItem={(id) => { onClose(); onOpenItem(id); }} />

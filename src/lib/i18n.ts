@@ -1,11 +1,17 @@
-// Langue de l'interface (et des données) : choix enregistré, français par défaut.
+// Langue de l'interface (et des données) : choix enregistré, anglais par défaut.
 export type Lang = "fr" | "en";
 const LANG_KEY = "tqp:lang";
+// Avant le choix explicite, le français était implicite (rien d'enregistré) : un visiteur qui a déjà des données
+// (dernier mode ou état) et pas de langue reste en français. Même règle dans le script d'index.html.
 const readLang = (): Lang => {
   try {
-    return localStorage.getItem(LANG_KEY) === "en" ? "en" : "fr";
+    const stored = localStorage.getItem(LANG_KEY);
+    if (stored === "fr" || stored === "en") return stored;
+    const lang: Lang = localStorage.getItem("tqp:lastMode") || localStorage.getItem("tqp:state:v1") ? "fr" : "en";
+    saveLang(lang); // fixé une fois pour toutes : l'état créé ensuite ne fera pas passer un visiteur anglais en français
+    return lang;
   } catch {
-    return "fr";
+    return "en";
   }
 };
 const saveLang = (lang: Lang) => {
