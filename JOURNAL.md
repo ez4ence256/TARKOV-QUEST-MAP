@@ -458,7 +458,7 @@ Faite dans le cloud, sur la branche **`claude/audit-ux-seo-perf`** (rien sur `ma
 **Design et interface**
 - Palette noir / anthracite / kaki avec touches d'orange (variables de `styles.css`), contour de focus orange, animations courtes (désactivées si le système demande moins de mouvement).
 - États vides guidés (« Aucune quête sélectionnée » avec boutons Chercher / Importer une capture ; « Aucune quête ne correspond » avec remise à zéro des filtres). Cartes de quête : boutons **Détails / Photos / Wiki** à la place de trois liens de 12 px séparés par des points.
-- Textes : tutoiement partout (17 textes vouvoyaient), vrais pluriels (`plural`) à la place de « quête(s) », espaces insécables (`frTypo`), textes propres au tactile (`IS_TOUCH`, `src/lib/device.ts` : « photo » au lieu de « Ctrl+V »).
+- Textes : tutoiement partout (22 passages vouvoyaient, dans 10 fichiers), vrais pluriels (`plural`) à la place de « quête(s) », espaces insécables (`frTypo`), textes propres au tactile (`IS_TOUCH`, `src/lib/device.ts` : « photo » au lieu de « Ctrl+V »).
 - Titre de l'onglet du navigateur : la map affichée.
 
 **Performances**
