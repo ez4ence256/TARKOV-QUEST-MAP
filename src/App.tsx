@@ -2,13 +2,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { GameMap, GameMode, Objective, TarkovData, Task } from "./types";
 import { GAME_MODES } from "./types";
-import { loadTarkovData } from "./api/cache";
+import { loadTarkovData, readCachedData } from "./api/cache";
 import { BUNDLED_CALIBRATION, loadCalibration } from "./map/calibration";
 import { MapView, type Placing } from "./map/MapView";
 import type { ItemSpotMarker } from "./map/ItemSpotsLayer";
 import { exportState, getLastMode, useAppState, type CustomPoint } from "./state/store";
 import { QUEST_COLORS } from "./lib/objectiveTypes";
-import { buildObjectivePoints, groupIdOf, isTaskFinished,manualPointKey, questsUnlockedBy, shownObjectives, spawnGroups, taskMapIds } from "./lib/points";
+import { buildObjectivePoints, groupIdOf, isTaskFinished, manualPointKey, questsUnlockedBy, shownObjectives, spawnGroups, taskMapIds } from "./lib/points";
 import { ModePicker } from "./components/ModePicker";
 import { UiIcon } from "./components/UiIcon";
 import { QuestList } from "./components/QuestList";
@@ -22,8 +22,9 @@ import { QuestTab } from "./components/QuestTab";
 import { CaptureTab } from "./components/CaptureTab";
 import { dominantMap } from "./lib/ocrMatch";
 import { PanelResizer } from "./components/PanelResizer";
-import { getLang, setLang as applyLang, tr, type Lang } from "./lib/i18n";
+import { getLang, plural, setLang as applyLang, tr, type Lang } from "./lib/i18n";
 import { clampPanelWidth, readPanelWidth } from "./lib/panelWidth";
+import { IS_TOUCH } from "./lib/device";
 import { storyIdOf, storyStepId } from "./lib/story";
 import { chaptersWithPositions, currentStoryPoints, pointsOnMap } from "./lib/storyPoints";
 import { chapterName, useStoryItems } from "./components/StoryView";
@@ -58,7 +59,7 @@ const TAB_GROUP: Record<Tab, RailGroup> = { selection: "selection", quests: "add
 const GROUP_FIRST: Record<RailGroup, Tab> = { selection: "selection", add: "quests", detail: "quest", custom: "custom", hideout: "hideout", settings: "settings" };
 /** Groupes à deux vues : petit sélecteur en haut du panneau. */
 const SUBS: Partial<Record<RailGroup, [Tab, [string, string]][]>> = {
-  add: [["quests", ["Rechercher", "Search"]], ["capture", ["Capture (Ctrl+V)", "Capture (Ctrl+V)"]]],
+  add: [["quests", ["Rechercher", "Search"]], ["capture", IS_TOUCH ? ["Capture (photo)", "Capture (photo)"] : ["Capture (Ctrl+V)", "Capture (Ctrl+V)"]]],
   detail: [["quest", ["Infos", "Info"]], ["photos", ["Photos", "Photos"]]],
 };
 const readTab = (): Tab => {
@@ -177,7 +178,11 @@ export default function App() {
     const force = reloadToken !== lastReload.current;
     lastReload.current = reloadToken;
     const controller = new AbortController();
-    setLoad((prev) => ({ status: "loading", data: prev.data?.gameMode === gameMode ? prev.data : null }));
+    // Affichage immédiat : la copie locale, même périmée, pendant que la version à jour se télécharge
+    // (sans elle, un écran « Chargement… » à chaque expiration du cache, toutes les 6 h). Un rechargement
+    // demandé garde simplement ce qui est à l'écran.
+    const cached = force ? null : readCachedData(gameMode, lang);
+    setLoad((prev) => ({ status: "loading", data: cached ?? (prev.data?.gameMode === gameMode ? prev.data : null) }));
     loadTarkovData(gameMode, lang, { force, signal: controller.signal })
       .then((res) => setLoad({ status: "ready", ...res }))
       .catch((error: Error) => {
@@ -272,6 +277,18 @@ export default function App() {
     const fromSelection = selectedTasks.map((t) => [...taskMapIds(t)][0]).find(Boolean);
     return byId(mode.mapId) ?? byId(fromSelection) ?? maps.find((m) => m.normalizedName === "customs") ?? maps[0];
   }, [maps, mode.mapId, selectedTasks]);
+
+  // Titre de l'onglet du navigateur : la map affichée d'abord, pour s'y retrouver à côté du jeu.
+  // Sur l'écran d'accueil, le titre d'index.html (celui des moteurs de recherche) est remis.
+  const currentMapName = currentMap?.name;
+  useEffect(() => {
+    if (!gameMode) return;
+    const landingTitle = document.title;
+    document.title = currentMapName ? `${currentMapName} · Tarkov Quest Planner` : "Tarkov Quest Planner";
+    return () => {
+      document.title = landingTitle;
+    };
+  }, [gameMode, currentMapName]);
 
   const oneAtATime = state.oneAtATime !== false;
   // « Kappa seulement » (Ajouter, Mes quêtes) : la carte ne montre plus que les quêtes demandées pour la Kappa
@@ -465,7 +482,7 @@ export default function App() {
     if (!mig) return;
     dispatch({ type: "renameIds", ...mig });
     const n = Object.keys(mig.tasks).length;
-    setChainNotice({ text: tr(`${n} quête(s) du wiki maintenant dans tarkov.dev : progression reprise.`, `${n} wiki quest(s) now in tarkov.dev: progress carried over.`) });
+    setChainNotice({ text: tr(`${n} quête${plural(n)} du wiki maintenant dans tarkov.dev : progression reprise.`, `${n} wiki quest${plural(n)} now in tarkov.dev: progress carried over.`) });
   }, [data, gameMode, mode, eventsSettled, eventEntries]);
   // quête wiki disparue du wiki (page supprimée ou « Historical content »), ou quête tarkov.dev retirée du jeu : retirée de la sélection, sans « Annuler »
   useEffect(() => {
@@ -536,8 +553,8 @@ export default function App() {
       [...fail],
       (k, f) =>
         tr(
-          `${who} : tu y as accès, donc les ${k + f} quête(s) qui la débloquent sont grisée(s) automatiquement (${k} terminée(s)${f ? `, ${f} échouée(s)` : ""}). Une seule activation suffit pour toute la chaîne.${removeOnUndo ? " « Annuler » retire aussi la quête." : ""}`,
-          `${whoEn}: you have access to it, so the ${k + f} quest(s) that unlock it are greyed out automatically (${k} completed${f ? `, ${f} failed` : ""}). One activation covers the whole chain.${removeOnUndo ? ' "Undo" also removes the quest.' : ""}`,
+          `${who} : tu y as accès, donc ${k + f > 1 ? `les ${k + f} quêtes qui la débloquent sont grisées` : "la quête qui la débloque est grisée"} automatiquement (${k} terminée${plural(k)}${f ? `, ${f} échouée${plural(f)}` : ""}). Une seule activation suffit pour toute la chaîne.${removeOnUndo ? " « Annuler » retire aussi la quête." : ""}`,
+          `${whoEn}: you have access to it, so the ${k + f > 1 ? `${k + f} quests that unlock it are` : "quest that unlocks it is"} greyed out automatically (${k} completed${f ? `, ${f} failed` : ""}). One activation covers the whole chain.${removeOnUndo ? ' "Undo" also removes the quest.' : ""}`,
         ),
       replace,
       removeOnUndo ? added.map((t) => t.id) : [],
@@ -566,7 +583,7 @@ export default function App() {
     dispatch({ type: "applyQuestStatus", done: ticks, failed: branch, deselect });
     if (branch.length)
       setChainNotice({
-        text: tr(`${branch.length} quête(s) de branche exclusive marquée(s) échouée(s).`, `${branch.length} quest(s) of an exclusive branch marked as failed.`),
+        text: tr(`${branch.length} quête${plural(branch.length)} de branche exclusive marquée${plural(branch.length)} échouée${plural(branch.length)}.`, `${branch.length} quest${plural(branch.length)} of an exclusive branch marked as failed.`),
         undo: () => dispatch({ type: "applyQuestStatus", done: [], undone: ticks, failed: [], unfailed: branch, select: deselect }),
       });
   };
@@ -585,13 +602,13 @@ export default function App() {
     const modeName = (m: string) => (m === "regular" ? "PvP" : m === "pve" ? "PvE" : tr("PvP Saison", "PvP Season"));
     const other = events.find((e) => e.gameMode !== gameMode);
     const parts = [
-      c.started && tr(`${c.started} quête(s) commencée(s)`, `${c.started} quest(s) started`),
-      c.reopened && tr(`${c.reopened} rouverte(s) (vue(s) en cours)`, `${c.reopened} reopened (seen in progress)`),
-      c.finished && tr(`${c.finished} terminée(s)`, `${c.finished} completed`),
-      c.failed && tr(`${c.failed} échouée(s)`, `${c.failed} failed`),
-      c.prereq && tr(`${c.prereq} prérequis grisé(s)`, `${c.prereq} prerequisite(s) greyed out`),
-      c.removed && tr(`${c.removed} retirée(s) de la sélection`, `${c.removed} removed from selection`),
-      c.branch && tr(`${c.branch} branche(s) exclusive(s) échouée(s)`, `${c.branch} exclusive branch quest(s) failed`),
+      c.started && tr(`${c.started} quête${plural(c.started)} commencée${plural(c.started)}`, `${c.started} quest${plural(c.started)} started`),
+      c.reopened && tr(`${c.reopened} rouverte${plural(c.reopened)} (vue${plural(c.reopened)} en cours)`, `${c.reopened} reopened (seen in progress)`),
+      c.finished && tr(`${c.finished} terminée${plural(c.finished)}`, `${c.finished} completed`),
+      c.failed && tr(`${c.failed} échouée${plural(c.failed)}`, `${c.failed} failed`),
+      c.prereq && tr(`${c.prereq} prérequis grisé${plural(c.prereq)}`, `${c.prereq} prerequisite${plural(c.prereq)} greyed out`),
+      c.removed && tr(`${c.removed} retirée${plural(c.removed)} de la sélection`, `${c.removed} removed from selection`),
+      c.branch && tr(`${c.branch} branche${plural(c.branch)} exclusive${plural(c.branch)} échouée${plural(c.branch)}`, `${c.branch} exclusive branch quest${plural(c.branch)} failed`),
       other && tr(`événement ${modeName(other.gameMode)} ignoré (le site affiche ${modeName(gameMode)})`, `${modeName(other.gameMode)} event ignored (the site shows ${modeName(gameMode)})`),
     ].filter(Boolean);
     if (plan.action) {
@@ -773,6 +790,7 @@ export default function App() {
         startPlacing({ kind: "manual", objectiveId: o.id, label: o.description || tr("objectif", "objective") })
       }
       onBrowse={() => setTab("quests")}
+      onCapture={() => setTab("capture")}
       onPhotos={showPhotos}
       onQuest={showQuest}
       onStory={(chapter) => showQuest(storyIdOf(chapter))}
@@ -808,7 +826,7 @@ export default function App() {
         panelOpen={panelOpen}
         onTogglePanel={() => setPanelOpen((o) => !o)}
         finder={
-          <ItemFinder variant="rail" openItem={finderItem} onItemClosed={() => setFinderItem(null)}onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })} gameMode={gameMode} lang={lang} tasks={tasks} traders={data?.traders ?? []} maps={maps} itemNames={data?.itemNames ?? NO_NAMES} itemIcons={data?.itemIcons ?? NO_NAMES} onShowQuest={showQuest}
+          <ItemFinder variant="rail" openItem={finderItem} onItemClosed={() => setFinderItem(null)} onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })} gameMode={gameMode} lang={lang} tasks={tasks} traders={data?.traders ?? []} maps={maps} itemNames={data?.itemNames ?? NO_NAMES} itemIcons={data?.itemIcons ?? NO_NAMES} onShowQuest={showQuest}
             done={mode.done}
             failed={failed}
             needs={needs}
@@ -827,7 +845,7 @@ export default function App() {
             }}
           />
         }
-        traders={<TraderWindow variant="rail" onOpenItem={setFinderItem}gameMode={gameMode} lang={lang} traders={data?.traders ?? []} tasks={tasks} itemIcons={data?.itemIcons ?? NO_NAMES} done={mode.done} onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })} />}
+        traders={<TraderWindow variant="rail" onOpenItem={setFinderItem} gameMode={gameMode} lang={lang} traders={data?.traders ?? []} tasks={tasks} itemIcons={data?.itemIcons ?? NO_NAMES} done={mode.done} onSetDone={(objectiveId, value) => dispatch({ type: "setDone", objectiveId, done: value })} />}
         room={<RoomControl variant="rail" room={room} />}
       />
 
@@ -1041,11 +1059,12 @@ export default function App() {
         {/* pas de poignée pendant l'affichage à deux colonnes : elle enregistrerait la largeur temporaire */}
         {panelOpen && !twoColumns && <PanelResizer width={shownPanelWidth} onChange={setPanelWidth} />}
 
-<main className="map-area">
+        <main className="map-area">
+          <h1 className="sr-only">Tarkov Quest Planner{currentMap ? ` · ${currentMap.name}` : ""}</h1>
           <div className="map-floating">
             <MapPicker maps={maps} currentId={currentMap?.id ?? ""} counts={mapCounts} onPick={showMap} />
             <label className="scav-check">
-              <input type="checkbox" checked={showScavExits} onChange={(e) => changeScavExits(e.target.checked)} />
+              <input type="checkbox" checked={showScavExits} onChange={(e) => changeScavExits(e.target.checked)} aria-label={tr("Extracts Scav", "Scav extracts")} />
               <span className="scav-check-long">{tr("Extracts Scav", "Scav extracts")}</span>
               <span className="scav-check-short" aria-hidden="true">Scav</span>
             </label>

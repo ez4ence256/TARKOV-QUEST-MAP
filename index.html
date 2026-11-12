@@ -3,14 +3,152 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#111417" />
-    <title>Tarkov Quest Planner</title>
+    <meta name="theme-color" content="#0c0d0c" />
+    <meta name="color-scheme" content="dark" />
+    <!-- Titre et description : ceux des résultats de recherche. Une fois l'appli ouverte, App.tsx affiche un titre court. -->
+    <title>Carte et suivi des quêtes Escape from Tarkov | Tarkov Quest Planner</title>
+    <meta
+      name="description"
+      content="Tes quêtes Escape from Tarkov sur la carte, objectif par objectif, avec les sorties, les objets à garder et la planque. PvP, PvE, saison. Gratuit, sans compte."
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <!-- %SITE_URL% : adresse publique du site, définie dans vite.config.ts (SITE_URL) -->
+    <link rel="canonical" href="%SITE_URL%" />
+
+    <!-- Aperçu du lien sur Discord, X, WhatsApp… -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Tarkov Quest Planner" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <meta property="og:url" content="%SITE_URL%" />
+    <meta property="og:title" content="Tarkov Quest Planner : tes quêtes Tarkov, sur la carte" />
+    <meta
+      property="og:description"
+      content="Sélectionne tes quêtes Escape from Tarkov : leurs objectifs s'affichent sur la carte avec les sorties. PvP, PvE et saison. Gratuit, sans compte."
+    />
+    <meta property="og:image" content="%SITE_URL%og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Tarkov Quest Planner : tes quêtes Tarkov, sur la carte" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Les trois polices du premier écran, demandées sans attendre la feuille de style -->
+    <link rel="preload" href="/fonts/barlow/barlow-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/barlow/barlow-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/barlow/barlow-condensed-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- Les données des quêtes viennent de tarkov.dev : connexion ouverte pendant le choix du mode -->
+    <link rel="preconnect" href="https://json.tarkov.dev" crossorigin />
+
+    <!-- Données structurées (schema.org). La FAQ reprend mot pour mot celle affichée sur la page d'accueil. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "%SITE_URL%#site",
+            "url": "%SITE_URL%",
+            "name": "Tarkov Quest Planner",
+            "alternateName": "TQP",
+            "inLanguage": ["fr", "en"]
+          },
+          {
+            "@type": "WebApplication",
+            "@id": "%SITE_URL%#app",
+            "url": "%SITE_URL%",
+            "name": "Tarkov Quest Planner",
+            "description": "Planificateur de quêtes pour Escape from Tarkov : les objectifs des quêtes sélectionnées sont affichés en points sur la carte de chaque map, avec les sorties, les objets à garder et la planque.",
+            "applicationCategory": "GameApplication",
+            "operatingSystem": "Tout navigateur récent (ordinateur, tablette, téléphone)",
+            "browserRequirements": "JavaScript requis",
+            "inLanguage": ["fr", "en"],
+            "isAccessibleForFree": true,
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+            "image": "%SITE_URL%og-image.jpg",
+            "about": { "@type": "VideoGame", "name": "Escape from Tarkov" },
+            "featureList": [
+              "Objectifs de quêtes affichés sur la carte de chaque map",
+              "Sorties, sorties coop et transits",
+              "Modes PvP, PvE et PvP Saison avec une progression par mode",
+              "Import des quêtes par capture d'écran du menu Tâches",
+              "Objets à garder pour les quêtes et la planque",
+              "Fiche de quête : guide, prérequis, récompenses et photos des emplacements",
+              "Rooms pour jouer en équipe",
+              "Interface en français et en anglais"
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "%SITE_URL%#faq",
+            "inLanguage": "fr",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "À quoi sert Tarkov Quest Planner ?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "À préparer tes raids sur Escape from Tarkov. Tu sélectionnes tes quêtes en cours et leurs objectifs apparaissent en points sur la carte de chaque map, avec les sorties. En fin de raid, tu coches ce qui est fait et l'outil te propose les quêtes débloquées."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Faut-il créer un compte ?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Non. Le site est gratuit et sans inscription : ta progression est enregistrée automatiquement dans ton navigateur. Un export JSON, dans les Réglages, permet de garder une copie ou de changer d'appareil."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Le PvE et les saisons PvP sont-ils pris en charge ?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Oui. PvP, PvE et PvP Saison ont chacun leurs quêtes et leur propre progression. Tu choisis ton mode à la première visite : le site rouvre ensuite sur le dernier mode joué, et tu peux en changer à tout moment."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Comment ajouter mes quêtes rapidement ?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Cherche-les par leur nom français ou anglais, ou importe une capture d'écran du menu Tâches du jeu (Ctrl+V sur ordinateur, photo sur téléphone) : les quêtes sont reconnues dans ton navigateur, l'image n'est envoyée nulle part."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "D'où viennent les données ?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Les quêtes, les maps, les sorties et les marchands viennent de l'API publique de tarkov.dev et se mettent à jour toutes seules. Les guides et les photos d'emplacements viennent du wiki Escape from Tarkov."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Peut-on l'utiliser en équipe ?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Oui. Crée une room et donne son ID à tes coéquipiers : chacun voit sur la même carte, en lecture seule, les quêtes et les objectifs cochés des autres."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+
     <script>
       // Juste après une mise en ligne, l'hébergement peut garder en cache une page HTML à la place
       // d'un fichier de l'app : on le redemande une fois avec une adresse unique (contourne ce cache).
       addEventListener("error", function (e) {
         var el = e.target, url = el && (el.src || el.href);
         if (!url || url.indexOf("/assets/") < 0 || el.dataset.retried) return;
+        // seuls le script et la feuille de style de l'app sont redemandés (pas un préchargement ni une icône)
+        if (el.tagName !== "SCRIPT" && !(el.tagName === "LINK" && el.rel === "stylesheet")) return;
         var copy = document.createElement(el.tagName);
         if (el.tagName === "SCRIPT") { copy.type = "module"; copy.crossOrigin = ""; copy.src = url + "?r=" + Date.now(); }
         else { copy.rel = "stylesheet"; copy.crossOrigin = ""; copy.href = url + "?r=" + Date.now(); }
@@ -20,7 +158,117 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <!--
+      Contenu de #root : copie statique, en français, de l'écran d'accueil (src/components/ModePicker.tsx).
+      Elle s'affiche dès l'arrivée de la page, avant le chargement de l'appli, et donne un vrai contenu aux
+      moteurs de recherche et aux assistants qui n'exécutent pas JavaScript. React la remplace au démarrage.
+      À garder identique à ModePicker.tsx (textes) et à la FAQ des données structurées ci-dessus.
+    -->
+    <div id="root">
+      <div class="landing is-shell">
+        <header class="landing-top">
+          <div class="landing-brand">
+            <svg class="brand-mark" viewBox="0 0 64 64" width="26" height="26" aria-hidden="true">
+              <circle cx="32" cy="32" r="17" fill="none" stroke="currentColor" stroke-width="4" />
+              <path d="M32 8v11M32 45v11M8 32h11M45 32h11" stroke="currentColor" stroke-width="4" />
+              <circle class="brand-dot" cx="32" cy="32" r="6" />
+            </svg>
+            Tarkov Quest Planner
+          </div>
+        </header>
+        <main class="landing-main">
+          <section class="landing-hero">
+            <p class="landing-kicker">Planificateur de quêtes · Escape from Tarkov</p>
+            <h1>Tes quêtes Escape from Tarkov, <em>sur la carte.</em></h1>
+            <p class="landing-lead">
+              Sélectionne tes quêtes en cours&nbsp;: leurs objectifs s'affichent sur la map, avec les sorties. Coche-les en fin de raid,
+              l'outil te propose la suite.
+            </p>
+            <ul class="landing-trust">
+              <li>Gratuit</li>
+              <li>Sans compte</li>
+              <li>Progression enregistrée dans ton navigateur</li>
+            </ul>
+          </section>
+          <section class="mode-card" aria-busy="true">
+            <h2 class="mode-title">Choisis ton mode de jeu</h2>
+            <div class="mode-options">
+              <div class="mode-option"><span class="mode-text"><span class="mode-label">PvP</span><span class="mode-hint">Mode classique en ligne</span></span></div>
+              <div class="mode-option"><span class="mode-text"><span class="mode-label">PvE</span><span class="mode-hint">Mode coopératif contre l'IA</span></span></div>
+              <div class="mode-option"><span class="mode-text"><span class="mode-label">PvP Saison</span><span class="mode-hint">Saison PvP (progression séparée)</span></span></div>
+            </div>
+            <p class="mode-note">Chaque mode garde sa propre progression. Tu peux en changer à tout moment.</p>
+            <noscript><p class="mode-note">Cet outil a besoin de JavaScript&nbsp;: active-le dans ton navigateur pour l'utiliser.</p></noscript>
+          </section>
+        </main>
+        <section class="landing-section">
+          <h2 class="landing-h2">Tout ce qu'il faut pour préparer un raid</h2>
+          <ul class="feature-grid">
+            <li class="feature"><h3>Objectifs sur la carte</h3><p>Une couleur par quête, une icône par type d'objectif, étage par étage, sur toutes les maps.</p></li>
+            <li class="feature"><h3>Sorties, coops et transits</h3><p>Les extractions PMC et Scav de chaque map, avec leur nom et leur faction.</p></li>
+            <li class="feature"><h3>Import par capture d'écran</h3><p>Colle une capture du menu Tâches avec Ctrl+V&nbsp;: tes quêtes sont reconnues dans ton navigateur.</p></li>
+            <li class="feature"><h3>Objets à garder et planque</h3><p>Ce qu'il te faut encore pour tes quêtes et pour les prochains niveaux de ta planque.</p></li>
+            <li class="feature"><h3>Fiche de quête complète</h3><p>Guide, prérequis, récompenses et photos des emplacements, tirés du wiki.</p></li>
+            <li class="feature"><h3>Jeu en équipe</h3><p>Crée une room pour voir les quêtes de tes coéquipiers sur la même carte.</p></li>
+          </ul>
+        </section>
+        <section class="landing-section">
+          <h2 class="landing-h2">Questions fréquentes</h2>
+          <div class="faq">
+            <details class="faq-item">
+              <summary>À quoi sert Tarkov Quest Planner&nbsp;?</summary>
+              <p>À préparer tes raids sur Escape from Tarkov. Tu sélectionnes tes quêtes en cours et leurs objectifs apparaissent en points sur la carte de chaque map, avec les sorties. En fin de raid, tu coches ce qui est fait et l'outil te propose les quêtes débloquées.</p>
+            </details>
+            <details class="faq-item">
+              <summary>Faut-il créer un compte&nbsp;?</summary>
+              <p>Non. Le site est gratuit et sans inscription&nbsp;: ta progression est enregistrée automatiquement dans ton navigateur. Un export JSON, dans les Réglages, permet de garder une copie ou de changer d'appareil.</p>
+            </details>
+            <details class="faq-item">
+              <summary>Le PvE et les saisons PvP sont-ils pris en charge&nbsp;?</summary>
+              <p>Oui. PvP, PvE et PvP Saison ont chacun leurs quêtes et leur propre progression. Tu choisis ton mode à la première visite&nbsp;: le site rouvre ensuite sur le dernier mode joué, et tu peux en changer à tout moment.</p>
+            </details>
+            <details class="faq-item">
+              <summary>Comment ajouter mes quêtes rapidement&nbsp;?</summary>
+              <p>Cherche-les par leur nom français ou anglais, ou importe une capture d'écran du menu Tâches du jeu (Ctrl+V sur ordinateur, photo sur téléphone)&nbsp;: les quêtes sont reconnues dans ton navigateur, l'image n'est envoyée nulle part.</p>
+            </details>
+            <details class="faq-item">
+              <summary>D'où viennent les données&nbsp;?</summary>
+              <p>Les quêtes, les maps, les sorties et les marchands viennent de l'API publique de tarkov.dev et se mettent à jour toutes seules. Les guides et les photos d'emplacements viennent du wiki Escape from Tarkov.</p>
+            </details>
+            <details class="faq-item">
+              <summary>Peut-on l'utiliser en équipe&nbsp;?</summary>
+              <p>Oui. Crée une room et donne son ID à tes coéquipiers&nbsp;: chacun voit sur la même carte, en lecture seule, les quêtes et les objectifs cochés des autres.</p>
+            </details>
+          </div>
+        </section>
+        <footer class="landing-footer">
+          <p>
+            Données&nbsp;: <a href="https://tarkov.dev" rel="noopener">tarkov.dev</a>. Guides et photos&nbsp;:
+            <a href="https://escapefromtarkov.fandom.com/wiki/Escape_from_Tarkov_Wiki" rel="noopener">wiki Escape from Tarkov</a>.
+            Site de fan&nbsp;: Escape from Tarkov est une marque de Battlestate Games, ce projet n'y est pas affilié.
+          </p>
+        </footer>
+      </div>
+    </div>
+    <script>
+      // La copie statique de l'accueil n'est montrée qu'à ceux qui vont voir l'accueil (première visite, en français) :
+      // - habitué (dernier mode de jeu retenu, voir loadState dans src/state/store.ts) : l'appli s'ouvre directement sur
+      //   la carte, donc un simple écran d'attente (logo et barre), sans texte pour valoir en français comme en anglais ;
+      // - interface en anglais (la copie est en français) et page du téléphone (/?phone=CODE) : rien.
+      (function () {
+        var root = document.getElementById("root"), english = false, mode = null;
+        try {
+          english = localStorage.getItem("tqp:lang") === "en";
+          mode = localStorage.getItem("tqp:lastMode");
+        } catch (e) { /* stockage indisponible : première visite */ }
+        if (/[?&]phone=/.test(location.search)) root.textContent = "";
+        else if (mode === "regular" || mode === "pve" || mode === "pvp-season") {
+          var brand = root.querySelector(".landing-brand");
+          root.innerHTML = '<div class="boot" role="status" aria-label="Tarkov Quest Planner"><div class="boot-bar"></div></div>';
+          if (brand) root.firstChild.insertBefore(brand, root.firstChild.firstChild);
+        } else if (english) root.textContent = "";
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

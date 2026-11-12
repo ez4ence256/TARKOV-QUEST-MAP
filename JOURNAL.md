@@ -4,19 +4,19 @@ Ce fichier sert de mémoire pour les prochaines sessions. Pour reprendre le trav
 
 ---
 
-## État actuel (16 octobre 2026, session 9)
+## État actuel (12 novembre 2026, session 10)
 
-La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : versions **0.7.0 à 0.7.23** (voir « Session 8 » dans l'historique). La session 9 (item finder) commence à **0.8.0**.
+La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : versions **0.7.0 à 0.7.23** (voir « Session 8 » dans l'historique). La session 9 (item finder) commence à **0.8.0**. La session 10 (audit UX, référencement, performances, accessibilité ; faite dans le cloud sur la branche `claude/audit-ux-seo-perf`, à fusionner dans `main` pour la mettre en production) est la **0.9.0**.
 
 | Élément | État |
 |---|---|
 | Branche | **`main`** seule (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**, branche par défaut). |
-| Version affichée | **0.8.70** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
+| Version affichée | **0.9.0** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
 | **Nouveau design** | depuis la **0.8.23** (commit `e189862` : barre latérale, mode raid, Barlow, icônes SVG). Dernière version avec l'**ancien design** : **0.8.22** (commit `a562131`). Pour revenir en arrière sur un point précis, comparer avec `git diff a562131 e189862 -- <fichier>`. |
 | Derniers commits | `3bc65a9` Item finder : recherche par image (0.8.2) · `78f5fb6` Ctrl+V d'une capture dans l'item finder (0.8.1) · `14c4dc9` Item finder redessiné (0.8.0) · `6800a70` journal fin de session 8 · `245ee03` Version 0.7.23 · `3a59955` Main story : ponts de l'Icebreaker pour Boreas · `2593e19` Icebreaker : calibrage corrigé · `45beb1b` positions > 100 m retirées (0.7.22) · `7acab9f` positions de The Ticket · `5447eef` bouton du panneau en icône seule sur téléphone (0.7.21) · `69ddc95` Item finder · `d81736d` infos du Labyrinthe sur la map |
 | Travail non commité | Seulement `.claude/` (non suivi, volontairement hors du dépôt : chemin propre à cette machine) |
-| Tests | **338/338** au vert (`npx vitest run`), 35 fichiers (voir « Tests ») |
-| Compilation | OK (`npm run build`). Avertissement Vite : le fichier principal fait **682 Ko** (198 Ko compressé) > 500 Ko. L'OCR est dans des fichiers séparés chargés à la demande (moteur 3,9 Mo, worker 111 Ko). |
+| Tests | **545/545** au vert (`npx vitest run`), 53 fichiers (voir « Tests ») |
+| Compilation | OK (`npm run build`). Avertissement Vite : le fichier principal (`App-*.js`) fait **654 Ko** (185 Ko compressé) > 500 Ko, plus `index-*.js` 232 Ko (72 Ko compressé, React). L'OCR est dans des fichiers séparés chargés à la demande (moteur 3,9 Mo, worker 111 Ko). |
 | **Production** | **https://tarkov.aprilox.fr**, déployée automatiquement à chaque push sur `main` (~1 min) par l'hébergeur, qui lance `npm start` (`server/index.mjs` : `dist/` + API des rooms sur le même port). Fichier absent = 404 sans cache (corrige l'empoisonnement du cache) ; `index.html` en `no-cache`, `/assets/*` en `immutable`. |
 | Vérifié dans le navigateur | Panneau à 400 à 720 px, téléphone, zoom 125 % simulé · sélection épinglée, ordre des sections · sorties (Douanes, Labs) · import d'une **image de synthèse** · rooms entre deux origines (création, jointure, coupure du serveur de 45 s) · Labyrinthe (marqueurs, bascule de map aux étapes) · Icebreaker après correction · voir l'historique pour le détail. |
 | **Poussé sur GitHub** | `main` poussée jusqu'à `3bc65a9` par URL HTTPS (vérifié avec `git ls-remote`) ; le fichier `item-images-*.bin` est servi en production (200, 1 473 855 octets). Voir « Push ». |
@@ -55,7 +55,7 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | `69ddc95` | 8 | Item finder (objets du jeu, quêtes, hideout, barters, crafts) |
 | `5447eef` | 8 | Barre du haut : bouton du panneau en icône seule sur téléphone |
 
-### Tests (443, 48 fichiers)
+### Tests (545, 53 fichiers ; le tableau ci-dessous date de la session 9, voir « Session 10 » pour les ajouts)
 
 | Fichier | Ce qui est couvert |
 |---|---|
@@ -433,6 +433,47 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
   - Étage : un point dont le centre `y` est sous le bas du niveau principal va dans le sous-sol qui le contient, même si le haut de sa zone dépasse (Claustrophobia sur Usine : haut -0,06, niveau principal à partir de -1) (`levelOf`, `levels.ts`).
 - **Kappa : seulement les 13 quêtes de tarkov.dev** (0.8.70, demande de l'utilisateur). Le patch 1.1.0.0 (3 août 2026, saison 1) a refait les quêtes secondaires : Collector demande maintenant LL4 chez les 7 marchands, karma Scav +3, niveau 40 et 4 quêtes (Chemical - Part 3, Sew it Good - Part 2, Shooter Born in Heaven, The Tarkov Shooter - Part 4), soit 12 avec leurs chaînes. Sources : historique de la page Collector du wiki (« Remove quest Kappa requirement as part of 1.1.0.0 task changes », 2026-08-03), notes de patch 1.1.0.0 du wiki (Changelog), retrait du champ `reqkappa` des pages de quêtes le 2026-10-22 (« Quest rework: LL groups »). La liste du wiki copiée en 0.8.30 (194 quêtes, 2026-10-20) était donc l'ancienne règle : `withWikiKappa`, `src/data/kappa-wiki.json` et `scripts/sync-kappa.mjs` supprimés ; la fiche quête n'affiche plus le Kappa du wiki pour les quêtes tarkov.dev (une page en cache peut encore avoir `reqkappa`) et la comparaison wiki/tarkov.dev ne parle plus de Kappa. Écart restant : tarkov.dev dit niveau 42 et ajoute Postman Pat - Part 2 (Pat le coursier 1-2 dans la liste), le wiki dit niveau 40 sans elle. Vérifié en local : « Kappa seulement » dans Ajouter = 13 quêtes.
 
+### Session 10 (0.9.0, 12 novembre 2026) : audit UX, référencement, performances, accessibilité
+
+Faite dans le cloud, sur la branche **`claude/audit-ux-seo-perf`** (rien sur `main` : la fusion déclenche la mise en production). Demande : audit complet (proposition de valeur, UX/UI, SEO, plan d'action) et corrections appliquées. Aucune fonctionnalité retirée.
+
+**Mesures avant / après** (serveur local sans compression, Chromium ; à refaire sur la production après fusion)
+
+| Mesure | Avant (0.8.70) | Après (0.9.0) |
+|---|---|---|
+| Lighthouse mobile, simulé : performances / accessibilité / bonnes pratiques / SEO | 99 / 98 / 96 / 90 | 100 / 100 / 100 / 100 |
+| Lighthouse mobile, réseau réellement bridé (4G lente, processeur ÷ 4) : note, premier affichage | 64, 7,2 s | 92, 2,6 s |
+| Décalage de mise en page de l'accueil (CLS) | 0,016 | 0 |
+| Démarrage de l'appli après le choix du mode | 15 requêtes, 3,61 Mo | 14 requêtes, 1,87 Mo |
+| axe-core, 7 écrans : éléments en défaut (ordinateur / téléphone) | 50 / 33 | 6 / 0 |
+| Tests | 522 (51 fichiers) | 545 (53 fichiers) |
+
+**Écran d'accueil et référencement**
+- *Trouvé* : page vide tant que le JavaScript (880 Ko) n'était pas chargé ; titre « Tarkov Quest Planner » sans description ; aucune balise de partage, ni `robots.txt`, ni `sitemap.xml`, ni icône ; l'accueil se limitait à « Choisissez votre mode de jeu ».
+- *Fait* : accueil réécrit (`ModePicker.tsx`) : titre « Tes quêtes Escape from Tarkov, sur la carte. », sous-titre, réassurance (gratuit, sans compte, progression dans le navigateur), choix du mode, six fonctionnalités, FAQ de six questions. **Copie statique dans `index.html`** (affichée dès le HTML, remplacée par l'appli), titre et description, Open Graph, données structurées, icônes, manifest, `robots.txt`, `sitemap.xml`, `llms.txt` (`seoPlugin` de `vite.config.ts`).
+- Le script d'`index.html` retire la copie pour l'anglais et la page du téléphone, et la remplace par un **écran d'attente** (logo, barre) pour un habitué, dont l'appli rouvre directement sur la carte : sans cela, il aurait vu l'accueil un instant à chaque visite.
+- `main.tsx` attend que l'affichage de la copie soit enregistré par le navigateur (300 ms au plus) avant de monter React : sur une connexion rapide, le titre était sinon mesuré (LCP) après le JavaScript.
+- `ModePicker.test.tsx` : la copie statique, la FAQ affichée et celle des données structurées doivent avoir les mêmes textes que le composant.
+
+**Design et interface**
+- Palette noir / anthracite / kaki avec touches d'orange (variables de `styles.css`), contour de focus orange, animations courtes (désactivées si le système demande moins de mouvement).
+- États vides guidés (« Aucune quête sélectionnée » avec boutons Chercher / Importer une capture ; « Aucune quête ne correspond » avec remise à zéro des filtres). Cartes de quête : boutons **Détails / Photos / Wiki** à la place de trois liens de 12 px séparés par des points.
+- Textes : tutoiement partout (17 textes vouvoyaient), vrais pluriels (`plural`) à la place de « quête(s) », espaces insécables (`frTypo`), textes propres au tactile (`IS_TOUCH`, `src/lib/device.ts` : « photo » au lieu de « Ctrl+V »).
+- Titre de l'onglet du navigateur : la map affichée.
+
+**Performances**
+- **Fichier des objets de 17 Mo (1,8 Mo compressé) plus téléchargé** : il ne servait qu'à lire l'adresse de l'image des objets cités par les quêtes. `readItems` (`tarkovJson.ts`) ne garde que les traductions ; l'image se déduit de l'identifiant (`iconSrc`), la fiche de quête passe par `ItemThumb` (image masquée si absente). `item-icons.json` : 133 à 160 entrées (27 objets dont l'image indiquée n'est pas `<id>-icon.webp`, surtout des préréglages d'armes, adresses vérifiées) ; `sync-item-icons.mjs` applique la même règle.
+- Données en cache affichées tout de suite puis rafraîchies en arrière-plan ; `modulepreload` du fichier de l'appli ; polices de l'accueil préchargées ; lignes de la liste de quêtes hors écran non dessinées (`content-visibility`).
+- Serveur (`server/index.mjs`) : `ETag` et réponses 304 (polices, fonds de carte, `index.html`), polices en cache 30 jours, fichiers `.bin` compressés à la volée ; routes d'API sorties dans `server/api.mjs` ; `server/static.test.ts`.
+
+**Accessibilité**
+- Nom accessible des boutons aligné sur leur libellé visible (barre latérale, langue, choix de la map, Objets), compteur de la barre dessiné en CSS, `h1` (masqué) sur la carte, case « Extracts Scav » nommée sur téléphone, images décoratives sans texte de remplacement quand le nom suit, version lisible (contraste), orange des sorties coop / transit `#cc4409` (texte blanc à 4,8).
+- Reste : la poignée du panneau hors de toute zone de la page (règle `region`, 1 élément par écran).
+
+**Vérifié** : `npx tsc -b`, 545 tests, `npm run build` ; captures ordinateur (1440 × 900) et téléphone (390 × 844) de l'accueil, de la carte, des onglets, des fenêtres Objets et Marchands, du mode raid, de l'anglais, du retour d'un habitué et de la page du téléphone ; console sans erreur ni avertissement sur tous ces parcours.
+
+**Pas vérifié** : la production (Cloudflare, déploiement) ; un vrai téléphone ; Firefox et Safari ; l'aperçu de partage sur Discord ; l'indexation réelle par Google. **Limite de la source** : 373 objectifs sur 1 416 sont en anglais dans le fichier français de tarkov.dev (l'appli ne traduit rien elle-même).
+
 ## Étude 3D (session 5, en attente de validation)
 
 **L'image de référence n'a pas été reçue.** La comparaison est faite sans elle.
@@ -574,8 +615,8 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
 
 **Données et stockage**
 - **localStorage proche du quota** (~4,3 M sur ~5 M de caractères avec un seul mode en FR+EN et tous les chapitres) : l'éviction des pages du wiki les moins utilisées protège le wiki, mais mettre plusieurs modes en cache peut encore évincer des données ou des chapitres (une écriture peut échouer en silence, le chapitre est alors relu à chaque ouverture).
-- **Fichier d'objets de 17 Mo** par langue, téléchargé au premier chargement puis toutes les 6 h (expiration du cache).
-- **Taille** : le fichier principal fait 682 Ko (avertissement Vite) ; le moteur OCR de 3,9 Mo est déployé avec le site mais chargé à la demande.
+- ~~Fichier d'objets de 17 Mo téléchargé au premier chargement puis toutes les 6 h~~ : supprimé en 0.9.0 (images déduites de l'identifiant). Contrepartie : un nouvel objet dont l'image n'est pas `<id>-icon.webp` reste sans image jusqu'au prochain `npm run sync:icons`.
+- **Taille** : le fichier principal fait 654 Ko (avertissement Vite) et contient aussi l'écran d'accueil ; le moteur OCR de 3,9 Mo est déployé avec le site mais chargé à la demande.
 - tarkov.dev : **données d'histoire désactivées en amont** (endpoint introuvable) ; wiki en anglais et parfois incomplet ; récompenses comparées seulement sur l'expérience, l'argent et la réputation ; 15 sorties sans faction, 18 sans photo du wiki ; coop détectée par « (Co-op) » dans le nom anglais ; champ `switch` des sorties non affiché.
 
 **Main story**
@@ -615,7 +656,6 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
 **Données**
 - « Re-teste le point d'accès d'histoire de tarkov.dev (json et GraphQL) ; s'il revient, remplace la lecture du wiki pour la Main story. »
 - « Déplace le cache du wiki vers IndexedDB (plus de place, fin du quota localStorage). »
-- « Dérive les icônes de l'id (`assets.tarkov.dev/<id>-icon.webp`) pour éviter le fichier d'objets de 17 Mo. »
 
 **Main story**
 - « Main story : choisir sa fin dans The Ticket pour n'afficher que ses étapes. »
@@ -630,7 +670,9 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
 - « Héberge les données de langue fra/eng dans l'app (sans CDN). »
 
 **Qualité**
-- « Découpe le fichier principal (682 Ko, > 500 Ko) avec des imports dynamiques. »
+- « Découpe le fichier principal (654 Ko, > 500 Ko) avec des imports dynamiques : fenêtres Objets et Marchands, fiche de quête, Main story, QR code (mesure : `ItemFinder` 68 Ko, Leaflet 242 Ko avant minification). »
+- « Extrais le CSS de l'écran d'accueil pour l'inclure dans `index.html` (le premier affichage n'attendrait plus la feuille de 79 Ko). »
+- « Place la poignée du panneau dans une zone de la page (dernier point relevé par axe-core : `region`). »
 - « Configure Vite en usePolling si l'observateur rate encore des modifications sur M:. »
 - « Audit du projet sans rien modifier, corrections par priorité. »
 - « Étude 3D : lance la première version (three.js à la demande) si la recommandation est validée. »

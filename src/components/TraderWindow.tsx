@@ -4,7 +4,7 @@
 // niveau, quête qui débloque l'offre, limite d'achat. Données chargées à la première ouverture.
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { GameMode, Task, Trader } from "../types";
-import { tr } from "../lib/i18n";
+import { plural, tr } from "../lib/i18n";
 import { UiIcon } from "./UiIcon";
 import { iconSrc } from "../lib/itemIcons";
 import { buildCategoryTree, type CategoryNode } from "../lib/itemCategories";
@@ -216,8 +216,8 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, done, onSetDo
                     ...(commerce > 0 ? [tr(`${formatPrice(commerce, file.currency[current!] ?? "RUB", lang)} dépensés chez ce marchand`, `${formatPrice(commerce, file.currency[current!] ?? "RUB", lang)} spent with this trader`)] : []),
                   ].join(", ")}.`}{" "}
               {all
-                ? tr(`${visible.length} offre(s).`, `${visible.length} offer(s).`)
-                : tr(`${visible.length} offre(s) débloquée(s) à ce niveau.`, `${visible.length} offer(s) unlocked at this level.`)}
+                ? tr(`${visible.length} offre${plural(visible.length)}.`, `${visible.length} offer${plural(visible.length)}.`)
+                : tr(`${visible.length} offre${plural(visible.length)} débloquée${plural(visible.length)} à ce niveau.`, `${visible.length} offer${plural(visible.length)} unlocked at this level.`)}
             </p>
             <div className="finder-body finder-split trader-split">
               {tree && (

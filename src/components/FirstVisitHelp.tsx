@@ -1,6 +1,7 @@
 // Aide de première visite : petite carte non bloquante en bas à gauche de la carte, 3 étapes.
 import { useState } from "react";
 import { tr } from "../lib/i18n";
+import { IS_TOUCH } from "../lib/device";
 
 const HELP_KEY = "tqp:help:v1";
 
@@ -26,7 +27,7 @@ const steps = () => [
   {
     title: tr("Ajoute tes quêtes", "Add your quests"),
     // téléphone : pas de Ctrl+V, mais une photo de l'écran du jeu (Ajouter › Capture)
-    text: window.matchMedia("(pointer: coarse)").matches
+    text: IS_TOUCH
       ? tr(
           "Onglet « Ajouter » : cherche une quête et touche-la. Ou, dans « Capture », prends en photo le menu Tâches du jeu.",
           "“Add” tab: search for a quest and tap it. Or, in “Capture”, take a photo of the in-game Tasks menu.",

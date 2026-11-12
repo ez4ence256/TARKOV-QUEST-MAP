@@ -4,7 +4,8 @@ import type { GameMap, Objective, Task, Trader } from "../types";
 import type { Action, ModeState } from "../state/store";
 import { ICON_LABELS, QUEST_COLORS, categoryOf } from "../lib/objectiveTypes";
 import { currentObjective, hasApiPosition, manualPointKey, objectiveMapCounts, objectivePointKey, taskProgress } from "../lib/points";
-import { getLang, tr } from "../lib/i18n";
+import { getLang, plural, tr } from "../lib/i18n";
+import { IS_TOUCH } from "../lib/device";
 import { storyIdOf } from "../lib/story";
 import { UiIcon } from "./UiIcon";
 import { Icon } from "./Icon";
@@ -31,6 +32,8 @@ interface Props {
   onFocus: (pointKey: string, mapId: string) => void;
   onStartPlacing: (objective: Objective) => void;
   onBrowse: () => void;
+  /** Ouvre l'import par capture d'écran (absent : la colonne d'un coéquipier ne le propose pas). */
+  onCapture?: () => void;
   /** Ouvre l'onglet Photos sur une quête. */
   onPhotos: (taskId: string) => void;
   /** Ouvre l'onglet Quête sur une quête (même quand tous ses points sont faits). */
@@ -87,14 +90,50 @@ export function SelectedQuests(props: Props) {
     !kappaOnly || (item.chapter === null && Boolean(tasksById.get(item.sel!.taskId)?.kappaRequired));
 
   if (items.length === 0) {
+    if (props.readOnly) {
+      return (
+        <div className="tab-body empty">
+          <p>{tr("Aucune quête sélectionnée.", "No quest selected.")}</p>
+        </div>
+      );
+    }
+    // rien de sélectionné : les deux façons de commencer, plutôt qu'un panneau vide
     return (
-      <div className="tab-body empty">
-        <p>{tr("Aucune quête sélectionnée.", "No quest selected.")}</p>
-        {!props.readOnly && (
-          <button className="btn btn-primary" onClick={props.onBrowse}>
-            {tr("Choisir des quêtes", "Choose quests")}
-          </button>
-        )}
+      <div className="tab-body">
+        <div className="empty-state">
+          <UiIcon id="list-checks" size={28} />
+          <h2 className="empty-title">{tr("Aucune quête sélectionnée", "No quest selected")}</h2>
+          <p className="muted">
+            {tr(
+              "Ajoute les quêtes que tu fais en ce moment : leurs objectifs apparaîtront sur la carte.",
+              "Add the quests you are doing right now: their objectives will show up on the map.",
+            )}
+          </p>
+          <div className="empty-actions">
+            <button className="empty-action" onClick={props.onBrowse}>
+              <UiIcon id="search" size={20} />
+              <span className="empty-action-text">
+                <strong>{tr("Chercher une quête", "Search for a quest")}</strong>
+                <span className="muted small">{tr("Par nom français ou anglais, marchand ou map", "By French or English name, trader or map")}</span>
+              </span>
+              <UiIcon id="chevron-right" size={16} />
+            </button>
+            {props.onCapture && (
+              <button className="empty-action" onClick={props.onCapture}>
+                <UiIcon id={IS_TOUCH ? "camera" : "clipboard-paste"} size={20} />
+                <span className="empty-action-text">
+                  <strong>{tr("Importer une capture d'écran", "Import a screenshot")}</strong>
+                  <span className="muted small">
+                    {IS_TOUCH
+                      ? tr("Une photo du menu Tâches du jeu suffit", "A photo of the in-game Tasks menu is enough")
+                      : tr("Menu Tâches du jeu, puis Ctrl+V ici", "In-game Tasks menu, then Ctrl+V here")}
+                  </span>
+                </span>
+                <UiIcon id="chevron-right" size={16} />
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     );
   }
@@ -123,33 +162,33 @@ export function SelectedQuests(props: Props) {
           ))}
         </div>
       )}
-      {items.length > 0 && (
-        <div className="selection-head">
-          <span className="muted small">
-            {kappaOnly
-              ? tr(`${kappaCount} quête(s) Kappa sur la carte`, `${kappaCount} Kappa quest(s) on the map`)
-              : tr(`${mode.selected.length} quête(s) sur la carte`, `${mode.selected.length} quest(s) on the map`)}
-            {!kappaOnly && storySelected.length > 0 && ` · ${storySelected.length} Main story`}
-          </span>
-          {!props.readOnly && (
+      <div className="selection-head">
+        <span className="muted small">
+          {kappaOnly
+            ? tr(`${kappaCount} quête${plural(kappaCount)} Kappa sur la carte`, `${kappaCount} Kappa quest${plural(kappaCount)} on the map`)
+            : tr(`${mode.selected.length} quête${plural(mode.selected.length)} sur la carte`, `${mode.selected.length} quest${plural(mode.selected.length)} on the map`)}
+          {!kappaOnly && storySelected.length > 0 && ` · ${storySelected.length} Main story`}
+        </span>
+        {!props.readOnly && (
+          <button className="btn btn-ghost btn-small" onClick={() => dispatch({ type: "clearSelection" })}>
+            {tr("Tout désélectionner", "Deselect all")}
+          </button>
+        )}
+        {!props.readOnly && (
+          <div className="selection-filters">
             <label className="check small">
               <input type="checkbox" checked={kappaOnly} onChange={(e) => props.onKappaOnly?.(e.target.checked)} />
               {tr("Kappa seulement", "Kappa only")}
             </label>
-          )}
-          {!props.readOnly && props.onlyMine !== undefined && (
-            <label className="check small" title={tr("Masque sur la carte les points des quêtes de tes coéquipiers", "Hides your teammates' quest points on the map")}>
-              <input type="checkbox" checked={props.onlyMine} onChange={(e) => props.onOnlyMine?.(e.target.checked)} />
-              {tr("Seulement mes quêtes", "Only my quests")}
-            </label>
-          )}
-          {!props.readOnly && (
-            <button className="btn btn-ghost btn-small" onClick={() => dispatch({ type: "clearSelection" })}>
-              {tr("Tout désélectionner", "Deselect all")}
-            </button>
-          )}
-        </div>
-      )}
+            {props.onlyMine !== undefined && (
+              <label className="check small" title={tr("Masque sur la carte les points des quêtes de tes coéquipiers", "Hides your teammates' quest points on the map")}>
+                <input type="checkbox" checked={props.onlyMine} onChange={(e) => props.onOnlyMine?.(e.target.checked)} />
+                {tr("Seulement mes quêtes", "Only my quests")}
+              </label>
+            )}
+          </div>
+        )}
+      </div>
 
       {items.filter((i) => onFilterMap(i) && onFilterKappa(i)).map((item) => {
         if (item.chapter !== null) {
@@ -213,7 +252,7 @@ export function SelectedQuests(props: Props) {
                   </span>
                   {o.description || <em className="muted">{tr("(sans description)", "(no description)")}</em>}
                   {o.optional && <span className="tag">{tr("optionnel", "optional")}</span>}
-                  {o === current && <span className="tag">▶ {tr("en cours", "current")}</span>}
+                  {o === current && <span className="tag tag-current">▶ {tr("en cours", "current")}</span>}
                 </div>
                 <ObjectiveItems objective={o} itemIcons={props.itemIcons} itemNames={props.itemNames} />
                 {!hasApiPosition(o) && LOOT_TYPES.has(o.type) && (
@@ -275,22 +314,6 @@ export function SelectedQuests(props: Props) {
                 <div className="muted small">
                   {traderName(task.traderId)}
                   {task.mapId ? ` · ${mapName(task.mapId)}` : ""}
-                  {" · "}
-                  <button className="link" onClick={() => props.onQuest(task.id)}>
-                    <UiIcon id="scroll-text" size={14} /> {tr("quête", "quest")}
-                  </button>
-                  {task.wikiLink && (
-                    <>
-                      {" · "}
-                      <button className="link" onClick={() => props.onPhotos(task.id)}>
-                        {tr("photos", "photos")}
-                      </button>
-                      {" · "}
-                      <a href={task.wikiLink} target="_blank" rel="noreferrer">
-                        wiki
-                      </a>
-                    </>
-                  )}
                 </div>
               </div>
               <span
@@ -310,6 +333,22 @@ export function SelectedQuests(props: Props) {
                 </button>
               )}
             </div>
+            {/* accès directs, sur toute la largeur de la carte : fiche de la quête, photos des emplacements, page du wiki */}
+            <div className="task-links">
+              <button className="task-link" onClick={() => props.onQuest(task.id)}>
+                <UiIcon id="scroll-text" size={14} /> {tr("Détails", "Details")}
+              </button>
+              {task.wikiLink && (
+                <>
+                  <button className="task-link" onClick={() => props.onPhotos(task.id)}>
+                    <UiIcon id="image" size={14} /> {tr("Photos", "Photos")}
+                  </button>
+                  <a className="task-link" href={task.wikiLink} target="_blank" rel="noreferrer">
+                    <UiIcon id="external-link" size={14} /> Wiki
+                  </a>
+                </>
+              )}
+            </div>
             <div className="progress-bar">
               <span style={{ width: `${progress.total ? (progress.done / progress.total) * 100 : 0}%` }} />
             </div>
@@ -323,7 +362,7 @@ export function SelectedQuests(props: Props) {
 
             {!props.readOnly && positioned.length === 0 && (
               <div className="objective-note">
-                {tr("Aucune position connue pour cette quête : rien à afficher sur la carte (placez les objectifs à la main).", "No known position for this quest: nothing to show on the map (place objectives by hand).")}
+                {tr("Aucune position connue pour cette quête : rien à afficher sur la carte (place les objectifs à la main).", "No known position for this quest: nothing to show on the map (place objectives by hand).")}
               </div>
             )}
             {positioned.length > 0 && <ul className="objectives">{positioned.map(renderObjective)}</ul>}

@@ -29,7 +29,7 @@ export function ResetProgressSection({ tasks, done, storyDone, modeLabel, onRese
       <div className="subhead">{tr(`Réinitialiser la progression (${modeLabel})`, `Reset progress (${modeLabel})`)}</div>
       <p className="muted small">
         {tr(
-          "Remet les objectifs (et les étapes de la Main story) à « pas fait » : les points des objectifs réapparaissent sur la carte. Vos notes, vos points personnels et vos chapitres choisis sont conservés. Les autres modes de jeu ne sont pas touchés.",
+          "Remet les objectifs (et les étapes de la Main story) à « pas fait » : les points des objectifs réapparaissent sur la carte. Tes notes, tes points personnels et tes chapitres choisis sont conservés. Les autres modes de jeu ne sont pas touchés.",
           "Sets objectives (and Main story steps) back to \"not done\": the objective points reappear on the map. Your notes, custom points and chosen chapters are kept. Other game modes are not affected.",
         )}
       </p>
@@ -89,7 +89,7 @@ export function ResetProgressSection({ tasks, done, storyDone, modeLabel, onRese
               </p>
               <p className="small">
                 {tr(
-                  "Conseil : faites d'abord une sauvegarde avec l'export JSON. Vous pourrez la réimporter si besoin.",
+                  "Conseil : fais d'abord une sauvegarde avec l'export JSON. Tu pourras la réimporter si besoin.",
                   "Tip: make a backup with the JSON export first. You can re-import it if needed.",
                 )}
               </p>

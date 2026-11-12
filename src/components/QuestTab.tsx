@@ -10,7 +10,7 @@ import type { GameMap, Task, TaskRewards, Trader } from "../types";
 import { ICON_LABELS, categoryOf } from "../lib/objectiveTypes";
 import { taskProgress } from "../lib/points";
 import { isGreyed } from "../lib/questChain";
-import { iconUrl } from "../api/tarkovJson";
+import { iconSrc } from "../lib/itemIcons";
 import { loadQuestPhotos, loadWikiPage, type WikiPage, type WikiPhoto } from "../api/wiki";
 import {
   acceptWikiPage,
@@ -198,9 +198,12 @@ const PACK_GROUPS: { kinds: PackItem["kind"][]; title: [string, string] }[] = [
 const firLabel = (fir: boolean | null | undefined) =>
   fir === true ? tr("Found in raid : oui", "Found in raid: yes") : fir === false ? tr("Found in raid : non", "Found in raid: no") : null;
 
-/** Image d'un objet, à taille fixe (pas de saut de page) ; rien si l'URL est inconnue. */
-function ItemIcon({ url, name }: { url?: string; name: string }) {
-  return url ? <img className="item-icon" src={iconUrl(url)} alt={name} width={32} height={32} loading="lazy" /> : null;
+/**
+ * Image d'un objet, à taille fixe (pas de saut de page). Décorative : le nom de l'objet la suit toujours.
+ * Adresse déduite de l'identifiant (`iconSrc`), masquée si elle n'existe pas (`ItemThumb`).
+ */
+function ItemIcon({ id, itemIcons }: { id: string; itemIcons: Record<string, string> }) {
+  return <ItemThumb src={iconSrc(id, itemIcons)} name="" size={32} />;
 }
 
 const fmt = (n: number) => n.toLocaleString(getLang() === "en" ? "en-US" : "fr-FR");
@@ -209,7 +212,7 @@ const fmt = (n: number) => n.toLocaleString(getLang() === "en" ? "en-US" : "fr-F
 export function TaskRewardList({ rewards, traders, itemNames, itemIcons }: { rewards: TaskRewards; traders: Trader[]; itemNames: Record<string, string>; itemIcons: Record<string, string> }) {
   const traderName = (id: string) => traders.find((t) => t.id === id)?.name ?? "?";
   const itemName = (id: string) => itemNames[id] ?? tr(`objet inconnu (${id})`, `unknown item (${id})`);
-  const icon = (id: string) => <ItemIcon url={itemIcons[id]} name={itemName(id)} />;
+  const icon = (id: string) => <ItemIcon id={id} itemIcons={itemIcons} />;
   return (
     <ul className="plain-list">
       {rewards.experience > 0 && <li>+{fmt(rewards.experience)} EXP</li>}
@@ -290,7 +293,7 @@ export function QuestTab(p: Props) {
   if (!task) {
     return (
       <div className="tab-body empty">
-        <p>{tr("Sélectionnez une quête, ou ouvrez-la depuis un point de la carte (bouton « Quête »).", "Select a quest, or open it from a map point (“Quest” button).")}</p>
+        <p>{tr("Sélectionne une quête, ou ouvre-la depuis un point de la carte (bouton « Quête »).", "Select a quest, or open it from a map point (“Quest” button).")}</p>
       </div>
     );
   }
@@ -308,7 +311,7 @@ export function QuestTab(p: Props) {
   const showTarkovRewards = rewards !== null && (rewardDiffs.length > 0 || !wiki || wiki.rewards.length === 0);
   const pvp = isPvpZone(task) && wiki !== null;
   const itemName = (id: string) => p.itemNames[id] ?? tr(`objet inconnu (${id})`, `unknown item (${id})`);
-  const icon = (id: string) => <ItemIcon url={p.itemIcons[id]} name={itemName(id)} />;
+  const icon = (id: string) => <ItemIcon id={id} itemIcons={p.itemIcons} />;
   const statusText = (l: QuestLink & { status?: string[] }) =>
     l.status?.length ? ` (${l.status.map((s) => STATUS_LABELS[s] ?? s).join(tr(" ou ", " or "))})` : "";
   // niveau et marchand de la quête préalable, quand tarkov.dev les donne
@@ -364,7 +367,7 @@ export function QuestTab(p: Props) {
             <ul className="plain-list pack-list">
               {wiki.relatedItems.map((r, k) => (
                 <li key={k}>
-                  <ItemThumb src={relatedIcon(r.name)} name={r.name} />
+                  <ItemThumb src={relatedIcon(r.name)} name="" />
                   {r.amount && r.amount !== "1" ? `${r.amount} × ` : ""}
                   {r.name}
                   {r.requirement && <span className="muted small"> · {r.requirement}</span>}

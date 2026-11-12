@@ -102,18 +102,7 @@ const responses: Record<string, unknown> = {
     translations: ["$.data.tasks.*.name"],
   },
   "regular/tasks_fr": { data: { "t1 name": "Quête un", "o1 desc": "Marquer", "qi1 Name": "Dossier secret" } },
-  // noms d'objets : seuls ceux cités par les quêtes sont gardés
-  // fichier principal des objets : seule l'image (iconLink) des objets cités est gardée
-  "regular/items": {
-    data: {
-      items: {
-        key1: { id: "key1", iconLink: "https://assets.tarkov.dev/key1-icon.webp", gridImageLink: "https://assets.tarkov.dev/key1-grid.webp" },
-        rub: { id: "rub", iconLink: "https://assets.tarkov.dev/rub-icon.webp" },
-        med1: { id: "med1" }, // sans image : absent
-        autre: { id: "autre", iconLink: "https://assets.tarkov.dev/autre-icon.webp" },
-      },
-    },
-  },
+  // noms d'objets : seuls ceux cités par les quêtes sont gardés (le fichier principal des objets, 17 Mo, n'est pas demandé)
   "regular/items_fr": { data: { "key1 Name": "Clé 306", "med1 Name": "Salewa", "rub Name": "Roubles", "autre Name": "Inutile" } },
   "regular/tasks_en": { data: { "t1 name": "Quest one", "o2 desc": "Find it" } },
   // sorties réelles de Douanes (positions de l'API), réduites aux champs utiles
@@ -259,22 +248,20 @@ describe("fetchTarkovData", () => {
     expect(task.failedBy).toEqual(["t9"]);
     expect(task.faction).toBeUndefined();
     expect(data.itemNames).toEqual({ qi1: "Dossier secret", key1: "Clé 306", med1: "Salewa", rub: "Roubles" });
-    expect(data.itemIcons).toEqual({
-      qi1: "qi1-icon.webp",
-      key1: "key1-icon.webp",
-      rub: "rub-icon.webp",
-    });
-    expect(iconUrl(data.itemIcons!.key1)).toBe("https://assets.tarkov.dev/key1-icon.webp");
+    // images : seuls les objets de quête (fichier des quêtes) ; celle des autres objets se déduit de leur identifiant (iconSrc)
+    expect(data.itemIcons).toEqual({ qi1: "qi1-icon.webp" });
+    expect(iconUrl(data.itemIcons!.qi1)).toBe("https://assets.tarkov.dev/qi1-icon.webp");
     expect(iconUrl("https://ailleurs.test/x.webp")).toBe("https://ailleurs.test/x.webp");
   });
 
-  it("garde les noms si le fichier des objets (images) est indisponible", async () => {
-    const base = mockFetch();
-    vi.stubGlobal("fetch", vi.fn(async (url: string) => (url.endsWith("regular/items") ? new Response("down", { status: 503 }) : base(url))));
-    vi.spyOn(console, "warn").mockImplementation(() => {});
+  it("ne télécharge pas le fichier principal des objets (17 Mo) : les images se déduisent de l'identifiant", async () => {
+    const fetchMock = vi.fn(mockFetch());
+    vi.stubGlobal("fetch", fetchMock);
     const data = await fetchTarkovData("regular", "fr");
+    const asked = fetchMock.mock.calls.map((c) => String(c[0]).replace(API_BASE, ""));
+    expect(asked).toContain("regular/items_fr");
+    expect(asked).not.toContain("regular/items");
     expect(data.itemNames?.key1).toBe("Clé 306");
-    expect(data.itemIcons).toEqual({ qi1: "qi1-icon.webp" });
   });
 
   it("garde toutes les quêtes du fichier (factions BEAR/USEC, noms à tiret) et les rend trouvables", async () => {

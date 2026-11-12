@@ -48,7 +48,7 @@ export function WikiBlocks({ blocks, itemNames, itemIcons }: { blocks: WikiBlock
         const at = s.indexOf(l.text, pos);
         const src = at < 0 ? undefined : iconOf(l.target);
         if (!src) continue;
-        parts.push(richMarks(s.slice(pos, at)), <ItemThumb key={at} src={src} name={l.text} title={l.target} size={22} />);
+        parts.push(richMarks(s.slice(pos, at)), <ItemThumb key={at} src={src} name="" title={l.target} size={22} />);
         pos = at;
       }
       parts.push(richMarks(s.slice(pos)));
@@ -63,7 +63,7 @@ export function WikiBlocks({ blocks, itemNames, itemIcons }: { blocks: WikiBlock
     for (const m of s.matchAll(ITEM_MARK)) {
       out.push(s.slice(last, m.index));
       const name = itemNames[m[1]];
-      out.push(<ItemThumb key={m.index} src={iconSrc(m[1], itemIcons)} name={name ?? ""} />, name ?? "[…]");
+      out.push(<ItemThumb key={m.index} src={iconSrc(m[1], itemIcons)} name="" />, name ?? "[…]");
       last = m.index + m[0].length;
     }
     out.push(s.slice(last));
@@ -111,7 +111,7 @@ export function WikiBlocks({ blocks, itemNames, itemIcons }: { blocks: WikiBlock
                     const nameCell = row[itemColumn(b.headers) + rowOffset(b.headers, row)] ?? "";
                     return (
                       <li key={j}>
-                        {nameCell && <ItemThumb src={iconOf(nameCell)} name={t(nameCell)} />}
+                        {nameCell && <ItemThumb src={iconOf(nameCell)} name="" />}
                         <RowText headers={b.headers} row={row} t={t} />
                       </li>
                     );

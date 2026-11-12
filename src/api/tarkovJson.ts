@@ -384,11 +384,13 @@ export function referencedItemIds(tasks: Task[]): Set<string> {
 }
 
 /**
- * Noms et images des objets utiles, dans la langue demandée. Les noms viennent du fichier
- * de traductions des objets (~1,7 Mo, clés "<id> Name"), les images (champ iconLink, 64 px,
- * assets.tarkov.dev) du fichier principal des objets (~17 Mo, mis en cache : seuls les
- * objets cités par les quêtes sont gardés). Les objets de quête ont nom et image dans le
- * fichier des quêtes. En cas d'échec, l'app fonctionne sans les noms ou sans les images.
+ * Noms et images des objets utiles, dans la langue demandée. Les noms viennent du fichier de
+ * traductions des objets (clés "<id> Name") ; seuls ceux des objets cités par les quêtes sont gardés.
+ * Les objets de quête ont nom et image dans le fichier des quêtes.
+ * Les images des autres objets ne sont pas lues ici : leur adresse se déduit de l'identifiant
+ * (`<id>-icon.webp`), les exceptions étant dans src/data/item-icons.json (`iconSrc`, lib/itemIcons.ts,
+ * tenu à jour par `npm run sync:icons`). Le fichier principal des objets (17 Mo, 1,8 Mo compressé) n'est
+ * donc plus téléchargé ni analysé à chaque démarrage. En cas d'échec, l'app fonctionne sans les noms.
  */
 async function readItems(
   gameMode: GameMode,
@@ -406,20 +408,10 @@ async function readItems(
     const icon = asString(q.iconLink);
     if (id && icon) icons[id] = storedIcon(icon);
   }
-  const [translations, main] = await Promise.all([
-    fetchTranslations(`${gameMode}/items`, lang, signal),
-    fetchJson(`${gameMode}/items`, signal).catch((error) => {
-      if ((error as Error).name === "AbortError") throw error;
-      console.warn("Images des objets indisponibles", error);
-      return {} as Dict;
-    }),
-  ]);
-  const raw = asDict(asDict(main.data).items);
+  const translations = await fetchTranslations(`${gameMode}/items`, lang, signal);
   for (const id of referencedItemIds(tasks)) {
     const name = translations[`${id} Name`];
     if (name) names[id] = name;
-    const icon = asString(asDict(raw[id]).iconLink);
-    if (icon) icons[id] = storedIcon(icon);
   }
   return { names, icons };
 }

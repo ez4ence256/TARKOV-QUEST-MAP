@@ -2,7 +2,7 @@
 // toutes les quêtes, le hideout, les barters et les crafts. Données chargées à la première ouverture.
 import { useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { GameMap, GameMode, Task, Trader } from "../types";
-import { tr } from "../lib/i18n";
+import { plural, tr } from "../lib/i18n";
 import { UiIcon } from "./UiIcon";
 import { scoreName } from "../lib/search";
 import { RECOGNIZED_MIN, matchItemLines } from "../lib/ocrMatch";
@@ -123,7 +123,7 @@ export function ItemFinder(props: Props) {
   };
   return (
     <>
-      <button ref={toggle} className={props.variant === "rail" ? "rail-item" : "btn btn-small item-finder-btn"} onClick={() => setOpen(true)} aria-haspopup="dialog" aria-label={tr("Item finder : chercher un objet", "Item finder: search an item")} title={tr("Chercher où sert un objet", "Find where an item is used")}>
+      <button ref={toggle} className={props.variant === "rail" ? "rail-item" : "btn btn-small item-finder-btn"} onClick={() => setOpen(true)} aria-haspopup="dialog" aria-label={tr("Objets : chercher où sert un objet", "Items: find where an item is used")} title={tr("Chercher où sert un objet", "Find where an item is used")}>
         <UiIcon id="search" size={props.variant === "rail" ? 22 : 18} />
         <span className={props.variant === "rail" ? "rail-label" : "item-finder-label"}>{tr("Objets", "Items")}</span>
       </button>
@@ -578,7 +578,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                 {banner}
                 {!ocr && (
                   <p className="muted finder-count" role="status">
-                    {tr(`${filtered.length} objet(s)`, `${filtered.length} item(s)`)}
+                    {tr(`${filtered.length} objet${plural(filtered.length)}`, `${filtered.length} item${plural(filtered.length)}`)}
                     {cat && ` · ${cat.name}`}
                   </p>
                 )}
@@ -732,7 +732,7 @@ function Usage(p: {
     const map = p.maps.find((m) => m.normalizedName === mapName);
     if (!map) return [];
     const key = keyId ? p.byId.get(keyId) : undefined;
-    return [{ key: `spot:${i}`, mapId: map.id, x, y, z, rank: i + 1, item: p.item.name, details: [tr(`${n} point(s) d'apparition regroupés`, `${n} spawn point(s) grouped`), ...(!key ? [] : linked.has(key.nameEn.toLowerCase()) ? [tr(`Derrière la porte : ${key.name} (confirmé par le wiki)`, `Behind the door: ${key.name} (confirmed by the wiki)`)] : [tr(`Porte fermée à proximité : ${key.name}`, `Locked door nearby: ${key.name}`)])] }];
+    return [{ key: `spot:${i}`, mapId: map.id, x, y, z, rank: i + 1, item: p.item.name, details: [tr(`${n} point${plural(n)} d'apparition regroupés`, `${n} spawn point${plural(n)} grouped`), ...(!key ? [] : linked.has(key.nameEn.toLowerCase()) ? [tr(`Derrière la porte : ${key.name} (confirmé par le wiki)`, `Behind the door: ${key.name} (confirmed by the wiki)`)] : [tr(`Porte fermée à proximité : ${key.name}`, `Locked door nearby: ${key.name}`)])] }];
   });
   const rows = p.quests
     .map((u) => ({ ...u, task: p.tasksById.get(u.taskId) }))
@@ -945,7 +945,7 @@ function Usage(p: {
                                   z,
                                   icon,
                                   label: key ? `${p.item.name} — ${key.name}` : p.item.name,
-                                  note: tr(`Spot ${i + 1} de « ${p.item.name} » : ${n} point(s) d'apparition (y ≈ ${y})`, `Spot ${i + 1} for "${p.item.name}": ${n} spawn point(s) (y ≈ ${y})`),
+                                  note: tr(`Spot ${i + 1} de « ${p.item.name} » : ${n} point${plural(n)} d'apparition (y ≈ ${y})`, `Spot ${i + 1} for "${p.item.name}": ${n} spawn point${plural(n)} (y ≈ ${y})`),
                                 })
                             : undefined
                         }
@@ -1216,7 +1216,7 @@ function SpotCard(p: {
           </button>
           <span className="finder-badge">{p.rank}</span>
           <strong>{p.mapLabel}</strong>
-          <span className="finder-pill">{tr(`${p.n} point(s)`, `${p.n} point(s)`)}</span>
+          <span className="finder-pill">{tr(`${p.n} point${plural(p.n)}`, `${p.n} point${plural(p.n)}`)}</span>
           {p.marker && (
             <button
               className="btn btn-small finder-spot-map"
@@ -1334,7 +1334,7 @@ export function StreamerChecklist({ collector, name, alts, itemIcons, onSetDone,
       </label>
       </div>
       <p className="muted finder-count" role="status">
-        {tr("Objets streamer Kappa", "Kappa streamer items")} : {[...collector.values()].filter((c) => c.kept).length}/{collector.size} {tr("de côté", "set aside")}
+        {tr("Objets streamer Kappa :", "Kappa streamer items:")} {[...collector.values()].filter((c) => c.kept).length}/{collector.size} {tr("de côté", "set aside")}
         {" · "}
         {tr("coche ceux que tu as mis de côté (FIR) : ils ne sont plus à garder pour Collector.", "tick the ones you set aside (FIR): they no longer need keeping for Collector.")}
       </p>

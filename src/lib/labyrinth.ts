@@ -83,6 +83,6 @@ export const groupSize = (m: LabyrinthMarker, all: LabyrinthMarker[] = LABYRINTH
 
 /** Explication de ce que sont les cadavres (légende de la carte). */
 export const SCIENTIST_NOTE = () =>
-  tr("Peut porter des notes de recherche et la clé de la salle d'observation : regardez leurs mains et les alentours.", "Can hold research notes and the observation room key: check their hands and surroundings.");
+  tr("Peut porter des notes de recherche et la clé de la salle d'observation : regarde leurs mains et les alentours.", "Can hold research notes and the observation room key: check their hands and surroundings.");
 
 export const ITEM_ICON = (id: string) => `https://assets.tarkov.dev/${id}-icon.webp`;

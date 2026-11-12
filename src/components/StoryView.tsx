@@ -183,7 +183,7 @@ const languageNote = (reason: string) =>
   reason === "missing"
     ? tr("Pas de page française pour ce chapitre sur le wiki : texte anglais.", "No French page for this chapter on the wiki: English text.")
     : tr(
-        "La page française ne correspond pas à la page anglaise (étapes en nombre ou en ordre différent) : texte anglais, pour que vos cases cochées restent justes.",
+        "La page française ne correspond pas à la page anglaise (étapes en nombre ou en ordre différent) : texte anglais, pour que tes cases cochées restent justes.",
         "The French page does not match the English one (different number or order of steps): English text, so that your ticks stay correct.",
       );
 
@@ -297,7 +297,7 @@ function Chapter({
       {hasBranches && (
         <p className="muted small">
           {tr(
-            "Ce chapitre a plusieurs fins : suivez les étapes de la vôtre (étiquette « Fin »). Les autres restent décochées, donc la progression n'atteint pas le total.",
+            "Ce chapitre a plusieurs fins : suis les étapes de la tienne (étiquette « Fin »). Les autres restent décochées, donc la progression n'atteint pas le total.",
             "This chapter has several endings: follow the steps of yours (\"Ending\" tag). The others stay unticked, so progress never reaches the total.",
           )}
         </p>

@@ -1,0 +1,24 @@
+# Tarkov Quest Planner
+
+> Planificateur de quêtes gratuit pour Escape from Tarkov. Le joueur sélectionne ses quêtes en cours et leurs objectifs s'affichent en points sur la carte de chaque map, avec les sorties. Interface en français et en anglais, sans compte.
+
+Tarkov Quest Planner est une application web qui tourne dans le navigateur. La progression (quêtes sélectionnées, objectifs cochés, notes, points personnels) est enregistrée localement, avec un export / import JSON pour changer d'appareil. Site de fan, non affilié à Battlestate Games.
+
+## Ce que fait l'outil
+
+- Affiche sur la carte les objectifs des quêtes sélectionnées : une couleur par quête, une icône par type d'objectif, étage par étage.
+- Montre les sorties, les sorties coop et les transits de chaque map, avec leur faction (PMC, Scav).
+- Gère trois modes de jeu avec une progression par mode : PvP, PvE et PvP Saison.
+- Recherche de quêtes par nom français ou anglais, tolérante aux fautes ; filtres par marchand, par map et « Kappa seulement ».
+- Import des quêtes par capture d'écran du menu Tâches du jeu (lecture OCR dans le navigateur, l'image n'est envoyée nulle part).
+- Fiche de quête : objectifs, objets à emporter, guide, prérequis, récompenses et photos des emplacements.
+- Recherche d'objets : dans quelles quêtes, quels niveaux de planque, quels trocs et quelles fabrications un objet sert ; objets à garder.
+- Suivi des niveaux de la planque et offres des marchands.
+- Rooms pour jouer en équipe : chaque joueur voit, en lecture seule, les quêtes de ses coéquipiers sur la même carte.
+- Mode raid : la carte en grand avec la liste des objectifs de la map affichée.
+
+## Sources des données
+
+- Quêtes, maps, sorties, marchands, objets : API publique de [tarkov.dev](https://tarkov.dev).
+- Fonds de carte : [tarkov-dev-svg-maps](https://github.com/the-hideout/tarkov-dev-svg-maps) (CC BY-NC-SA 4.0).
+- Guides, photos des emplacements, Main story : [wiki Escape from Tarkov](https://escapefromtarkov.fandom.com/wiki/Escape_from_Tarkov_Wiki) (CC BY-NC-SA).

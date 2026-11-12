@@ -60,7 +60,7 @@ export function MapPicker({ maps, currentId, counts, onPick, allLabel, label }: 
         className="input map-picker-btn"
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={label ?? tr("Map affichée", "Displayed map")}
+        aria-label={`${label ?? tr("Map affichée", "Displayed map")}${tr(" : ", ": ")}${current?.name ?? allLabel ?? ""}${current && counts.get(current.id) ? ` (${counts.get(current.id)})` : ""}`}
         disabled={maps.length === 0}
         onClick={() => setOpen((o) => !o)}
         title={credit}

@@ -2,6 +2,7 @@
 // et des données tarkov.dev réduites aux champs utiles.
 import { describe, expect, it } from "vitest";
 import type { Task, TaskDetails, Trader } from "../types";
+import { frTypo } from "./i18n"; // les textes français affichés portent des espaces insécables
 import type { WikiPage } from "../api/wiki";
 import {
   acceptWikiPage,
@@ -178,7 +179,7 @@ describe("comparaison des prérequis", () => {
     const cmp = comparePrerequisites(signal3, readWikiQuest(SIGNAL_3_WIKI), ctx);
     expect(cmp.tarkovTasks).toEqual([{ name: "Rat Hunting", taskId: "rat", status: ["complete"] }]);
     expect(cmp.wikiTasks).toEqual([]);
-    expect(cmp.warnings).toEqual(["tarkov.dev demande la quête « Rat Hunting », que le wiki ne mentionne pas."]);
+    expect(cmp.warnings).toEqual([frTypo("tarkov.dev demande la quête « Rat Hunting », que le wiki ne mentionne pas.")]);
     // quête suivante d'après tarkov.dev (celle qui demande Rat Hunting)
     expect(comparePrerequisites(ratHunting, null, ctx).tarkovNext).toEqual([{ name: "Signal - Part 3", taskId: "signal3" }]);
   });
@@ -191,7 +192,7 @@ describe("comparaison des prérequis", () => {
       details: details({ taskRequirements: prereqs.map((p) => ({ taskId: p.id, status: ["complete"] })) }),
     });
     const cmp = comparePrerequisites(collector, readWikiQuest(COLLECTOR_WIKI), { tasks: [...prereqs, collector], traders });
-    expect(cmp.warnings).toEqual(["tarkov.dev demande la quête « Postman Pat - Part 2 », que le wiki ne mentionne pas."]);
+    expect(cmp.warnings).toEqual([frTypo("tarkov.dev demande la quête « Postman Pat - Part 2 », que le wiki ne mentionne pas.")]);
     expect(cmp.wikiTasks.map((t) => t.taskId)).toEqual(["p0", "p1"]); // cliquables
   });
 
@@ -260,7 +261,7 @@ describe("récompenses", () => {
       }),
     });
     expect(compareRewards(signal3, readWikiQuest(SIGNAL_3_WIKI), traders)).toEqual([
-      `Roubles : ${(33000).toLocaleString("fr-FR")} selon tarkov.dev, ${(30000).toLocaleString("fr-FR")} selon le wiki.`,
+      frTypo(`Roubles : ${(33000).toLocaleString("fr-FR")} selon tarkov.dev, ${(30000).toLocaleString("fr-FR")} selon le wiki.`),
     ]);
   });
 
@@ -268,6 +269,6 @@ describe("récompenses", () => {
     const other = task("other", "Other");
     expect(
       failConditionText({ type: "taskStatus", description: "", taskId: "other", status: ["complete"] }, new Map([["other", other]])),
-    ).toBe("Échoue si la quête « Other » est terminée.");
+    ).toBe(frTypo("Échoue si la quête « Other » est terminée."));
   });
 });

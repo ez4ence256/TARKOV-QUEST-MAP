@@ -34,7 +34,7 @@ Le dossier `dist/` est un site statique. Vous pouvez le déposer tel quel sur n'
 
 ## Fonctionnalités
 
-- **Mode de jeu** demandé à chaque ouverture : PvP, PvE ou PvP Saison. Chaque mode a sa propre progression.
+- **Écran d'accueil** à la première visite : ce que fait l'outil, le choix du **mode de jeu** (PvP, PvE ou PvP Saison), les fonctionnalités et une FAQ. Chaque mode a sa propre progression. Aux visites suivantes le site rouvre directement sur le dernier mode joué (écran d'attente le temps du chargement) ; le badge du mode, en haut de la barre latérale, ramène à l'accueil pour en changer.
 - **Liste de toutes les quêtes**, avec des filtres par marchand et par map, et une **recherche bilingue** : le nom français ou anglais trouve la quête (« Appâtage » ou « Chumming »). La recherche ignore la casse, les accents et la ponctuation, et tolère les petites fautes (1 faute à partir de 5 lettres, 2 à partir de 9). Les correspondances exactes passent en premier. Quand c'est le nom anglais qui correspond, il est rappelé sous le nom français.
 - **Quêtes sélectionnées épinglées** en tête de cette liste, dans une zone « Quêtes sélectionnées (n) », puis les autres quêtes. La recherche et les filtres s'appliquent aussi à la zone épinglée, qui indique combien de quêtes sélectionnées sont masquées. Le bouton **« Tout désélectionner »** vide la sélection sans toucher à la progression, aux notes ni aux points perso. Un clic sur une quête la sélectionne ou la désélectionne.
 - **Sélecteur de map** : toutes les maps fournies par l'API. Le nombre de points restants est indiqué entre parenthèses.
@@ -107,12 +107,20 @@ Positions utilisées pour placer les points (rien n'est inventé) :
 - `objectives[].zones[].position` : zones à marquer, visiter, etc. Le contour `outline` est dessiné en pointillés quand il existe.
 - `objectives[].possibleLocations[].positions` : emplacements possibles d'un objet de quête.
 
+### Référencement et page d'entrée
+
+- `index.html` porte le titre, la description, les balises de partage (Open Graph, image `public/og-image.jpg`), les données structurées (`WebSite`, `WebApplication`, `FAQPage`) et une **copie statique de l'écran d'accueil**, affichée avant le chargement de l'appli et lue par les moteurs de recherche. Elle doit rester identique à `src/components/ModePicker.tsx` : le test `src/components/ModePicker.test.tsx` échoue dès qu'un texte diffère (accueil, FAQ affichée, FAQ des données structurées).
+- `%SITE_URL%` est remplacé à la compilation par `SITE_URL` (`vite.config.ts`, `https://tarkov.aprilox.fr/` par défaut ; variable d'environnement `SITE_URL` pour un autre domaine). La même valeur sert à `robots.txt` et `sitemap.xml`, écrits dans `dist/` à la compilation.
+- `public/llms.txt` décrit le site aux assistants IA ; `public/site.webmanifest` et les icônes permettent d'installer le site sur l'écran d'accueil.
+- Textes français : `tr()` pose les espaces insécables devant « : ; ? ! » et dans les guillemets (`frTypo`, `src/lib/i18n.ts`) ; `plural(n)` accorde les mots comptés.
+
 ### Texte des quêtes (wiki)
 
 - Il vient de la page wiki de la quête : le lien `wikiLink` de tarkov.dev, puis une requête `parse` avec `redirects=1`. La page n'est acceptée que si elle existe et est classée « Quests » ou « Historical content ».
 - Le wiki n'a **pas de données structurées** (ni Cargo ni Semantic MediaWiki). L'app lit le wikitext : paramètres du modèle `{{Infobox quest}}` et sections (Dialogue, Requirements, Objectives, Rewards, Initial Equipment, Failure Dialogue, Guide). Tout est converti en texte. **Aucun HTML du wiki n'est inséré dans la page.**
 - **Une seule requête par quête**, partagée avec l'onglet Photos, à la demande, une par seconde au plus, avec un cache de 7 jours.
 - Les noms français des objets (clés, objets à rendre, récompenses) viennent du fichier de traductions `items_<langue>` de tarkov.dev (environ 1,7 Mo, téléchargé avec les quêtes). Seuls les objets cités par les quêtes sont gardés.
+- Les images des objets ne demandent aucun téléchargement de données : leur adresse se déduit de l'identifiant (`assets.tarkov.dev/<id>-icon.webp`), les exceptions (environ 160 objets) étant dans `src/data/item-icons.json`, à régénérer avec `npm run sync:icons` quand le jeu ajoute des objets. Le fichier principal des objets de tarkov.dev (17 Mo) n'est plus téléchargé au démarrage.
 
 ### Photos des emplacements
 

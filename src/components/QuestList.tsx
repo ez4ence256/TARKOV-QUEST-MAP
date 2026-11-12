@@ -9,7 +9,7 @@ import { useStoryChapters } from "./StoryView";
 import { QUEST_COLORS } from "../lib/objectiveTypes";
 import { taskProgress } from "../lib/points";
 import { isGreyed } from "../lib/questChain";
-import { getLang, tr } from "../lib/i18n";
+import { getLang, plural, tr } from "../lib/i18n";
 import { UiIcon } from "./UiIcon";
 import { filterQuests, filterStory, mergeRows, pinSelected, STORY_TRADER, type Row, type StoryResult } from "../lib/questFilter";
 import { storyIdOf } from "../lib/story";
@@ -92,6 +92,16 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
   const searching = Boolean(query.trim());
   const selectedCount = mode.selected.length + storySelected.length;
   const showPinned = selectedCount > 0 && !(searching && pinned.length === 0);
+  // rien ne correspond : on le dit, avec de quoi revenir à la liste complète
+  const filtersActive = searching || Boolean(trader || mapFilter) || hideCompleted || onlyCompleted || kappaOnly;
+  const resetFilters = () => {
+    setQuery("");
+    setTrader("");
+    setMapFilter("");
+    setHideCompleted(false);
+    setOnlyCompleted(false);
+    if (kappaOnly) onKappaOnly(false);
+  };
 
   const renderStoryRow = (r: StoryResult) => {
     const id = r.chapter.id;
@@ -256,8 +266,8 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
         </div>
         <div className="muted small">
           {tr(
-            `${quests.length} quête${quests.length > 1 ? "s" : ""} sur ${tasks.length}`,
-            `${quests.length} of ${tasks.length} quest${tasks.length > 1 ? "s" : ""}`,
+            `${quests.length} quête${plural(quests.length)} sur ${tasks.length}`,
+            `${quests.length} of ${tasks.length} quest${plural(tasks.length)}`,
           )}
         </div>
       </div>
@@ -307,6 +317,14 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
 
       {showPinned && others.length > 0 && <div className="subhead">{tr(`Autres quêtes (${others.length})`, `Other quests (${others.length})`)}</div>}
       <ul className="quest-list">{others.map(renderRow)}</ul>
+      {rows.length === 0 && filtersActive && (
+        <div className="empty-state is-compact">
+          <p className="muted">{tr("Aucune quête ne correspond à cette recherche.", "No quest matches this search.")}</p>
+          <button className="btn btn-small" onClick={resetFilters}>
+            {tr("Effacer la recherche et les filtres", "Clear the search and filters")}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -6,6 +6,9 @@
 //  3. l'icône de l'objet sur le wiki (« File:<nom anglais> icon.png », puis « <titre de la page> icon.png ») ;
 //  4. l'image de la page wiki, sauf un plan d'emplacement ou une porte (pages de clés) et « Missing_image » ;
 //  sinon rien (l'image reste masquée, jamais cassée).
+// En plus : tout objet dont l'image indiquée par tarkov.dev n'est pas <id>-icon.webp (préréglages d'armes…) est noté
+// avec cette image. L'appli n'a donc pas à télécharger le fichier des objets (17 Mo) pour la connaître : elle déduit
+// l'adresse de l'identifiant et ne lit que ce fichier d'exceptions (iconSrc, src/lib/itemIcons.ts).
 // Usage : npm run sync:icons
 import { writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -94,6 +97,13 @@ for (const batch of batches(rest)) {
     if (!pg?.thumbnail?.source || /missing|map|location|door/i.test(pg.pageimage ?? "")) continue;
     for (const id of wikiWanted.get(t)) out[id] ??= pg.thumbnail.source;
   }
+}
+
+// 5. image indiquée par tarkov.dev différente de l'image standard (même si la standard existe)
+for (const [id, item] of Object.entries(items)) {
+  const link = item?.iconLink;
+  if (out[id] || !link?.startsWith(ICON_BASE) || link === `${ICON_BASE}${id}-icon.webp` || /unknown-item-icon/.test(link)) continue;
+  if (await exists(link)) out[id] = link.slice(ICON_BASE.length);
 }
 
 const file = join(dirname(fileURLToPath(import.meta.url)), "..", "src", "data", "item-icons.json");

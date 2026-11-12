@@ -304,7 +304,7 @@ export function useRoom(state: AppState, dispatch: Dispatch<Action>, ctx: RoomCo
           const cur = stateRef.current;
           if (cur.gameMode === m) return;
           // seul l'affichage change de mode : aucune quête locale n'est touchée
-          if (cur.gameMode) setNotice(tr(`La room est en mode ${m === "regular" ? "PvP" : m === "pve" ? "PvE" : "PvP Saison"} : vous y avez été basculé.`, `The room is in ${m === "regular" ? "PvP" : m === "pve" ? "PvE" : "PvP Season"} mode: you were switched to it.`));
+          if (cur.gameMode) setNotice(tr(`La room est en mode ${m === "regular" ? "PvP" : m === "pve" ? "PvE" : "PvP Saison"} : tu y as été basculé.`, `The room is in ${m === "regular" ? "PvP" : m === "pve" ? "PvE" : "PvP Season"} mode: you were switched to it.`));
           dispatch({ type: "setGameMode", mode: m });
         },
         onMembers: (members) => {
@@ -335,7 +335,7 @@ export function useRoom(state: AppState, dispatch: Dispatch<Action>, ctx: RoomCo
     setError(
       e instanceof Unavailable && e.hosting
         ? tr("Rooms indisponibles sur cet hébergement.", "Rooms are not available on this hosting.")
-        : tr("Serveur injoignable, réessayez.", "Server unreachable, try again."),
+        : tr("Serveur injoignable, réessaie.", "Server unreachable, try again."),
     );
 
   const create = async () => {
