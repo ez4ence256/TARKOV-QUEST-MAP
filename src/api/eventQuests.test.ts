@@ -32,7 +32,7 @@ const trader = (id: string, normalizedName: string): Trader => ({ id, name: norm
 const map = (id: string, nameEn: string): GameMap => ({ id, name: nameEn, nameEn, normalizedName: nameEn.toLowerCase() });
 const dev = (nameEn: string): Task => ({
   id: `td-${nameEn}`, name: nameEn, nameEn, normalizedName: nameEn.toLowerCase(), traderId: "t1", mapId: null,
-  minPlayerLevel: 1, kappaRequired: false, wikiLink: null, objectives: [],
+  minPlayerLevel: 1, kappaRequired: false, lightkeeperRequired: false, wikiLink: null, objectives: [],
 });
 const ctx = { traders: [trader("t1", "prapor")], maps: [map("m1", "Lighthouse")] };
 

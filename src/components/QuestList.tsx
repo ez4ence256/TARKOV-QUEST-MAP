@@ -9,7 +9,7 @@ import { useStoryChapters } from "./StoryView";
 import { QUEST_COLORS } from "../lib/objectiveTypes";
 import { taskProgress } from "../lib/points";
 import { isGreyed } from "../lib/questChain";
-import { getLang, tr } from "../lib/i18n";
+import { getLang, plural, tr } from "../lib/i18n";
 import { UiIcon } from "./UiIcon";
 import { filterQuests, filterStory, mergeRows, pinSelected, STORY_TRADER, type Row, type StoryResult } from "../lib/questFilter";
 import { storyIdOf } from "../lib/story";
@@ -39,6 +39,9 @@ interface Props {
   /** « Kappa seulement » : partagé avec Mes quêtes et la carte. */
   kappaOnly: boolean;
   onKappaOnly: (value: boolean) => void;
+  /** « Lightkeeper seulement » : partagé avec Mes quêtes et la carte. */
+  lightkeeperOnly: boolean;
+  onLightkeeperOnly: (value: boolean) => void;
   /** Quêtes sélectionnées qui n'existent plus dans les données (jamais retirées toutes seules). */
   ghostIds?: string[];
   onRemoveGhosts?: () => void;
@@ -46,7 +49,7 @@ interface Props {
 
 const ghostName = (id: string) => (id.startsWith("wiki-") ? id.slice(5).replace(/-/g, " ") : tr(`quête retirée du site (id ${id.slice(0, 8)}…)`, `quest removed from the site (id ${id.slice(0, 8)}…)`));
 
-export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhotos, onClearSelection, onShowMap, onToggleStory, onOpenStory, onlyMine, onOnlyMine, kappaOnly, onKappaOnly, ghostIds = [], onRemoveGhosts }: Props) {
+export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhotos, onClearSelection, onShowMap, onToggleStory, onOpenStory, onlyMine, onOnlyMine, kappaOnly, onKappaOnly, lightkeeperOnly, onLightkeeperOnly, ghostIds = [], onRemoveGhosts }: Props) {
   const [query, setQuery] = useState("");
   const [trader, setTrader] = useState("");
   const [mapFilter, setMapFilter] = useState("");
@@ -67,7 +70,9 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
   const [storyRetry, setStoryRetry] = useState(0);
   const storyChapters = useStoryChapters(true, storyRetry);
   const storySelected = mode.story?.selected ?? [];
-  const filters = useMemo(() => ({ query, traderId: trader, mapId: mapFilter, hideCompleted, onlyCompleted, kappaOnly }), [query, trader, mapFilter, hideCompleted, onlyCompleted, kappaOnly]);
+  const filters = useMemo(() => ({ query, traderId: trader, mapId: mapFilter, hideCompleted, onlyCompleted, kappaOnly, lightkeeperOnly }), [query, trader, mapFilter, hideCompleted, onlyCompleted, kappaOnly, lightkeeperOnly]);
+  const lightkeeperTasks = useMemo(() => tasks.filter((t) => t.lightkeeperRequired), [tasks]);
+  const lightkeeperDone = lightkeeperTasks.filter((t) => isGreyed(t, mode.done, mode.failed)).length;
 
   // Recherche sur le nom affiché ET le nom anglais ; meilleurs résultats en premier.
   const quests = useMemo(() => filterQuests(tasks, filters, mode.done, mode.failed), [tasks, filters, mode.done, mode.failed]);
@@ -93,6 +98,17 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
   const selectedCount = mode.selected.length + storySelected.length;
   const showPinned = selectedCount > 0 && !(searching && pinned.length === 0);
 
+  const filtering = Boolean(query.trim() || trader || mapFilter || hideCompleted || onlyCompleted || kappaOnly || lightkeeperOnly);
+  const clearFilters = () => {
+    setQuery("");
+    setTrader("");
+    setMapFilter("");
+    setHideCompleted(false);
+    setOnlyCompleted(false);
+    onKappaOnly(false);
+    onLightkeeperOnly(false);
+  };
+
   const renderStoryRow = (r: StoryResult) => {
     const id = r.chapter.id;
     const isSelected = storySelected.includes(id);
@@ -112,10 +128,10 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
           </span>
           <span className="quest-main">
             <span className="quest-name">{r.chapter.name}</span>
-            {r.viaEnglish && <span className="quest-alt">EN : {r.chapter.nameEn}</span>}
+            {r.viaEnglish && <span className="quest-alt">{tr("EN : ", "EN: ")}{r.chapter.nameEn}</span>}
             <span className="quest-meta">Main story</span>
           </span>
-          {ticked > 0 && <span className="quest-progress">{tr(`${ticked} faite${ticked > 1 ? "s" : ""}`, `${ticked} done`)}</span>}
+          {ticked > 0 && <span className="quest-progress">{tr(`${ticked} faite${plural(ticked)}`, `${ticked} done`)}</span>}
         </button>
         <button
           className="quest-photos"
@@ -156,11 +172,12 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
               {t.name}
               {failedTag && <span className="tag">{tr("Échouée", "Failed")}</span>}
             </span>
-            {viaEnglish && <span className="quest-alt">EN : {t.nameEn}</span>}
+            {viaEnglish && <span className="quest-alt">{tr("EN : ", "EN: ")}{t.nameEn}</span>}
             <span className="quest-meta">
               {tradersById.get(t.traderId)?.name ?? "?"}
               {t.minPlayerLevel ? ` · ${tr("niv.", "lvl")} ${t.minPlayerLevel}` : ""}
               {t.kappaRequired ? " · Kappa" : ""}
+              {t.lightkeeperRequired ? " · Lightkeeper" : ""}
               {t.source === "wiki" ? " · wiki" : ""}
             </span>
           </span>
@@ -247,6 +264,10 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
           <input type="checkbox" checked={kappaOnly} onChange={(e) => onKappaOnly(e.target.checked)} />
           {tr("Kappa seulement", "Kappa only")}
         </label>
+        <label className="check">
+          <input type="checkbox" checked={lightkeeperOnly} onChange={(e) => onLightkeeperOnly(e.target.checked)} />
+          {tr("Lightkeeper seulement", "Lightkeeper only")} ({lightkeeperDone}/{lightkeeperTasks.length})
+        </label>
         {onlyMine !== undefined && (
           <label className="check" title={tr("Masque sur la carte les points des quêtes de tes coéquipiers", "Hides your teammates' quest points on the map")}>
             <input type="checkbox" checked={onlyMine} onChange={(e) => onOnlyMine?.(e.target.checked)} />
@@ -256,8 +277,8 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
         </div>
         <div className="muted small">
           {tr(
-            `${quests.length} quête${quests.length > 1 ? "s" : ""} sur ${tasks.length}`,
-            `${quests.length} of ${tasks.length} quest${tasks.length > 1 ? "s" : ""}`,
+            `${quests.length} quête${plural(quests.length)} sur ${tasks.length}`,
+            `${quests.length} of ${tasks.length} quest${plural(tasks.length)}`,
           )}
         </div>
       </div>
@@ -275,6 +296,15 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
         </p>
       )}
 
+      {rows.length === 0 && filtering && storyChapters.status !== "loading" && (
+        <div className="empty-state">
+          <p className="muted">{tr("Aucune quête ne correspond.", "No quest matches.")}</p>
+          <button className="btn btn-primary" onClick={clearFilters}>
+            {tr("Effacer la recherche et les filtres", "Clear the search and filters")}
+          </button>
+        </div>
+      )}
+
       {showPinned && (
         <section className="pinned" aria-label={tr("Quêtes sélectionnées", "Selected quests")}>
           <div className="pinned-head">
@@ -286,15 +316,15 @@ export function QuestList({ tasks, traders, maps, mode, onToggle, onOpen, onPhot
           {hiddenCount > 0 && (
             <p className="muted small">
               {tr(
-                `${hiddenCount} autre${hiddenCount > 1 ? "s" : ""} quête${hiddenCount > 1 ? "s" : ""} sélectionnée${hiddenCount > 1 ? "s" : ""}, masquée${hiddenCount > 1 ? "s" : ""} par la recherche ou les filtres`,
-                `${hiddenCount} other selected quest${hiddenCount > 1 ? "s" : ""} hidden by the search or filters`,
+                `${hiddenCount} autre${plural(hiddenCount)} quête${plural(hiddenCount)} sélectionnée${plural(hiddenCount)}, masquée${plural(hiddenCount)} par la recherche ou les filtres`,
+                `${hiddenCount} other selected quest${plural(hiddenCount)} hidden by the search or filters`,
               )}
               {!searching && hiddenNames.length > 0 && hiddenNames.length <= 5 ? ` : ${hiddenNames.join(", ")}.` : "."}
             </p>
           )}
           {!searching && ghostIds.length > 0 && onRemoveGhosts && (
             <p className="muted small">
-              {tr(`Quête${ghostIds.length > 1 ? "s" : ""} qui n'existe${ghostIds.length > 1 ? "nt" : ""} plus sur le site : `, `Quest${ghostIds.length > 1 ? "s" : ""} no longer on the site: `)}
+              {tr(`Quête${plural(ghostIds.length)} qui n'existe${ghostIds.length > 1 ? "nt" : ""} plus sur le site : `, `Quest${plural(ghostIds.length)} no longer on the site: `)}
               {ghostIds.map(ghostName).join(", ")}{" "}
               <button className="btn btn-small" onClick={onRemoveGhosts}>
                 {tr("Retirer", "Remove")}

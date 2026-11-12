@@ -22,9 +22,9 @@ function RailItem({ icon, label, full, active, count, onClick }: ItemProps) {
   const name = `${full ?? label}${count ? ` (${count})` : ""}`;
   return (
     <button className={`rail-item${active ? " is-active" : ""}`} aria-current={active ? "page" : undefined} aria-label={name} title={name} onClick={onClick}>
-      <span className="rail-icon">
+      {/* compteur dessiné en CSS : le lecteur d'écran l'a déjà dans le nom du bouton */}
+      <span className="rail-icon" data-count={count || undefined}>
         <UiIcon id={icon} size={22} />
-        {count ? <span className="rail-count">{count}</span> : null}
       </span>
       <span className="rail-label">{label}</span>
     </button>
@@ -95,7 +95,7 @@ export function Rail(p: Props) {
         <RailItem icon="crosshair" label={tr("Raid", "Raid")} full={tr("Mode raid", "Raid mode")} active={p.raid} onClick={() => { setMore(false); p.onRaid(); }} />
         <button
           className="rail-item"
-          aria-label={tr("Langue", "Language")}
+          aria-label={`${p.lang === "en" ? "EN" : "FR"} : ${tr("langue", "language")}`}
           title={tr("Langue de l'interface et des noms de quêtes, maps et objets", "Language of the interface and of quest, map and item names")}
           onClick={() => p.onLang(p.lang === "en" ? "fr" : "en")}
         >

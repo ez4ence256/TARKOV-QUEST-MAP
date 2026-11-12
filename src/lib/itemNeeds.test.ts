@@ -4,7 +4,7 @@ import { computeNeeds } from "./itemNeeds";
 
 const obj = (id: string, type: string, extra: Partial<Objective> = {}): Objective => ({ id, type, description: "", optional: false, mapIds: [], locations: [], ...extra });
 const task = (id: string, objectives: Objective[], faction?: "BEAR" | "USEC"): Task => ({
-  id, name: id, nameEn: id, normalizedName: id, traderId: "t", mapId: null, minPlayerLevel: null, kappaRequired: false, wikiLink: null, objectives, ...(faction ? { faction } : {}),
+  id, name: id, nameEn: id, normalizedName: id, traderId: "t", mapId: null, minPlayerLevel: null, kappaRequired: false, lightkeeperRequired: false, wikiLink: null, objectives, ...(faction ? { faction } : {}),
 });
 
 describe("computeNeeds", () => {

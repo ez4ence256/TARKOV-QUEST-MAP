@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { GameMap } from "../types";
 import { loadMapImages, type MapImages } from "../api/mapImages";
-import { tr } from "../lib/i18n";
+import { plural, tr } from "../lib/i18n";
 
 interface Props {
   maps: GameMap[];
@@ -52,6 +52,7 @@ export function MapPicker({ maps, currentId, counts, onPick, allLabel, label }: 
     items[Math.min(items.length - 1, Math.max(0, i + step))].focus();
   };
 
+  const count = current ? counts.get(current.id) : undefined;
   const credit = tr("Images des maps : wiki Escape from Tarkov", "Map images: Escape from Tarkov wiki");
   return (
     <div className={`map-picker${allLabel ? " in-panel" : ""}`} ref={root} onKeyDown={onKey}>
@@ -60,14 +61,14 @@ export function MapPicker({ maps, currentId, counts, onPick, allLabel, label }: 
         className="input map-picker-btn"
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={label ?? tr("Map affichée", "Displayed map")}
+        aria-label={`${label ?? tr("Map affichée", "Displayed map")} : ${current?.name ?? allLabel ?? ""}${count ? ` (${count}) point${plural(count)}` : ""}`}
         disabled={maps.length === 0}
         onClick={() => setOpen((o) => !o)}
         title={credit}
       >
         {current && imageOf(current) && <img className="map-thumb" src={imageOf(current)} alt="" width={36} height={22} />}
         <span className="map-picker-name">{current?.name ?? allLabel ?? "…"}</span>
-        <span className="map-picker-count">{current && counts.get(current.id) ? `(${counts.get(current.id)})` : ""}</span>
+        <span className="map-picker-count">{count ? `(${count})` : ""}</span>
         <span aria-hidden="true">▾</span>
       </button>
       {open && (

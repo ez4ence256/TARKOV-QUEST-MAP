@@ -10,10 +10,10 @@ const mk = (id: string, reqs: [string, string[]][] = [], failedBy?: string[]): T
   traderId: "t",
   mapId: null,
   minPlayerLevel: null,
-  kappaRequired: false,
+  kappaRequired: false, lightkeeperRequired: false,
   wikiLink: null,
   objectives: [{ id: `${id}-o`, type: "mark", description: "", optional: false, mapIds: [], locations: [] }],
-  details: { taskRequirements: reqs.map(([taskId, status]) => ({ taskId, status })), traderRequirements: [], neededKeys: [], rewards: null, failConditions: [], restartable: false, lightkeeperRequired: false },
+  details: { taskRequirements: reqs.map(([taskId, status]) => ({ taskId, status })), traderRequirements: [], neededKeys: [], rewards: null, failConditions: [], restartable: false },
   ...(failedBy ? { failedBy } : {}),
 });
 const sorted = (r: { complete: string[]; failed: string[] }) => ({ complete: [...r.complete].sort(), failed: [...r.failed].sort() });

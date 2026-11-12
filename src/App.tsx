@@ -22,7 +22,9 @@ import { QuestTab } from "./components/QuestTab";
 import { CaptureTab } from "./components/CaptureTab";
 import { dominantMap } from "./lib/ocrMatch";
 import { PanelResizer } from "./components/PanelResizer";
-import { getLang, setLang as applyLang, tr, type Lang } from "./lib/i18n";
+import { isTouch } from "./lib/touch";
+import { getLang, plural, setLang as applyLang, tr, type Lang } from "./lib/i18n";
+import { homeTitle } from "./lib/homeContent";
 import { clampPanelWidth, readPanelWidth } from "./lib/panelWidth";
 import { storyIdOf, storyStepId } from "./lib/story";
 import { chaptersWithPositions, currentStoryPoints, pointsOnMap } from "./lib/storyPoints";
@@ -57,10 +59,10 @@ const TABS: Tab[] = ["selection", "quests", "capture", "quest", "photos", "custo
 const TAB_GROUP: Record<Tab, RailGroup> = { selection: "selection", quests: "add", capture: "add", quest: "detail", photos: "detail", custom: "custom", hideout: "hideout", settings: "settings" };
 const GROUP_FIRST: Record<RailGroup, Tab> = { selection: "selection", add: "quests", detail: "quest", custom: "custom", hideout: "hideout", settings: "settings" };
 /** Groupes à deux vues : petit sélecteur en haut du panneau. */
-const SUBS: Partial<Record<RailGroup, [Tab, [string, string]][]>> = {
-  add: [["quests", ["Rechercher", "Search"]], ["capture", ["Capture (Ctrl+V)", "Capture (Ctrl+V)"]]],
+const subs = (): Partial<Record<RailGroup, [Tab, [string, string]][]>> => ({
+  add: [["quests", ["Rechercher", "Search"]], ["capture", isTouch() ? ["Capture", "Capture"] : ["Capture (Ctrl+V)", "Capture (Ctrl+V)"]]],
   detail: [["quest", ["Infos", "Info"]], ["photos", ["Photos", "Photos"]]],
-};
+});
 const readTab = (): Tab => {
   try {
     const t = localStorage.getItem("tqp:tab");
@@ -178,7 +180,7 @@ export default function App() {
     lastReload.current = reloadToken;
     const controller = new AbortController();
     setLoad((prev) => ({ status: "loading", data: prev.data?.gameMode === gameMode ? prev.data : null }));
-    loadTarkovData(gameMode, lang, { force, signal: controller.signal })
+    loadTarkovData(gameMode, lang, { force, signal: controller.signal, onRefresh: (res) => setLoad({ status: "ready", ...res }) })
       .then((res) => setLoad({ status: "ready", ...res }))
       .catch((error: Error) => {
         if (error.name !== "AbortError") setLoad({ status: "error", data: null, error: error.message });
@@ -276,7 +278,11 @@ export default function App() {
   const oneAtATime = state.oneAtATime !== false;
   // « Kappa seulement » (Ajouter, Mes quêtes) : la carte ne montre plus que les quêtes demandées pour la Kappa
   const [kappaOnly, setKappaOnly] = useState(false);
-  const mapTasks = useMemo(() => (kappaOnly ? selectedTasks.filter((t) => t.kappaRequired) : selectedTasks), [kappaOnly, selectedTasks]);
+  const [lightkeeperOnly, setLightkeeperOnly] = useState(false);
+  // les deux cases cochées : il faut les deux (ET)
+  const anyOnly = kappaOnly || lightkeeperOnly;
+  const passesOnly = useCallback((t: Task) => (!kappaOnly || t.kappaRequired) && (!lightkeeperOnly || t.lightkeeperRequired), [kappaOnly, lightkeeperOnly]);
+  const mapTasks = useMemo(() => (anyOnly ? selectedTasks.filter(passesOnly) : selectedTasks), [anyOnly, passesOnly, selectedTasks]);
   const points = useMemo(
     () => (currentMap ? buildObjectivePoints(mapTasks, mode, currentMap.id, state.showDone, oneAtATime) : []),
     [mapTasks, mode, currentMap, state.showDone, oneAtATime],
@@ -305,8 +311,8 @@ export default function App() {
   const { items: storyItems, chapters: storyChapters } = useStoryItems(storyIds, data?.itemNames ?? NO_NAMES);
   const storyDone = mode.story?.done ?? NO_DONE;
   const storyPointsAll = useMemo(() => storyIds.flatMap((c) => currentStoryPoints(c, storyItems[c] ?? [], storyDone)), [storyIds, storyItems, storyDone]);
-  // la Main story ne fait pas partie de la Kappa : pas de points en « Kappa seulement »
-  const storyPoints = useMemo(() => (kappaOnly ? [] : pointsOnMap(storyPointsAll, currentMap?.normalizedName)), [kappaOnly, storyPointsAll, currentMap]);
+  // la Main story ne fait ni partie de la Kappa ni de Lightkeeper : pas de points en « seulement »
+  const storyPoints = useMemo(() => (anyOnly ? [] : pointsOnMap(storyPointsAll, currentMap?.normalizedName)), [anyOnly, storyPointsAll, currentMap]);
   // la case en cours de la Main story compte aussi dans le sélecteur de map
   // filtre « Mes maps » de la Sélection, partagé avec la colonne du coéquipier en room
   const [selectionMap, setSelectionMap] = useState<string | null>(null);
@@ -315,14 +321,14 @@ export default function App() {
   const { mapCounts, questsOnMap } = useMemo(() => {
     const counts = new Map(pointsPerMap);
     const onMap = new Map([...questsPerMap].map(([id, s]) => [id, new Set(s)]));
-    for (const p of kappaOnly ? [] : storyPointsAll) {
+    for (const p of anyOnly ? [] : storyPointsAll) {
       const id = maps.find((m) => m.normalizedName === p.map)?.id;
       if (!id) continue;
       counts.set(id, (counts.get(id) ?? 0) + 1);
       onMap.set(id, (onMap.get(id) ?? new Set()).add(storyIdOf(p.chapter)));
     }
     return { mapCounts: counts, questsOnMap: onMap };
-  }, [pointsPerMap, questsPerMap, storyPointsAll, maps, kappaOnly]);
+  }, [pointsPerMap, questsPerMap, storyPointsAll, maps, anyOnly]);
   const storyName = useCallback((chapter: string) => chapterName(storyChapters, chapter), [storyChapters]);
   const setStoryStep = (chapter: string, stepKey: string, value: boolean) => dispatch({ type: "setStoryStep", chapter, stepKey, done: value });
 
@@ -465,7 +471,7 @@ export default function App() {
     if (!mig) return;
     dispatch({ type: "renameIds", ...mig });
     const n = Object.keys(mig.tasks).length;
-    setChainNotice({ text: tr(`${n} quête(s) du wiki maintenant dans tarkov.dev : progression reprise.`, `${n} wiki quest(s) now in tarkov.dev: progress carried over.`) });
+    setChainNotice({ text: tr(`${n} quête${plural(n)} du wiki maintenant dans tarkov.dev : progression reprise.`, `${n} wiki quest${plural(n)} now in tarkov.dev: progress carried over.`) });
   }, [data, gameMode, mode, eventsSettled, eventEntries]);
   // quête wiki disparue du wiki (page supprimée ou « Historical content »), ou quête tarkov.dev retirée du jeu : retirée de la sélection, sans « Annuler »
   useEffect(() => {
@@ -479,13 +485,13 @@ export default function App() {
     dispatch({ type: "applyQuestStatus", done: [], failed: [], deselect: [...ids, ...removed] });
     const wikiNames = ids.map((id) => id.slice(5).replace(/-/g, " "));
     const goneNames = removed.map((id) => data.tasks.find((t) => t.id === id)?.name ?? id);
-    const plural = ids.length + removed.length > 1;
+    const several = ids.length + removed.length > 1;
     const why = [
       wikiNames.length && tr(`${wikiNames.join(", ")} : plus sur le wiki`, `${wikiNames.join(", ")}: no longer on the wiki`),
       goneNames.length && tr(`${goneNames.join(", ")} : n'existe plus dans le jeu`, `${goneNames.join(", ")}: no longer in the game`),
     ].filter(Boolean).join(" ; ");
     setChainNotice({
-      text: tr(`${plural ? "Quêtes retirées" : "Quête retirée"} de ta sélection (${why}).`, `${plural ? "Quests" : "Quest"} removed from your selection (${why}).`),
+      text: tr(`${several ? "Quêtes retirées" : "Quête retirée"} de ta sélection (${why}).`, `${several ? "Quests" : "Quest"} removed from your selection (${why}).`),
     });
   }, [data, mode, freshListing]);
   // sélectionnées mais absentes des données (quête retirée du site) : proposées au retrait, jamais retirées seules
@@ -536,8 +542,8 @@ export default function App() {
       [...fail],
       (k, f) =>
         tr(
-          `${who} : tu y as accès, donc les ${k + f} quête(s) qui la débloquent sont grisée(s) automatiquement (${k} terminée(s)${f ? `, ${f} échouée(s)` : ""}). Une seule activation suffit pour toute la chaîne.${removeOnUndo ? " « Annuler » retire aussi la quête." : ""}`,
-          `${whoEn}: you have access to it, so the ${k + f} quest(s) that unlock it are greyed out automatically (${k} completed${f ? `, ${f} failed` : ""}). One activation covers the whole chain.${removeOnUndo ? ' "Undo" also removes the quest.' : ""}`,
+          `${who} : tu y as accès, donc ${k + f > 1 ? `les ${k + f} quêtes qui la débloquent sont grisées` : "la quête qui la débloque est grisée"} automatiquement (${k} terminée${plural(k)}${f ? `, ${f} échouée${plural(f)}` : ""}). Une seule activation suffit pour toute la chaîne.${removeOnUndo ? " « Annuler » retire aussi la quête." : ""}`,
+          `${whoEn}: you have access to it, so ${k + f > 1 ? `the ${k + f} quests that unlock it are` : "the quest that unlocks it is"} greyed out automatically (${k} completed${f ? `, ${f} failed` : ""}). One activation covers the whole chain.${removeOnUndo ? ' "Undo" also removes the quest.' : ""}`,
         ),
       replace,
       removeOnUndo ? added.map((t) => t.id) : [],
@@ -566,7 +572,7 @@ export default function App() {
     dispatch({ type: "applyQuestStatus", done: ticks, failed: branch, deselect });
     if (branch.length)
       setChainNotice({
-        text: tr(`${branch.length} quête(s) de branche exclusive marquée(s) échouée(s).`, `${branch.length} quest(s) of an exclusive branch marked as failed.`),
+        text: tr(`${branch.length} quête${plural(branch.length)} de branche exclusive marquée${plural(branch.length)} échouée${plural(branch.length)}.`, `${branch.length} quest${plural(branch.length)} of an exclusive branch marked as failed.`),
         undo: () => dispatch({ type: "applyQuestStatus", done: [], undone: ticks, failed: [], unfailed: branch, select: deselect }),
       });
   };
@@ -585,13 +591,13 @@ export default function App() {
     const modeName = (m: string) => (m === "regular" ? "PvP" : m === "pve" ? "PvE" : tr("PvP Saison", "PvP Season"));
     const other = events.find((e) => e.gameMode !== gameMode);
     const parts = [
-      c.started && tr(`${c.started} quête(s) commencée(s)`, `${c.started} quest(s) started`),
-      c.reopened && tr(`${c.reopened} rouverte(s) (vue(s) en cours)`, `${c.reopened} reopened (seen in progress)`),
-      c.finished && tr(`${c.finished} terminée(s)`, `${c.finished} completed`),
-      c.failed && tr(`${c.failed} échouée(s)`, `${c.failed} failed`),
-      c.prereq && tr(`${c.prereq} prérequis grisé(s)`, `${c.prereq} prerequisite(s) greyed out`),
-      c.removed && tr(`${c.removed} retirée(s) de la sélection`, `${c.removed} removed from selection`),
-      c.branch && tr(`${c.branch} branche(s) exclusive(s) échouée(s)`, `${c.branch} exclusive branch quest(s) failed`),
+      c.started && tr(`${c.started} quête${plural(c.started)} commencée${plural(c.started)}`, `${c.started} quest${plural(c.started)} started`),
+      c.reopened && tr(`${c.reopened} rouverte${plural(c.reopened)} (vue${plural(c.reopened)} en cours)`, `${c.reopened} reopened (seen in progress)`),
+      c.finished && tr(`${c.finished} terminée${plural(c.finished)}`, `${c.finished} completed`),
+      c.failed && tr(`${c.failed} échouée${plural(c.failed)}`, `${c.failed} failed`),
+      c.prereq && tr(`${c.prereq} prérequis grisé${plural(c.prereq)}`, `${c.prereq} prerequisite${plural(c.prereq)} greyed out`),
+      c.removed && tr(`${c.removed} retirée${plural(c.removed)} de la sélection`, `${c.removed} removed from selection`),
+      c.branch && tr(`${c.branch} quête${plural(c.branch)} de branche exclusive échouée${plural(c.branch)}`, `${c.branch} exclusive branch quest${plural(c.branch)} failed`),
       other && tr(`événement ${modeName(other.gameMode)} ignoré (le site affiche ${modeName(gameMode)})`, `${modeName(other.gameMode)} event ignored (the site shows ${modeName(gameMode)})`),
     ].filter(Boolean);
     if (plan.action) {
@@ -600,7 +606,7 @@ export default function App() {
     }
     if (!parts.length) return;
     const undo = plan.undo;
-    setChainNotice({ text: `${prefix} : ${parts.join(" · ")}`, undo: undo ? () => dispatch({ type: "applyQuestStatus", ...undo }) : undefined });
+    setChainNotice({ text: tr(`${prefix} : ${parts.join(" · ")}`, `${prefix}: ${parts.join(" · ")}`), undo: undo ? () => dispatch({ type: "applyQuestStatus", ...undo }) : undefined });
   };
   flushMonitor.current = () => {
     monitorTimer.current = undefined;
@@ -632,7 +638,7 @@ export default function App() {
     const markers: TeamMarker[] = [];
     const players: TeamPlayer[] = [];
     for (const { m, view } of teamLive) {
-      const pts = buildObjectivePoints(teammateTasks(view, tasksById).filter((t) => !kappaOnly || t.kappaRequired), view, currentMap.id, state.showDone, oneAtATime);
+      const pts = buildObjectivePoints(teammateTasks(view, tasksById).filter(passesOnly), view, currentMap.id, state.showDone, oneAtATime);
       // ses emplacements possibles d'un même objet : un seul point aussi, déplié au clic (de mon côté)
       const groups = spawnGroups(pts);
       for (const pt of pts) {
@@ -654,7 +660,7 @@ export default function App() {
           ...(g ? { group: { id: `${m.id}:${groupIdOf(pt)}`, rep: g.rep === pt.key, count: g.keys.length } } : {}),
         });
       }
-      for (const c of kappaOnly ? [] : (view.story?.selected ?? [])) {
+      for (const c of anyOnly ? [] : (view.story?.selected ?? [])) {
         const mine = pointsOnMap(currentStoryPoints(c, teamStoryItems[c] ?? [], view.story?.done ?? NO_DONE), currentMap.normalizedName);
         for (const p of mine) markers.push({ key: `${m.id}:${p.id}`, owner: m.name, x: p.x, z: p.z, color: STORY_COLOR, text: `${storyName(c)} — ${p.stepTitle}`, taskId: storyIdOf(c) });
       }
@@ -662,7 +668,7 @@ export default function App() {
       if (pos && pos.map === currentMap.id) players.push({ id: m.id, name: m.name, position: pos });
     }
     return { markers, players };
-  }, [teamLive, teamStoryItems, currentMap, tasksById, objectivesById, state.showDone, oneAtATime, storyName, kappaOnly]);
+  }, [teamLive, teamStoryItems, currentMap, tasksById, objectivesById, state.showDone, oneAtATime, storyName, anyOnly, passesOnly]);
   const monitorEvent = useRef((_e: MonitorEvent) => {});
   monitorEvent.current = (e) => {
     if (e.type === "task") {
@@ -727,6 +733,11 @@ export default function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, [placing]);
 
+  // titre de l'onglet : la map affichée (accueil : titre de la page d'accueil)
+  useEffect(() => {
+    document.title = gameMode && currentMap ? `${currentMap.name} | Tarkov Quest Planner` : homeTitle();
+  }, [gameMode, currentMap?.name, lang]);
+
   if (!gameMode) {
     return <ModePicker
         last={getLastMode()}
@@ -767,12 +778,15 @@ export default function App() {
       onOnlyMine={setOnlyMine}
       kappaOnly={kappaOnly}
       onKappaOnly={setKappaOnly}
+      lightkeeperOnly={lightkeeperOnly}
+      onLightkeeperOnly={setLightkeeperOnly}
       onComplete={completeTask}
       onFocus={focusPoint}
       onStartPlacing={(o) =>
         startPlacing({ kind: "manual", objectiveId: o.id, label: o.description || tr("objectif", "objective") })
       }
       onBrowse={() => setTab("quests")}
+      onCapture={() => setTab("capture")}
       onPhotos={showPhotos}
       onQuest={showQuest}
       onStory={(chapter) => showQuest(storyIdOf(chapter))}
@@ -834,9 +848,9 @@ export default function App() {
       {/* key : recrée tout l'arbre (popups Leaflet comprises) dans la nouvelle langue */}
       <div className="layout" key={lang}>
         <aside id="side-panel" className={`panel ${panelOpen ? "is-open" : ""}`}>
-          {SUBS[TAB_GROUP[tab]] && (
+          {subs()[TAB_GROUP[tab]] && (
             <div className="subswitch" role="tablist">
-              {SUBS[TAB_GROUP[tab]]!.map(([id, label]) => (
+              {subs()[TAB_GROUP[tab]]!.map(([id, label]) => (
                 <button key={id} role="tab" aria-selected={tab === id} className={`subswitch-btn${tab === id ? " is-active" : ""}`} onClick={() => setTab(id)}>
                   {tr(...label)}
                 </button>
@@ -874,6 +888,8 @@ export default function App() {
               onOnlyMine={setOnlyMine}
               kappaOnly={kappaOnly}
               onKappaOnly={setKappaOnly}
+              lightkeeperOnly={lightkeeperOnly}
+              onLightkeeperOnly={setLightkeeperOnly}
               ghostIds={ghostIds}
               onRemoveGhosts={() => dispatch({ type: "applyQuestStatus", done: [], failed: [], deselect: ghostIds })}
             />
@@ -901,6 +917,7 @@ export default function App() {
                   mapFilter={selectionMap && (mapCounts.get(selectionMap) ?? 0) > 0 ? selectionMap : null}
                   oneAtATime={oneAtATime}
                   kappaOnly={kappaOnly}
+                  lightkeeperOnly={lightkeeperOnly}
                 />
                 <div className="room-col room-col-mine">{mySelection}</div>
               </div>
@@ -1037,15 +1054,16 @@ export default function App() {
               }
             />
           )}
+          {/* dans le panneau (repère « complémentaire ») ; pas de poignée à deux colonnes : elle enregistrerait la largeur temporaire */}
+          {panelOpen && !twoColumns && <PanelResizer width={shownPanelWidth} onChange={setPanelWidth} />}
         </aside>
-        {/* pas de poignée pendant l'affichage à deux colonnes : elle enregistrerait la largeur temporaire */}
-        {panelOpen && !twoColumns && <PanelResizer width={shownPanelWidth} onChange={setPanelWidth} />}
 
 <main className="map-area">
+          <h1 className="sr-only">{currentMap ? `${currentMap.name} - Tarkov Quest Planner` : "Tarkov Quest Planner"}</h1>
           <div className="map-floating">
             <MapPicker maps={maps} currentId={currentMap?.id ?? ""} counts={mapCounts} onPick={showMap} />
             <label className="scav-check">
-              <input type="checkbox" checked={showScavExits} onChange={(e) => changeScavExits(e.target.checked)} />
+              <input type="checkbox" aria-label={tr("Extracts Scav", "Scav extracts")} checked={showScavExits} onChange={(e) => changeScavExits(e.target.checked)} />
               <span className="scav-check-long">{tr("Extracts Scav", "Scav extracts")}</span>
               <span className="scav-check-short" aria-hidden="true">Scav</span>
             </label>
@@ -1068,6 +1086,17 @@ export default function App() {
               >
                 <span className="kappa-chip-long">{tr("Kappa seulement", "Kappa only")}</span>
                 <span className="kappa-chip-short">Kappa</span>
+                <UiIcon id="x" size={12} />
+              </button>
+            )}
+            {lightkeeperOnly && (
+              <button
+                className="btn btn-small kappa-chip"
+                onClick={() => setLightkeeperOnly(false)}
+                title={tr("La carte ne montre que les quêtes de Lightkeeper et leurs préalables. Cliquer pour tout montrer.", "The map only shows Lightkeeper's quests and their prerequisites. Click to show everything.")}
+              >
+                <span className="kappa-chip-long">{tr("Lightkeeper seulement", "Lightkeeper only")}</span>
+                <span className="kappa-chip-short">Lightkeeper</span>
                 <UiIcon id="x" size={12} />
               </button>
             )}

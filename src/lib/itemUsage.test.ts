@@ -9,10 +9,10 @@ const BOLTS = "57347c5b245977448d35f6e1";
 
 const obj = (o: Partial<Objective> & { type: string }): Objective => ({ id: "o", description: "", optional: false, mapIds: [], locations: [], ...o });
 const task = (id: string, objectives: Objective[], details?: Task["details"]): Task => ({
-  id, name: id, nameEn: id, normalizedName: id, traderId: "t", mapId: null, minPlayerLevel: null, kappaRequired: false, wikiLink: null, objectives, details,
+  id, name: id, nameEn: id, normalizedName: id, traderId: "t", mapId: null, minPlayerLevel: null, kappaRequired: false, lightkeeperRequired: false, wikiLink: null, objectives, details,
 });
 const details = (p: Partial<NonNullable<Task["details"]>>): NonNullable<Task["details"]> => ({
-  taskRequirements: [], traderRequirements: [], neededKeys: [], rewards: null, failConditions: [], restartable: false, lightkeeperRequired: false, ...p,
+  taskRequirements: [], traderRequirements: [], neededKeys: [], rewards: null, failConditions: [], restartable: false, ...p,
 });
 
 describe("buildUsageIndex", () => {

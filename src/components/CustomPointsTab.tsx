@@ -27,7 +27,7 @@ export function CustomPointsTab({ points, maps, currentMapId, onAdd, onFocus }: 
       </button>
       <p className="muted small">
         {tr(
-          "Cliquez ensuite sur la carte. Vous pourrez nommer le point, choisir son icône, écrire une note et le déplacer en le faisant glisser.",
+          "Clique ensuite sur la carte. Tu pourras nommer le point, choisir son icône, écrire une note et le déplacer en le faisant glisser.",
           "Then click on the map. You can name the point, pick its icon, write a note and move it by dragging.",
         )}
       </p>

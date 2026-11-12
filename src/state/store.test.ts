@@ -17,7 +17,7 @@ const signal3: Task = {
   traderId: "mechanic",
   mapId: SHORELINE,
   minPlayerLevel: null,
-  kappaRequired: true,
+  kappaRequired: true, lightkeeperRequired: false,
   wikiLink: "https://escapefromtarkov.fandom.com/wiki/Signal_-_Part_3",
   objectives: [JAMMER_1, JAMMER_2, JAMMER_3].map((id, i) => ({
     id,

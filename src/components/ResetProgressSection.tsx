@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { Task } from "../types";
 import { orphanDoneCount, taskProgress, tasksWithProgress } from "../lib/points";
-import { tr } from "../lib/i18n";
+import { plural, tr } from "../lib/i18n";
 import { ConfirmButton } from "./ConfirmButton";
 
 interface Props {
@@ -29,7 +29,7 @@ export function ResetProgressSection({ tasks, done, storyDone, modeLabel, onRese
       <div className="subhead">{tr(`Réinitialiser la progression (${modeLabel})`, `Reset progress (${modeLabel})`)}</div>
       <p className="muted small">
         {tr(
-          "Remet les objectifs (et les étapes de la Main story) à « pas fait » : les points des objectifs réapparaissent sur la carte. Vos notes, vos points personnels et vos chapitres choisis sont conservés. Les autres modes de jeu ne sont pas touchés.",
+          "Remet les objectifs (et les étapes de la Main story) à « pas fait » : les points des objectifs réapparaissent sur la carte. Tes notes, tes points personnels et tes chapitres choisis sont conservés. Les autres modes de jeu ne sont pas touchés.",
           "Sets objectives (and Main story steps) back to \"not done\": the objective points reappear on the map. Your notes, custom points and chosen chapters are kept. Other game modes are not affected.",
         )}
       </p>
@@ -50,7 +50,7 @@ export function ResetProgressSection({ tasks, done, storyDone, modeLabel, onRese
                   </span>
                   <ConfirmButton
                     label={tr("Réinitialiser", "Reset")}
-                    question={tr(`Décocher ${checked} objectif${checked > 1 ? "s" : ""} ?`, `Uncheck ${checked} objective${checked > 1 ? "s" : ""}?`)}
+                    question={tr(`Décocher ${checked} objectif${plural(checked)} ?`, `Uncheck ${checked} objective${plural(checked)}?`)}
                     confirmLabel={tr("Oui", "Yes")}
                     onConfirm={() => onResetTask(task)}
                   />
@@ -61,16 +61,16 @@ export function ResetProgressSection({ tasks, done, storyDone, modeLabel, onRese
           {storyDone > 0 && (
             <p className="muted small">
               {tr(
-                `+ ${storyDone} étape${storyDone > 1 ? "s" : ""} cochée${storyDone > 1 ? "s" : ""} de la Main story (se réinitialise par chapitre dans l'onglet Fiche quête, ou ici avec « Tout réinitialiser »).`,
-                `+ ${storyDone} checked Main story step${storyDone > 1 ? "s" : ""} (reset per chapter in the Quest tab, or here with "Reset all").`,
+                `+ ${storyDone} étape${plural(storyDone)} cochée${plural(storyDone)} de la Main story (se réinitialise par chapitre dans l'onglet Fiche quête, ou ici avec « Tout réinitialiser »).`,
+                `+ ${storyDone} checked Main story step${plural(storyDone)} (reset per chapter in the Quest tab, or here with "Reset all").`,
               )}
             </p>
           )}
           {orphans > 0 && (
             <p className="muted small">
               {tr(
-                `+ ${orphans} objectif${orphans > 1 ? "s" : ""} coché${orphans > 1 ? "s" : ""} de quêtes absentes des données actuelles (compris dans « Tout réinitialiser »).`,
-                `+ ${orphans} checked objective${orphans > 1 ? "s" : ""} from quests missing in the current data (included in "Reset all").`,
+                `+ ${orphans} objectif${plural(orphans)} coché${plural(orphans)} de quêtes absentes des données actuelles (compris dans « Tout réinitialiser »).`,
+                `+ ${orphans} checked objective${plural(orphans)} from quests missing in the current data (included in "Reset all").`,
               )}
             </p>
           )}
@@ -89,7 +89,7 @@ export function ResetProgressSection({ tasks, done, storyDone, modeLabel, onRese
               </p>
               <p className="small">
                 {tr(
-                  "Conseil : faites d'abord une sauvegarde avec l'export JSON. Vous pourrez la réimporter si besoin.",
+                  "Conseil : fais d'abord une sauvegarde avec l'export JSON. Tu pourras la réimporter si besoin.",
                   "Tip: make a backup with the JSON export first. You can re-import it if needed.",
                 )}
               </p>

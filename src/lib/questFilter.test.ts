@@ -14,7 +14,7 @@ const task = (id: string, name: string, nameEn: string, traderId: string, mapId:
   traderId,
   mapId,
   minPlayerLevel: null,
-  kappaRequired: false,
+  kappaRequired: false, lightkeeperRequired: false,
   wikiLink: null,
   objectives: [{ id: `${id}-o`, type: "mark", description: "", optional: false, mapIds: [mapId], locations: [] }],
 });

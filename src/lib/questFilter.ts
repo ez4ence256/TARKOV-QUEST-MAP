@@ -19,6 +19,8 @@ export interface QuestFilters {
   onlyCompleted?: boolean;
   /** Seulement les quêtes demandées pour la Kappa. */
   kappaOnly?: boolean;
+  /** Seulement les quêtes de Lightkeeper et leurs préalables. */
+  lightkeeperOnly?: boolean;
 }
 
 export interface QuestResult {
@@ -46,8 +48,8 @@ export const rowKey = (r: Row) => ("task" in r ? r.task.id : storyIdOf(r.chapter
  * (leur avancement n'est connu qu'une fois la page chargée).
  */
 export function filterStory(chapters: StoryChapter[], f: QuestFilters, lang: string): StoryResult[] {
-  // les chapitres ne comptent pas pour la Kappa
-  if ((f.traderId && f.traderId !== STORY_TRADER) || f.mapId || f.kappaOnly) return [];
+  // les chapitres ne comptent ni pour la Kappa ni pour Lightkeeper
+  if ((f.traderId && f.traderId !== STORY_TRADER) || f.mapId || f.kappaOnly || f.lightkeeperOnly) return [];
   const q = f.query.trim();
   return chapters.flatMap((c) => {
     const name = lang === "en" ? c.nameEn : c.name;
@@ -72,6 +74,7 @@ export function filterQuests(tasks: Task[], f: QuestFilters, done: Record<string
     if (f.traderId && t.traderId !== f.traderId) continue;
     if (f.mapId && !taskMapIds(t).has(f.mapId)) continue;
     if (f.kappaOnly && !t.kappaRequired) continue;
+    if (f.lightkeeperOnly && !t.lightkeeperRequired) continue;
     if (f.hideCompleted || f.onlyCompleted) {
       const greyed = isGreyed(t, done, failed);
       if (f.hideCompleted ? greyed : !greyed) continue;

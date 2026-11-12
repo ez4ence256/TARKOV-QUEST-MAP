@@ -1,6 +1,6 @@
 // Contrôle « Room » de la barre du haut : créer, rejoindre, copier l'ID, quitter.
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { tr } from "../lib/i18n";
+import { plural, tr } from "../lib/i18n";
 import { UiIcon } from "./UiIcon";
 import type { useRoom } from "../api/room";
 import { DEFAULT_NICKNAME, MAX_NICKNAME } from "../lib/roomSync";
@@ -100,7 +100,7 @@ export function RoomControl({ room, variant }: { room: ReturnType<typeof useRoom
                 </button>
               </div>
               <p className="small" role="status">
-                {statusText} · {tr(`${info.members} membre${info.members > 1 ? "s" : ""}`, `${info.members} member${info.members > 1 ? "s" : ""}`)}
+                {statusText} · {tr(`${info.members} membre${plural(info.members)}`, `${info.members} member${plural(info.members)}`)}
               </p>
               {nickname}
               <p className="muted small">

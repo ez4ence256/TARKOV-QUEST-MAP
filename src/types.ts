@@ -26,7 +26,7 @@ export const GAME_MODES: { id: GameMode; label: string; hint: string }[] = [
       return tr("PvP Saison", "PvP Season");
     },
     get hint() {
-      return tr("Saison PvP (progression séparée)", "PvP season (separate progression)");
+      return tr("Saison PvP, progression séparée", "PvP season, separate progression");
     },
   },
 ];
@@ -105,7 +105,6 @@ export interface TaskDetails {
    */
   failConditions: { type: string; description: string; taskId?: string; status?: string[] }[];
   restartable: boolean;
-  lightkeeperRequired: boolean;
 }
 
 export interface Task {
@@ -119,6 +118,8 @@ export interface Task {
   mapId: string | null;
   minPlayerLevel: number | null;
   kappaRequired: boolean;
+  /** Donnée par Lightkeeper ou préalable (transitif) d'une de ses quêtes ; calculé, pas lu dans l'API. */
+  lightkeeperRequired: boolean;
   wikiLink: string | null;
   /** "wiki" : quête d'événement absente de tarkov.dev, lue sur le wiki (objectifs sans position sur la carte). */
   source?: "wiki";

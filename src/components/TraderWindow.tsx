@@ -4,7 +4,7 @@
 // niveau, quête qui débloque l'offre, limite d'achat. Données chargées à la première ouverture.
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { GameMode, Task, Trader } from "../types";
-import { tr } from "../lib/i18n";
+import { plural, tr } from "../lib/i18n";
 import { UiIcon } from "./UiIcon";
 import { iconSrc } from "../lib/itemIcons";
 import { buildCategoryTree, type CategoryNode } from "../lib/itemCategories";
@@ -172,7 +172,7 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, done, onSetDo
             </div>
             {fence && current === fence.id ? (
               <div className="finder-body">
-                <div className="finder-main">
+                <div className="finder-main" tabIndex={0} role="region" aria-label={tr("Liste Fence", "Fence list")}>
                   <StreamerChecklist collector={collector} name={name} alts={(id) => items?.get(id)?.alts ?? []} itemIcons={itemIcons} onSetDone={onSetDone} onOpenItem={(id) => { onClose(); onOpenItem(id); }} />
                 </div>
               </div>
@@ -216,8 +216,8 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, done, onSetDo
                     ...(commerce > 0 ? [tr(`${formatPrice(commerce, file.currency[current!] ?? "RUB", lang)} dépensés chez ce marchand`, `${formatPrice(commerce, file.currency[current!] ?? "RUB", lang)} spent with this trader`)] : []),
                   ].join(", ")}.`}{" "}
               {all
-                ? tr(`${visible.length} offre(s).`, `${visible.length} offer(s).`)
-                : tr(`${visible.length} offre(s) débloquée(s) à ce niveau.`, `${visible.length} offer(s) unlocked at this level.`)}
+                ? tr(`${visible.length} offre${plural(visible.length)}.`, `${visible.length} offer${plural(visible.length)}.`)
+                : tr(`${visible.length} offre${plural(visible.length)} débloquée${plural(visible.length)} à ce niveau.`, `${visible.length} offer${plural(visible.length)} unlocked at this level.`)}
             </p>
             <div className="finder-body finder-split trader-split">
               {tree && (
@@ -244,7 +244,7 @@ function TraderDialog({ gameMode, lang, traders, tasks, itemIcons, done, onSetDo
                   />
                 </nav>
               )}
-              <div className="finder-main">
+              <div className="finder-main" tabIndex={0} role="region" aria-label={tr("Offres", "Offers")}>
                 {visible.length === 0 ? (
                   <p className="muted finder-empty">{tr("Rien à ce niveau.", "Nothing at this level.")}</p>
                 ) : (
@@ -284,7 +284,7 @@ function OfferTile({ offer, name, itemIcons, taskName, lang }: { offer: Offer; n
           </span>
         )}
         {offer.task && (
-          <span className="trader-lock" aria-label={tr(`Débloqué par une quête : ${taskName(offer.task)}`, `Unlocked by a quest: ${taskName(offer.task)}`)}>
+          <span className="trader-lock" role="img" aria-label={tr(`Débloqué par une quête : ${taskName(offer.task)}`, `Unlocked by a quest: ${taskName(offer.task)}`)}>
             <UiIcon id="lock" size={14} />
           </span>
         )}

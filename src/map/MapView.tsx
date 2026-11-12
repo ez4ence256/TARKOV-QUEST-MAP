@@ -115,6 +115,13 @@ function MapEvents({ placing, onPlace, onMove }: {
     mouseout() {
       onMove(null);
     },
+    // Recadrage seulement à l'ouverture : sinon chaque rendu (souris qui bouge) ramène la carte sur la fiche ouverte
+    popupopen(e) {
+      e.popup.options.autoPan = false;
+    },
+    popupclose(e) {
+      e.popup.options.autoPan = true;
+    },
   });
   return null;
 }
@@ -506,8 +513,8 @@ function MapViewInner(props: MapViewProps) {
       {props.placing && (
         <div className="map-banner">
           {props.placing.kind === "manual"
-            ? tr(`Cliquez sur la carte pour placer : ${props.placing.label}`, `Click on the map to place: ${props.placing.label}`)
-            : tr("Cliquez sur la carte pour ajouter votre point", "Click on the map to add your point")}
+            ? tr(`Clique sur la carte pour placer : ${props.placing.label}`, `Click on the map to place: ${props.placing.label}`)
+            : tr("Clique sur la carte pour ajouter ton point", "Click on the map to add your point")}
         </div>
       )}
       {baseStatus === "grid" && (

@@ -52,7 +52,7 @@ export function SettingsTab(p: Props) {
     if (!file) return;
     try {
       const state = await readImportFile(file);
-      if (!window.confirm(tr("Remplacer toute votre progression actuelle par celle du fichier ?", "Replace all your current progress with the file's content?"))) return;
+      if (!window.confirm(tr("Remplacer toute ta progression actuelle par celle du fichier ?", "Replace all your current progress with the file's content?"))) return;
       p.onImport(state);
       setMessage(tr("Sauvegarde importée.", "Backup imported."));
     } catch (error) {
@@ -128,7 +128,7 @@ export function SettingsTab(p: Props) {
         <ul className="legend">
           {exitLegend().map(([kind, label]) => (
             <li key={kind}>
-              <span dangerouslySetInnerHTML={{ __html: exitPinHtml(kind) }} /> {label}
+              <span aria-hidden="true" dangerouslySetInnerHTML={{ __html: exitPinHtml(kind) }} /> {label}
             </li>
           ))}
         </ul>
@@ -179,7 +179,7 @@ export function SettingsTab(p: Props) {
         <div className="subhead">{tr("Sauvegarde", "Backup")}</div>
         <p className="muted small">
           {tr(
-            "Tout est enregistré automatiquement dans ce navigateur. Exportez un fichier pour garder une copie ou changer d'appareil.",
+            "Tout est enregistré automatiquement dans ce navigateur. Exporte un fichier pour garder une copie ou changer d'appareil.",
             "Everything is saved automatically in this browser. Export a file to keep a copy or switch devices.",
           )}
         </p>

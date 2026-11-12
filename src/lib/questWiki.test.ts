@@ -1,6 +1,7 @@
 // Croisement wiki ↔ tarkov.dev, avec de courts extraits réels du wiki (CC BY-NC-SA)
 // et des données tarkov.dev réduites aux champs utiles.
 import { describe, expect, it } from "vitest";
+import { tr } from "./i18n"; // les textes attendus passent par tr() comme ceux du code (espaces insécables)
 import type { Task, TaskDetails, Trader } from "../types";
 import type { WikiPage } from "../api/wiki";
 import {
@@ -30,7 +31,6 @@ const details = (d: Partial<TaskDetails> = {}): TaskDetails => ({
   rewards: null,
   failConditions: [],
   restartable: false,
-  lightkeeperRequired: false,
   ...d,
 });
 
@@ -42,7 +42,7 @@ const task = (id: string, nameEn: string, extra: Partial<Task> = {}): Task => ({
   traderId: "mechanic",
   mapId: null,
   minPlayerLevel: null,
-  kappaRequired: false,
+  kappaRequired: false, lightkeeperRequired: false,
   wikiLink: `https://escapefromtarkov.fandom.com/wiki/${baseQuestName(nameEn).replace(/ /g, "_")}`,
   objectives: [],
   details: details(),
@@ -169,7 +169,7 @@ describe("comparaison des prérequis", () => {
   const ratHunting = task("rat", "Rat Hunting");
   const signal3 = task("signal3", "Signal - Part 3", {
     minPlayerLevel: 15,
-    kappaRequired: false,
+    kappaRequired: false, lightkeeperRequired: false,
     details: details({ taskRequirements: [{ taskId: "rat", status: ["complete"] }] }),
   });
   const ctx = { tasks: [ratHunting, signal3], traders };
@@ -178,7 +178,7 @@ describe("comparaison des prérequis", () => {
     const cmp = comparePrerequisites(signal3, readWikiQuest(SIGNAL_3_WIKI), ctx);
     expect(cmp.tarkovTasks).toEqual([{ name: "Rat Hunting", taskId: "rat", status: ["complete"] }]);
     expect(cmp.wikiTasks).toEqual([]);
-    expect(cmp.warnings).toEqual(["tarkov.dev demande la quête « Rat Hunting », que le wiki ne mentionne pas."]);
+    expect(cmp.warnings).toEqual([tr("tarkov.dev demande la quête « Rat Hunting », que le wiki ne mentionne pas.", "")]);
     // quête suivante d'après tarkov.dev (celle qui demande Rat Hunting)
     expect(comparePrerequisites(ratHunting, null, ctx).tarkovNext).toEqual([{ name: "Signal - Part 3", taskId: "signal3" }]);
   });
@@ -191,7 +191,7 @@ describe("comparaison des prérequis", () => {
       details: details({ taskRequirements: prereqs.map((p) => ({ taskId: p.id, status: ["complete"] })) }),
     });
     const cmp = comparePrerequisites(collector, readWikiQuest(COLLECTOR_WIKI), { tasks: [...prereqs, collector], traders });
-    expect(cmp.warnings).toEqual(["tarkov.dev demande la quête « Postman Pat - Part 2 », que le wiki ne mentionne pas."]);
+    expect(cmp.warnings).toEqual([tr("tarkov.dev demande la quête « Postman Pat - Part 2 », que le wiki ne mentionne pas.", "")]);
     expect(cmp.wikiTasks.map((t) => t.taskId)).toEqual(["p0", "p1"]); // cliquables
   });
 
@@ -260,7 +260,7 @@ describe("récompenses", () => {
       }),
     });
     expect(compareRewards(signal3, readWikiQuest(SIGNAL_3_WIKI), traders)).toEqual([
-      `Roubles : ${(33000).toLocaleString("fr-FR")} selon tarkov.dev, ${(30000).toLocaleString("fr-FR")} selon le wiki.`,
+      tr(`Roubles : ${(33000).toLocaleString("fr-FR")} selon tarkov.dev, ${(30000).toLocaleString("fr-FR")} selon le wiki.`, ""),
     ]);
   });
 
@@ -268,6 +268,6 @@ describe("récompenses", () => {
     const other = task("other", "Other");
     expect(
       failConditionText({ type: "taskStatus", description: "", taskId: "other", status: ["complete"] }, new Map([["other", other]])),
-    ).toBe("Échoue si la quête « Other » est terminée.");
+    ).toBe(tr("Échoue si la quête « Other » est terminée.", ""));
   });
 });

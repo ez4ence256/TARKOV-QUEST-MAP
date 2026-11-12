@@ -2,7 +2,8 @@
 // toutes les quêtes, le hideout, les barters et les crafts. Données chargées à la première ouverture.
 import { useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { GameMap, GameMode, Task, Trader } from "../types";
-import { tr } from "../lib/i18n";
+import { plural, tr } from "../lib/i18n";
+import { isTouch } from "../lib/touch";
 import { UiIcon } from "./UiIcon";
 import { scoreName } from "../lib/search";
 import { RECOGNIZED_MIN, matchItemLines } from "../lib/ocrMatch";
@@ -37,6 +38,7 @@ const PAGE = 100;
 /** Filtre « À garder pour » : la planque, à côté des identifiants de marchands. */
 const HIDEOUT = "hideout";
 const KAPPA = "kappa";
+const LIGHTKEEPER = "lightkeeper";
 
 type OcrState = { step: "reading"; progress: number | null } | { step: "done"; text: ListedItem[]; image: ListedItem[] } | { step: "error"; stale?: boolean };
 
@@ -123,7 +125,7 @@ export function ItemFinder(props: Props) {
   };
   return (
     <>
-      <button ref={toggle} className={props.variant === "rail" ? "rail-item" : "btn btn-small item-finder-btn"} onClick={() => setOpen(true)} aria-haspopup="dialog" aria-label={tr("Item finder : chercher un objet", "Item finder: search an item")} title={tr("Chercher où sert un objet", "Find where an item is used")}>
+      <button ref={toggle} className={props.variant === "rail" ? "rail-item" : "btn btn-small item-finder-btn"} onClick={() => setOpen(true)} aria-haspopup="dialog" title={tr("Chercher où sert un objet", "Find where an item is used")}>
         <UiIcon id="search" size={props.variant === "rail" ? 22 : 18} />
         <span className={props.variant === "rail" ? "rail-label" : "item-finder-label"}>{tr("Objets", "Items")}</span>
       </button>
@@ -148,6 +150,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
   const [onlyNeeded, setOnlyNeeded] = useState(false);
   // « Kappa seulement » : objets à remettre pour les quêtes demandées pour la Kappa
   const [kappaOnly, setKappaOnly] = useState(false);
+  const [lightkeeperOnly, setLightkeeperOnly] = useState(false);
   // « Planque » : objets de la planque ; cochée avec « Kappa seulement », les deux à la fois
   const [hideoutOnly, setHideoutOnly] = useState(false);
   // marchand choisi sous les catégories : objets qui restent à remettre pour ses quêtes (aucun au départ)
@@ -350,11 +353,12 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
           const t = byTask.get(s.taskId);
           if (t) add(t.traderId, itemId);
           if (t?.kappaRequired) add(KAPPA, itemId);
+          if (t?.lightkeeperRequired) add(LIGHTKEEPER, itemId);
         }
       }
     return out;
   }, [needs, tasks]);
-  const pools = useMemo(() => [...(kappaOnly ? [KAPPA] : []), ...(hideoutOnly ? [HIDEOUT] : [])], [kappaOnly, hideoutOnly]);
+  const pools = useMemo(() => [...(kappaOnly ? [KAPPA] : []), ...(lightkeeperOnly ? [LIGHTKEEPER] : []), ...(hideoutOnly ? [HIDEOUT] : [])], [kappaOnly, lightkeeperOnly, hideoutOnly]);
   const collector = useMemo(() => collectorItems(tasks, done), [tasks, done]);
   const filtered = useMemo(
     () =>
@@ -405,7 +409,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
     return [
       ...new Set(
         need.sources
-          .filter((s) => (s.kind === "quest" ? !pools.length || (kappaOnly && tasksById.get(s.taskId)?.kappaRequired) : !pools.length || hideoutOnly))
+          .filter((s) => (s.kind === "quest" ? !pools.length || (kappaOnly && tasksById.get(s.taskId)?.kappaRequired) || (lightkeeperOnly && tasksById.get(s.taskId)?.lightkeeperRequired) : !pools.length || hideoutOnly))
           .map((s) => (s.kind === "quest" ? (tasksById.get(s.taskId)?.name ?? s.taskId) : tr("Planque", "Hideout"))),
       ),
     ];
@@ -469,7 +473,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
         </div>
         <div className="finder-head">
           {mode === "container" ? (
-            <p className="finder-container-hint">{tr("Ctrl+V n'importe quel conteneur ou inventaire : vois tout de suite quoi vendre ou garder", "Ctrl+V any container or inventory: instantly see what to sell or keep")}</p>
+            <p className="finder-container-hint">{isTouch() ? tr("Prends en photo n'importe quel conteneur ou inventaire : vois tout de suite quoi vendre ou garder", "Take a photo of any container or inventory: instantly see what to sell or keep") : tr("Ctrl+V n'importe quel conteneur ou inventaire : vois tout de suite quoi vendre ou garder", "Ctrl+V any container or inventory: instantly see what to sell or keep")}</p>
           ) : (
           <div className="finder-search-wrap">
             <span className="finder-search-icon" aria-hidden="true"><UiIcon id="search" /></span>
@@ -478,7 +482,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
               className="input finder-search"
               type="search"
               value={query}
-              placeholder={tr("Nom d'un objet (FR ou EN) ou Ctrl+V d'une capture…", "Item name (FR or EN) or Ctrl+V a screenshot…")}
+              placeholder={isTouch() ? tr("Nom d'un objet (FR ou EN)…", "Item name (FR or EN)…") : tr("Nom d'un objet (FR ou EN) ou Ctrl+V d'une capture…", "Item name (FR or EN) or Ctrl+V a screenshot…")}
               aria-label={tr("Chercher un objet", "Search an item")}
               onChange={(e) => {
                 setQuery(e.target.value);
@@ -498,6 +502,10 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
           <label className="check finder-only-need">
             <input type="checkbox" checked={kappaOnly} onChange={(e) => setKappaOnly(e.target.checked)} />
             {tr("Kappa seulement", "Kappa only")}
+          </label>
+          <label className="check finder-only-need">
+            <input type="checkbox" checked={lightkeeperOnly} onChange={(e) => setLightkeeperOnly(e.target.checked)} />
+            {tr("Lightkeeper seulement", "Lightkeeper only")}
           </label>
           <label className="check finder-only-need" title={hideoutIncluded ? undefined : tr("Ajoute les objets de la planque aux objets à garder", "Adds the hideout items to the items to keep")}>
             <input
@@ -560,6 +568,7 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
                 collector={collector.get(selected.id)}
                 onSetDone={onSetDone}
                 kappaOnly={kappaOnly}
+                lightkeeperOnly={lightkeeperOnly}
               />
             </>
           ) : mode === "container" ? (
@@ -568,17 +577,17 @@ function FinderDialog({ gameMode, lang, tasks, traders, maps, itemNames, itemIco
               byId={byId}
               iconSrc={(id) => iconSrc(id, itemIcons)}
               keepReasons={keepReasons}
-              filterLabel={pools.length ? [kappaOnly && tr("quêtes Kappa", "Kappa quests"), hideoutOnly && tr("planque", "hideout")].filter(Boolean).join(" + ") : null}
+              filterLabel={pools.length ? [kappaOnly && tr("quêtes Kappa", "Kappa quests"), lightkeeperOnly && tr("quêtes Lightkeeper", "Lightkeeper quests"), hideoutOnly && tr("planque", "hideout")].filter(Boolean).join(" + ") : null}
               onPick={setSelected}
               onFile={(file) => scanContainer(file)}
             />
           ) : (
             <>
-              <div className="finder-main">
+              <div className="finder-main" tabIndex={0} role="region" aria-label={tr("Objets", "Items")}>
                 {banner}
                 {!ocr && (
                   <p className="muted finder-count" role="status">
-                    {tr(`${filtered.length} objet(s)`, `${filtered.length} item(s)`)}
+                    {tr(`${filtered.length} objet${plural(filtered.length)}`, `${filtered.length} item${plural(filtered.length)}`)}
                     {cat && ` · ${cat.name}`}
                   </p>
                 )}
@@ -693,6 +702,7 @@ function Usage(p: {
   onSetDone: (objectiveId: string, value: boolean) => void;
   /** « Kappa seulement » : les quêtes non demandées pour la Kappa passent dans un bloc à part. */
   kappaOnly?: boolean;
+  lightkeeperOnly?: boolean;
 }) {
   const [tab, setTab] = useState<Tab>("quests");
   // quête dépliée sur place (on reste dans la fiche de l'objet au lieu d'aller à la fiche quête)
@@ -732,7 +742,7 @@ function Usage(p: {
     const map = p.maps.find((m) => m.normalizedName === mapName);
     if (!map) return [];
     const key = keyId ? p.byId.get(keyId) : undefined;
-    return [{ key: `spot:${i}`, mapId: map.id, x, y, z, rank: i + 1, item: p.item.name, details: [tr(`${n} point(s) d'apparition regroupés`, `${n} spawn point(s) grouped`), ...(!key ? [] : linked.has(key.nameEn.toLowerCase()) ? [tr(`Derrière la porte : ${key.name} (confirmé par le wiki)`, `Behind the door: ${key.name} (confirmed by the wiki)`)] : [tr(`Porte fermée à proximité : ${key.name}`, `Locked door nearby: ${key.name}`)])] }];
+    return [{ key: `spot:${i}`, mapId: map.id, x, y, z, rank: i + 1, item: p.item.name, details: [tr(`${n} point${plural(n)} d'apparition regroupé${plural(n)}`, `${n} spawn point${plural(n)} grouped`), ...(!key ? [] : linked.has(key.nameEn.toLowerCase()) ? [tr(`Derrière la porte : ${key.name} (confirmé par le wiki)`, `Behind the door: ${key.name} (confirmed by the wiki)`)] : [tr(`Porte fermée à proximité : ${key.name}`, `Locked door nearby: ${key.name}`)])] }];
   });
   const rows = p.quests
     .map((u) => ({ ...u, task: p.tasksById.get(u.taskId) }))
@@ -812,7 +822,7 @@ function Usage(p: {
           <p className="muted small">{tr("Aucune quête ni station ne le demande : vendable.", "No quest or station needs it: sellable.")}</p>
         ) : (
           (() => {
-            const isNonKappa = (s: NeedSource) => p.kappaOnly === true && s.kind === "quest" && !p.tasksById.get(s.taskId)?.kappaRequired;
+            const isNonKappa = (s: NeedSource) => s.kind === "quest" && ((p.kappaOnly === true && !p.tasksById.get(s.taskId)?.kappaRequired) || (p.lightkeeperOnly === true && !p.tasksById.get(s.taskId)?.lightkeeperRequired));
             const keep = p.need.sources.filter((s) => !isNonKappa(s));
             const nonKappa = p.need.sources.filter(isNonKappa);
             const list = (sources: NeedSource[]) => (
@@ -945,7 +955,7 @@ function Usage(p: {
                                   z,
                                   icon,
                                   label: key ? `${p.item.name} — ${key.name}` : p.item.name,
-                                  note: tr(`Spot ${i + 1} de « ${p.item.name} » : ${n} point(s) d'apparition (y ≈ ${y})`, `Spot ${i + 1} for "${p.item.name}": ${n} spawn point(s) (y ≈ ${y})`),
+                                  note: tr(`Spot ${i + 1} de « ${p.item.name} » : ${n} point${plural(n)} d'apparition (y ≈ ${y})`, `Spot ${i + 1} for "${p.item.name}": ${n} spawn point${plural(n)} (y ≈ ${y})`),
                                 })
                             : undefined
                         }
@@ -1000,6 +1010,7 @@ function Usage(p: {
                         <div className="finder-quest-tags">
                           {r.task.minPlayerLevel ? <span className="tag">{tr(`Niveau ${r.task.minPlayerLevel}`, `Level ${r.task.minPlayerLevel}`)}</span> : null}
                           {r.task.kappaRequired && <span className="tag">Kappa</span>}
+                          {r.task.lightkeeperRequired && <span className="tag">Lightkeeper</span>}
                           {map && <span className="tag">{map}</span>}
                         </div>
                         <div className="subhead">{tr("Prérequis", "Prerequisites")}</div>
@@ -1216,7 +1227,7 @@ function SpotCard(p: {
           </button>
           <span className="finder-badge">{p.rank}</span>
           <strong>{p.mapLabel}</strong>
-          <span className="finder-pill">{tr(`${p.n} point(s)`, `${p.n} point(s)`)}</span>
+          <span className="finder-pill">{tr(`${p.n} point${plural(p.n)}`, `${p.n} point${plural(p.n)}`)}</span>
           {p.marker && (
             <button
               className="btn btn-small finder-spot-map"
@@ -1334,7 +1345,7 @@ export function StreamerChecklist({ collector, name, alts, itemIcons, onSetDone,
       </label>
       </div>
       <p className="muted finder-count" role="status">
-        {tr("Objets streamer Kappa", "Kappa streamer items")} : {[...collector.values()].filter((c) => c.kept).length}/{collector.size} {tr("de côté", "set aside")}
+        {tr("Objets streamer Kappa : ", "Kappa streamer items: ")}{[...collector.values()].filter((c) => c.kept).length}/{collector.size} {tr("de côté", "set aside")}
         {" · "}
         {tr("coche ceux que tu as mis de côté (FIR) : ils ne sont plus à garder pour Collector.", "tick the ones you set aside (FIR): they no longer need keeping for Collector.")}
       </p>

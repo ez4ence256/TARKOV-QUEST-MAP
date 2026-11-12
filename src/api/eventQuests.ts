@@ -5,6 +5,7 @@
 // Ce qui est gardé en cache : les quêtes lues (objectifs en texte brut), pas le wikitext.
 // Les objectifs viennent du wiki : aucune position sur la carte n'est inventée.
 
+import { LIGHTKEEPER_TRADER_ID } from "../lib/lightkeeper";
 import type { GameMap, TarkovData, Task, Trader } from "../types";
 import type { ModeState } from "../state/store";
 import { baseQuestName } from "../lib/questWiki";
@@ -114,6 +115,7 @@ export function buildEventTasks(entries: EventEntry[], data: Pick<TarkovData, "t
         mapId: mapIds[0] ?? null,
         minPlayerLevel: null,
         kappaRequired: false,
+        lightkeeperRequired: trader(e.givenBy)?.id === LIGHTKEEPER_TRADER_ID,
         wikiLink: pageUrlFor(e.title),
         source: "wiki",
         objectives: texts.map((description, i) => {

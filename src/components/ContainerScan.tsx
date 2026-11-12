@@ -7,6 +7,7 @@ import { useState } from "react";
 import type { ListedItem } from "../api/itemList";
 import type { Found, ItemSize } from "../lib/containerGrid";
 import { tr } from "../lib/i18n";
+import { isTouch } from "../lib/touch";
 import { ItemThumb } from "./ItemThumb";
 
 /** Objet reconnu, sa place (px de la capture) et sa taille en cases. */
@@ -64,7 +65,7 @@ export function ContainerScan(p: {
   if (!scan)
     return (
       <div className="container-empty">
-        <p className="container-empty-title">{tr("Ctrl+V n'importe quel conteneur ou inventaire", "Ctrl+V any container or inventory")}</p>
+        <p className="container-empty-title">{isTouch() ? tr("Prends en photo n'importe quel conteneur ou inventaire", "Take a photo of any container or inventory") : tr("Ctrl+V n'importe quel conteneur ou inventaire", "Ctrl+V any container or inventory")}</p>
         <p className="muted">
           {tr(
             "Junk box, sac, scav case… : capture sa grille dans le jeu, colle-la ici, et vois tout de suite quoi vendre ou garder. Chaque objet est reconnu par le nom court écrit sur sa case.",

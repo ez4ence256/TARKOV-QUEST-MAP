@@ -4,7 +4,7 @@
 
 import type { GameMap, Task, Trader } from "../types";
 import type { WikiPage } from "../api/wiki";
-import { getLang, tr } from "./i18n";
+import { getLang, plural, tr } from "./i18n";
 import {
   cleanInline,
   findSection,
@@ -212,7 +212,7 @@ export function packingList(task: Task, itemNames: Record<string, string>, maps:
     if (ids.length <= MAX_LISTED_CHOICES) return { label: ids.map(name).join(tr(" ou ", " or ")), itemIds: ids };
     const n = count ?? 1;
     return {
-      label: tr(`${n} objet${n > 1 ? "s" : ""} au choix parmi ${ids.length}`, `${n} item${n > 1 ? "s" : ""} of your choice among ${ids.length}`),
+      label: tr(`${n} objet${plural(n)} au choix parmi ${ids.length}`, `${n} item${plural(n)} of your choice among ${ids.length}`),
       detail: tr("ex. ", "e.g. ") + `${ids.slice(0, MAX_LISTED_CHOICES).map(name).join(", ")}…`,
       countInLabel: true as const,
     };

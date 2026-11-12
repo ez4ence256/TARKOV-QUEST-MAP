@@ -27,5 +27,11 @@ export function setLang(lang: Lang) {
   if (typeof document !== "undefined") document.documentElement.lang = lang;
 }
 
-/** Texte dans la langue choisie : français ou anglais. */
-export const tr = (fr: string, en: string) => (current === "en" ? en : fr);
+/** Typographie française : espace insécable devant : ; ? ! » et après « (une vraie espace seulement, « https://… » n'est pas touché). */
+const frTypography = (s: string) => s.replace(/ ([:;?!»])/g, " $1").replace(/« /g, "« ");
+
+/** Texte dans la langue choisie : français (avec espaces insécables) ou anglais. */
+export const tr = (fr: string, en: string) => (current === "en" ? en : frTypography(fr));
+
+/** Marque du pluriel pour `n` : français à partir de 2, anglais sauf pour 1. `quête${plural(n)}` → « quête » / « quêtes ». */
+export const plural = (n: number) => ((current === "en" ? n !== 1 : n >= 2) ? "s" : "");

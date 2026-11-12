@@ -9,7 +9,8 @@ import { isStaleBuildError, staleBuildMessage } from "../lib/staleBuild";
 import { mergeOcrResults } from "../lib/phoneCapture";
 import { buildCandidates, bestScore, matchOcrLines, nameColumn, unknownNames, type OcrMatch, type OcrMatchResult } from "../lib/ocrMatch";
 import type { OcrProgress, Tone } from "../lib/ocr";
-import { tr } from "../lib/i18n";
+import { plural, tr } from "../lib/i18n";
+import { isTouch } from "../lib/touch";
 import { UiIcon } from "./UiIcon";
 import { filterQuests } from "../lib/questFilter";
 import { ConfirmButton } from "./ConfirmButton";
@@ -177,8 +178,8 @@ export function CaptureTab({ tasks, pasted, onApply, selectedIds }: Props) {
   const removed = selectedIds ? selectedIds.filter((id) => !started.includes(id)) : [];
   const counts = [
     started.length && tr(`${started.length} en cours`, `${started.length} in progress`),
-    finished.length && tr(`${finished.length} terminée(s)`, `${finished.length} completed`),
-    failed.length && tr(`${failed.length} ratée(s)`, `${failed.length} failed`),
+    finished.length && tr(`${finished.length} terminée${plural(finished.length)}`, `${finished.length} completed`),
+    failed.length && tr(`${failed.length} ratée${plural(failed.length)}`, `${failed.length} failed`),
   ].filter(Boolean);
 
   return (
@@ -198,14 +199,20 @@ export function CaptureTab({ tasks, pasted, onApply, selectedIds }: Props) {
     >
       <div className="subhead">{tr("Importer des quêtes depuis une capture", "Import quests from a screenshot")}</div>
       <p className="small">
-        {tr("Faites une capture du menu ", "Take a screenshot of the in-game ")}
-        <strong>{tr("Personnage > Tâches", "Character > Tasks")}</strong>
-        {tr(" du jeu (filtré par map si vous voulez), puis", " menu (filtered by map if you like), then")}{" "}
-        <kbd>Ctrl</kbd>+<kbd>V</kbd>{tr(" n'importe où dans l'app (sauf dans un champ de texte), ou :", " anywhere in the app (except in a text field), or:")}
+        {isTouch() ? (
+          tr("Prends en photo le menu Tâches du jeu (filtré par map si tu veux), ou :", "Take a photo of the in-game Tasks menu (filtered by map if you like), or:")
+        ) : (
+          <>
+            {tr("Fais une capture du menu ", "Take a screenshot of the in-game ")}
+            <strong>{tr("Personnage > Tâches", "Character > Tasks")}</strong>
+            {tr(" du jeu (filtré par map si tu veux), puis", " menu (filtered by map if you like), then")}{" "}
+            <kbd>Ctrl</kbd>+<kbd>V</kbd>{tr(" n'importe où dans l'app (sauf dans un champ de texte), ou :", " anywhere in the app (except in a text field), or:")}
+          </>
+        )}
       </p>
       <p className="small">
         {tr(
-          "Ou la liste des tâches d'un marchand, terminées affichées : les quêtes sur fond bleu sont marquées terminées d'un coup, celles sur fond brun ajoutées à vos quêtes. Celles sur fond gris (ratées, ou pas encore acceptées) restent décochées : cochez celles qui sont ratées.",
+          "Ou la liste des tâches d'un marchand, terminées affichées : les quêtes sur fond bleu sont marquées terminées d'un coup, celles sur fond brun ajoutées à tes quêtes. Celles sur fond gris (ratées, ou pas encore acceptées) restent décochées : coche celles qui sont ratées.",
           "Or a trader's task list with completed ones shown: quests on a blue background are marked completed in one go, those on a brown background added to your quests. Those on a grey background (failed, or not accepted yet) stay unchecked: check the failed ones.",
         )}
       </p>
@@ -219,12 +226,12 @@ export function CaptureTab({ tasks, pasted, onApply, selectedIds }: Props) {
           <UiIcon id="camera" /> {tr("Prendre une photo", "Take a photo")}
         </button>
         <input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden onChange={onPick} />
-        <span className="muted small">{tr("ou glissez-déposez l'image ici.", "or drag and drop the image here.")}</span>
+        <span className="muted small">{tr("ou glisse-dépose l'image ici.", "or drag and drop the image here.")}</span>
       </div>
       <PhoneCapture onPhotos={(photos) => void handleImages(photos, true)} />
       <p className="muted small">
         {tr(
-          "La lecture se fait dans votre navigateur : l'image n'est envoyée nulle part (avec le téléphone, les photos transitent par ce serveur, en mémoire, puis sont effacées). La première fois, environ 4 Mo de données de langue (français + anglais) sont téléchargés, puis gardés en cache.",
+          "La lecture se fait dans ton navigateur : l'image n'est envoyée nulle part (avec le téléphone, les photos transitent par ce serveur, en mémoire, puis sont effacées). La première fois, environ 4 Mo de données de langue (français + anglais) sont téléchargés, puis gardés en cache.",
           "Reading happens in your browser: the image is not sent anywhere (with the phone, photos pass through this server, in memory only, then are deleted). The first time, about 4 MB of language data (French + English) is downloaded, then cached.",
         )}
       </p>
@@ -247,7 +254,7 @@ export function CaptureTab({ tasks, pasted, onApply, selectedIds }: Props) {
           {state.result.recognized.length === 0 && state.result.uncertain.length === 0 ? (
             <p className="warn-box">
               {tr(
-                "Aucune quête reconnue sur cette capture. Essayez une capture plus nette du menu Personnage > Tâches, recadrée sur la liste des quêtes, et vérifiez que le bon mode de jeu est choisi.",
+                "Aucune quête reconnue sur cette capture. Essaie une capture plus nette du menu Personnage > Tâches, recadrée sur la liste des quêtes, et vérifie que le bon mode de jeu est choisi.",
                 "No quest recognized in this screenshot. Try a sharper screenshot of the Character > Tasks menu, cropped to the quest list, and check that the right game mode is selected.",
               )}
             </p>
@@ -359,7 +366,7 @@ export function CaptureTab({ tasks, pasted, onApply, selectedIds }: Props) {
                   "Currently selected quests that are not in this capture are deselected (not completed, not failed: just removed from the selection). Useful after filming your whole list of active quests. Story chapters are not touched.",
                 )}
                 {removed.length > 0 &&
-                  " " + tr(`Retire ${removed.length} quête(s) de ta sélection : `, `Removes ${removed.length} quest(s) from your selection: `) + removed.map((id) => tasksById.get(id)?.name ?? (id.startsWith("wiki-") ? id.slice(5).replace(/-/g, " ") : tr("quête retirée du site", "quest removed from the site"))).join(", ") + "."}
+                  " " + tr(`Retire ${removed.length} quête${plural(removed.length)} de ta sélection : `, `Removes ${removed.length} quest${plural(removed.length)} from your selection: `) + removed.map((id) => tasksById.get(id)?.name ?? (id.startsWith("wiki-") ? id.slice(5).replace(/-/g, " ") : tr("quête retirée du site", "quest removed from the site"))).join(", ") + "."}
               </p>
             </div>
           )}

@@ -170,7 +170,7 @@ export function CustomPopup({ point, onChange, onRemove }: CustomPopupProps) {
           </button>
         )}
       </div>
-      <div className="popup-foot">{tr("Astuce : faites glisser le point pour le déplacer.", "Tip: drag the point to move it.")}</div>
+      <div className="popup-foot">{tr("Astuce : fais glisser le point pour le déplacer.", "Tip: drag the point to move it.")}</div>
     </div>
   );
 }

@@ -11,7 +11,7 @@ const task: Task = {
   traderId: "p",
   mapId: "m1",
   minPlayerLevel: null,
-  kappaRequired: false,
+  kappaRequired: false, lightkeeperRequired: false,
   wikiLink: null,
   objectives: [
     { id: "a", type: "mark", description: "", optional: false, mapIds: ["m1"], locations: [{ mapId: "m1", position: { x: 1, y: 0, z: 2 } }] },

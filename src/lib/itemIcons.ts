@@ -4,7 +4,7 @@ import { iconUrl } from "../api/tarkovJson";
 import iconFix from "../data/item-icons.json";
 import { tr } from "./i18n";
 
-/** Objets sans image standard chez tarkov.dev -> bonne image (npm run sync:icons). */
+/** Objets dont l'image n'est pas <id>-icon.webp -> bonne image (npm run sync:icons). */
 const ICON_FIX: Record<string, string> = iconFix;
 
 /** Nom comparable : sans accents, majuscules ni ponctuation. */

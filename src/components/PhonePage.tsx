@@ -1,7 +1,7 @@
 // Page minimale ouverte par le QR code (`/?phone=CODE`) : photos (ou vidéo, découpée ici en images) du menu Tâches, envoyées au PC.
 // Rien n'est stocké sur le téléphone (ni localStorage ni état de l'appli) ; les photos ne font que transiter par le relais.
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
-import { tr } from "../lib/i18n";
+import { plural, tr } from "../lib/i18n";
 import { downscaleSize, pickFrames, PHONE_MAX_PHOTOS, sharpness, VIDEO_MAX_FRAMES, VIDEO_STEP, type FrameSample } from "../lib/phoneCapture";
 
 interface Photo {
@@ -206,7 +206,7 @@ export function PhonePage({ code }: { code: string }) {
       <input ref={inputRef} type="file" accept="image/*" capture="environment" hidden onChange={onPick} />
       <input ref={videoRef} type="file" accept="video/*" capture="environment" hidden onChange={onPick} />
       {error && <p className="error" role="alert">{error}</p>}
-      <p role="status">{`${photos.length} photo${photos.length > 1 ? "s" : ""}`}</p>
+      <p role="status">{`${photos.length} photo${plural(photos.length)}`}</p>
       <ul className="phone-thumbs">
         {photos.map((p, i) => (
           <li key={p.id}>

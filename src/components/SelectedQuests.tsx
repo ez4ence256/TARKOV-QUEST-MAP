@@ -4,7 +4,7 @@ import type { GameMap, Objective, Task, Trader } from "../types";
 import type { Action, ModeState } from "../state/store";
 import { ICON_LABELS, QUEST_COLORS, categoryOf } from "../lib/objectiveTypes";
 import { currentObjective, hasApiPosition, manualPointKey, objectiveMapCounts, objectivePointKey, taskProgress } from "../lib/points";
-import { getLang, tr } from "../lib/i18n";
+import { getLang, plural, tr } from "../lib/i18n";
 import { storyIdOf } from "../lib/story";
 import { UiIcon } from "./UiIcon";
 import { Icon } from "./Icon";
@@ -31,6 +31,8 @@ interface Props {
   onFocus: (pointKey: string, mapId: string) => void;
   onStartPlacing: (objective: Objective) => void;
   onBrowse: () => void;
+  /** Ouvre l'import d'une capture d'écran (onglet Capture). */
+  onCapture?: () => void;
   /** Ouvre l'onglet Photos sur une quête. */
   onPhotos: (taskId: string) => void;
   /** Ouvre l'onglet Quête sur une quête (même quand tous ses points sont faits). */
@@ -48,6 +50,8 @@ interface Props {
   /** « Kappa seulement » : partagé avec Ajouter et la carte ; la colonne du coéquipier suit le mien. */
   kappaOnly?: boolean;
   onKappaOnly?: (value: boolean) => void;
+  lightkeeperOnly?: boolean;
+  onLightkeeperOnly?: (value: boolean) => void;
   itemIcons: Record<string, string>;
   itemNames: Record<string, string>;
 }
@@ -82,18 +86,29 @@ export function SelectedQuests(props: Props) {
     !filterId || Boolean(props.questsOnMap.get(filterId)?.has(item.chapter !== null ? storyIdOf(item.chapter) : item.sel!.taskId));
   // « Kappa seulement » : quêtes demandées pour la Kappa (les chapitres de la Main story n'en font pas partie)
   const kappaOnly = Boolean(props.kappaOnly);
-  const kappaCount = mode.selected.filter((s) => tasksById.get(s.taskId)?.kappaRequired).length;
-  const onFilterKappa = (item: (typeof items)[number]) =>
-    !kappaOnly || (item.chapter === null && Boolean(tasksById.get(item.sel!.taskId)?.kappaRequired));
+  const lightkeeperOnly = Boolean(props.lightkeeperOnly);
+  const anyOnly = kappaOnly || lightkeeperOnly;
+  const passesOnly = (taskId: string) => {
+    const t = tasksById.get(taskId);
+    return (!kappaOnly || Boolean(t?.kappaRequired)) && (!lightkeeperOnly || Boolean(t?.lightkeeperRequired));
+  };
+  const onlyCount = mode.selected.filter((s) => passesOnly(s.taskId)).length;
+  const onlyLabel = [kappaOnly && "Kappa", lightkeeperOnly && "Lightkeeper"].filter(Boolean).join(" + ");
+  const onFilterKappa = (item: (typeof items)[number]) => !anyOnly || (item.chapter === null && passesOnly(item.sel!.taskId));
 
   if (items.length === 0) {
     return (
       <div className="tab-body empty">
         <p>{tr("Aucune quête sélectionnée.", "No quest selected.")}</p>
         {!props.readOnly && (
-          <button className="btn btn-primary" onClick={props.onBrowse}>
-            {tr("Choisir des quêtes", "Choose quests")}
-          </button>
+          <div className="btn-row">
+            <button className="btn btn-primary" onClick={props.onBrowse}>
+              <UiIcon id="search" size={16} /> {tr("Chercher une quête", "Find a quest")}
+            </button>
+            <button className="btn" onClick={props.onCapture}>
+              <UiIcon id="clipboard-paste" size={16} /> {tr("Importer une capture", "Import a screenshot")}
+            </button>
+          </div>
         )}
       </div>
     );
@@ -126,15 +141,21 @@ export function SelectedQuests(props: Props) {
       {items.length > 0 && (
         <div className="selection-head">
           <span className="muted small">
-            {kappaOnly
-              ? tr(`${kappaCount} quête(s) Kappa sur la carte`, `${kappaCount} Kappa quest(s) on the map`)
-              : tr(`${mode.selected.length} quête(s) sur la carte`, `${mode.selected.length} quest(s) on the map`)}
-            {!kappaOnly && storySelected.length > 0 && ` · ${storySelected.length} Main story`}
+            {anyOnly
+              ? tr(`${onlyCount} quête${plural(onlyCount)} ${onlyLabel} sur la carte`, `${onlyCount} ${onlyLabel} quest${plural(onlyCount)} on the map`)
+              : tr(`${mode.selected.length} quête${plural(mode.selected.length)} sur la carte`, `${mode.selected.length} quest${plural(mode.selected.length)} on the map`)}
+            {!anyOnly && storySelected.length > 0 && ` · ${storySelected.length} Main story`}
           </span>
           {!props.readOnly && (
             <label className="check small">
               <input type="checkbox" checked={kappaOnly} onChange={(e) => props.onKappaOnly?.(e.target.checked)} />
               {tr("Kappa seulement", "Kappa only")}
+            </label>
+          )}
+          {!props.readOnly && (
+            <label className="check small">
+              <input type="checkbox" checked={lightkeeperOnly} onChange={(e) => props.onLightkeeperOnly?.(e.target.checked)} />
+              {tr("Lightkeeper seulement", "Lightkeeper only")}
             </label>
           )}
           {!props.readOnly && props.onlyMine !== undefined && (
@@ -233,8 +254,8 @@ export function SelectedQuests(props: Props) {
                     >
                       {mapName(mapId)} · {n}{" "}
                       {isSpawnList
-                        ? tr(`emplacement${n > 1 ? "s" : ""} possible${n > 1 ? "s" : ""}`, `possible location${n > 1 ? "s" : ""}`)
-                        : `point${n > 1 ? "s" : ""}`}
+                        ? tr(`emplacement${plural(n)} possible${plural(n)}`, `possible location${plural(n)}`)
+                        : `point${plural(n)}`}
                     </button>
                   ))}
                   {/* « terminer la quête X » n'a pas de lieu : rien à placer */}
@@ -275,22 +296,6 @@ export function SelectedQuests(props: Props) {
                 <div className="muted small">
                   {traderName(task.traderId)}
                   {task.mapId ? ` · ${mapName(task.mapId)}` : ""}
-                  {" · "}
-                  <button className="link" onClick={() => props.onQuest(task.id)}>
-                    <UiIcon id="scroll-text" size={14} /> {tr("quête", "quest")}
-                  </button>
-                  {task.wikiLink && (
-                    <>
-                      {" · "}
-                      <button className="link" onClick={() => props.onPhotos(task.id)}>
-                        {tr("photos", "photos")}
-                      </button>
-                      {" · "}
-                      <a href={task.wikiLink} target="_blank" rel="noreferrer">
-                        wiki
-                      </a>
-                    </>
-                  )}
                 </div>
               </div>
               <span
@@ -313,6 +318,21 @@ export function SelectedQuests(props: Props) {
             <div className="progress-bar">
               <span style={{ width: `${progress.total ? (progress.done / progress.total) * 100 : 0}%` }} />
             </div>
+            <div className="task-links">
+              <button className="btn btn-small" onClick={() => props.onQuest(task.id)}>
+                <UiIcon id="scroll-text" size={16} /> {tr("Détails", "Details")}
+              </button>
+              {task.wikiLink && (
+                <>
+                  <button className="btn btn-small" onClick={() => props.onPhotos(task.id)}>
+                    <UiIcon id="image" size={16} /> {tr("Photos", "Photos")}
+                  </button>
+                  <a className="btn btn-small" href={task.wikiLink} target="_blank" rel="noreferrer">
+                    <UiIcon id="external-link" size={16} /> Wiki
+                  </a>
+                </>
+              )}
+            </div>
             {!props.readOnly && task.objectives.some((o) => !mode.done[o.id]) && (
               <div className="btn-row">
                 <button className="btn btn-small btn-primary" onClick={() => props.onComplete(task)}>
@@ -323,7 +343,7 @@ export function SelectedQuests(props: Props) {
 
             {!props.readOnly && positioned.length === 0 && (
               <div className="objective-note">
-                {tr("Aucune position connue pour cette quête : rien à afficher sur la carte (placez les objectifs à la main).", "No known position for this quest: nothing to show on the map (place objectives by hand).")}
+                {tr("Aucune position connue pour cette quête : rien à afficher sur la carte (place les objectifs à la main).", "No known position for this quest: nothing to show on the map (place objectives by hand).")}
               </div>
             )}
             {positioned.length > 0 && <ul className="objectives">{positioned.map(renderObjective)}</ul>}

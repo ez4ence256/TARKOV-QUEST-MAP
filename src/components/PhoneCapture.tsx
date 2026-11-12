@@ -2,7 +2,7 @@
 // Quand le téléphone confirme, les photos sont récupérées (lecture unique) et remises à CaptureTab pour l'OCR.
 import { useEffect, useMemo, useRef, useState } from "react";
 import qrcode from "qrcode-generator";
-import { tr } from "../lib/i18n";
+import { plural, tr } from "../lib/i18n";
 import { isLocalOrigin, normalizeOrigin, phoneUrl, PHONE_ORIGIN_KEY } from "../lib/phoneCapture";
 import { isStaleBuildError, staleBuildMessage } from "../lib/staleBuild";
 
@@ -193,7 +193,7 @@ export function PhoneCapture({ onPhotos }: { onPhotos: (photos: Blob[]) => void 
       ) : (
         <p className="muted small">{tr("Saisis l'adresse de ce PC pour afficher le QR code.", "Enter this PC's address to show the QR code.")}</p>
       )}
-      <p className="small" role="status">{tr(`En attente des photos… (${state.count} reçue(s))`, `Waiting for the photos… (${state.count} received)`)}</p>
+      <p className="small" role="status">{tr(`En attente des photos… (${state.count} reçue${plural(state.count)})`, `Waiting for the photos… (${state.count} received)`)}</p>
       <div className="btn-row">
         <button className="btn btn-small" onClick={() => setState({ step: "idle" })}>
           {tr("Annuler", "Cancel")}

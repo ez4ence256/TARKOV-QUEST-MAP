@@ -8,6 +8,7 @@
 // par l'anglais, puis par la clé elle-même (même logique que le site tarkov.dev,
 // src/modules/api-request.mjs).
 
+import { lightkeeperTaskIds } from "../lib/lightkeeper";
 import type {
   ApiLocation,
   GameMap,
@@ -235,7 +236,6 @@ function readDetails(raw: Dict, t: (k: unknown) => string): TaskDetails {
       ...(refId(f.task) ? { taskId: refId(f.task)!, status: asArray(f.status).filter((s): s is string => typeof s === "string") } : {}),
     })),
     restartable: raw.restartable === true,
-    lightkeeperRequired: raw.lightkeeperRequired === true,
   };
 }
 
@@ -311,6 +311,7 @@ function readTask(raw: Dict, t: (k: unknown) => string, tEn: (k: unknown) => str
     mapId: taskMap,
     minPlayerLevel: typeof raw.minPlayerLevel === "number" ? raw.minPlayerLevel : null,
     kappaRequired: raw.kappaRequired === true,
+    lightkeeperRequired: false, // calculé après lecture de toutes les quêtes (fetchTarkovData)
     wikiLink: asString(raw.wikiLink),
     objectives,
   };
@@ -332,9 +333,12 @@ export async function fetchTarkovData(
     fetchEndpoint(`${gameMode}/traders`, lang, signal),
   ]);
 
-  const tasks = values(tasksRes.data.tasks)
+  const parsed = values(tasksRes.data.tasks)
     .map((raw) => readTask(raw, tasksRes.t, tasksRes.tEn))
-    .filter((task): task is Task => task !== null)
+    .filter((task): task is Task => task !== null);
+  const lightkeeperIds = lightkeeperTaskIds(parsed);
+  const tasks = parsed
+    .map((task) => ({ ...task, lightkeeperRequired: lightkeeperIds.has(task.id) }))
     .sort((a, b) => a.name.localeCompare(b.name, lang));
 
   const maps: GameMap[] = values(mapsRes.data.maps)
@@ -385,10 +389,9 @@ export function referencedItemIds(tasks: Task[]): Set<string> {
 
 /**
  * Noms et images des objets utiles, dans la langue demandée. Les noms viennent du fichier
- * de traductions des objets (~1,7 Mo, clés "<id> Name"), les images (champ iconLink, 64 px,
- * assets.tarkov.dev) du fichier principal des objets (~17 Mo, mis en cache : seuls les
- * objets cités par les quêtes sont gardés). Les objets de quête ont nom et image dans le
- * fichier des quêtes. En cas d'échec, l'app fonctionne sans les noms ou sans les images.
+ * de traductions des objets (~1,7 Mo, clés "<id> Name"). Les images ne viennent plus du fichier
+ * principal des objets (17 Mo) : iconSrc les déduit de l'id (<id>-icon.webp), les exceptions sont
+ * dans src/data/item-icons.json. Seules les images des objets de quête (fichier des quêtes) sont gardées.
  */
 async function readItems(
   gameMode: GameMode,
@@ -406,20 +409,10 @@ async function readItems(
     const icon = asString(q.iconLink);
     if (id && icon) icons[id] = storedIcon(icon);
   }
-  const [translations, main] = await Promise.all([
-    fetchTranslations(`${gameMode}/items`, lang, signal),
-    fetchJson(`${gameMode}/items`, signal).catch((error) => {
-      if ((error as Error).name === "AbortError") throw error;
-      console.warn("Images des objets indisponibles", error);
-      return {} as Dict;
-    }),
-  ]);
-  const raw = asDict(asDict(main.data).items);
+  const translations = await fetchTranslations(`${gameMode}/items`, lang, signal);
   for (const id of referencedItemIds(tasks)) {
     const name = translations[`${id} Name`];
     if (name) names[id] = name;
-    const icon = asString(asDict(raw[id]).iconLink);
-    if (icon) icons[id] = storedIcon(icon);
   }
   return { names, icons };
 }

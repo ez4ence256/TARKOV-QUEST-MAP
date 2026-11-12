@@ -103,17 +103,7 @@ const responses: Record<string, unknown> = {
   },
   "regular/tasks_fr": { data: { "t1 name": "Quête un", "o1 desc": "Marquer", "qi1 Name": "Dossier secret" } },
   // noms d'objets : seuls ceux cités par les quêtes sont gardés
-  // fichier principal des objets : seule l'image (iconLink) des objets cités est gardée
-  "regular/items": {
-    data: {
-      items: {
-        key1: { id: "key1", iconLink: "https://assets.tarkov.dev/key1-icon.webp", gridImageLink: "https://assets.tarkov.dev/key1-grid.webp" },
-        rub: { id: "rub", iconLink: "https://assets.tarkov.dev/rub-icon.webp" },
-        med1: { id: "med1" }, // sans image : absent
-        autre: { id: "autre", iconLink: "https://assets.tarkov.dev/autre-icon.webp" },
-      },
-    },
-  },
+  // le fichier principal des objets (17 Mo) n'est plus lu : les images se déduisent de l'id
   "regular/items_fr": { data: { "key1 Name": "Clé 306", "med1 Name": "Salewa", "rub Name": "Roubles", "autre Name": "Inutile" } },
   "regular/tasks_en": { data: { "t1 name": "Quest one", "o2 desc": "Find it" } },
   // sorties réelles de Douanes (positions de l'API), réduites aux champs utiles
@@ -245,7 +235,6 @@ describe("fetchTarkovData", () => {
       traderRequirements: [{ traderId: "tr1", type: "level", compare: ">=", value: 2 }],
       neededKeys: [{ mapId: "m1", keyIds: ["key1"] }],
       restartable: true,
-      lightkeeperRequired: false,
       rewards: {
         experience: 8500,
         items: [{ itemId: "rub", count: 30000 }],
@@ -259,22 +248,18 @@ describe("fetchTarkovData", () => {
     expect(task.failedBy).toEqual(["t9"]);
     expect(task.faction).toBeUndefined();
     expect(data.itemNames).toEqual({ qi1: "Dossier secret", key1: "Clé 306", med1: "Salewa", rub: "Roubles" });
-    expect(data.itemIcons).toEqual({
-      qi1: "qi1-icon.webp",
-      key1: "key1-icon.webp",
-      rub: "rub-icon.webp",
-    });
-    expect(iconUrl(data.itemIcons!.key1)).toBe("https://assets.tarkov.dev/key1-icon.webp");
+    expect(data.itemIcons).toEqual({ qi1: "qi1-icon.webp" }); // objets de quête seulement
+    expect(iconUrl(data.itemIcons!.qi1)).toBe("https://assets.tarkov.dev/qi1-icon.webp");
     expect(iconUrl("https://ailleurs.test/x.webp")).toBe("https://ailleurs.test/x.webp");
   });
 
-  it("garde les noms si le fichier des objets (images) est indisponible", async () => {
+  it("ne télécharge pas le fichier principal des objets (17 Mo)", async () => {
     const base = mockFetch();
-    vi.stubGlobal("fetch", vi.fn(async (url: string) => (url.endsWith("regular/items") ? new Response("down", { status: 503 }) : base(url))));
-    vi.spyOn(console, "warn").mockImplementation(() => {});
-    const data = await fetchTarkovData("regular", "fr");
-    expect(data.itemNames?.key1).toBe("Clé 306");
-    expect(data.itemIcons).toEqual({ qi1: "qi1-icon.webp" });
+    const urls: string[] = [];
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => (urls.push(url), base(url))));
+    await fetchTarkovData("regular", "fr");
+    expect(urls.some((u) => u.endsWith("regular/items"))).toBe(false);
+    expect(urls.some((u) => u.endsWith("regular/items_fr"))).toBe(true);
   });
 
   it("garde toutes les quêtes du fichier (factions BEAR/USEC, noms à tiret) et les rend trouvables", async () => {

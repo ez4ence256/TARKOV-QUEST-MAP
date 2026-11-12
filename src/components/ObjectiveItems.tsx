@@ -22,7 +22,7 @@ export function ObjectiveItems({ objective, itemIcons, itemNames, size = 28 }: {
       {count > 0 && <span className="objective-items-count">×{count}</span>}
       {objective.foundInRaid && <span className="finder-pill fir">FIR</span>}
       {keys.map((id) => (
-        <ItemThumb key={`k${id}`} src={iconSrc(id, itemIcons)} name={name(id)} title={`${tr("clé", "key")} : ${name(id)}`} size={Math.round(size * 0.8)} />
+        <ItemThumb key={`k${id}`} src={iconSrc(id, itemIcons)} name={name(id)} title={tr(`clé : ${name(id)}`, `key: ${name(id)}`)} size={Math.round(size * 0.8)} />
       ))}
     </span>
   );

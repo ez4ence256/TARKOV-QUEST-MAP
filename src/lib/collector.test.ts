@@ -5,7 +5,7 @@ import { computeNeeds } from "./itemNeeds";
 
 const obj = (id: string, itemIds: string[]): Objective => ({ id, type: "giveItem", description: "", optional: false, mapIds: [], locations: [], itemIds, count: 1, foundInRaid: true });
 const task = (id: string, nameEn: string, objectives: Objective[]): Task => ({
-  id, name: nameEn, nameEn, normalizedName: id, traderId: "t", mapId: null, minPlayerLevel: null, kappaRequired: false, wikiLink: null, objectives,
+  id, name: nameEn, nameEn, normalizedName: id, traderId: "t", mapId: null, minPlayerLevel: null, kappaRequired: false, lightkeeperRequired: false, wikiLink: null, objectives,
 });
 const tasks = [task("c", "Collector", [obj("o1", ["i1"]), obj("o2", ["i2"])]), task("q", "Other", [obj("o3", ["i1"])])];
 

@@ -1,0 +1,26 @@
+# Tarkov Quest Planner
+
+> Carte interactive et suivi des quêtes d'Escape from Tarkov (quest map and quest tracker), en français et en anglais. Site de fan gratuit, sans compte, non affilié à Battlestate Games.
+
+Tarkov Quest Planner affiche les objectifs des quêtes sélectionnées en points sur la carte de chaque map, avec les sorties, coops et transits. L'utilisateur coche les quêtes terminées en fin de raid et l'outil propose les suivantes. La progression est enregistrée dans le navigateur (localStorage), séparément pour chaque mode de jeu : PvP, PvE et PvP Saison. Il n'y a ni compte ni serveur de progression.
+
+URL : https://tarkov.aprilox.fr/
+
+## Fonctionnalités
+
+- Objectifs des quêtes sur la carte : une couleur par quête, une icône par type d'objectif.
+- Sorties, coops et transits de chaque map.
+- Import des quêtes en cours par capture d'écran (menu Personnage > Tâches) : Ctrl+V ou photo depuis un téléphone, lecture OCR dans le navigateur.
+- Recherche d'objets : quêtes et modules de la planque qui en ont besoin, barters et crafts.
+- Fiche de quête : objectifs, objets à emporter, prérequis, récompenses, guide et photos du wiki.
+- Quêtes Kappa, quêtes PvE, quêtes de saison PvP.
+- Jeu en équipe avec une « room » : chacun garde ses quêtes et voit celles de ses coéquipiers en lecture seule.
+
+## Données
+
+- Quêtes, objectifs, maps et objets : API de tarkov.dev (https://tarkov.dev/).
+- Textes détaillés, guides et photos des quêtes : wiki Escape from Tarkov (https://escapefromtarkov.fandom.com/wiki/Escape_from_Tarkov_Wiki).
+
+## English summary
+
+Tarkov Quest Planner is a free, account-free interactive quest map and quest tracker for Escape from Tarkov. Select your active quests to see their objectives and the extracts on the map, tick them off after a raid and get the next quests suggested. Progress is stored in the browser per game mode (PvP, PvE, PvP Season). Data comes from tarkov.dev and the Escape from Tarkov wiki. Fan site, not affiliated with Battlestate Games.

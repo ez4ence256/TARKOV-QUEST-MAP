@@ -29,12 +29,14 @@ Autres commandes utiles :
 | `npm run sync:maps` | Met à jour la copie locale des cartes SVG et du calibrage |
 
 Le dossier `dist/` est un site statique. Vous pouvez le déposer tel quel sur n'importe quel hébergement : GitHub Pages, Netlify, ou un simple dossier.
+Le serveur Node du projet (`server/index.mjs`) sert aussi `dist/` avec ETag (réponse 304), compression brotli/gzip, polices en cache pour un an et `index.html` toujours revalidé.
 
 ---
 
 ## Fonctionnalités
 
-- **Mode de jeu** demandé à chaque ouverture : PvP, PvE ou PvP Saison. Chaque mode a sa propre progression.
+- **Accueil** : présentation de l’outil, FAQ et choix du **mode de jeu** (PvP, PvE ou PvP Saison), chaque mode ayant sa propre progression. L’app rouvre directement le dernier mode utilisé (`tqp:lastMode`). Les fichiers de référencement (`index.html`, `public/llms.txt`, `site.webmanifest`, `robots.txt` et `sitemap.xml` générés au build) utilisent l’adresse de la variable d’environnement `SITE_URL` (défaut https://tarkov.aprilox.fr/).
+- **« Lightkeeper seulement »** à côté de chaque « Kappa seulement » : les quêtes données par Lightkeeper et leurs prérequis, indépendant de Kappa.
 - **Liste de toutes les quêtes**, avec des filtres par marchand et par map, et une **recherche bilingue** : le nom français ou anglais trouve la quête (« Appâtage » ou « Chumming »). La recherche ignore la casse, les accents et la ponctuation, et tolère les petites fautes (1 faute à partir de 5 lettres, 2 à partir de 9). Les correspondances exactes passent en premier. Quand c'est le nom anglais qui correspond, il est rappelé sous le nom français.
 - **Quêtes sélectionnées épinglées** en tête de cette liste, dans une zone « Quêtes sélectionnées (n) », puis les autres quêtes. La recherche et les filtres s'appliquent aussi à la zone épinglée, qui indique combien de quêtes sélectionnées sont masquées. Le bouton **« Tout désélectionner »** vide la sélection sans toucher à la progression, aux notes ni aux points perso. Un clic sur une quête la sélectionne ou la désélectionne.
 - **Sélecteur de map** : toutes les maps fournies par l'API. Le nombre de points restants est indiqué entre parenthèses.
@@ -112,7 +114,7 @@ Positions utilisées pour placer les points (rien n'est inventé) :
 - Il vient de la page wiki de la quête : le lien `wikiLink` de tarkov.dev, puis une requête `parse` avec `redirects=1`. La page n'est acceptée que si elle existe et est classée « Quests » ou « Historical content ».
 - Le wiki n'a **pas de données structurées** (ni Cargo ni Semantic MediaWiki). L'app lit le wikitext : paramètres du modèle `{{Infobox quest}}` et sections (Dialogue, Requirements, Objectives, Rewards, Initial Equipment, Failure Dialogue, Guide). Tout est converti en texte. **Aucun HTML du wiki n'est inséré dans la page.**
 - **Une seule requête par quête**, partagée avec l'onglet Photos, à la demande, une par seconde au plus, avec un cache de 7 jours.
-- Les noms français des objets (clés, objets à rendre, récompenses) viennent du fichier de traductions `items_<langue>` de tarkov.dev (environ 1,7 Mo, téléchargé avec les quêtes). Seuls les objets cités par les quêtes sont gardés.
+- Les noms français des objets (clés, objets à rendre, récompenses) viennent du fichier de traductions `items_<langue>` de tarkov.dev (environ 1,7 Mo, téléchargé avec les quêtes). Seuls les objets cités par les quêtes sont gardés. Le gros fichier `<mode>/items` n’est plus téléchargé : les icônes sont déduites de l’id de l’objet.
 
 ### Photos des emplacements
 

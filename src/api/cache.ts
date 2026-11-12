@@ -6,7 +6,7 @@ import type { GameMode, TarkovData } from "../types";
 import { fetchTarkovData } from "./tarkovJson";
 
 export const DATA_TTL_MS = 6 * 60 * 60 * 1000; // 6 heures
-const CACHE_VERSION = 12;
+const CACHE_VERSION = 13;
 const cacheKey = (mode: GameMode, lang: string) => `tqp:data:v${CACHE_VERSION}:${mode}:${lang}`;
 
 export function readCachedData(mode: GameMode, lang: string): TarkovData | null {
@@ -57,17 +57,30 @@ export interface LoadResult {
 /**
  * Renvoie les données d'un mode de jeu :
  *  1. depuis le cache s'il a moins de DATA_TTL_MS (sauf si force = true) ;
- *  2. sinon depuis l'API ;
- *  3. si l'API échoue, depuis le cache périmé (avec un message d'erreur).
+ *  2. cache périmé et onRefresh fourni : le cache tout de suite, puis onRefresh avec les données
+ *     de l'API (ou le cache en "stale" avec l'erreur si elle échoue) ;
+ *  3. sinon depuis l'API ;
+ *  4. si l'API échoue, depuis le cache périmé (avec un message d'erreur).
  */
 export async function loadTarkovData(
   mode: GameMode,
   lang: string,
-  { force = false, signal }: { force?: boolean; signal?: AbortSignal } = {},
+  { force = false, signal, onRefresh }: { force?: boolean; signal?: AbortSignal; onRefresh?: (res: LoadResult) => void } = {},
 ): Promise<LoadResult> {
   purgeOldCaches();
   const cached = readCachedData(mode, lang);
   if (!force && cached && Date.now() - cached.fetchedAt < DATA_TTL_MS) {
+    return { data: cached, source: "cache" };
+  }
+  if (!force && cached && onRefresh) {
+    fetchTarkovData(mode, lang, signal)
+      .then((data) => {
+        writeCachedData(data);
+        if (!signal?.aborted) onRefresh({ data, source: "network" });
+      })
+      .catch((error: Error) => {
+        if (!signal?.aborted && error.name !== "AbortError") onRefresh({ data: cached, source: "stale", error: error.message });
+      });
     return { data: cached, source: "cache" };
   }
   try {
