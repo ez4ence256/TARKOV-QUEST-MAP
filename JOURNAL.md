@@ -11,7 +11,7 @@ La session 8 regroupe tout ce qui suit le renommage de la branche en `main` : ve
 | Élément | État |
 |---|---|
 | Branche | **`main`** seule (dépôt **`ez4ence256/TARKOV-QUEST-MAP`**, branche par défaut). |
-| Version affichée | **0.8.72** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
+| Version affichée | **0.8.73** (`package.json`, en bas à droite de l'écran d'accueil). Règle : augmenter à chaque livraison, avant le dernier commit ; schéma `0.<session>.<n° de livraison dans la session>`. |
 | **Nouveau design** | depuis la **0.8.23** (commit `e189862` : barre latérale, mode raid, Barlow, icônes SVG). Dernière version avec l'**ancien design** : **0.8.22** (commit `a562131`). Pour revenir en arrière sur un point précis, comparer avec `git diff a562131 e189862 -- <fichier>`. |
 | Derniers commits | `3bc65a9` Item finder : recherche par image (0.8.2) · `78f5fb6` Ctrl+V d'une capture dans l'item finder (0.8.1) · `14c4dc9` Item finder redessiné (0.8.0) · `6800a70` journal fin de session 8 · `245ee03` Version 0.7.23 · `3a59955` Main story : ponts de l'Icebreaker pour Boreas · `2593e19` Icebreaker : calibrage corrigé · `45beb1b` positions > 100 m retirées (0.7.22) · `7acab9f` positions de The Ticket · `5447eef` bouton du panneau en icône seule sur téléphone (0.7.21) · `69ddc95` Item finder · `d81736d` infos du Labyrinthe sur la map |
 | Travail non commité | Seulement `.claude/` (non suivi, volontairement hors du dépôt : chemin propre à cette machine) |
@@ -448,6 +448,7 @@ Même méthode que le pilote : les fonds du jeu viennent de notre SVG (ou des tu
   - Barre latérale : barre de défilement masquée (`scrollbar-width: none`), elle rognait les libellés sur un écran bas.
   - Écartés par l'utilisateur après essai en local : vue « Prochain raid », réglage de la planque dans la fenêtre Objets (existait déjà dans l'onglet Planque), synchronisation TarkovTracker. Pages par quête : pas décidé.
   - Pas vérifié dans le navigateur : guide à 390 px, PvE et PvP Saison, boutons « Ouvrir la fiche » et « Ajouter à mes quêtes » du guide.
+- **Guide Lightkeeper : masquer les terminées, repérer les actives** (0.8.73, demande de l'utilisateur). `LightkeeperGuide.tsx` : case « Masquer les quêtes terminées » (état du composant, non enregistré ; la numérotation des étapes ne change pas), étape déjà dans Mes quêtes en vert avec la pastille « Dans mes quêtes » (`is-active`, prioritaire sur « À faire maintenant »), étapes terminées grisées (opacité 0,55), petite légende des trois couleurs. Vérifié en local (cocher, ajouter, masquer : 55 → 54 étapes affichées).
 
 ## Étude 3D (session 5, en attente de validation)
 

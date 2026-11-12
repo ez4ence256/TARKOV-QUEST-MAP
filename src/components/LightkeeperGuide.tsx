@@ -1,6 +1,6 @@
 // Guide pas à pas pour débloquer Lightkeeper (fenêtre Marchands) : les quêtes à faire avant, puis les siennes,
 // dans l'ordre. Cocher = « Quête terminée » (même action que partout : carte, Mes quêtes et compteur suivent).
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { Task, Trader } from "../types";
 import { plural, tr } from "../lib/i18n";
 import { LIGHTKEEPER_SERVICES, lightkeeperSteps } from "../lib/lightkeeper";
@@ -33,6 +33,7 @@ export function LightkeeperGuide(p: Props) {
   const available = (t: Task) => !finishedIds.has(t.id) && (t.details?.taskRequirements ?? []).every((r) => !inGuide.has(r.taskId) || finishedIds.has(r.taskId));
   const needs = useMemo(() => [...computeNeeds({ tasks: all, done: p.done, failed: p.failed })].filter(([, n]) => n.count > 0), [all, p.done, p.failed]);
   const traderName = (id: string) => p.traders.find((t) => t.id === id)?.name ?? "";
+  const [hideDone, setHideDone] = useState(false);
   let n = 0;
 
   const group = (title: string, list: Task[]) => (
@@ -43,9 +44,11 @@ export function LightkeeperGuide(p: Props) {
           const isDone = finishedIds.has(t.id);
           const now = available(t);
           const service = LIGHTKEEPER_SERVICES[t.nameEn];
-          const step = ++n;
+          const step = ++n; // la numérotation ne bouge pas quand les terminées sont masquées
+          const active = !isDone && p.selectedIds.includes(t.id);
+          if (isDone && hideDone) return null;
           return (
-            <li key={t.id} className={`lk-step${isDone ? " is-done" : now ? " is-now" : ""}`}>
+            <li key={t.id} className={`lk-step${isDone ? " is-done" : active ? " is-active" : now ? " is-now" : ""}`}>
               <details>
                 <summary className="lk-summary">
                   <input
@@ -67,7 +70,11 @@ export function LightkeeperGuide(p: Props) {
                       </span>
                     )}
                   </span>
-                  {now && <span className="chip lk-now">{tr("À faire maintenant", "Do this now")}</span>}
+                  {active ? (
+                    <span className="chip lk-active">{tr("Dans mes quêtes", "In my quests")}</span>
+                  ) : (
+                    now && <span className="chip lk-now">{tr("À faire maintenant", "Do this now")}</span>
+                  )}
                 </summary>
                 <div className="lk-detail">
                   {t.objectives.length === 0 ? (
@@ -120,6 +127,15 @@ export function LightkeeperGuide(p: Props) {
         <>
           <p className="lk-progress" role="status">
             <strong>{tr(`${finishedIds.size} / ${all.length} terminée${plural(finishedIds.size)}`, `${finishedIds.size} / ${all.length} done`)}</strong>
+          </p>
+          <label className="check">
+            <input type="checkbox" checked={hideDone} onChange={(e) => setHideDone(e.target.checked)} />
+            {tr("Masquer les quêtes terminées", "Hide finished quests")}
+          </label>
+          <p className="lk-legend muted">
+            <span className="lk-key is-active" aria-hidden="true" /> {tr("dans mes quêtes", "in my quests")}
+            <span className="lk-key is-now" aria-hidden="true" /> {tr("à faire maintenant", "do this now")}
+            <span className="lk-key is-done" aria-hidden="true" /> {tr("terminée", "finished")}
           </p>
           {needs.length > 0 && (
             <div className="lk-needs">

@@ -2990,6 +2990,40 @@ kbd {
 .lk-step:not(.is-now):not(.is-done) {
   opacity: 0.8;
 }
+.lk-step.is-active {
+  border-color: var(--ok);
+  box-shadow: inset 3px 0 0 var(--ok);
+}
+.lk-step.is-done {
+  opacity: 0.55;
+}
+.lk-active {
+  flex: none;
+  color: var(--ok);
+  border-color: var(--ok);
+}
+.lk-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.5rem;
+  margin: 0;
+  font-size: var(--fs-sm);
+}
+.lk-key {
+  width: 12px;
+  height: 12px;
+  margin-left: 0.5rem;
+  border-radius: 3px;
+  background: var(--muted);
+}
+.lk-key.is-active {
+  margin-left: 0;
+  background: var(--ok);
+}
+.lk-key.is-now {
+  background: var(--accent);
+}
 .lk-step.is-done .lk-main strong {
   color: var(--muted);
   text-decoration: line-through;
