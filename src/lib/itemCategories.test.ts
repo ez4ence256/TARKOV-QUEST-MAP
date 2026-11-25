@@ -30,10 +30,11 @@ describe("arbre des catégories", () => {
     expect(tree[2]).toMatchObject({ id: OTHER, children: [] });
     expect([...tree[2].items]).toEqual(["q1"]);
   });
-  it("fichier livré : 12 catégories du flea en tête, dans l'ordre du jeu", () => {
+  it("fichier livré : catégories du flea en tête, dans l'ordre du jeu", () => {
     const roots = (shipped as unknown as CategoryFile).cats.filter(([, p]) => p === null).map(([id]) => id);
     // Objets d'échange, Équipement… Argent (ids du handbook du jeu)
     expect(roots.slice(0, 2)).toEqual(["5b47574386f77428ca22b33e", "5b47574386f77428ca22b33f"]);
-    expect(roots[11]).toBe("5b5f78b786f77447ed5636af");
+    // 11 catégories principales depuis la mise à jour Unity 6 (« Objets d'info » retirée par le jeu), Argent en dernier
+    expect(roots[10]).toBe("5b5f78b786f77447ed5636af");
   });
 });
